@@ -707,3 +707,90 @@ pre.hljs {
 .swal2-container .swal2-popup.swal2-toast.color-success {
     @apply bg-success;
 }
+
+
+
+.pagination-container {
+    display: flex;
+     justify-content: center;
+     align-items: center;
+     height: 40px;
+     border: 1px solid #972e25;
+     padding: 20px 80px;
+     position: relative;
+     margin: 30px;
+     border-radius: 10px;
+     width: auto;
+   }
+   
+   @media (max-width: 500px) {
+     .pagination-container {
+       width: 100%;
+     }
+   }
+   
+   @media (max-width: 400px) {
+     .pagination-container {
+       padding: 20px 50px;
+     }
+   }
+ 
+   .prev-button,
+ .next-button {
+   position: absolute;
+   top: 50%;
+   transform: translateY(-50%);
+   background-color: transparent;
+   border: none;
+   font-size: 14px;
+   padding: 10px;
+ }
+ 
+ .prev-button {
+   left: 10px;
+ }
+ 
+ .next-button {
+   right: 10px;
+ }
+ 
+ @media (max-width: 400px) {
+   .prev-button,
+   .next-button {
+     font-size: 14px;
+   }
+ }
+ 
+ .page-numbers {
+   display: flex;
+   gap: 10px;
+ }
+ 
+ @media (max-width: 500px) {
+   .page-numbers {
+     gap: 5px;
+   }
+ }
+ 
+ .page-button {
+     background-color: transparent;
+     border: none;
+     cursor: pointer;
+     /* padding: 5px 10px; */
+     font-size: 15px;
+   
+    
+   }
+   @media (max-width: 500px) {
+     .page-button {    padding: 5px;
+     }
+ 
+   }
+   
+   .page-button.active {
+     color: white;
+     background-color: #972e25;
+     border-radius: 5px;
+     /* padding: 5px 16px; */
+     padding: 1px 8px;
+   }

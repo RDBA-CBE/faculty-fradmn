@@ -23,6 +23,7 @@ import IconBolt from '@/components/Icon/IconBolt';
 import IconPlus from '@/components/Icon/IconPlus';
 import IconCaretDown from '@/components/Icon/IconCaretDown';
 import IconMultipleForwardRight from '@/components/Icon/IconMultipleForwardRight';
+import PrivateRouter from '@/hook/privateRouter';
 
 const Index = () => {
     const dispatch = useDispatch();
@@ -1121,4 +1122,4 @@ const Index = () => {
     );
 };
 
-export default Index;
+export default PrivateRouter(Index);

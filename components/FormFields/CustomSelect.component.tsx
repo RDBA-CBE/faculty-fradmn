@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useRef } from "react";
 import Select from "react-select";
 import { ChevronDown } from "lucide-react";
 
@@ -24,6 +24,8 @@ interface SelectProps {
   disabled?: boolean;
   isClearable?: boolean;
   leftIcon?: React.ReactNode;
+  loading?:boolean
+  onSearch?:any
 }
 
 const CustomSelect = (props: SelectProps) => {
@@ -44,7 +46,22 @@ const CustomSelect = (props: SelectProps) => {
     menuOpen,
     isClearable,
     leftIcon,
+    loading,
+    onSearch
   } = props;
+
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+
+  const debouncedSearch = useCallback((searchValue: string) => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+    debounceRef.current = setTimeout(() => {
+      if (onSearch) {
+        onSearch(searchValue);
+      }
+    }, 500);
+  }, [onSearch]);
 
   const customStyles = {
     control: (provided: any, state: any) => ({
@@ -85,6 +102,18 @@ const CustomSelect = (props: SelectProps) => {
       ...base,
       padding: "4px 8px",
     }),
+    placeholder: (base: any) => ({
+      ...base,
+      fontSize: "14px",
+      fontWeight:"600",
+      color:"#6b7280"
+    }),
+    singleValue: (base: any) => ({
+      ...base,
+      fontSize: "14px",
+      fontWeight:"600",
+
+    }),
   };
 
   const CustomDropdownIndicator = (props: any) => {
@@ -99,6 +128,8 @@ const CustomSelect = (props: SelectProps) => {
     <div className={`w-full ${className}`}>
       {title && (
         <label className="block text-sm font-bold text-gray-700 mb-1">
+          
+
           {title} {required && <span className="text-red-500">*</span>}
         </label>
       )}
@@ -114,12 +145,19 @@ const CustomSelect = (props: SelectProps) => {
           options={options}
           value={value}
           onChange={onChange}
+          isLoading={loading}
           isSearchable={isSearchable}
           isMulti={isMulti}
           isClearable={isClearable !== undefined ? isClearable : true}
           styles={customStyles}
           onMenuOpen={() => menuOpen && menuOpen(true)}
           onMenuClose={() => menuOpen && menuOpen(false)}
+          onInputChange={(inputValue) => {
+            if (inputValue !== null && inputValue !== undefined) {
+              const searchValue = String(inputValue);
+              debouncedSearch(searchValue);
+            }
+          }}
           components={{
             DropdownIndicator: CustomDropdownIndicator,
           }}

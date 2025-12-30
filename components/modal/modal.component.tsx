@@ -12,6 +12,7 @@ export default function Modal(props: any) {
     updateHeader,
     subTitle,
     isFullWidth,
+    maxWidth = "max-w-xl",
   } = props;
 
   return (
@@ -49,7 +50,7 @@ export default function Modal(props: any) {
             >
               <Dialog.Panel
                 className={`panel w-full ${
-                  isFullWidth ? "" : "max-w-lg"
+                  isFullWidth ? "" : maxWidth
                 } overflow-hidden rounded-lg border-0 p-0 text-black dark:text-white-dark`}
               >
                 {/* HEADER */}

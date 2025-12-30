@@ -1,9 +1,23 @@
 import instance from "@/utils/axios.utils";
 
-const address = {
-  list: (page) => {
+const college_dept = {
+  list: (page, body) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `addresses?page=${page}`;
+      let url = `colleges/?page=${page}`;
+      if (body?.group) {
+        url += `&group=${encodeURIComponent(body.group)}`;
+      }
+
+      if (body?.user_type) {
+        url += `&user_type=${encodeURIComponent(body.user_type)}`;
+      }
+      if (body?.search) {
+        url += `&search=${encodeURIComponent(body.search)}`;
+      }
+
+      if (body?.account_status) {
+        url += `&account_status=${encodeURIComponent(body?.account_status)}`;
+      }
       instance()
         .get(url)
         .then((res) => {
@@ -22,20 +36,15 @@ const address = {
 
   create: (data: any) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `addresses/`;
-      const config = {
-        headers: {
-          "Content-Type": "multipart/form-data; charset=utf-8;",
-        },
-      };
+      let url = `colleges/`;
       instance()
-        .post(url, data, config)
+        .post(url, data)
         .then((res) => {
           resolve(res.data);
         })
         .catch((error) => {
           if (error.response) {
-            reject(error.response.data.message);
+            reject(error.response.data);
           } else {
             reject(error);
           }
@@ -46,20 +55,16 @@ const address = {
 
   update: (data: any, id: any) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `addresses/${id}/`;
-      const config = {
-        headers: {
-          "Content-Type": "multipart/form-data; charset=utf-8;",
-        },
-      };
+      let url = `colleges/${id}/`;
+
       instance()
-        .patch(url, data, config)
+        .patch(url, data)
         .then((res) => {
           resolve(res.data);
         })
         .catch((error) => {
           if (error.response) {
-            reject(error.response.data.message);
+            reject(error.response.data);
           } else {
             reject(error);
           }
@@ -70,7 +75,7 @@ const address = {
 
   delete: (id: any) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `addresses/${id}/`;
+      let url = `colleges/${id}/`;
 
       instance()
         .delete(url)
@@ -90,8 +95,7 @@ const address = {
 
   details: (id: any) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `addresses/${id}/`;
-
+      let url = `colleges/${id}/`;
       instance()
         .get(url)
         .then((res) => {
@@ -108,7 +112,8 @@ const address = {
     return promise;
   },
 
-  
+ 
+
 };
 
-export default address;
+export default college_dept;

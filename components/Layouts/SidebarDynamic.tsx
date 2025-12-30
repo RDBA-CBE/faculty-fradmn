@@ -51,7 +51,7 @@ const SidebarDynamic = () => {
   }, []);
 
   const role = () => {
-    const group = localStorage.getItem("group");
+    const group = localStorage.getItem("role");
     setGroup(group);
   };
 
@@ -163,7 +163,7 @@ const SidebarDynamic = () => {
                 alt="logo"
               />
               <span className="align-middle text-2xl font-semibold dark:text-white-light lg:inline ltr:ml-1.5 rtl:mr-1.5">
-                {t("VRISTO")}
+                {t("REPUTE")}
               </span>
             </Link>
             <button

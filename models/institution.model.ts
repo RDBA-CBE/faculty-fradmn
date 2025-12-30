@@ -1,9 +1,15 @@
 import instance from "@/utils/axios.utils";
 
-const video = {
-  list: (page) => {
+const instution = {
+  list: (page, body) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `property-videos?page=${page}`;
+      let url = `institutions/?page=${page}`;
+      if (body?.search) {
+        url += `&search=${encodeURIComponent(body.search)}`;
+      }
+      if (body?.ordering) {
+        url += `&ordering=${encodeURIComponent(body.ordering)}`;
+      }
       instance()
         .get(url)
         .then((res) => {
@@ -22,20 +28,15 @@ const video = {
 
   create: (data: any) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `property-videos/`;
-      const config = {
-        headers: {
-          "Content-Type": "multipart/form-data; charset=utf-8;",
-        },
-      };
+      let url = `institutions/`;
       instance()
-        .post(url, data, config)
+        .post(url, data)
         .then((res) => {
           resolve(res.data);
         })
         .catch((error) => {
           if (error.response) {
-            reject(error.response.data.message);
+            reject(error.response);
           } else {
             reject(error);
           }
@@ -46,20 +47,16 @@ const video = {
 
   update: (data: any, id: any) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `property-videos/${id}/`;
-      const config = {
-        headers: {
-          "Content-Type": "multipart/form-data; charset=utf-8;",
-        },
-      };
+      let url = `institutions/${id}/`;
+
       instance()
-        .patch(url, data, config)
+        .patch(url, data)
         .then((res) => {
           resolve(res.data);
         })
         .catch((error) => {
           if (error.response) {
-            reject(error.response.data.message);
+            reject(error.response.message);
           } else {
             reject(error);
           }
@@ -70,7 +67,7 @@ const video = {
 
   delete: (id: any) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `property-videos/${id}/`;
+      let url = `institutions/${id}/`;
 
       instance()
         .delete(url)
@@ -79,7 +76,7 @@ const video = {
         })
         .catch((error) => {
           if (error.response) {
-            reject(error.response.data.message);
+            reject(error.response.message);
           } else {
             reject(error);
           }
@@ -90,16 +87,15 @@ const video = {
 
   details: (id: any) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `property-videos/${id}/`;
-
+      let url = `auth/view_user/${id}`;
       instance()
-        .get(url)
+        .post(url)
         .then((res) => {
           resolve(res.data);
         })
         .catch((error) => {
           if (error.response) {
-            reject(error.response.data.message);
+            reject(error.response.message);
           } else {
             reject(error);
           }
@@ -107,8 +103,6 @@ const video = {
     });
     return promise;
   },
-
-  
 };
 
-export default video;
+export default instution;

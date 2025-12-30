@@ -4,11 +4,11 @@ export const CLIENT_ID =
 
 // export const BACKEND_URL = "http://31.97.206.165/api/";
 
-export const BACKEND_URL = "https://file.boomrealtys.com/api/";
+export const BACKEND_URL = "http://88.222.213.249/api/";
 
 // menuConfig.ts
 export const menuConfig = {
-  Admin: [
+  super_admin: [
     {
       type: "link",
       icon: "IconMenuWidgets",
@@ -20,13 +20,13 @@ export const menuConfig = {
       type: "link",
       icon: "IconMenuWidgets",
       label: "Institutions",
-      href: "/",
+      href: "/faculty/institution",
     },
     {
       type: "link",
       icon: "IconMenuWidgets",
       label: "Colleges & Departments",
-      href: "/",
+      href: "/faculty/college_and_department",
     },
 
     {

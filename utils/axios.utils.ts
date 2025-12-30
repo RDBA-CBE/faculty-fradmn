@@ -90,7 +90,7 @@ export const instance = (): AxiosInstance => {
         return new Promise(async (resolve, reject) => {
           try {
             const response = await axios.post(
-              `${BACKEND_URL}authentication/refresh-token/`,
+              `${BACKEND_URL}auth/jwt/token/refresh/`,
               {
                 refresh: refreshToken,
               }

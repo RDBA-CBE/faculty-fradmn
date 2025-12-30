@@ -41,7 +41,7 @@ const LoginBoxed = () => {
     try {
       setState({ btnLoading: true });
       const body = {
-        email: state.email.trim(),
+        username: state.email.trim(),
         password: state.password,
       };
 
@@ -50,10 +50,8 @@ const LoginBoxed = () => {
       Success("Login Successfully");
       localStorage.setItem("token", res.access);
       localStorage.setItem("refresh", res.refresh);
-      localStorage.setItem("userId", res.user_id);
-      if (res?.groups?.length > 0) {
-        localStorage.setItem("group", res.groups[0]?.name);
-      }
+      localStorage.setItem("userId", res.user?.id);
+      localStorage.setItem("role", res.user?.role);
       router.replace("/");
       setState({ btnLoading: false });
     } catch (error) {
@@ -117,7 +115,7 @@ const LoginBoxed = () => {
               <form className="space-y-5 dark:text-white" onSubmit={submitForm}>
                 <TextInput
                   name="email"
-                  type="email"
+                  type="text"
                   title="Email"
                   placeholder="Enter Email"
                   value={state.email}

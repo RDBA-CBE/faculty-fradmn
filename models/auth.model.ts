@@ -3,7 +3,7 @@ import instance from "@/utils/axios.utils";
 const auth = {
   login: (body: any) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `authentication/login/`;
+      let url = `auth/login/`;
       instance()
         .post(url, body)
         .then((res) => {
@@ -79,7 +79,7 @@ const auth = {
 
   logout: (body: any) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `authentication/logout/`;
+      let url = `auth/logout/`;
       instance()
         .post(url, body)
         .then((res) => {
