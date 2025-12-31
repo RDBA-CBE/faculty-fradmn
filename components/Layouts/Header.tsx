@@ -123,11 +123,13 @@ const Header = () => {
     try {
       const userString = localStorage.getItem("userId");
       if (userString) {
-        const res: any = await Models.user.details(userString);
+        const res: any = await Models.auth.profile();
         console.log("getUserRole --->", res);
         setState({
           name: `${capitalizeFLetter(res?.first_name)} ${res?.last_name}`,
-          user_type: capitalizeFLetter(res?.user_type),
+          user_type: capitalizeFLetter(res?.
+            role_display
+            ),
           email: res?.email,
         });
       }

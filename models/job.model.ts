@@ -1,22 +1,14 @@
 import instance from "@/utils/axios.utils";
 
-const college_dept = {
+const job = {
   list: (page, body) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `colleges/?page=${page}`;
-      if (body?.group) {
-        url += `&group=${encodeURIComponent(body.group)}`;
-      }
-
-      if (body?.user_type) {
-        url += `&user_type=${encodeURIComponent(body.user_type)}`;
-      }
+      let url = `jobs/?page=${page}`;
       if (body?.search) {
         url += `&search=${encodeURIComponent(body.search)}`;
       }
-
-      if (body?.account_status) {
-        url += `&account_status=${encodeURIComponent(body?.account_status)}`;
+      if (body?.ordering) {
+        url += `&ordering=${encodeURIComponent(body.ordering)}`;
       }
       instance()
         .get(url)
@@ -36,7 +28,7 @@ const college_dept = {
 
   create: (data: any) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `colleges/`;
+      let url = `jobs/`;
       instance()
         .post(url, data)
         .then((res) => {
@@ -44,7 +36,7 @@ const college_dept = {
         })
         .catch((error) => {
           if (error.response) {
-            reject(error.response.data);
+            reject(error.response);
           } else {
             reject(error);
           }
@@ -55,8 +47,7 @@ const college_dept = {
 
   update: (data: any, id: any) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `colleges/${id}/`;
-
+      let url = `jobs/${id}/`;
       instance()
         .patch(url, data)
         .then((res) => {
@@ -64,7 +55,7 @@ const college_dept = {
         })
         .catch((error) => {
           if (error.response) {
-            reject(error.response.data);
+            reject(error.response.message);
           } else {
             reject(error);
           }
@@ -75,8 +66,7 @@ const college_dept = {
 
   delete: (id: any) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `colleges/${id}/`;
-
+      let url = `jobs/${id}/`;
       instance()
         .delete(url)
         .then((res) => {
@@ -84,7 +74,7 @@ const college_dept = {
         })
         .catch((error) => {
           if (error.response) {
-            reject(error.response.data.message);
+            reject(error.response.message);
           } else {
             reject(error);
           }
@@ -95,7 +85,7 @@ const college_dept = {
 
   details: (id: any) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `colleges/${id}/`;
+      let url = `jobs/${id}/`;
       instance()
         .get(url)
         .then((res) => {
@@ -103,7 +93,7 @@ const college_dept = {
         })
         .catch((error) => {
           if (error.response) {
-            reject(error.response.data.message);
+            reject(error.response.message);
           } else {
             reject(error);
           }
@@ -111,9 +101,6 @@ const college_dept = {
     });
     return promise;
   },
-
- 
-
 };
 
-export default college_dept;
+export default job;

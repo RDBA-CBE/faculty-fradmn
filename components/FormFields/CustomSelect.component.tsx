@@ -26,6 +26,8 @@ interface SelectProps {
   leftIcon?: React.ReactNode;
   loading?:boolean
   onSearch?:any
+  menuPortalTarget?: HTMLElement | null;
+  position?: "top" | "bottom" 
 }
 
 const CustomSelect = (props: SelectProps) => {
@@ -47,7 +49,8 @@ const CustomSelect = (props: SelectProps) => {
     isClearable,
     leftIcon,
     loading,
-    onSearch
+    onSearch,
+    position
   } = props;
 
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -79,8 +82,8 @@ const CustomSelect = (props: SelectProps) => {
       ...provided,
       paddingLeft: "0px",
     }),
-    menuPortal: (base: any) => ({ ...base, zIndex: 9999 }),
-    menu: (base: any) => ({ ...base, zIndex: 9999 }),
+    menuPortal: (base: any) => ({ ...base, zIndex: 99999 }),
+    menu: (base: any) => ({ ...base, zIndex: 99999 }),
     menuList: (base: any) => ({
       ...base,
       maxHeight: 160, 
@@ -163,6 +166,9 @@ const CustomSelect = (props: SelectProps) => {
           }}
           classNamePrefix="react-select"
           onMenuScrollToBottom={loadMore}
+          menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+           menuPlacement={position??"bottom"}
+        menuPosition="fixed"
         />
         {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
       </div>

@@ -225,6 +225,38 @@ const Sidebar = () => {
 
                             <h2 className="-mx-4 mb-1 flex items-center bg-white-light/30 px-7 py-3 font-extrabold uppercase dark:bg-dark dark:bg-opacity-[0.08]">
                                 <IconMinus className="hidden h-5 w-4 flex-none" />
+                                <span>{t('Faculty Management')}</span>
+                            </h2>
+
+                            <li className="menu nav-item">
+                                <Link href="/faculty/institution" className="group">
+                                    <div className="flex items-center">
+                                        <IconMenuDashboard className="shrink-0 group-hover:!text-primary" />
+                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Institutions')}</span>
+                                    </div>
+                                </Link>
+                            </li>
+
+                            <li className="menu nav-item">
+                                <Link href="/faculty/college_and_department" className="group">
+                                    <div className="flex items-center">
+                                        <IconMenuUsers className="shrink-0 group-hover:!text-primary" />
+                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Colleges & Departments')}</span>
+                                    </div>
+                                </Link>
+                            </li>
+
+                            <li className="menu nav-item">
+                                <Link href="/faculty/job" className="group">
+                                    <div className="flex items-center">
+                                        <IconMenuScrumboard className="shrink-0 group-hover:!text-primary" />
+                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Jobs')}</span>
+                                    </div>
+                                </Link>
+                            </li>
+
+                            <h2 className="-mx-4 mb-1 flex items-center bg-white-light/30 px-7 py-3 font-extrabold uppercase dark:bg-dark dark:bg-opacity-[0.08]">
+                                <IconMinus className="hidden h-5 w-4 flex-none" />
                                 <span>{t('User Management')}</span>
                             </h2>
 

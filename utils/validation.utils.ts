@@ -45,3 +45,27 @@ export const CreateCollege = Yup.object().shape({
     .required("College phone is required"),
   college_address: Yup.string().required("College address is required"),
 });
+
+export const CreateUser = Yup.object().shape({
+  username: Yup.string().required("Username is required"),
+  email: Yup.string()
+    .email("Please enter a valid email address")
+    .required("Email is required"),
+  password: Yup.string()
+    .min(6, "Password must be at least 6 characters")
+    .required("Password is required"),
+  password_confirm: Yup.string()
+    .oneOf([Yup.ref('password')], "Passwords must match")
+    .required("Confirm password is required"),
+  phone: Yup.string()
+    .matches(/^[+]?[0-9]{10,15}$/, "Please enter a valid phone number")
+    .required("Phone number is required"),
+  role: Yup.string().required("Role is required"),
+  gender: Yup.string().required("Gender is required"),
+  education_qualification: Yup.string().required("Education qualification is required"),
+  institution: Yup.number().when('role', {
+    is: 'institution_admin',
+    then: (schema) => schema.required("Institution is required"),
+    otherwise: (schema) => schema.nullable(),
+  }),
+});
