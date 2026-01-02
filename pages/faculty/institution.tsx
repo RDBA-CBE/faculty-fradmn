@@ -13,7 +13,14 @@ import IconEye from "@/components/Icon/IconEye";
 import IconEyeOff from "@/components/Icon/IconEyeOff";
 import IconLoader from "@/components/Icon/IconLoader";
 import IconEdit from "@/components/Icon/IconEdit";
-import { Building2, User, GraduationCap, BookOpen, UserCheck, Briefcase } from "lucide-react";
+import {
+  Building2,
+  User,
+  GraduationCap,
+  BookOpen,
+  UserCheck,
+  Briefcase,
+} from "lucide-react";
 import Pagination from "@/components/pagination/pagination";
 import PrimaryButton from "@/components/FormFields/PrimaryButton.component";
 import { showDeleteAlert, useSetState } from "@/utils/function.utils";
@@ -115,11 +122,11 @@ const Institution = () => {
     submitting: false,
     sortBy: "",
     sortOrder: "asc",
-    
+
     // Wizard state
     currentStep: 1,
     completedSteps: [],
-    
+
     // API response IDs
     institutionId: null,
     institutionAdminId: null,
@@ -127,14 +134,14 @@ const Institution = () => {
     hrId: null,
     departmentId: null,
     hodId: null,
-    
+
     // Institution fields
     institution_name: "",
     institution_code: "",
     institution_email: "",
     institution_phone: "",
     address: "",
-    
+
     // Admin fields
     admin_username: "",
     admin_email: "",
@@ -145,7 +152,7 @@ const Institution = () => {
     admin_education_qualification: "",
     showAdminPassword: false,
     showAdminConfirmPassword: false,
-    
+
     // HR fields
     hr_username: "",
     hr_email: "",
@@ -156,7 +163,7 @@ const Institution = () => {
     hr_qualification: "",
     showHRPassword: false,
     showHRConfirmPassword: false,
-    
+
     // College fields
     colleges: [],
     college_name: "",
@@ -164,13 +171,13 @@ const Institution = () => {
     college_email: "",
     college_phone: "",
     college_address: "",
-    
+
     // Department fields
     departments: [],
     department_name: "",
     department_code: "",
     selectedCollege: null,
-    
+
     // HOD fields
     hod_username: "",
     hod_email: "",
@@ -183,7 +190,7 @@ const Institution = () => {
     selectedDepartment: null,
     showHODPassword: false,
     showHODConfirmPassword: false,
-    
+
     // Job fields
     job_title: "",
     job_description: "",
@@ -191,7 +198,7 @@ const Institution = () => {
     job_salary_min: "",
     job_salary_max: "",
     job_department: null,
-    
+
     errors: {},
     count: 0,
     instutionList: [],
@@ -201,14 +208,14 @@ const Institution = () => {
   });
 
   const steps = [
-    { id: 1, name: 'Institution', icon: Building2, required: true },
-    { id: 2, name: 'Institution Admin', icon: User, required: false },
-    { id: 3, name: 'Create HR', icon: UserCheck, required: false },
-    { id: 4, name: 'College', icon: GraduationCap, required: false },
-    { id: 5, name: 'Department HOD', icon: UserCheck, required: false },
-    { id: 6, name: 'Department', icon: BookOpen, required: false },
+    { id: 1, name: "Institution", icon: Building2, required: true },
+    { id: 2, name: "Institution Admin", icon: User, required: false },
+    { id: 3, name: "Create HR", icon: UserCheck, required: false },
+    { id: 4, name: "College", icon: GraduationCap, required: false },
+    { id: 5, name: "Department HOD", icon: UserCheck, required: false },
+    { id: 6, name: "Department", icon: BookOpen, required: false },
 
-    { id: 7, name: 'Jobs', icon: Briefcase, required: false }
+    { id: 7, name: "Jobs", icon: Briefcase, required: false },
   ];
 
   const statusOptions = [
@@ -228,13 +235,15 @@ const Institution = () => {
     { value: "other", label: "Other" },
   ];
 
-  const isStepCompleted = (stepId: number) => state.completedSteps.includes(stepId);
-  const isStepAccessible = (stepId: number) => stepId === 1 || isStepCompleted(stepId - 1);
+  const isStepCompleted = (stepId: number) =>
+    state.completedSteps.includes(stepId);
+  const isStepAccessible = (stepId: number) =>
+    stepId === 1 || isStepCompleted(stepId - 1);
 
   const handleStepComplete = async (stepId: number, skipToNext = true) => {
     try {
       setState({ submitting: true });
-      
+
       // Validate current step
       if (stepId === 1) {
         const body = {
@@ -246,7 +255,7 @@ const Institution = () => {
         };
         await CreateInstituion.validate(body, { abortEarly: false });
       }
-      
+
       if (stepId === 2) {
         const adminBody = {
           username: state.admin_username,
@@ -257,10 +266,10 @@ const Institution = () => {
           gender: state.admin_gender?.value,
           education_qualification: state.admin_education_qualification,
         };
-        console.log('Step 2 validation data:', adminBody);
+        console.log("Step 2 validation data:", adminBody);
         await CreateInstitutionAdmin.validate(adminBody, { abortEarly: false });
       }
-      
+
       if (stepId === 3) {
         const hrBody = {
           hr_username: state.hr_username,
@@ -273,7 +282,7 @@ const Institution = () => {
         };
         await CreateHR.validate(hrBody, { abortEarly: false });
       }
-      
+
       if (stepId === 4) {
         const collegeBody = {
           college_name: state.college_name,
@@ -283,9 +292,8 @@ const Institution = () => {
           college_address: state.college_address,
         };
         await CreateCollegeForm.validate(collegeBody, { abortEarly: false });
-        
       }
-      
+
       if (stepId === 5) {
         const hodBody = {
           hod_username: state.hod_username,
@@ -298,39 +306,42 @@ const Institution = () => {
         };
         await CreateHOD.validate(hodBody, { abortEarly: false });
       }
-      
+
       if (stepId === 6) {
         const deptBody = {
           department_name: state.department_name,
           department_code: state.department_code,
         };
         await CreateDepartment.validate(deptBody, { abortEarly: false });
-        
       }
-      
+
       if (stepId === 7) {
         if (!state.job_title) {
           throw new Error("Job title is required");
         }
       }
-      
-      setState({ 
+
+      setState({
         completedSteps: [...state.completedSteps, stepId],
-        errors: {} 
+        errors: {},
       });
-      
+
       if (skipToNext && stepId < steps.length) {
         const nextStep = stepId + 1;
         setState({ currentStep: nextStep });
-        
+
         setTimeout(() => {
-          const stepElement = document.querySelector(`[data-step="${nextStep}"]`);
+          const stepElement = document.querySelector(
+            `[data-step="${nextStep}"]`
+          );
           if (stepElement) {
-            stepElement.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+            stepElement.scrollIntoView({
+              behavior: "smooth",
+              inline: "center",
+            });
           }
         }, 100);
       }
-      
     } catch (error: any) {
       if (error?.inner) {
         const errors = {};
@@ -338,7 +349,7 @@ const Institution = () => {
           errors[err.path] = err.message;
         });
         setState({ errors });
-        console.log('✌️errors --->', errors);
+        console.log("✌️errors --->", errors);
         return; // Stop execution if validation fails
       } else {
         Failure(error?.message || "Operation failed");
@@ -350,9 +361,9 @@ const Institution = () => {
   };
 
   const handleSkipStep = () => {
-    setState({ 
+    setState({
       completedSteps: [...state.completedSteps, state.currentStep],
-      currentStep: state.currentStep + 1 
+      currentStep: state.currentStep + 1,
     });
   };
 
@@ -365,10 +376,10 @@ const Institution = () => {
       departmentId: null,
       hodId: null,
     };
-    
+
     try {
       setState({ submitting: true });
-      
+
       // Get steps up to current step (including current step)
       const stepsToProcess = [];
       for (let i = 1; i <= state.currentStep; i++) {
@@ -376,8 +387,8 @@ const Institution = () => {
           stepsToProcess.push(i);
         }
       }
-      console.log('✌️handleFinalSubmit --->', stepsToProcess);
-      
+      console.log("✌️handleFinalSubmit --->", stepsToProcess);
+
       // Validate all steps before API calls
       for (const stepId of stepsToProcess) {
         if (stepId === 1) {
@@ -390,7 +401,7 @@ const Institution = () => {
           };
           await CreateInstituion.validate(body, { abortEarly: false });
         }
-        
+
         if (stepId === 2) {
           const adminBody = {
             username: state.admin_username,
@@ -401,9 +412,11 @@ const Institution = () => {
             gender: state.admin_gender?.value,
             education_qualification: state.admin_education_qualification,
           };
-          await CreateInstitutionAdmin.validate(adminBody, { abortEarly: false });
+          await CreateInstitutionAdmin.validate(adminBody, {
+            abortEarly: false,
+          });
         }
-        
+
         if (stepId === 3) {
           const hrBody = {
             hr_username: state.hr_username,
@@ -416,7 +429,7 @@ const Institution = () => {
           };
           await CreateHR.validate(hrBody, { abortEarly: false });
         }
-        
+
         if (stepId === 4) {
           const collegeBody = {
             college_name: state.college_name,
@@ -427,7 +440,7 @@ const Institution = () => {
           };
           await CreateCollegeForm.validate(collegeBody, { abortEarly: false });
         }
-        
+
         if (stepId === 5) {
           const hodBody = {
             hod_username: state.hod_username,
@@ -440,7 +453,7 @@ const Institution = () => {
           };
           await CreateHOD.validate(hodBody, { abortEarly: false });
         }
-        
+
         if (stepId === 6) {
           const deptBody = {
             department_name: state.department_name,
@@ -448,14 +461,14 @@ const Institution = () => {
           };
           await CreateDepartment.validate(deptBody, { abortEarly: false });
         }
-        
+
         if (stepId === 7) {
           if (!state.job_title) {
             throw new Error("Job title is required");
           }
         }
       }
-      
+
       // Step 1: Create Institution
       if (stepsToProcess.includes(1)) {
         try {
@@ -466,28 +479,30 @@ const Institution = () => {
             institution_phone: state.institution_phone,
             address: state.address,
           };
-console.log('✌️institutionBody --->', institutionBody);
 
-          const institutionRes = await Models.institution.create(institutionBody);
-console.log('✌️institutionRes --->', institutionRes);
+          const institutionRes: any = await Models.institution.create(
+            institutionBody
+          );
           createdRecords.institutionId = institutionRes?.id;
         } catch (error: any) {
           const apiErrors = error.response.data;
           let errorMessages = [];
-          
-          Object.keys(apiErrors).forEach(field => {
+
+          Object.keys(apiErrors).forEach((field) => {
             if (Array.isArray(apiErrors[field])) {
-              apiErrors[field].forEach(msg => {
+              apiErrors[field].forEach((msg) => {
                 errorMessages.push(`${field}: ${msg}`);
               });
             } else {
               errorMessages.push(`${field}: ${apiErrors[field]}`);
             }
           });
-          
-          throw new Error(`Institution  creation failed:\n${errorMessages.join('\n')}`);
+
+          throw new Error(
+            `Institution  creation failed:\n${errorMessages.join("\n")}`
+          );
         }
-        
+
         // Step 2: Create Institution Admin
         if (stepsToProcess.includes(2)) {
           try {
@@ -501,31 +516,37 @@ console.log('✌️institutionRes --->', institutionRes);
               status: "active",
               gender: state.admin_gender?.value,
               education_qualification: state.admin_education_qualification,
-              institution: createdRecords.institutionId
+              institution: createdRecords.institutionId,
             };
-            const adminRes = await Models.auth.createUser(adminBody);
+            const adminRes: any = await Models.auth.createUser(adminBody);
             createdRecords.institutionAdminId = adminRes?.id;
           } catch (error: any) {
             if (error?.response?.data) {
               const apiErrors = error.response.data;
               let errorMessages = [];
-              
-              Object.keys(apiErrors).forEach(field => {
+
+              Object.keys(apiErrors).forEach((field) => {
                 if (Array.isArray(apiErrors[field])) {
-                  apiErrors[field].forEach(msg => {
+                  apiErrors[field].forEach((msg) => {
                     errorMessages.push(`${field}: ${msg}`);
                   });
                 } else {
                   errorMessages.push(`${field}: ${apiErrors[field]}`);
                 }
               });
-              
-              throw new Error(`Institution Admin creation failed:\n${errorMessages.join('\n')}`);
+
+              throw new Error(
+                `Institution Admin creation failed:\n${errorMessages.join(
+                  "\n"
+                )}`
+              );
             }
-            throw new Error(`Institution Admin creation failed: ${error?.message}`);
+            throw new Error(
+              `Institution Admin creation failed: ${error?.message}`
+            );
           }
         }
-        
+
         // Step 3: Create HR
         if (stepsToProcess.includes(3)) {
           try {
@@ -539,15 +560,15 @@ console.log('✌️institutionRes --->', institutionRes);
               status: "active",
               gender: state.hr_gender?.value,
               education_qualification: state.hr_qualification,
-              institution: createdRecords.institutionId
+              institution: createdRecords.institutionId,
             };
-            const hrRes = await Models.auth.createUser(hrBody);
+            const hrRes: any = await Models.auth.createUser(hrBody);
             createdRecords.hrId = hrRes?.id;
           } catch (error: any) {
             throw new Error(`HR creation failed: ${error?.message}`);
           }
         }
-        
+
         // Step 4: Create College
         if (stepsToProcess.includes(4)) {
           try {
@@ -557,15 +578,15 @@ console.log('✌️institutionRes --->', institutionRes);
               college_email: state.college_email,
               college_phone: state.college_phone,
               college_address: state.college_address,
-              institution: createdRecords.institutionId
+              institution: createdRecords.institutionId,
             };
-            const collegeRes = await Models.college.create(collegeBody);
+            const collegeRes: any = await Models.college.create(collegeBody);
             createdRecords.collegeId = collegeRes?.id;
           } catch (error: any) {
             throw new Error(`College creation failed: ${error?.message}`);
           }
         }
-        
+
         // Step 5: Create HOD
         if (stepsToProcess.includes(5)) {
           try {
@@ -579,15 +600,15 @@ console.log('✌️institutionRes --->', institutionRes);
               status: "active",
               gender: state.hod_gender?.value,
               education_qualification: state.hod_qualification,
-              college: createdRecords.collegeId
+              college: createdRecords.collegeId,
             };
-            const hodRes = await Models.auth.createUser(hodBody);
+            const hodRes: any = await Models.auth.createUser(hodBody);
             createdRecords.hodId = hodRes?.id;
           } catch (error: any) {
             throw new Error(`HOD creation failed: ${error?.message}`);
           }
         }
-        
+
         // Step 6: Create Department
         if (stepsToProcess.includes(6)) {
           try {
@@ -595,15 +616,15 @@ console.log('✌️institutionRes --->', institutionRes);
               department_name: state.department_name,
               department_code: state.department_code,
               college: createdRecords.collegeId,
-              institution: createdRecords.institutionId
+              institution: createdRecords.institutionId,
             };
-            const deptRes = await Models.department.create(deptBody);
+            const deptRes: any = await Models.department.create(deptBody);
             createdRecords.departmentId = deptRes?.id;
           } catch (error: any) {
             throw new Error(`Department creation failed: ${error?.message}`);
           }
         }
-        
+
         // Step 7: Create Job
         if (stepsToProcess.includes(7)) {
           try {
@@ -613,7 +634,7 @@ console.log('✌️institutionRes --->', institutionRes);
               job_requirements: state.job_requirements,
               job_salary_min: state.job_salary_min,
               job_salary_max: state.job_salary_max,
-              department: createdRecords.departmentId
+              department: createdRecords.departmentId,
             };
             const jobRes = await Models.job.create(jobBody);
           } catch (error: any) {
@@ -621,7 +642,7 @@ console.log('✌️institutionRes --->', institutionRes);
           }
         }
       }
-      
+
       // Generate success message based on created entities
       let successMessage = "";
       const createdEntities = [];
@@ -630,33 +651,54 @@ console.log('✌️institutionRes --->', institutionRes);
       }
       if (createdRecords.institutionId && createdRecords.institutionAdminId) {
         createdEntities.push("Institution with Admin");
-      } 
-      if (createdRecords.institutionId && createdRecords.institutionAdminId && createdRecords.collegeId) {
+      }
+      if (
+        createdRecords.institutionId &&
+        createdRecords.institutionAdminId &&
+        createdRecords.collegeId
+      ) {
         createdEntities.push("Institution , Admin and College");
-      } 
-      if (createdRecords.institutionId && createdRecords.institutionAdminId && createdRecords.collegeId && createdRecords.hrId) {
+      }
+      if (
+        createdRecords.institutionId &&
+        createdRecords.institutionAdminId &&
+        createdRecords.collegeId &&
+        createdRecords.hrId
+      ) {
         createdEntities.push("Institution , Admin , College and HR");
-      } 
+      }
 
-      if (createdRecords.institutionId && createdRecords.institutionAdminId && createdRecords.collegeId && createdRecords.hodId) {
+      if (
+        createdRecords.institutionId &&
+        createdRecords.institutionAdminId &&
+        createdRecords.collegeId &&
+        createdRecords.hodId
+      ) {
         createdEntities.push("Institution , Admin , College , HR and HOD");
       }
-      
-      if (createdRecords.institutionId && createdRecords.institutionAdminId && createdRecords.collegeId && createdRecords.departmentId && createdRecords.hodId) {
-        createdEntities.push("Institution , Admin , College , HR , HOD and Department");
+
+      if (
+        createdRecords.institutionId &&
+        createdRecords.institutionAdminId &&
+        createdRecords.collegeId &&
+        createdRecords.departmentId &&
+        createdRecords.hodId
+      ) {
+        createdEntities.push(
+          "Institution , Admin , College , HR , HOD and Department"
+        );
       }
-      
-      
-     
+
       if (createdEntities.length > 0) {
-        successMessage = `${createdEntities.join(" and ")} created successfully!`;
+        successMessage = `${createdEntities.join(
+          " and "
+        )} created successfully!`;
       } else {
         successMessage = "created successfully!";
       }
-      
+
       Success(successMessage);
       handleCloseModal();
-      
     } catch (error: any) {
       if (error?.inner) {
         const errors = {};
@@ -664,15 +706,17 @@ console.log('✌️institutionRes --->', institutionRes);
           errors[err.path] = err.message;
         });
         setState({ errors });
-        console.log('✌️errors --->', errors);
+        console.log("✌️errors --->", errors);
         return; // Stop execution if validation fails
       } else {
         // Rollback created records
         await rollbackCreatedRecords(createdRecords);
-        Failure(error?.message || "Setup failed. All created records have been removed.");
+        Failure(
+          error?.message ||
+            "Setup failed. All created records have been removed."
+        );
       }
     } finally {
-      
       setState({ submitting: false });
     }
   };
@@ -686,10 +730,10 @@ console.log('✌️institutionRes --->', institutionRes);
       departmentId: null,
       hodId: null,
     };
-    
+
     try {
       setState({ submitting: true });
-      
+
       // Step 1: Create Institution
       if (state.completedSteps.includes(1)) {
         try {
@@ -700,12 +744,14 @@ console.log('✌️institutionRes --->', institutionRes);
             institution_phone: state.institution_phone,
             address: state.address,
           };
-          const institutionRes = await Models.institution.create(institutionBody);
+          const institutionRes: any = await Models.institution.create(
+            institutionBody
+          );
           createdRecords.institutionId = institutionRes?.id;
         } catch (error: any) {
           throw new Error(`Institution creation failed: ${error?.message}`);
         }
-        
+
         // Step 2: Create Institution Admin
         if (state.completedSteps.includes(2)) {
           try {
@@ -719,32 +765,38 @@ console.log('✌️institutionRes --->', institutionRes);
               status: "active",
               gender: state.admin_gender?.value,
               education_qualification: state.admin_education_qualification,
-              institution: createdRecords.institutionId
+              institution: createdRecords.institutionId,
             };
-            const adminRes = await Models.auth.createUser(adminBody);
+            const adminRes: any = await Models.auth.createUser(adminBody);
             createdRecords.institutionAdminId = adminRes?.id;
           } catch (error: any) {
             // Handle API validation errors
             if (error?.response?.data) {
               const apiErrors = error.response.data;
               let errorMessages = [];
-              
-              Object.keys(apiErrors).forEach(field => {
+
+              Object.keys(apiErrors).forEach((field) => {
                 if (Array.isArray(apiErrors[field])) {
-                  apiErrors[field].forEach(msg => {
+                  apiErrors[field].forEach((msg) => {
                     errorMessages.push(`${field}: ${msg}`);
                   });
                 } else {
                   errorMessages.push(`${field}: ${apiErrors[field]}`);
                 }
               });
-              
-              throw new Error(`Institution Admin creation failed:\n${errorMessages.join('\n')}`);
+
+              throw new Error(
+                `Institution Admin creation failed:\n${errorMessages.join(
+                  "\n"
+                )}`
+              );
             }
-            throw new Error(`Institution Admin creation failed: ${error?.message}`);
+            throw new Error(
+              `Institution Admin creation failed: ${error?.message}`
+            );
           }
         }
-        
+
         // Step 3: Create College
         if (state.completedSteps.includes(3)) {
           try {
@@ -754,14 +806,14 @@ console.log('✌️institutionRes --->', institutionRes);
               college_email: state.college_email,
               college_phone: state.college_phone,
               college_address: state.college_address,
-              institution: createdRecords.institutionId
+              institution: createdRecords.institutionId,
             };
-            const collegeRes = await Models.college.create(collegeBody);
+            const collegeRes: any = await Models.college.create(collegeBody);
             createdRecords.collegeId = collegeRes?.id;
           } catch (error: any) {
             throw new Error(`College creation failed: ${error?.message}`);
           }
-          
+
           // Step 4: Create HR
           if (state.completedSteps.includes(4)) {
             try {
@@ -775,31 +827,33 @@ console.log('✌️institutionRes --->', institutionRes);
                 status: "active",
                 gender: state.hr_gender?.value,
                 education_qualification: state.hr_qualification,
-                college: createdRecords.collegeId
+                college: createdRecords.collegeId,
               };
-              const hrRes = await Models.auth.createUser(hrBody);
+              const hrRes: any = await Models.auth.createUser(hrBody);
               createdRecords.hrId = hrRes?.id;
             } catch (error: any) {
               if (error?.response?.data) {
                 const apiErrors = error.response.data;
                 let errorMessages = [];
-                
-                Object.keys(apiErrors).forEach(field => {
+
+                Object.keys(apiErrors).forEach((field) => {
                   if (Array.isArray(apiErrors[field])) {
-                    apiErrors[field].forEach(msg => {
+                    apiErrors[field].forEach((msg) => {
                       errorMessages.push(`${field}: ${msg}`);
                     });
                   } else {
                     errorMessages.push(`${field}: ${apiErrors[field]}`);
                   }
                 });
-                
-                throw new Error(`HR creation failed:\n${errorMessages.join('\n')}`);
+
+                throw new Error(
+                  `HR creation failed:\n${errorMessages.join("\n")}`
+                );
               }
               throw new Error(`HR creation failed: ${error?.message}`);
             }
           }
-          
+
           // Step 5: Create Department
           if (state.completedSteps.includes(5)) {
             try {
@@ -807,14 +861,14 @@ console.log('✌️institutionRes --->', institutionRes);
                 department_name: state.department_name,
                 department_code: state.department_code,
                 college: createdRecords.collegeId,
-                institution: createdRecords.institutionId
+                institution: createdRecords.institutionId,
               };
-              const deptRes = await Models.department.create(deptBody);
+              const deptRes: any = await Models.department.create(deptBody);
               createdRecords.departmentId = deptRes?.id;
             } catch (error: any) {
               throw new Error(`Department creation failed: ${error?.message}`);
             }
-            
+
             // Step 6: Create HOD
             if (state.completedSteps.includes(6)) {
               try {
@@ -828,9 +882,9 @@ console.log('✌️institutionRes --->', institutionRes);
                   status: "active",
                   gender: state.hod_gender?.value,
                   education_qualification: state.hod_qualification,
-                  department: createdRecords.departmentId
+                  department: createdRecords.departmentId,
                 };
-                const hodRes = await Models.auth.createUser(hodBody);
+                const hodRes: any = await Models.auth.createUser(hodBody);
                 createdRecords.hodId = hodRes?.id;
               } catch (error: any) {
                 throw new Error(`HOD creation failed: ${error?.message}`);
@@ -839,66 +893,69 @@ console.log('✌️institutionRes --->', institutionRes);
           }
         }
       }
-      
+
       // Generate success message based on created entities
       let successMessage = "";
       const createdEntities = [];
-      
+
       if (createdRecords.institutionId) createdEntities.push("Institution");
       if (createdRecords.institutionAdminId) createdEntities.push("Admin");
       if (createdRecords.collegeId) createdEntities.push("College");
       if (createdRecords.hrId) createdEntities.push("HR");
       if (createdRecords.departmentId) createdEntities.push("Department");
       if (createdRecords.hodId) createdEntities.push("HOD");
-      
+
       if (createdEntities.length > 0) {
-        successMessage = `${createdEntities.join(" and ")} created successfully!`;
+        successMessage = `${createdEntities.join(
+          " and "
+        )} created successfully!`;
       } else {
         successMessage = "Setup completed successfully!";
       }
-      
+
       Success(successMessage);
       handleCloseModal();
-      
     } catch (error: any) {
-console.log('✌️error --->', error);
+      console.log("✌️error --->", error);
       // Rollback created records
       await rollbackCreatedRecords(createdRecords);
-      Failure(error?.message || "Setup failed. All created records have been removed.");
+      Failure(
+        error?.message || "Setup failed. All created records have been removed."
+      );
     } finally {
       setState({ submitting: false });
     }
   };
-  
+
   const rollbackCreatedRecords = async (records: any) => {
-console.log('✌️records --->', records);
+    console.log("✌️records --->", records);
     try {
       if (records.hodId) {
         await Models.auth.deleteUser(records.hodId);
-        console.log('Deleted HOD:', records.hodId);
+        console.log("Deleted HOD:", records.hodId);
       }
       if (records.departmentId) {
         await Models.department.delete(records.departmentId);
-        console.log('Deleted Department:', records.departmentId);
+        console.log("Deleted Department:", records.departmentId);
       }
       if (records.hrId) {
         await Models.auth.deleteUser(records.hrId);
-        console.log('Deleted HR:', records.hrId);
+        console.log("Deleted HR:", records.hrId);
       }
       if (records.collegeId) {
         await Models.college.delete(records.collegeId);
-        console.log('Deleted College:', records.collegeId);
+        console.log("Deleted College:", records.collegeId);
       }
       if (records.institutionAdminId) {
         await Models.auth.deleteUser(records.institutionAdminId);
-        console.log('Deleted Institution Admin:', records.institutionAdminId);
+        console.log("Deleted Institution Admin:", records.institutionAdminId);
       }
       if (records.institutionId) {
         await Models.institution.delete(records.institutionId);
-        console.log('Deleted Institution:', records.institutionId);
+        console.log("Deleted Institution:", records.institutionId);
       }
     } catch (rollbackError) {
-      console.error('Rollback error:', rollbackError);
+      console.error("Rollback error:", rollbackError);
     }
   };
 
@@ -986,14 +1043,14 @@ console.log('✌️records --->', records);
       showModal: false,
       currentStep: 1,
       completedSteps: [],
-      
+
       // Clear all form fields
       institution_name: "",
       institution_code: "",
       institution_email: "",
       institution_phone: "",
       address: "",
-      
+
       admin_username: "",
       admin_email: "",
       admin_phone: "",
@@ -1001,7 +1058,7 @@ console.log('✌️records --->', records);
       admin_confirm_password: "",
       admin_gender: null,
       admin_education_qualification: "",
-      
+
       hr_username: "",
       hr_email: "",
       hr_phone: "",
@@ -1009,13 +1066,13 @@ console.log('✌️records --->', records);
       hr_confirm_password: "",
       hr_gender: null,
       hr_qualification: "",
-      
+
       college_name: "",
       college_code: "",
       college_email: "",
       college_phone: "",
       college_address: "",
-      
+
       hod_username: "",
       hod_email: "",
       hod_phone: "",
@@ -1023,16 +1080,16 @@ console.log('✌️records --->', records);
       hod_confirm_password: "",
       hod_gender: null,
       hod_qualification: "",
-      
+
       department_name: "",
       department_code: "",
-      
+
       job_title: "",
       job_description: "",
       job_requirements: "",
       job_salary_min: "",
       job_salary_max: "",
-      
+
       errors: {},
       editId: null,
     });
@@ -1041,21 +1098,24 @@ console.log('✌️records --->', records);
   const handleFormChange = (field: string, value: any) => {
     // Map validation field names to form field names for error clearing
     const errorFieldMap: { [key: string]: string[] } = {
-      admin_username: ['username', 'admin_username'],
-      admin_email: ['email', 'admin_email'], 
-      admin_password: ['password', 'admin_password'],
-      admin_confirm_password: ['password_confirm', 'admin_confirm_password'],
-      admin_phone: ['phone', 'admin_phone'],
-      admin_gender: ['gender', 'admin_gender'],
-      admin_education_qualification: ['education_qualification', 'admin_education_qualification']
+      admin_username: ["username", "admin_username"],
+      admin_email: ["email", "admin_email"],
+      admin_password: ["password", "admin_password"],
+      admin_confirm_password: ["password_confirm", "admin_confirm_password"],
+      admin_phone: ["phone", "admin_phone"],
+      admin_gender: ["gender", "admin_gender"],
+      admin_education_qualification: [
+        "education_qualification",
+        "admin_education_qualification",
+      ],
     };
-    
+
     const fieldsToClear = errorFieldMap[field] || [field];
     const clearedErrors = { ...state.errors };
     fieldsToClear.forEach((errorField: string) => {
       clearedErrors[errorField] = "";
     });
-    
+
     setState({
       [field]: value,
       errors: clearedErrors,
@@ -1110,8 +1170,6 @@ console.log('✌️records --->', records);
       Failure("Failed to delete institution. Please try again.");
     }
   };
-
-
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-3 dark:from-gray-900 dark:to-gray-800">
@@ -1374,25 +1432,47 @@ console.log('✌️records --->', records);
               }
             `}</style>
             {/* Progress Header */}
-            <div className=" py-6 border-b">
+            <div className=" border-b py-6">
               {/* <h2 className="text-2xl font-bold mb-4">Institution Setup Wizard</h2> */}
-              <div className="overflow-x-auto scrollbar-hide">
-                <div className="flex items-center justify-between min-w-max px-4">
+              <div className="scrollbar-hide overflow-x-auto">
+                <div className="flex min-w-max items-center justify-between px-4">
                   {steps.map((step, index) => (
-                    <div key={step.id} className="flex items-center" data-step={step.id}>
-                      <div className={`
-                        w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium
-                        ${isStepCompleted(step.id) ? 'bg-green-500 text-white' : 
-                          state.currentStep === step.id ? 'bg-blue-500 text-white' :
-                          isStepAccessible(step.id) ? 'bg-gray-200 text-gray-600' : 'bg-gray-100 text-gray-400'}
-                      `}>
-                        {isStepCompleted(step.id) ? '✓' : <step.icon className="h-5 w-5" />}
+                    <div
+                      key={step.id}
+                      className="flex items-center"
+                      data-step={step.id}
+                    >
+                      <div
+                        className={`
+                        flex h-10 w-10 items-center justify-center rounded-full text-sm font-medium
+                        ${
+                          isStepCompleted(step.id)
+                            ? "bg-green-500 text-white"
+                            : state.currentStep === step.id
+                            ? "bg-blue-500 text-white"
+                            : isStepAccessible(step.id)
+                            ? "bg-gray-200 text-gray-600"
+                            : "bg-gray-100 text-gray-400"
+                        }
+                      `}
+                      >
+                        {isStepCompleted(step.id) ? (
+                          "✓"
+                        ) : (
+                          <step.icon className="h-5 w-5" />
+                        )}
                       </div>
-                      <span className="ml-2 text-sm font-medium whitespace-nowrap">{step.name}</span>
+                      <span className="ml-2 whitespace-nowrap text-sm font-medium">
+                        {step.name}
+                      </span>
                       {index < steps.length - 1 && (
-                        <div className={`w-8 h-0.5 mx-4 ${
-                          isStepCompleted(step.id) ? 'bg-green-500' : 'bg-gray-200'
-                        }`} />
+                        <div
+                          className={`mx-4 h-0.5 w-8 ${
+                            isStepCompleted(step.id)
+                              ? "bg-green-500"
+                              : "bg-gray-200"
+                          }`}
+                        />
                       )}
                     </div>
                   ))}
@@ -1401,7 +1481,7 @@ console.log('✌️records --->', records);
             </div>
 
             {/* Step Content */}
-            <div className="p-6 min-h-[400px]">
+            <div className="min-h-[400px] p-6">
               {state.currentStep === 1 && (
                 <div className="space-y-6">
                   <h3 className="text-lg font-semibold">Institution Details</h3>
@@ -1410,7 +1490,9 @@ console.log('✌️records --->', records);
                       title="Institution Name"
                       placeholder="Enter institution name"
                       value={state.institution_name}
-                      onChange={(e) => handleFormChange("institution_name", e.target.value)}
+                      onChange={(e) =>
+                        handleFormChange("institution_name", e.target.value)
+                      }
                       error={state.errors.institution_name}
                       required
                     />
@@ -1418,7 +1500,9 @@ console.log('✌️records --->', records);
                       title="Institution Code"
                       placeholder="Enter unique code"
                       value={state.institution_code}
-                      onChange={(e) => handleFormChange("institution_code", e.target.value)}
+                      onChange={(e) =>
+                        handleFormChange("institution_code", e.target.value)
+                      }
                       error={state.errors.institution_code}
                       required
                     />
@@ -1429,14 +1513,18 @@ console.log('✌️records --->', records);
                       type="email"
                       placeholder="institution@example.com"
                       value={state.institution_email}
-                      onChange={(e) => handleFormChange("institution_email", e.target.value)}
+                      onChange={(e) =>
+                        handleFormChange("institution_email", e.target.value)
+                      }
                       error={state.errors.institution_email}
                       required
                     />
                     <CustomPhoneInput
                       title="Phone Number"
                       value={state.institution_phone}
-                      onChange={(value) => handleFormChange("institution_phone", value)}
+                      onChange={(value) =>
+                        handleFormChange("institution_phone", value)
+                      }
                       error={state.errors.institution_phone}
                       required
                     />
@@ -1445,24 +1533,30 @@ console.log('✌️records --->', records);
                     title="Complete Address"
                     placeholder="Enter the full address"
                     value={state.address}
-                    onChange={(e) => handleFormChange("address", e.target.value)}
+                    onChange={(e) =>
+                      handleFormChange("address", e.target.value)
+                    }
                     error={state.errors.address}
                     rows={4}
                     required
                   />
                 </div>
               )}
-              
+
               {state.currentStep === 2 && (
                 <div className="space-y-6">
                   <h3 className="text-lg font-semibold">Institution Admin</h3>
-                  <p className="text-sm text-gray-600">Create an admin user for this institution</p>
+                  <p className="text-sm text-gray-600">
+                    Create an admin user for this institution
+                  </p>
                   <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                     <TextInput
                       title="Username"
                       placeholder="Enter admin username"
                       value={state.admin_username}
-                      onChange={(e) => handleFormChange("admin_username", e.target.value)}
+                      onChange={(e) =>
+                        handleFormChange("admin_username", e.target.value)
+                      }
                       error={state.errors.username}
                       required
                     />
@@ -1471,7 +1565,9 @@ console.log('✌️records --->', records);
                       type="email"
                       placeholder="admin@example.com"
                       value={state.admin_email}
-                      onChange={(e) => handleFormChange("admin_email", e.target.value)}
+                      onChange={(e) =>
+                        handleFormChange("admin_email", e.target.value)
+                      }
                       error={state.errors.email}
                       autoComplete="username"
                       required
@@ -1483,22 +1579,55 @@ console.log('✌️records --->', records);
                       type={state.showAdminPassword ? "text" : "password"}
                       placeholder="Enter password"
                       value={state.admin_password}
-                      onChange={(e) => handleFormChange("admin_password", e.target.value)}
+                      onChange={(e) =>
+                        handleFormChange("admin_password", e.target.value)
+                      }
                       error={state.errors.password}
-                      rightIcon={state.showAdminPassword ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
-                      rightIconOnlick={() => setState({ showAdminPassword: !state.showAdminPassword })}
+                      rightIcon={
+                        state.showAdminPassword ? (
+                          <IconEyeOff className="h-4 w-4" />
+                        ) : (
+                          <IconEye className="h-4 w-4" />
+                        )
+                      }
+                      rightIconOnlick={() =>
+                        setState({
+                          showAdminPassword: !state.showAdminPassword,
+                        })
+                      }
                       autoComplete="new-password"
                       required
                     />
                     <TextInput
                       title="Confirm Password"
-                      type={state.showAdminConfirmPassword ? "text" : "password"}
+                      type={
+                        state.showAdminConfirmPassword ? "text" : "password"
+                      }
                       placeholder="Confirm password"
                       value={state.admin_confirm_password}
-                      onChange={(e) => handleFormChange("admin_confirm_password", e.target.value)}
-                      error={state.errors.password_confirm || state.errors.admin_confirm_password}
-                      rightIcon={state.showAdminConfirmPassword ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
-                      rightIconOnlick={() => setState({ showAdminConfirmPassword: !state.showAdminConfirmPassword })}
+                      onChange={(e) =>
+                        handleFormChange(
+                          "admin_confirm_password",
+                          e.target.value
+                        )
+                      }
+                      error={
+                        state.errors.password_confirm ||
+                        state.errors.admin_confirm_password
+                      }
+                      rightIcon={
+                        state.showAdminConfirmPassword ? (
+                          <IconEyeOff className="h-4 w-4" />
+                        ) : (
+                          <IconEye className="h-4 w-4" />
+                        )
+                      }
+                      rightIconOnlick={() =>
+                        setState({
+                          showAdminConfirmPassword:
+                            !state.showAdminConfirmPassword,
+                        })
+                      }
                       required
                     />
                   </div>
@@ -1506,7 +1635,9 @@ console.log('✌️records --->', records);
                     <CustomPhoneInput
                       title="Phone"
                       value={state.admin_phone}
-                      onChange={(value) => handleFormChange("admin_phone", value)}
+                      onChange={(value) =>
+                        handleFormChange("admin_phone", value)
+                      }
                       error={state.errors.phone}
                       required
                     />
@@ -1514,7 +1645,9 @@ console.log('✌️records --->', records);
                       title="Gender"
                       options={genderOptions}
                       value={state.admin_gender}
-                      onChange={(selectedOption) => handleFormChange("admin_gender", selectedOption)}
+                      onChange={(selectedOption) =>
+                        handleFormChange("admin_gender", selectedOption)
+                      }
                       placeholder="Select Gender"
                       error={state.errors.gender}
                       required
@@ -1524,13 +1657,18 @@ console.log('✌️records --->', records);
                     title="Education Qualification"
                     placeholder="Enter education qualification"
                     value={state.admin_education_qualification}
-                    onChange={(e) => handleFormChange("admin_education_qualification", e.target.value)}
+                    onChange={(e) =>
+                      handleFormChange(
+                        "admin_education_qualification",
+                        e.target.value
+                      )
+                    }
                     error={state.errors.education_qualification}
                     required
                   />
                 </div>
               )}
-              
+
               {state.currentStep === 3 && (
                 <div className="space-y-6">
                   <h3 className="text-lg font-semibold">Create HR</h3>
@@ -1539,7 +1677,9 @@ console.log('✌️records --->', records);
                       title="HR Name"
                       placeholder="Enter HR name"
                       value={state.hr_username}
-                      onChange={(e) => handleFormChange("hr_username", e.target.value)}
+                      onChange={(e) =>
+                        handleFormChange("hr_username", e.target.value)
+                      }
                       error={state.errors.hr_username}
                       required
                     />
@@ -1548,7 +1688,9 @@ console.log('✌️records --->', records);
                       type="email"
                       placeholder="hr@example.com"
                       value={state.hr_email}
-                      onChange={(e) => handleFormChange("hr_email", e.target.value)}
+                      onChange={(e) =>
+                        handleFormChange("hr_email", e.target.value)
+                      }
                       error={state.errors.hr_email}
                       autoComplete="username"
                       required
@@ -1560,10 +1702,20 @@ console.log('✌️records --->', records);
                       type={state.showHRPassword ? "text" : "password"}
                       placeholder="Enter password"
                       value={state.hr_password}
-                      onChange={(e) => handleFormChange("hr_password", e.target.value)}
+                      onChange={(e) =>
+                        handleFormChange("hr_password", e.target.value)
+                      }
                       error={state.errors.hr_password}
-                      rightIcon={state.showHRPassword ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
-                      rightIconOnlick={() => setState({ showHRPassword: !state.showHRPassword })}
+                      rightIcon={
+                        state.showHRPassword ? (
+                          <IconEyeOff className="h-4 w-4" />
+                        ) : (
+                          <IconEye className="h-4 w-4" />
+                        )
+                      }
+                      rightIconOnlick={() =>
+                        setState({ showHRPassword: !state.showHRPassword })
+                      }
                       autoComplete="new-password"
                       required
                     />
@@ -1572,10 +1724,22 @@ console.log('✌️records --->', records);
                       type={state.showHRConfirmPassword ? "text" : "password"}
                       placeholder="Confirm password"
                       value={state.hr_confirm_password}
-                      onChange={(e) => handleFormChange("hr_confirm_password", e.target.value)}
+                      onChange={(e) =>
+                        handleFormChange("hr_confirm_password", e.target.value)
+                      }
                       error={state.errors.hr_password_confirm}
-                      rightIcon={state.showHRConfirmPassword ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
-                      rightIconOnlick={() => setState({ showHRConfirmPassword: !state.showHRConfirmPassword })}
+                      rightIcon={
+                        state.showHRConfirmPassword ? (
+                          <IconEyeOff className="h-4 w-4" />
+                        ) : (
+                          <IconEye className="h-4 w-4" />
+                        )
+                      }
+                      rightIconOnlick={() =>
+                        setState({
+                          showHRConfirmPassword: !state.showHRConfirmPassword,
+                        })
+                      }
                       required
                     />
                   </div>
@@ -1591,7 +1755,9 @@ console.log('✌️records --->', records);
                       title="Gender"
                       options={genderOptions}
                       value={state.hr_gender}
-                      onChange={(selectedOption) => handleFormChange("hr_gender", selectedOption)}
+                      onChange={(selectedOption) =>
+                        handleFormChange("hr_gender", selectedOption)
+                      }
                       placeholder="Select Gender"
                       error={state.errors.hr_gender}
                       required
@@ -1601,13 +1767,15 @@ console.log('✌️records --->', records);
                     title="Qualification"
                     placeholder="Enter qualification"
                     value={state.hr_qualification}
-                    onChange={(e) => handleFormChange("hr_qualification", e.target.value)}
+                    onChange={(e) =>
+                      handleFormChange("hr_qualification", e.target.value)
+                    }
                     error={state.errors.hr_qualification}
                     required
                   />
                 </div>
               )}
-              
+
               {state.currentStep === 4 && (
                 <div className="space-y-6">
                   <h3 className="text-lg font-semibold">Create College</h3>
@@ -1616,7 +1784,9 @@ console.log('✌️records --->', records);
                       title="College Name"
                       placeholder="Enter college name"
                       value={state.college_name}
-                      onChange={(e) => handleFormChange("college_name", e.target.value)}
+                      onChange={(e) =>
+                        handleFormChange("college_name", e.target.value)
+                      }
                       error={state.errors.college_name}
                       required
                     />
@@ -1625,7 +1795,9 @@ console.log('✌️records --->', records);
                       type="email"
                       placeholder="college@example.com"
                       value={state.college_email}
-                      onChange={(e) => handleFormChange("college_email", e.target.value)}
+                      onChange={(e) =>
+                        handleFormChange("college_email", e.target.value)
+                      }
                       error={state.errors.college_email}
                       required
                     />
@@ -1635,14 +1807,18 @@ console.log('✌️records --->', records);
                       title="College Code"
                       placeholder="Enter college code"
                       value={state.college_code}
-                      onChange={(e) => handleFormChange("college_code", e.target.value)}
+                      onChange={(e) =>
+                        handleFormChange("college_code", e.target.value)
+                      }
                       error={state.errors.college_code}
                       required
                     />
                     <CustomPhoneInput
                       title="Phone Number"
                       value={state.college_phone}
-                      onChange={(value) => handleFormChange("college_phone", value)}
+                      onChange={(value) =>
+                        handleFormChange("college_phone", value)
+                      }
                       error={state.errors.college_phone}
                       required
                     />
@@ -1651,15 +1827,16 @@ console.log('✌️records --->', records);
                     title="Address"
                     placeholder="Enter college address"
                     value={state.college_address}
-                    onChange={(e) => handleFormChange("college_address", e.target.value)}
+                    onChange={(e) =>
+                      handleFormChange("college_address", e.target.value)
+                    }
                     error={state.errors.college_address}
                     rows={3}
                     required
-
                   />
                 </div>
               )}
-              
+
               {state.currentStep === 5 && (
                 <div className="space-y-6">
                   <h3 className="text-lg font-semibold">Department HOD</h3>
@@ -1668,7 +1845,9 @@ console.log('✌️records --->', records);
                       title="HOD Name"
                       placeholder="Enter HOD name"
                       value={state.hod_username}
-                      onChange={(e) => handleFormChange("hod_username", e.target.value)}
+                      onChange={(e) =>
+                        handleFormChange("hod_username", e.target.value)
+                      }
                       error={state.errors.hod_username}
                       required
                     />
@@ -1677,7 +1856,9 @@ console.log('✌️records --->', records);
                       type="email"
                       placeholder="hod@example.com"
                       value={state.hod_email}
-                      onChange={(e) => handleFormChange("hod_email", e.target.value)}
+                      onChange={(e) =>
+                        handleFormChange("hod_email", e.target.value)
+                      }
                       error={state.errors.hod_email}
                       required
                     />
@@ -1688,10 +1869,20 @@ console.log('✌️records --->', records);
                       type={state.showHODPassword ? "text" : "password"}
                       placeholder="Enter password"
                       value={state.hod_password}
-                      onChange={(e) => handleFormChange("hod_password", e.target.value)}
+                      onChange={(e) =>
+                        handleFormChange("hod_password", e.target.value)
+                      }
                       error={state.errors.hod_password}
-                      rightIcon={state.showHODPassword ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
-                      rightIconOnlick={() => setState({ showHODPassword: !state.showHODPassword })}
+                      rightIcon={
+                        state.showHODPassword ? (
+                          <IconEyeOff className="h-4 w-4" />
+                        ) : (
+                          <IconEye className="h-4 w-4" />
+                        )
+                      }
+                      rightIconOnlick={() =>
+                        setState({ showHODPassword: !state.showHODPassword })
+                      }
                       required
                     />
                     <TextInput
@@ -1699,10 +1890,22 @@ console.log('✌️records --->', records);
                       type={state.showHODConfirmPassword ? "text" : "password"}
                       placeholder="Confirm password"
                       value={state.hod_confirm_password}
-                      onChange={(e) => handleFormChange("hod_confirm_password", e.target.value)}
+                      onChange={(e) =>
+                        handleFormChange("hod_confirm_password", e.target.value)
+                      }
                       error={state.errors.hod_confirm_password}
-                      rightIcon={state.showHODConfirmPassword ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
-                      rightIconOnlick={() => setState({ showHODConfirmPassword: !state.showHODConfirmPassword })}
+                      rightIcon={
+                        state.showHODConfirmPassword ? (
+                          <IconEyeOff className="h-4 w-4" />
+                        ) : (
+                          <IconEye className="h-4 w-4" />
+                        )
+                      }
+                      rightIconOnlick={() =>
+                        setState({
+                          showHODConfirmPassword: !state.showHODConfirmPassword,
+                        })
+                      }
                       required
                     />
                   </div>
@@ -1718,7 +1921,9 @@ console.log('✌️records --->', records);
                       title="Gender"
                       options={genderOptions}
                       value={state.hod_gender}
-                      onChange={(selectedOption) => handleFormChange("hod_gender", selectedOption)}
+                      onChange={(selectedOption) =>
+                        handleFormChange("hod_gender", selectedOption)
+                      }
                       placeholder="Select Gender"
                       error={state.errors.hod_gender}
                       required
@@ -1728,35 +1933,41 @@ console.log('✌️records --->', records);
                     title="Qualification"
                     placeholder="Enter qualification"
                     value={state.hod_qualification}
-                    onChange={(e) => handleFormChange("hod_qualification", e.target.value)}
+                    onChange={(e) =>
+                      handleFormChange("hod_qualification", e.target.value)
+                    }
                     error={state.errors.hod_qualification}
                     required
                   />
                 </div>
               )}
-              
+
               {state.currentStep === 6 && (
                 <div className="space-y-6">
                   <h3 className="text-lg font-semibold">Create Department</h3>
-                    <TextInput
-                      title="Department Name"
-                      placeholder="Enter department name"
-                      value={state.department_name}
-                      onChange={(e) => handleFormChange("department_name", e.target.value)}
-                      error={state.errors.department_name}
-                      required
-                    />
-                    <TextInput
-                      title="Department Code"
-                      placeholder="Enter department code"
-                      value={state.department_code}
-                      onChange={(e) => handleFormChange("department_code", e.target.value)}
-                      error={state.errors.department_code}
-                      required
-                    />
+                  <TextInput
+                    title="Department Name"
+                    placeholder="Enter department name"
+                    value={state.department_name}
+                    onChange={(e) =>
+                      handleFormChange("department_name", e.target.value)
+                    }
+                    error={state.errors.department_name}
+                    required
+                  />
+                  <TextInput
+                    title="Department Code"
+                    placeholder="Enter department code"
+                    value={state.department_code}
+                    onChange={(e) =>
+                      handleFormChange("department_code", e.target.value)
+                    }
+                    error={state.errors.department_code}
+                    required
+                  />
                 </div>
               )}
-              
+
               {state.currentStep === 7 && (
                 <div className="space-y-6">
                   <h3 className="text-lg font-semibold">Create Job</h3>
@@ -1764,7 +1975,9 @@ console.log('✌️records --->', records);
                     title="Job Title"
                     placeholder="Enter job title"
                     value={state.job_title}
-                    onChange={(e) => handleFormChange("job_title", e.target.value)}
+                    onChange={(e) =>
+                      handleFormChange("job_title", e.target.value)
+                    }
                     error={state.errors.job_title}
                     required
                   />
@@ -1772,7 +1985,9 @@ console.log('✌️records --->', records);
                     title="Job Description"
                     placeholder="Enter job description"
                     value={state.job_description}
-                    onChange={(e) => handleFormChange("job_description", e.target.value)}
+                    onChange={(e) =>
+                      handleFormChange("job_description", e.target.value)
+                    }
                     error={state.errors.job_description}
                     rows={4}
                   />
@@ -1780,7 +1995,9 @@ console.log('✌️records --->', records);
                     title="Job Requirements"
                     placeholder="Enter job requirements"
                     value={state.job_requirements}
-                    onChange={(e) => handleFormChange("job_requirements", e.target.value)}
+                    onChange={(e) =>
+                      handleFormChange("job_requirements", e.target.value)
+                    }
                     error={state.errors.job_requirements}
                     rows={3}
                   />
@@ -1790,7 +2007,9 @@ console.log('✌️records --->', records);
                       type="number"
                       placeholder="Enter minimum salary"
                       value={state.job_salary_min}
-                      onChange={(e) => handleFormChange("job_salary_min", e.target.value)}
+                      onChange={(e) =>
+                        handleFormChange("job_salary_min", e.target.value)
+                      }
                       error={state.errors.job_salary_min}
                     />
                     <TextInput
@@ -1798,7 +2017,9 @@ console.log('✌️records --->', records);
                       type="number"
                       placeholder="Enter maximum salary"
                       value={state.job_salary_max}
-                      onChange={(e) => handleFormChange("job_salary_max", e.target.value)}
+                      onChange={(e) =>
+                        handleFormChange("job_salary_max", e.target.value)
+                      }
                       error={state.errors.job_salary_max}
                     />
                   </div>
@@ -1807,15 +2028,20 @@ console.log('✌️records --->', records);
             </div>
 
             {/* Navigation Footer */}
-            <div className="p-6 border-t flex justify-between">
+            <div className="flex justify-between border-t p-6">
               <button
                 onClick={() => {
                   const newStep = Math.max(1, state.currentStep - 1);
                   setState({ currentStep: newStep });
                   setTimeout(() => {
-                    const stepElement = document.querySelector(`[data-step="${newStep}"]`);
+                    const stepElement = document.querySelector(
+                      `[data-step="${newStep}"]`
+                    );
                     if (stepElement) {
-                      stepElement.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+                      stepElement.scrollIntoView({
+                        behavior: "smooth",
+                        inline: "center",
+                      });
                     }
                   }, 100);
                 }}
@@ -1824,12 +2050,11 @@ console.log('✌️records --->', records);
               >
                 Previous
               </button>
-              
+
               <div className="flex gap-2">
-               
-              <button
+                <button
                   onClick={handleFinalSubmit}
-                  className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                  className="rounded-lg bg-green-500 px-6 py-2 text-white hover:bg-green-600"
                 >
                   Submit
                 </button>
@@ -1837,19 +2062,18 @@ console.log('✌️records --->', records);
                   <button
                     onClick={() => handleStepComplete(state.currentStep)}
                     disabled={state.submitting}
-                    className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
+                    className="rounded-lg bg-blue-500 px-6 py-2 text-white hover:bg-blue-600 disabled:opacity-50"
                   >
-                    {state.submitting ? 'Creating...' : 'Create & Next'}
+                    {state.submitting ? "Creating..." : "Create & Next"}
                   </button>
                 ) : (
                   <button
                     onClick={handleFinishWizard}
-                    className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                    className="rounded-lg bg-green-500 px-6 py-2 text-white hover:bg-green-600"
                   >
                     Finish Setup
                   </button>
                 )}
-                 
               </div>
             </div>
           </div>
