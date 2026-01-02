@@ -20,6 +20,7 @@ import { Success, Failure } from "@/utils/function.utils";
 import useDebounce from "@/hook/useDebounce";
 import { CreateUser } from "@/utils/validation.utils";
 import Swal from "sweetalert2";
+import { GENDER_OPTION } from "@/utils/constant.utils";
 
 const Users = () => {
   const dispatch = useDispatch();
@@ -77,11 +78,7 @@ const Users = () => {
     { value: "inactive", label: "Inactive" },
   ];
 
-  const genderOptions = [
-    { value: "male", label: "Male" },
-    { value: "female", label: "Female" },
-    { value: "other", label: "Other" },
-  ];
+ 
 
   const debounceSearch = useDebounce(state.search, 500);
 
@@ -473,7 +470,7 @@ console.log('✌️row --->', row);
         />
         <CustomSelect
           title="Gender"
-          options={genderOptions}
+          options={GENDER_OPTION}
           value={state.gender}
           onChange={(selectedOption) => handleFormChange("gender", selectedOption)}
           placeholder="Select Gender"

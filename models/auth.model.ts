@@ -131,7 +131,7 @@ const auth = {
         })
         .catch((error) => {
           if (error.response) {
-            reject(error.response?.data);
+            reject(error);
           } else {
             reject(error);
           }

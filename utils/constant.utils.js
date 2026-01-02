@@ -347,3 +347,10 @@ export const FILTER_ROLES = [
     label: "Seller",
   },
 ];
+
+
+export const GENDER_OPTION = [
+  { value: "male", label: "Male" },
+  { value: "female", label: "Female" },
+  { value: "other", label: "Other" },
+];
