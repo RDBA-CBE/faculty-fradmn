@@ -41,7 +41,7 @@ const department = {
         })
         .catch((error) => {
           if (error.response) {
-            reject(error.response.data);
+            reject(error.response);
           } else {
             reject(error);
           }

@@ -12,7 +12,7 @@ import IconTrash from "@/components/Icon/IconTrash";
 import IconEye from "@/components/Icon/IconEye";
 import IconEyeOff from "@/components/Icon/IconEyeOff";
 import IconLoader from "@/components/Icon/IconLoader";
-import IconEdit from "@/components/Icon/IconEdit";
+import { GraduationCap, BookOpen } from "lucide-react";
 import Pagination from "@/components/pagination/pagination";
 import { Dropdown, showDeleteAlert, useSetState } from "@/utils/function.utils";
 import Modal from "@/components/modal/modal.component";
@@ -20,12 +20,21 @@ import { Success, Failure } from "@/utils/function.utils";
 import useDebounce from "@/hook/useDebounce";
 import Swal from "sweetalert2";
 import Models from "@/imports/models.import";
-import { CreateCollege } from "@/utils/validation.utils";
+import { CreateCollege, CreateDepartment } from "@/utils/validation.utils";
 import PrivateRouter from "@/hook/privateRouter";
+import IconEdit from "@/components/Icon/IconEdit";
 
 const CollegeAndDepartment = () => {
   const dispatch = useDispatch();
   const [state, setState] = useSetState({
+    // Wizard state
+    currentStep: 1,
+    completedSteps: [],
+    createdCollegeId: null,
+    
+    // Selection state
+    selectedRecords: [],
+    
     activeTab: "colleges",
     page: 1,
     pageSize: 10,
@@ -65,6 +74,14 @@ const CollegeAndDepartment = () => {
     editId: null,
   });
 
+  const steps = [
+    { id: 1, name: 'College', icon: GraduationCap, required: true },
+    { id: 2, name: 'Department', icon: BookOpen, required: true }
+  ];
+
+  const isStepCompleted = (stepId: number) => state.completedSteps.includes(stepId);
+  const isStepAccessible = (stepId: number) => stepId === 1 || isStepCompleted(stepId - 1);
+
   const statusOptions = [
     { value: "active", label: "Active" },
     { value: "inactive", label: "Inactive" },
@@ -82,6 +99,7 @@ const CollegeAndDepartment = () => {
       collegeList(1);
     } else {
       deptList(1);
+      collegeDropdownList(1); // Load colleges for dropdown
     }
   }, [state.activeTab]);
 
@@ -232,6 +250,9 @@ const CollegeAndDepartment = () => {
   const handleCloseModal = () => {
     setState({
       showModal: false,
+      currentStep: 1,
+      completedSteps: [],
+      createdCollegeId: null,
       college_name: "",
       college_code: "",
       college_email: "",
@@ -243,6 +264,7 @@ const CollegeAndDepartment = () => {
       department_email: "",
       department_phone: "",
       department_head: "",
+      college: null,
       errors: {},
       editId: null,
     });
@@ -332,19 +354,105 @@ const CollegeAndDepartment = () => {
     );
   };
 
+  const handleBulkDelete = () => {
+    showDeleteAlert(
+      () => {
+        bulkDeleteRecords();
+      },
+      () => {
+        Swal.fire("Cancelled", "Your Records are safe :)", "info");
+      },
+      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`
+    );
+  };
+
   const deleteRecord = async (id) => {
     try {
       if (state.activeTab === "colleges") {
         await Models.college.delete(id);
-        Success(`College deleted successfully!`);
+        Success("College deleted successfully!");
         collegeList(state.page);
       } else {
         await Models.department.delete(id);
-        Success(`Department deleted successfully!`);
+        Success("Department deleted successfully!");
         deptList(state.page);
       }
     } catch (error) {
-      Failure("Failed to delete record");
+      Failure(`Failed to delete ${state.activeTab.slice(0, -1)}. Please try again.`);
+    }
+  };
+
+  const bulkDeleteRecords = async () => {
+    try {
+      for (const id of state.selectedRecords) {
+        if (state.activeTab === "colleges") {
+          await Models.college.delete(id);
+        } else {
+          await Models.department.delete(id);
+        }
+      }
+      Success(`${state.selectedRecords.length} ${state.activeTab} deleted successfully!`);
+      setState({ selectedRecords: [] });
+      if (state.activeTab === "colleges") {
+        collegeList(state.page);
+      } else {
+        deptList(state.page);
+      }
+    } catch (error) {
+      Failure(`Failed to delete ${state.activeTab}. Please try again.`);
+    }
+  };
+
+  const rollbackCreatedRecords = async (records: any) => {
+    try {
+      if (records.departmentId) {
+        await Models.department.delete(records.departmentId);
+        console.log('Deleted Department:', records.departmentId);
+      }
+      if (records.collegeId) {
+        await Models.college.delete(records.collegeId);
+        console.log('Deleted College:', records.collegeId);
+      }
+    } catch (rollbackError) {
+      console.error('Rollback error:', rollbackError);
+    }
+  };
+
+  const handleFinalSubmit = async () => {
+    try {
+      setState({ submitting: true });
+      
+      // Validate college data
+      const collegeBody = {
+        college_name: state.college_name,
+        college_code: state.college_code,
+        college_email: state.college_email,
+        college_phone: state.college_phone,
+        college_address: state.college_address,
+        institution: state?.institution?.value,
+      };
+      await CreateCollege.validate(collegeBody, { abortEarly: false });
+      
+      // Create College only
+      const collegeRes = await Models.college.create(collegeBody);
+      
+      Success("College created successfully!");
+      handleCloseModal();
+      collegeList(state.page);
+      
+    } catch (error: any) {
+      if (error?.inner) {
+        const errors = {};
+        error.inner.forEach((err) => {
+          errors[err.path] = err.message;
+        });
+        setState({ errors });
+        return;
+      } else {
+        Failure(error?.message || "College creation failed.");
+      }
+    } finally {
+      setState({ submitting: false });
     }
   };
 
@@ -352,7 +460,65 @@ const CollegeAndDepartment = () => {
     try {
       setState({ submitting: true });
 
-      if (state.activeTab === "colleges") {
+      // If activeTab is departments, show single step department form
+      if (state.activeTab === "departments") {
+        const body: any = {
+          department_name: state.department_name,
+          department_code: state.department_code,
+          college: state.college?.value,
+        };
+        
+        // Validate all department fields at once
+        const validationBody = {
+          college: state.college?.value,
+          department_name: state.department_name,
+          department_code: state.department_code,
+        };
+        
+        const errors = {};
+        
+        // Check all required fields
+        if (!validationBody.college) {
+          errors.college = "Please select a college";
+        }
+        if (!validationBody.department_name) {
+          errors.department_name = "Department name is required";
+        }
+        if (!validationBody.department_code) {
+          errors.department_code = "Department code is required";
+        }
+        
+        // If any validation errors, show all at once
+        if (Object.keys(errors).length > 0) {
+          setState({ errors });
+          return;
+        }
+        
+        // Clear errors if validation passes
+        setState({ errors: {} });
+        
+        if (state.college?.value) {
+          const res: any = await Models.college.details(state.college?.value);
+          body.institution = res?.institution;
+        }
+        
+        console.log("✌️department body --->", body);
+        
+        if (state.editId) {
+          const res = await Models.department.update(body, state.editId);
+          Success("Department updated successfully!");
+        } else {
+          const res = await Models.department.create(body);
+          Success("Department created successfully!");
+        }
+        
+        deptList(state.page);
+        handleCloseModal();
+        return;
+      }
+
+      // College wizard flow
+      if (state.currentStep === 1) {
         const body = {
           college_name: state.college_name,
           college_code: state.college_code,
@@ -377,58 +543,53 @@ const CollegeAndDepartment = () => {
         if (state.editId) {
           const res = await Models.college.update(body, state.editId);
           Success("College updated successfully!");
+          handleCloseModal();
         } else {
-          const res = await Models.college.create(body);
-          Success("College created successfully!");
+          // Just validate and move to next step, don't create college yet
+          Success("College details saved!");
+          
+          // Move to next step without creating college
+          setState({ 
+            currentStep: 2,
+            completedSteps: [1],
+            errors: {}
+          });
+          return; // Don't close modal, move to step 2
         }
+      } else if (state.currentStep === 2) {
+        // Validate department details and create both college and department
+        if (!state.department_name || !state.department_code) {
+          setState({ errors: { department_name: "Department name is required", department_code: "Department code is required" } });
+          return;
+        }
+        
+        // Create college first
+        const collegeBody = {
+          college_name: state.college_name,
+          college_code: state.college_code,
+          college_email: state.college_email,
+          college_phone: state.college_phone,
+          college_address: state.college_address,
+          institution: state?.institution?.value,
+        };
+        
+        const collegeRes = await Models.college.create(collegeBody);
+        
+        // Create department with the created college ID
+        const deptBody = {
+          department_name: state.department_name,
+          department_code: state.department_code,
+          college: collegeRes?.id,
+          institution: state?.institution?.value,
+        };
+        
+        const deptRes = await Models.department.create(deptBody);
+        Success("College and Department created successfully!");
+        handleCloseModal();
         collegeList(state.page);
-      } else {
-        if (state.editId) {
-          const body: any = {
-            department_name: state.department_name,
-            department_code: state.department_code,
-            college: state.college?.value,
-            // department_email: state.department_email,
-            // department_phone: state.department_phone,
-            // department_head: state.department_head,
-          };
-          if (state.college?.value) {
-            const res: any = await Models.college.details(state.college?.value);
-            body.institution = res?.institution;
-          }
-          const res = await Models.department.update(body, state.editId);
-          // Update department API call
-          Success("Department updated successfully!");
-          deptList(state.page);
-        } else {
-          const body: any = {
-            department_name: state.department_name,
-            department_code: state.department_code,
-            college: state.college?.value,
-
-            // institution:
-            // department_email: state.department_email,
-            // department_phone: state.department_phone,
-            // department_head: state.department_head,
-          };
-          if (state.college?.value) {
-            const res: any = await Models.college.details(state.college?.value);
-            body.institution = res?.institution;
-          }
-          console.log("✌️body --->", body);
-
-          const res = await Models.department.create(body);
-          console.log("✌️res --->", res);
-
-          // Create department API call
-          Success("Department created successfully!");
-          deptList(1);
-        }
-        deptList(state.page);
       }
-
-      handleCloseModal();
     } catch (error) {
+      console.log("✌️error --->", error);
       Failure("Operation failed. Please try again.");
     } finally {
       setState({ submitting: false });
@@ -508,27 +669,29 @@ const CollegeAndDepartment = () => {
 
   const renderDepartmentForm = () => (
     <div className="space-y-6">
-      <CustomSelect
-        options={state.collegeDropdownList}
-        value={state.college}
-        onChange={(selectedOption) =>
-          setState({
-            college: selectedOption,
-            errors: { ...state.errors, college: "" },
-          })
-        }
-        onSearch={(searchTerm) => collegeDropdownList(1, searchTerm)}
-        placeholder="Select College"
-        isClearable={true}
-        loadMore={() =>
-          state.collegeNext &&
-          collegeDropdownList(state.collegePage + 1, "", true)
-        }
-        loading={state.collegeLoading}
-        title="Select College"
-        error={state.errors.institution}
-        required
-      />
+      {state.activeTab === "departments" && (
+        <CustomSelect
+          options={state.collegeDropdownList}
+          value={state.college}
+          onChange={(selectedOption) =>
+            setState({
+              college: selectedOption,
+              errors: { ...state.errors, college: "" },
+            })
+          }
+          onSearch={(searchTerm) => collegeDropdownList(1, searchTerm)}
+          placeholder="Select College"
+          isClearable={true}
+          loadMore={() =>
+            state.collegeNext &&
+            collegeDropdownList(state.collegePage + 1, "", true)
+          }
+          loading={state.collegeLoading}
+          title="Select College"
+          error={state.errors.college}
+          required
+        />
+      )}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <TextInput
           title="Department Name"
@@ -547,32 +710,6 @@ const CollegeAndDepartment = () => {
           required
         />
       </div>
-      {/* <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <TextInput
-          title="Email Address"
-          type="email"
-          placeholder="dept@example.com"
-          value={state.department_email}
-          onChange={(e) => handleFormChange("department_email", e.target.value)}
-          error={state.errors.department_email}
-          required
-        />
-        <CustomPhoneInput
-          title="Phone Number"
-          value={state.department_phone}
-          onChange={(value) => handleFormChange("department_phone", value)}
-          error={state.errors.department_phone}
-          required
-        />
-      </div> */}
-      {/* <TextInput
-        title="Department Head"
-        placeholder="Enter department head name"
-        value={state.department_head}
-        onChange={(e) => handleFormChange("department_head", e.target.value)}
-        error={state.errors.department_head}
-        required
-      /> */}
     </div>
   );
 
@@ -865,11 +1002,22 @@ const CollegeAndDepartment = () => {
             <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
               {state.activeTab === "colleges" ? "Colleges" : "Departments"} List
             </h3>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              {state.activeTab === "colleges"
-                ? state.collegeCount
-                : state.departmentCount}{" "}
-              records found
+            <div className="flex items-center gap-4">
+              {state.selectedRecords.length > 0 && (
+                <button
+                  onClick={handleBulkDelete}
+                  className="flex items-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+                >
+                  <IconTrash className="h-4 w-4" />
+                  Delete ({state.selectedRecords.length})
+                </button>
+              )}
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                {state.activeTab === "colleges"
+                  ? state.collegeCount
+                  : state.departmentCount}{" "}
+                records found
+              </div>
             </div>
           </div>
         </div>
@@ -881,10 +1029,14 @@ const CollegeAndDepartment = () => {
             className="table-hover whitespace-nowrap"
             records={
               state.activeTab === "colleges"
-                ? state.collegeList
-                : state.deptList
+                ? state.collegeList || []
+                : state.deptList || []
             }
             fetching={state.loading}
+            selectedRecords={(
+              state.activeTab === "colleges" ? state.collegeList || [] : state.deptList || []
+            ).filter(record => state.selectedRecords.includes(record.id))}
+            onSelectedRecordsChange={(records) => setState({ selectedRecords: records.map(r => r.id) })}
             customLoader={
               <div className="flex items-center justify-center py-12">
                 <div className="flex items-center gap-3">
@@ -935,62 +1087,102 @@ const CollegeAndDepartment = () => {
       <Modal
         open={state.showModal}
         close={handleCloseModal}
-        isFullWidth={false}
-        maxWidth="max-w-2xl"
+        addHeader={state.activeTab === "colleges" ? "College & Department Setup" : "Add Department"}
         renderComponent={() => (
-          <div className="relative">
-            <div className="mb-8 text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900">
-                {state.editId ? (
-                  <IconEdit className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-                ) : (
-                  <IconPlus className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-                )}
+          <div className="w-full max-w-4xl">
+            <style jsx>{`
+              .scrollbar-hide {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+              }
+              .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+              }
+            `}</style>
+            {/* Progress Header */}
+            {state.activeTab === "colleges" && (
+              <div className="border-b py-6">
+                <div className="scrollbar-hide overflow-x-auto">
+                  <div className="flex min-w-max items-center justify-center px-4 gap-16">
+                    {steps.map((step, index) => (
+                      <div key={step.id} className="flex items-center" data-step={step.id}>
+                        <div className={`
+                          flex h-10 w-10 items-center justify-center rounded-full text-sm font-medium
+                          ${isStepCompleted(step.id) ? 'bg-green-500 text-white' : 
+                            state.currentStep === step.id ? 'bg-blue-500 text-white' :
+                            isStepAccessible(step.id) ? 'bg-gray-200 text-gray-600' : 'bg-gray-100 text-gray-400'}
+                        `}>
+                          {isStepCompleted(step.id) ? '✓' : <step.icon className="h-5 w-5" />}
+                        </div>
+                        <span className="ml-2 whitespace-nowrap text-sm font-medium">{step.name}</span>
+                        {index < steps.length - 1 && (
+                          <div className={`mx-8 h-0.5 w-16 ${
+                            isStepCompleted(step.id) ? 'bg-green-500' : 'bg-gray-200'
+                          }`} />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {state.editId ? "Update" : "Add New"}{" "}
-                {state.activeTab === "colleges" ? "College" : "Department"}
-              </h2>
-              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                Fill in the details to {state.editId ? "update" : "create"}{" "}
-                {state.activeTab === "colleges" ? "college" : "department"}
-              </p>
+            )}
+
+            {/* Step Content */}
+            <div className="p-6 min-h-[400px]">
+              {state.activeTab === "departments" ? (
+                renderDepartmentForm()
+              ) : (
+                <>
+                  {state.currentStep === 1 && renderCollegeForm()}
+                  {state.currentStep === 2 && renderDepartmentForm()}
+                </>
+              )}
             </div>
 
-            {state.activeTab === "colleges"
-              ? renderCollegeForm()
-              : renderDepartmentForm()}
-
-            <div className="mt-8 flex flex-col-reverse gap-3 border-t border-gray-200 pt-6 dark:border-gray-700 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                onClick={handleCloseModal}
-                className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-medium text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSubmit}
-                disabled={state.submitting}
-                className={`group relative inline-flex items-center justify-center overflow-hidden rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-3 text-sm font-medium text-white shadow-lg transition-all duration-200 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                  state.submitting ? "cursor-not-allowed opacity-70" : ""
-                }`}
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
-                {state.submitting ? (
-                  <IconLoader className="relative z-10 mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <IconPlus className="relative z-10 mr-2 h-4 w-4" />
-                )}
-                <span className="relative z-10">
-                  {state.submitting
-                    ? "Saving..."
-                    : state.editId
-                    ? "Update"
-                    : "Create"}{" "}
-                  {state.activeTab === "colleges" ? "College" : "Department"}
-                </span>
-              </button>
+            {/* Navigation Footer */}
+            <div className="p-6 border-t flex justify-between">
+              {state.activeTab === "departments" ? (
+                <div className="flex justify-end w-full">
+                  <button
+                    onClick={handleSubmit}
+                    disabled={state.submitting}
+                    className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
+                  >
+                    {state.submitting ? 'Creating...' : state.editId ? 'Update Department' : 'Create Department'}
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <button
+                    onClick={() => setState({ currentStep: Math.max(1, state.currentStep - 1) })}
+                    disabled={state.currentStep === 1}
+                    className="px-4 py-2 text-gray-600 disabled:opacity-50"
+                  >
+                    Previous
+                  </button>
+                  
+                  <div className="flex gap-2">
+                    {state.currentStep == 1&&
+                    <button
+                      onClick={handleFinalSubmit}
+                      disabled={state.submitting}
+                      className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50"
+                    >
+                      {state.submitting ? 'Creating...' : 'Create College'}
+                    </button>
+                    }
+                    {/* {state.currentStep < steps.length && ( */}
+                      <button
+                        onClick={handleSubmit}
+                        disabled={state.submitting}
+                        className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
+                      >
+                        {state.submitting ? 'Creating...' : state.currentStep === 1 ? 'Save & Next' : 'Create College & Department'}
+                      </button>
+                    {/* )} */}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}

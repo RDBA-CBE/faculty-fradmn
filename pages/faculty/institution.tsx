@@ -126,6 +126,9 @@ const Institution = () => {
     // Wizard state
     currentStep: 1,
     completedSteps: [],
+    
+    // Selection state
+    selectedRecords: [],
 
     // API response IDs
     institutionId: null,
@@ -1092,6 +1095,7 @@ const Institution = () => {
 
       errors: {},
       editId: null,
+      selectedRecords: [],
     });
   };
 
@@ -1161,13 +1165,28 @@ const Institution = () => {
     );
   };
 
-  const deleteDecord = async (id: number) => {
+  const handleBulkDelete = () => {
+    showDeleteAlert(
+      () => {
+        bulkDeleteRecords();
+      },
+      () => {
+        Swal.fire("Cancelled", "Your Records are safe :)", "info");
+      },
+      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`
+    );
+  };
+
+  const bulkDeleteRecords = async () => {
     try {
-      await Models.institution.delete(id);
-      Success("Institution deleted successfully!");
+      for (const id of state.selectedRecords) {
+        await Models.institution.delete(id);
+      }
+      Success(`${state.selectedRecords.length} institutions deleted successfully!`);
+      setState({ selectedRecords: [] });
       instutionList(state.page);
     } catch (error) {
-      Failure("Failed to delete institution. Please try again.");
+      Failure("Failed to delete institutions. Please try again.");
     }
   };
 
@@ -1241,8 +1260,19 @@ const Institution = () => {
             <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
               Institutions List
             </h3>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              {state.count} institutions found
+            <div className="flex items-center gap-4">
+              {state.selectedRecords.length > 0 && (
+                <button
+                  onClick={handleBulkDelete}
+                  className="flex items-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+                >
+                  <IconTrash className="h-4 w-4" />
+                  Delete ({state.selectedRecords.length})
+                </button>
+              )}
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                {state.count} institutions found
+              </div>
             </div>
           </div>
         </div>
@@ -1254,6 +1284,8 @@ const Institution = () => {
             className="table-hover whitespace-nowrap"
             records={state.instutionList}
             fetching={state.loading}
+            selectedRecords={state.instutionList.filter(record => state.selectedRecords.includes(record.id))}
+            onSelectedRecordsChange={(records) => setState({ selectedRecords: records.map(r => r.id) })}
             customLoader={
               <div className="flex items-center justify-center py-12">
                 <div className="flex items-center gap-3">
