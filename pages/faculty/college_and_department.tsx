@@ -438,21 +438,29 @@ const CollegeAndDepartment = () => {
   };
 
   const rollbackCreatedRecords = async (records: any) => {
+    console.log("Starting rollback for records:", records);
     try {
       if (records.hodId) {
+        console.log("Rolling back HOD:", records.hodId);
         await Models.auth.deleteUser(records.hodId);
-        console.log("Deleted HOD:", records.hodId);
+        console.log("Successfully deleted HOD:", records.hodId);
       }
       if (records.departmentId) {
+        console.log("Rolling back Department:", records.departmentId);
         await Models.department.delete(records.departmentId);
-        console.log("Deleted Department:", records.departmentId);
+        console.log("Successfully deleted Department:", records.departmentId);
       }
       if (records.collegeId) {
+        console.log("Rolling back College:", records.collegeId);
         await Models.college.delete(records.collegeId);
-        console.log("Deleted College:", records.collegeId);
+        console.log("Successfully deleted College:", records.collegeId);
       }
+      console.log("Rollback completed successfully");
     } catch (rollbackError) {
       console.error("Rollback error:", rollbackError);
+      Failure(
+        "Failed to cleanup created records. Please contact administrator."
+      );
     }
   };
 
@@ -489,14 +497,19 @@ const CollegeAndDepartment = () => {
         await CreateCollege.validate(collegeBody, { abortEarly: false });
 
         if (!state.department_name || !state.department_code) {
-          throw new Error("Department name and code are required");
+          Failure("Department name and code are required");
         }
 
         let createdRecords = { collegeId: null, departmentId: null };
 
         try {
+          console.log("Step 2.1: Creating college...", collegeBody);
           const collegeRes = await Models.college.create(collegeBody);
           createdRecords.collegeId = collegeRes?.id;
+          console.log(
+            "Step 2.1: College created successfully with ID:",
+            createdRecords.collegeId
+          );
 
           const deptBody = {
             department_name: state.department_name,
@@ -505,15 +518,32 @@ const CollegeAndDepartment = () => {
             institution: state?.institution?.value,
           };
 
+          console.log("Step 2.2: Creating department...", deptBody);
           const deptRes = await Models.department.create(deptBody);
           createdRecords.departmentId = deptRes?.id;
+          console.log(
+            "Step 2.2: Department created successfully with ID:",
+            createdRecords.departmentId
+          );
 
           Success("College and Department created successfully!");
           handleCloseModal();
           collegeList(state.page);
         } catch (error) {
+          console.error("Step 2 Error Details:", error);
+
+          // Show step-specific error message
+          if (createdRecords.collegeId && !createdRecords.departmentId) {
+            console.log("Error occurred during department creation");
+            Failure(
+              "Step 2.2 failed: Department creation failed. College was created but removed due to error."
+            );
+          } else {
+            console.log("Error occurred during college creation");
+            Failure("Step 2.1 failed: College creation failed.");
+          }
+
           await rollbackCreatedRecords(createdRecords);
-          throw error;
         }
       }
     } catch (error: any) {
@@ -526,10 +556,29 @@ const CollegeAndDepartment = () => {
         setState({ errors });
         return;
       } else {
-        if (error?.data?.non_field_errors?.length > 0) {
-          Failure(error?.data?.non_field_errors?.[0]);
+        // Handle API errors with specific field messages
+        if (error?.response?.data) {
+          const apiErrors = {};
+          Object.keys(error.response.data).forEach((field) => {
+            if (Array.isArray(error.response.data[field])) {
+              apiErrors[field] = error.response.data[field][0];
+            } else {
+              apiErrors[field] = error.response.data[field];
+            }
+          });
+          setState({ errors: apiErrors });
+          return;
         }
-        // Failure(error?.message || "Creation failed.");
+
+        if (error?.response?.data?.non_field_errors?.length > 0) {
+          Failure(error?.response?.data?.non_field_errors?.[0]);
+        } else {
+          Failure(
+            `Step ${state.currentStep} failed: ${
+              error?.message || "Creation failed. Please try again."
+            }`
+          );
+        }
       }
     } finally {
       setState({ submitting: false });
@@ -626,7 +675,7 @@ const CollegeAndDepartment = () => {
           handleCloseModal();
         } else {
           // Just validate and move to next step, don't create college yet
-          Success("College details saved!");
+          // Success("College details saved!");
 
           // Move to next step without creating college
           setState({
@@ -648,7 +697,7 @@ const CollegeAndDepartment = () => {
           return;
         }
 
-        Success("Department details saved!");
+        // Success("Department details saved!");
         setState({
           currentStep: 3,
           completedSteps: [1, 2],
@@ -684,7 +733,7 @@ const CollegeAndDepartment = () => {
         };
 
         try {
-          // Create college first
+          // Step 3.1: Create college first
           const collegeBody = {
             college_name: state.college_name,
             college_code: state.college_code,
@@ -694,10 +743,15 @@ const CollegeAndDepartment = () => {
             institution: state?.institution?.value,
           };
 
+          console.log("Step 3.1: Creating college...", collegeBody);
           const collegeRes = await Models.college.create(collegeBody);
           createdRecords.collegeId = collegeRes?.id;
+          console.log(
+            "Step 3.1: College created successfully with ID:",
+            createdRecords.collegeId
+          );
 
-          // Create department with the created college ID
+          // Step 3.2: Create department with the created college ID
           const deptBody = {
             department_name: state.department_name,
             department_code: state.department_code,
@@ -705,10 +759,15 @@ const CollegeAndDepartment = () => {
             institution: state?.institution?.value,
           };
 
+          console.log("Step 3.2: Creating department...", deptBody);
           const deptRes = await Models.department.create(deptBody);
           createdRecords.departmentId = deptRes?.id;
+          console.log(
+            "Step 3.2: Department created successfully with ID:",
+            createdRecords.departmentId
+          );
 
-          // Create HOD with the created department ID
+          // Step 3.3: Create HOD with the created department ID
           const finalHodBody = {
             username: state.hod_username,
             email: state.hod_email,
@@ -722,21 +781,118 @@ const CollegeAndDepartment = () => {
             department: deptRes?.id,
           };
 
+          console.log("Step 3.3: Creating HOD...", finalHodBody);
           const hodRes = await Models.auth.createUser(finalHodBody);
           createdRecords.hodId = hodRes?.id;
+          console.log(
+            "Step 3.3: HOD created successfully with ID:",
+            createdRecords.hodId
+          );
 
           Success("College, Department and HOD created successfully!");
           handleCloseModal();
           collegeList(state.page);
-        } catch (error) {
+        } catch (error: any) {
+          console.error("Step 3 Error Details:", error);
+
+          // Show step-specific error message based on what was created
+          if (
+            createdRecords.collegeId &&
+            createdRecords.departmentId &&
+            !createdRecords.hodId
+          ) {
+            console.log("Error occurred during HOD creation");
+            if (error?.response?.data) {
+              const apiErrors = error.response.data;
+              let errorMessages = [];
+
+              Object.keys(apiErrors).forEach((field) => {
+                if (Array.isArray(apiErrors[field])) {
+                  apiErrors[field].forEach((msg) => {
+                    errorMessages.push(`${field}: ${msg}`);
+                  });
+                } else {
+                  errorMessages.push(`${field}: ${apiErrors[field]}`);
+                }
+              });
+
+              throw new Error(
+                `Hod  creation failed:\n${errorMessages.join(
+                  "\n"
+                )}`
+              );
+            }
+            throw new Error(
+              `hod  creation failed: ${error?.message}`
+            );
+          } else if (createdRecords.collegeId && !createdRecords.departmentId) {
+            console.log("Error occurred during department creation");
+            if (error?.response?.data) {
+              const apiErrors = error.response.data;
+              let errorMessages = [];
+
+              Object.keys(apiErrors).forEach((field) => {
+                if (Array.isArray(apiErrors[field])) {
+                  apiErrors[field].forEach((msg) => {
+                    errorMessages.push(`${field}: ${msg}`);
+                  });
+                } else {
+                  errorMessages.push(`${field}: ${apiErrors[field]}`);
+                }
+              });
+
+              throw new Error(
+                `Department  creation failed:\n${errorMessages.join(
+                  "\n"
+                )}`
+              );
+            }
+            throw new Error(
+              `Department  creation failed: ${error?.message}`
+            );
+          } else {
+            console.log("Error occurred during college creation");
+            if (error?.response?.data) {
+              const apiErrors = error.response.data;
+              let errorMessages = [];
+              Object.keys(apiErrors).forEach((field) => {
+                if (Array.isArray(apiErrors[field])) {
+                  apiErrors[field].forEach((msg) => {
+                    errorMessages.push(`${field}: ${msg}`);
+                  });
+                } else {
+                  errorMessages.push(`${field}: ${apiErrors[field]}`);
+                }
+              });
+              Failure(
+                ` College creation failed:\n${errorMessages.join(
+                  "\n"
+                )}`
+              );
+            } else {
+              Failure("College creation failed.");
+            }
+          }
+
           // Rollback created records on error
           await rollbackCreatedRecords(createdRecords);
-          Failure("Creation failed. All created records have been removed.");
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.log("✌️error --->", error);
-      Failure("Operation failed. Please try again.");
+      if (error?.response?.data) {
+        const apiErrors = {};
+        Object.keys(error.response.data).forEach((field) => {
+          if (Array.isArray(error.response.data[field])) {
+            apiErrors[field] = error.response.data[field][0];
+          } else {
+            apiErrors[field] = error.response.data[field];
+          }
+        });
+        setState({ errors: apiErrors });
+        return;
+      }
+      Failure(error?.message || "Operation failed. Please try again.");
     } finally {
       setState({ submitting: false });
     }
@@ -808,6 +964,7 @@ const CollegeAndDepartment = () => {
           onChange={(e) => handleFormChange("college_address", e.target.value)}
           error={state.errors.college_address}
           rows={3}
+          required
         />
       </div>
     </div>
@@ -1452,11 +1609,7 @@ const CollegeAndDepartment = () => {
                         disabled={state.submitting}
                         className="rounded-lg bg-green-500 px-6 py-2 text-white hover:bg-green-600 disabled:opacity-50"
                       >
-                        {state.submitting
-                          ? "Creating..."
-                          : state.currentStep === 1
-                          ? "Create College"
-                          : "Create College & Department"}
+                        {state.submitting ? "Creating..." : "Submit"}
                       </button>
                     )}
                     {/* {state.currentStep < steps.length && ( */}
@@ -1471,7 +1624,7 @@ const CollegeAndDepartment = () => {
                         ? "Save & Next"
                         : state.currentStep === 2
                         ? "Save & Next"
-                        : "Create College, Department & HOD"}
+                        : "Submit"}
                     </button>
                     {/* )} */}
                   </div>

@@ -20,6 +20,7 @@ import { Models } from "@/imports/models.import";
 import { Success, Failure } from "@/utils/function.utils";
 import useDebounce from "@/hook/useDebounce";
 import Swal from "sweetalert2";
+import { FileText, Clock, CheckCircle, XCircle } from "lucide-react";
 
 const Application = () => {
   const dispatch = useDispatch();
@@ -262,6 +263,63 @@ const Application = () => {
             <IconPlus className="relative z-10 h-5 w-5" />
             <span className="relative z-10">Add Application</span>
           </button>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="mb-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-sm transition-all duration-200 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Applications</p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white">{state.count || 0}</p>
+            </div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900">
+              <FileText className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+            </div>
+          </div>
+        </div>
+
+        <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-sm transition-all duration-200 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Pending</p>
+              <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
+                {state.applicationList?.filter(app => app.status === 'Pending')?.length || 0}
+              </p>
+            </div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-yellow-100 dark:bg-yellow-900">
+              <Clock className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+            </div>
+          </div>
+        </div>
+
+        <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-sm transition-all duration-200 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Accepted</p>
+              <p className="text-3xl font-bold text-green-600 dark:text-green-400">
+                {state.applicationList?.filter(app => app.status === 'Accepted')?.length || 0}
+              </p>
+            </div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 dark:bg-green-900">
+              <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+            </div>
+          </div>
+        </div>
+
+        <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-sm transition-all duration-200 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Rejected</p>
+              <p className="text-3xl font-bold text-red-600 dark:text-red-400">
+                {state.applicationList?.filter(app => app.status === 'Rejected')?.length || 0}
+              </p>
+            </div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100 dark:bg-red-900">
+              <XCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
+            </div>
+          </div>
         </div>
       </div>
 

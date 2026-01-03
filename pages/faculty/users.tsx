@@ -368,7 +368,33 @@ console.log('✌️row --->', row);
 
       userList(state.page);
       handleCloseModal();
-    } catch (error) {
+    } catch (error: any) {
+      console.log("✌️error --->", error);
+      
+      // Handle API errors with specific field messages
+      if (error?.data) {
+        const apiErrors = {};
+        Object.keys(error.data).forEach((field) => {
+          if (Array.isArray(error.data[field])) {
+            apiErrors[field] = error.data[field][0];
+          } else {
+            apiErrors[field] = error.data[field];
+          }
+        });
+        setState({ errors: apiErrors });
+        return;
+      }
+      
+      // Handle validation errors
+      if (error?.inner) {
+        const errors = {};
+        error.inner.forEach((err: any) => {
+          errors[err.path] = err.message;
+        });
+        setState({ errors });
+        return;
+      }
+      
       Failure("Operation failed. Please try again.");
     } finally {
       setState({ submitting: false });

@@ -141,3 +141,16 @@ export const CreateDepartment = Yup.object().shape({
   department_name: Yup.string().required("Department name is required"),
   department_code: Yup.string().required("Department code is required"),
 });
+
+export const CreateJob = Yup.object().shape({
+  job_title: Yup.string().required("Job title is required"),
+  job_description: Yup.string().required("Job description is required"),
+  college: Yup.number().required("Please select a college"),
+  department: Yup.number().required("Please select a department"),
+  job_type: Yup.string().required("Please select job type"),
+  experience_required: Yup.string().required("Please select experience required"),
+  qualification: Yup.string().required("Qualification is required"),
+  salary_range: Yup.string().required("Salary range is required"),
+  last_date: Yup.date().required("Last date is required"),
+  priority: Yup.string().required("Please select priority"),
+});
