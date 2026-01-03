@@ -597,7 +597,7 @@ console.log('✌️row --->', row);
     </div>
   );
 
-  const getColumns = () => {
+  const getColumns = (): any[] => {
     const baseColumns = [
       {
         accessor: "username",
@@ -636,8 +636,8 @@ console.log('✌️row --->', row);
       baseColumns.splice(3, 0, {
         accessor: "college",
         title: "College",
-        render: ({ college }) => (
-          <div className="text-gray-600 dark:text-gray-400">{college}</div>
+        render: (row:any) => (
+          <div className="text-gray-600 dark:text-gray-400">{row?.college}</div>
         ),
       });
     }
@@ -646,8 +646,8 @@ console.log('✌️row --->', row);
       baseColumns.splice(3, 0, {
         accessor: "department",
         title: "Department",
-        render: ({ department }) => (
-          <div className="text-gray-600 dark:text-gray-400">{department}</div>
+        render: (row:any) => (
+          <div className="text-gray-600 dark:text-gray-400">{row?.department}</div>
         ),
       });
     }
@@ -657,17 +657,17 @@ console.log('✌️row --->', row);
         {
           accessor: "qualification",
           title: "Qualification",
-          render: ({ qualification }) => (
+          render: (row:any) => (
             <div className="text-gray-600 dark:text-gray-400">
-              {qualification}
+              {row?.qualification}
             </div>
           ),
         },
         {
           accessor: "experience",
           title: "Experience",
-          render: ({ experience }) => (
-            <div className="text-gray-600 dark:text-gray-400">{experience}</div>
+          render: (row:any) => (
+            <div className="text-gray-600 dark:text-gray-400">{row?.experience}</div>
           ),
         }
       );

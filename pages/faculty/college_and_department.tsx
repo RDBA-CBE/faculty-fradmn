@@ -504,7 +504,7 @@ const CollegeAndDepartment = () => {
 
         try {
           console.log("Step 2.1: Creating college...", collegeBody);
-          const collegeRes = await Models.college.create(collegeBody);
+          const collegeRes:any = await Models.college.create(collegeBody);
           createdRecords.collegeId = collegeRes?.id;
           console.log(
             "Step 2.1: College created successfully with ID:",
@@ -519,7 +519,7 @@ const CollegeAndDepartment = () => {
           };
 
           console.log("Step 2.2: Creating department...", deptBody);
-          const deptRes = await Models.department.create(deptBody);
+          const deptRes:any = await Models.department.create(deptBody);
           createdRecords.departmentId = deptRes?.id;
           console.log(
             "Step 2.2: Department created successfully with ID:",
@@ -604,7 +604,7 @@ const CollegeAndDepartment = () => {
           department_code: state.department_code,
         };
 
-        const errors = {};
+        const errors:any = {};
 
         // Check all required fields
         if (!validationBody.college) {
@@ -744,7 +744,7 @@ const CollegeAndDepartment = () => {
           };
 
           console.log("Step 3.1: Creating college...", collegeBody);
-          const collegeRes = await Models.college.create(collegeBody);
+          const collegeRes:any = await Models.college.create(collegeBody);
           createdRecords.collegeId = collegeRes?.id;
           console.log(
             "Step 3.1: College created successfully with ID:",
@@ -760,7 +760,7 @@ const CollegeAndDepartment = () => {
           };
 
           console.log("Step 3.2: Creating department...", deptBody);
-          const deptRes = await Models.department.create(deptBody);
+          const deptRes:any = await Models.department.create(deptBody);
           createdRecords.departmentId = deptRes?.id;
           console.log(
             "Step 3.2: Department created successfully with ID:",
@@ -782,7 +782,7 @@ const CollegeAndDepartment = () => {
           };
 
           console.log("Step 3.3: Creating HOD...", finalHodBody);
-          const hodRes = await Models.auth.createUser(finalHodBody);
+          const hodRes:any = await Models.auth.createUser(finalHodBody);
           createdRecords.hodId = hodRes?.id;
           console.log(
             "Step 3.3: HOD created successfully with ID:",

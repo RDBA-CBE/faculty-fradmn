@@ -1165,6 +1165,18 @@ const Institution = () => {
     );
   };
 
+  const deleteDecord = async (id) => {
+    try {
+        await Models.institution.delete(id);
+      Success(`institutions deleted successfully!`);
+      setState({ selectedRecords: [] });
+      instutionList(state.page);
+    } catch (error) {
+      Failure("Failed to delete institutions. Please try again.");
+    }
+  };
+
+
   const handleBulkDelete = () => {
     showDeleteAlert(
       () => {
