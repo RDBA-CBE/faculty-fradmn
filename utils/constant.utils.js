@@ -3,7 +3,10 @@ export const CLIENT_ID =
 
 // export const BACKEND_URL = "http://31.97.206.165/api/";
 
-export const BACKEND_URL = "http://88.222.213.249/api/";
+// export const BACKEND_URL = "http://88.222.213.249/api/";
+export const BACKEND_URL = "https://user-service.88.222.213.249.nip.io/api/";
+
+
 
 // menuConfig.ts
 export const menuConfig = {

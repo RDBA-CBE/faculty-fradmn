@@ -41,7 +41,7 @@ const LoginBoxed = () => {
     try {
       setState({ btnLoading: true });
       const body = {
-        username: state.email.trim(),
+        email: state.email.trim(),
         password: state.password,
       };
 

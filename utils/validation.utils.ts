@@ -3,7 +3,7 @@ import * as Yup from "yup";
 import { PROPERTY_TYPE } from "./constant.utils";
 
 export const login = Yup.object().shape({
-  username: Yup.string().required("Username is required"),
+  email: Yup.string().required("Email is required"),
   password: Yup.string().required("Password is required"),
 });
 
