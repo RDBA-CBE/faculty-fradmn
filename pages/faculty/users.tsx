@@ -111,12 +111,14 @@ const Users = () => {
         username: item?.username,
         email: item?.email,
         phone: item?.phone,
-        department: item?.department,
+        department: item?.department?.name,
         position: item?.position,
         qualification: item?.qualification,
         experience: item?.experience,
         status: item?.status,
-        college:""
+        college:item?.college?.name,
+        institution:item?.institution?.name,
+
       }));
 
       setState({

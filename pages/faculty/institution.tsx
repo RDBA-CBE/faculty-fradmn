@@ -40,73 +40,6 @@ import useDebounce from "@/hook/useDebounce";
 import Swal from "sweetalert2";
 import { GENDER_OPTION } from "@/utils/constant.utils";
 
-const institutionData = [
-  {
-    id: 1,
-    name: "Harvard University",
-    type: "University",
-    location: "Cambridge, MA",
-    established: "1636",
-    status: "Active",
-  },
-  {
-    id: 2,
-    name: "MIT",
-    type: "Institute",
-    location: "Cambridge, MA",
-    established: "1861",
-    status: "Active",
-  },
-  {
-    id: 3,
-    name: "Stanford University",
-    type: "University",
-    location: "Stanford, CA",
-    established: "1885",
-    status: "Active",
-  },
-  {
-    id: 4,
-    name: "Oxford University",
-    type: "University",
-    location: "Oxford, UK",
-    established: "1096",
-    status: "Inactive",
-  },
-  {
-    id: 5,
-    name: "Cambridge University",
-    type: "University",
-    location: "Cambridge, UK",
-    established: "1209",
-    status: "Active",
-  },
-  {
-    id: 4,
-    name: "Oxford University",
-    type: "University",
-    location: "Oxford, UK",
-    established: "1096",
-    status: "Inactive",
-  },
-  {
-    id: 4,
-    name: "Oxford University",
-    type: "University",
-    location: "Oxford, UK",
-    established: "1096",
-    status: "Inactive",
-  },
-  {
-    id: 4,
-    name: "Oxford University",
-    type: "University",
-    location: "Oxford, UK",
-    established: "1096",
-    status: "Inactive",
-  },
-];
-
 const Institution = () => {
   const dispatch = useDispatch();
   const [state, setState] = useSetState({
@@ -122,11 +55,12 @@ const Institution = () => {
     submitting: false,
     sortBy: "",
     sortOrder: "asc",
+    showEditModal: false,
 
     // Wizard state
     currentStep: 1,
     completedSteps: [],
-    
+
     // Selection state
     selectedRecords: [],
 
@@ -401,6 +335,7 @@ const Institution = () => {
             institution_email: state.institution_email,
             institution_phone: state.institution_phone,
             address: state.address,
+            status: "active",
           };
           await CreateInstituion.validate(body, { abortEarly: false });
         }
@@ -486,7 +421,7 @@ const Institution = () => {
           const institutionRes: any = await Models.institution.create(
             institutionBody
           );
-          createdRecords.institutionId = institutionRes?.id;
+          createdRecords.institutionId = institutionRes?.data?.id;
         } catch (error: any) {
           const apiErrors = error.response.data;
           let errorMessages = [];
@@ -701,6 +636,7 @@ const Institution = () => {
       }
 
       Success(successMessage);
+      instutionList(state.page);
       handleCloseModal();
     } catch (error: any) {
       if (error?.inner) {
@@ -721,6 +657,26 @@ const Institution = () => {
       }
     } finally {
       setState({ submitting: false });
+    }
+  };
+
+  const handleUpdate = async () => {
+    try {
+      setState({ btnLoading: true });
+      const body = {
+        institution_name: state.institution_name,
+        institution_code: state.institution_code,
+        institution_email: state.institution_email,
+        institution_phone: state.institution_phone,
+        address: state.address,
+      };
+      const res = await Models.institution.update(body, state.editId);
+      console.log("✌️res --->", res);
+      instutionList(state.page);
+      handleCloseModal();
+      setState({ btnLoading: false });
+    } catch (error) {
+      setState({ btnLoading: false });
     }
   };
 
@@ -1006,11 +962,6 @@ const Institution = () => {
       });
     } catch (error) {
       console.error("Error fetching institutions:", error);
-      setState({
-        recordsData: institutionData,
-        totalRecords: institutionData.length,
-        loading: false,
-      });
     }
   };
 
@@ -1096,6 +1047,7 @@ const Institution = () => {
       errors: {},
       editId: null,
       selectedRecords: [],
+      showEditModal: false,
     });
   };
 
@@ -1129,7 +1081,7 @@ const Institution = () => {
   const handleEdit = (row: any) => {
     setState({
       editId: row?.id,
-      showModal: true,
+      showEditModal: true,
       institution_name: row?.institution_name,
       institution_code: row?.institution_code,
       institution_email: row?.institution_email,
@@ -1167,15 +1119,14 @@ const Institution = () => {
 
   const deleteDecord = async (id) => {
     try {
-        await Models.institution.delete(id);
-      Success(`institutions deleted successfully!`);
+      await Models.institution.delete(id);
+      Success(`Institutions deleted successfully!`);
       setState({ selectedRecords: [] });
       instutionList(state.page);
     } catch (error) {
       Failure("Failed to delete institutions. Please try again.");
     }
   };
-
 
   const handleBulkDelete = () => {
     showDeleteAlert(
@@ -1194,7 +1145,9 @@ const Institution = () => {
       for (const id of state.selectedRecords) {
         await Models.institution.delete(id);
       }
-      Success(`${state.selectedRecords.length} institutions deleted successfully!`);
+      Success(
+        `${state.selectedRecords.length} institutions deleted successfully!`
+      );
       setState({ selectedRecords: [] });
       instutionList(state.page);
     } catch (error) {
@@ -1296,8 +1249,12 @@ const Institution = () => {
             className="table-hover whitespace-nowrap"
             records={state.instutionList}
             fetching={state.loading}
-            selectedRecords={state.instutionList.filter(record => state.selectedRecords.includes(record.id))}
-            onSelectedRecordsChange={(records) => setState({ selectedRecords: records.map(r => r.id) })}
+            selectedRecords={state.instutionList.filter((record) =>
+              state.selectedRecords.includes(record.id)
+            )}
+            onSelectedRecordsChange={(records) =>
+              setState({ selectedRecords: records.map((r) => r.id) })
+            }
             customLoader={
               <div className="flex items-center justify-center py-12">
                 <div className="flex items-center gap-3">
@@ -1448,18 +1405,16 @@ const Institution = () => {
             minHeight={200}
           />
         </div>
-
-        <div className="border-t border-gray-200 p-6 dark:border-gray-700">
-          <Pagination
-            activeNumber={handlePageChange}
-            totalPage={state.count}
-            currentPages={state.page}
-            pageSize={state.pageSize}
-          />
-        </div>
+          <div className="border-t border-gray-200 p-6 dark:border-gray-700">
+            <Pagination
+              activeNumber={handlePageChange}
+              totalPage={state.count}
+              currentPages={state.page}
+              pageSize={state.pageSize}
+            />
+          </div>
       </div>
 
-      {/* Multi-Step Wizard Modal */}
       <Modal
         open={state.showModal}
         close={handleCloseModal}
@@ -2118,6 +2073,93 @@ const Institution = () => {
                     Finish Setup
                   </button>
                 )}
+              </div>
+            </div>
+          </div>
+        )}
+      />
+      <Modal
+        open={state.showEditModal}
+        close={handleCloseModal}
+        addHeader="Update Institution"
+        renderComponent={() => (
+          <div className="w-full max-w-4xl">
+            {/* Progress Header */}
+
+            {/* Step Content */}
+            <div className="min-h-[400px]">
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                  <TextInput
+                    title="Institution Name"
+                    placeholder="Enter institution name"
+                    value={state.institution_name}
+                    onChange={(e) =>
+                      handleFormChange("institution_name", e.target.value)
+                    }
+                    error={state.errors.institution_name}
+                    required
+                  />
+                  <TextInput
+                    title="Institution Code"
+                    placeholder="Enter unique code"
+                    value={state.institution_code}
+                    onChange={(e) =>
+                      handleFormChange("institution_code", e.target.value)
+                    }
+                    error={state.errors.institution_code}
+                    required
+                  />
+                </div>
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                  <TextInput
+                    title="Email Address"
+                    type="email"
+                    placeholder="institution@example.com"
+                    value={state.institution_email}
+                    onChange={(e) =>
+                      handleFormChange("institution_email", e.target.value)
+                    }
+                    error={state.errors.institution_email}
+                    required
+                  />
+                  <CustomPhoneInput
+                    title="Phone Number"
+                    value={state.institution_phone}
+                    onChange={(value) =>
+                      handleFormChange("institution_phone", value)
+                    }
+                    error={state.errors.institution_phone}
+                    required
+                  />
+                </div>
+                <TextArea
+                  title="Complete Address"
+                  placeholder="Enter the full address"
+                  value={state.address}
+                  onChange={(e) => handleFormChange("address", e.target.value)}
+                  error={state.errors.address}
+                  rows={4}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Navigation Footer */}
+            <div className="flex justify-end border-t p-6">
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleCloseModal()}
+                  className="rounded-lg border px-6 py-2  hover:bg-green-600"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleUpdate()}
+                  className="rounded-lg bg-green-500 px-6 py-2 text-white hover:bg-green-600"
+                >
+                  {state.btnLoading ? "Updating..." : "Update"}
+                </button>
               </div>
             </div>
           </div>

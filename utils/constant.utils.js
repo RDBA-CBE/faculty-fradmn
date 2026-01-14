@@ -183,6 +183,180 @@ export const menuConfig = {
   ],
 };
 
+export const OwnmenuConfig = {
+  super_admin: [
+    {
+      type: "link",
+      icon: "IconMenuDashboard",
+      label: "dashboard",
+      href: "/",
+    },
+
+    {
+      type: "link",
+      icon: "IconMenuApps",
+      label: "Institutions",
+      href: "/faculty/institution",
+    },
+    {
+      type: "link",
+      icon: "IconMenuNotes",
+      label: "Colleges & Departments",
+      href: "/faculty/college_and_department",
+    },
+
+    {
+      type: "link",
+      icon: "IconMenuUsers",
+      label: "Users",
+      href: "/faculty/users",
+    },
+
+    // {
+    //   type: "link",
+    //   icon: "IconMenuScrumboard",
+    //   label: "HOD Management",
+    //   href: "/faculty/hod_management",
+    // },
+
+    {
+      type: "link",
+      icon: "IconMenuForms",
+      label: "Job Postings",
+      href: "/faculty/job",
+    },
+
+    {
+      type: "link",
+      icon: "IconMenuTables",
+      label: "Applications",
+      href: "/faculty/application",
+    },
+    {
+      type: "link",
+      icon: "IconMenuCharts",
+      label: "Reports",
+      href: "/",
+    },
+  ],
+
+  institution_admin: [
+    {
+      type: "link",
+      icon: "IconMenuDashboard",
+      label: "dashboard",
+      href: "/",
+    },
+
+    {
+      type: "link",
+      icon: "IconMenuNotes",
+      label: "Colleges & Departments",
+      href: "/faculty/college_and_department",
+    },
+
+    {
+      type: "link",
+      icon: "IconMenuUsers",
+      label: "Users",
+      href: "/faculty/users",
+    },
+
+    {
+      type: "link",
+      icon: "IconMenuForms",
+      label: "Job Postings",
+      href: "/faculty/job",
+    },
+
+    {
+      type: "link",
+      icon: "IconMenuTables",
+      label: "Applications",
+      href: "/faculty/application",
+    },
+    {
+      type: "link",
+      icon: "IconMenuCharts",
+      label: "Reports",
+      href: "/",
+    },
+  ],
+
+  hr: [
+    {
+      type: "link",
+      icon: "IconMenuDashboard",
+      label: "dashboard",
+      href: "/",
+    },
+
+    {
+      type: "link",
+      icon: "IconMenuNotes",
+      label: "Colleges & Departments",
+      href: "/faculty/college_and_department",
+    },
+
+    {
+      type: "link",
+      icon: "IconMenuUsers",
+      label: "Users",
+      href: "/faculty/users",
+    },
+
+    {
+      type: "link",
+      icon: "IconMenuForms",
+      label: "Job Postings",
+      href: "/faculty/job",
+    },
+
+    {
+      type: "link",
+      icon: "IconMenuTables",
+      label: "Applications",
+      href: "/faculty/application",
+    },
+    {
+      type: "link",
+      icon: "IconMenuCharts",
+      label: "Reports",
+      href: "/",
+    },
+  ],
+
+  hod: [
+    {
+      type: "link",
+      icon: "IconMenuDashboard",
+      label: "dashboard",
+      href: "/",
+    },
+
+
+    {
+      type: "link",
+      icon: "IconMenuForms",
+      label: "Job Postings",
+      href: "/faculty/job",
+    },
+
+    {
+      type: "link",
+      icon: "IconMenuTables",
+      label: "Applications",
+      href: "/faculty/application",
+    },
+    {
+      type: "link",
+      icon: "IconMenuCharts",
+      label: "Reports",
+      href: "/",
+    },
+  ],
+};
+
 export const propertyType = [
   { value: 1, label: "Sale" },
   { value: 2, label: "Rent" },

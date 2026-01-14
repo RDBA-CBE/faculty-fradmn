@@ -19,13 +19,14 @@ import { Success, Failure } from "@/utils/function.utils";
 import useDebounce from "@/hook/useDebounce";
 import Swal from "sweetalert2";
 import { Models } from "@/imports/models.import";
-import { CreateJob } from "@/utils/validation.utils";
 import CustomeDatePicker from "@/components/datePicker";
 import { Briefcase, Users, Building2, AlertCircle } from "lucide-react";
 import moment from "moment";
+import { useRouter } from "next/navigation";
 
 const Job = () => {
   const dispatch = useDispatch();
+  const router=useRouter()
   const [state, setState] = useSetState({
     page: 1,
     pageSize: 10,
@@ -117,6 +118,7 @@ const Job = () => {
       setState({ loading: true });
       const body = bodyData();
       const res: any = await Models.job.list(page, body);
+console.log('✌️res --->', res);
 
       const tableData = res?.results?.map((item) => ({
         id: item?.id,
@@ -231,61 +233,7 @@ const Job = () => {
     });
   };
 
-  const handleFormChange = (field: string, value: any) => {
-    setState({
-      [field]: value,
-      errors: {
-        ...state.errors,
-        [field]: "",
-      },
-    });
-  };
-
-  const handleCollegeChange = (selectedOption) => {
-    setState({
-      college: selectedOption,
-      department: null,
-      departmentList: [],
-      errors: { ...state.errors, college: "" },
-    });
-    if (selectedOption?.value) {
-      getDeptListByCollegeId(1);
-    }
-  };
-
-  const getDeptListByCollegeId = async (id) => {
-    try {
-      const body = {
-        college: id,
-      };
-      const res = await Models.department.list(1, body);
-      console.log("✌️res --->", res);
-    } catch (error) {
-      console.log("✌️error --->", error);
-    }
-  };
-
-  const handleEdit = (row) => {
-    setState({
-      editId: row?.id,
-      showModal: true,
-      job_title: row?.job_title,
-      job_description: row?.job_description,
-      college: { value: row?.college_id, label: row?.college_name },
-      department: { value: row?.department_id, label: row?.department_name },
-      job_type: jobTypeOptions.find((opt) => opt.value === row?.job_type),
-      experience_required: experienceOptions.find(
-        (opt) => opt.value === row?.experience_required
-      ),
-      qualification: row?.qualification,
-      salary_range: row?.salary_range,
-      last_date: row?.last_date,
-      priority: priorityOptions.find((opt) => opt.value === row?.priority),
-    });
-    if (row?.college_id) {
-      departmentDropdownList(1);
-    }
-  };
+ 
 
   const handleToggleStatus = async (row: any) => {
     try {
@@ -316,60 +264,11 @@ const Job = () => {
     }
   };
 
-  const handleSubmit = async () => {
-    try {
-      setState({ submitting: true });
-      
-      const body = {
-        job_title: state.job_title,
-        job_description: state.job_description,
-        college: state.college?.value,
-        department: state.department?.value,
-        job_type: state.job_type?.value,
-        experience_required: state.experience_required?.value,
-        qualification: state.qualification,
-        salary_range: state.salary_range,
-        last_date: moment(state.last_date).format("YYYY-MM-DD"),
-        priority: state.priority?.value,
-      };
+  const handleEdit=(row)=>{
 
-      await CreateJob.validate(body, { abortEarly: false });
+  }
 
-      if (state.editId) {
-        await Models.job.update(body, state.editId);
-        Success("Job updated successfully!");
-      } else {
-        await Models.job.create(body);
-        Success("Job created successfully!");
-      }
 
-      jobList(state.page);
-      handleCloseModal();
-    } catch (error: any) {
-      console.log("Job submit error:", error);
-      if (error?.inner) {
-        const errors = {};
-        error.inner.forEach((err) => {
-          errors[err.path] = err.message;
-        });
-        setState({ errors });
-      } else if (error?.response?.data) {
-        const apiErrors = {};
-        Object.keys(error.response.data).forEach((field) => {
-          if (Array.isArray(error.response.data[field])) {
-            apiErrors[field] = error.response.data[field][0];
-          } else {
-            apiErrors[field] = error.response.data[field];
-          }
-        });
-        setState({ errors: apiErrors });
-      } else {
-        Failure(error?.message || "Failed to save job");
-      }
-    } finally {
-      setState({ submitting: false });
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-3 dark:from-gray-900 dark:to-gray-800">
@@ -385,7 +284,7 @@ const Job = () => {
             </p>
           </div>
           <button
-            onClick={() => setState({ showModal: true })}
+            onClick={() => router.push("newjob")}
             className="group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
@@ -650,220 +549,7 @@ const Job = () => {
         </div>
       </div>
 
-      {/* Modal */}
-      <Modal
-        open={state.showModal}
-        close={handleCloseModal}
-        maxWidth="max-w-4xl"
-        renderComponent={() => (
-          <div className="relative">
-            <div className="mb-8 text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900">
-                {state.editId ? (
-                  <IconEdit className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-                ) : (
-                  <IconPlus className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-                )}
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {state.editId ? "Update" : "Add New"} Job
-              </h2>
-              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                Fill in the details to {state.editId ? "update" : "create"} a
-                job posting
-              </p>
-            </div>
-
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                <TextInput
-                  title="Job Title"
-                  placeholder="Enter job title"
-                  value={state.job_title}
-                  onChange={(e) =>
-                    handleFormChange("job_title", e.target.value)
-                  }
-                  error={state.errors.job_title}
-                  required
-                />
-
-                <CustomSelect
-                  options={jobTypeOptions}
-                  value={state.job_type}
-                  onChange={(selectedOption) =>
-                    setState({
-                      job_type: selectedOption,
-                      errors: { ...state.errors, job_type: "" },
-                    })
-                  }
-                  placeholder="Select Job Type"
-                  title="Job Type"
-                  error={state.errors.job_type}
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                <CustomSelect
-                  options={state.collegeList}
-                  value={state.college}
-                  onChange={handleCollegeChange}
-                  onSearch={(searchTerm) => collegeDropdownList(1, searchTerm)}
-                  placeholder="Select College"
-                  isClearable={true}
-                  loadMore={() =>
-                    state.collegeNext &&
-                    collegeDropdownList(state.collegePage + 1, "", true)
-                  }
-                  loading={state.collegeLoading}
-                  title="College"
-                  error={state.errors.college}
-                  required
-                />
-                <CustomSelect
-                  options={state.departmentList}
-                  value={state.department}
-                  onChange={(selectedOption) =>
-                    setState({
-                      department: selectedOption,
-                      errors: { ...state.errors, department: "" },
-                    })
-                  }
-                  onSearch={(searchTerm) =>
-                    departmentDropdownList(1, searchTerm)
-                  }
-                  placeholder="Select Department"
-                  isClearable={true}
-                  loadMore={() =>
-                    state.departmentNext &&
-                    departmentDropdownList(state.departmentPage + 1, "", true)
-                  }
-                  loading={state.departmentLoading}
-                  title="Department"
-                  error={state.errors.department}
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                <CustomSelect
-                  options={experienceOptions}
-                  value={state.experience_required}
-                  onChange={(selectedOption) =>
-                    setState({
-                      experience_required: selectedOption,
-                      errors: { ...state.errors, experience_required: "" },
-                    })
-                  }
-                  placeholder="Select Experience"
-                  title="Experience Required"
-                  error={state.errors.experience_required}
-                  required
-                />
-                <TextInput
-                  title="Qualification"
-                  placeholder="e.g., Bachelor's in Computer Science"
-                  value={state.qualification}
-                  onChange={(e) =>
-                    handleFormChange("qualification", e.target.value)
-                  }
-                  error={state.errors.qualification}
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                <TextInput
-                  title="Salary Range"
-                  placeholder="e.g., 2 LPA - 5 LPA"
-                  value={state.salary_range}
-                  onChange={(e) =>
-                    handleFormChange("salary_range", e.target.value)
-                  }
-                  error={state.errors.salary_range}
-                  required
-                />
-                {/* <TextInput
-                  title="Last Date"
-                  type="date"
-                  value={state.last_date}
-                  onChange={(e) => handleFormChange("last_date", e.target.value)}
-                  error={state.errors.last_date}
-                  required
-                /> */}
-
-                <CustomeDatePicker
-                  value={state.last_date}
-                  placeholder="Last Date"
-                  title="Last Date"
-                  onChange={(e) => setState({ last_date: e })}
-                  showTimeSelect={false}
-                  minDate={new Date()}
-                />
-                <CustomSelect
-                  options={priorityOptions}
-                  value={state.priority}
-                  onChange={(selectedOption) =>
-                    setState({
-                      priority: selectedOption,
-                      errors: { ...state.errors, priority: "" },
-                    })
-                  }
-                  placeholder="Select Priority"
-                  title="Priority"
-                  error={state.errors.priority}
-                  required
-                />
-              </div>
-
-              <TextArea
-                title="Job Description"
-                placeholder="Enter detailed job description"
-                value={state.job_description}
-                onChange={(e) =>
-                  handleFormChange("job_description", e.target.value)
-                }
-                error={state.errors.job_description}
-                rows={4}
-                required
-              />
-            </div>
-
-            <div className="mt-8 flex flex-col-reverse gap-3 border-t border-gray-200 pt-6 dark:border-gray-700 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                onClick={handleCloseModal}
-                className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-medium text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSubmit}
-                disabled={state.submitting}
-                className={`group relative inline-flex items-center justify-center overflow-hidden rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-3 text-sm font-medium text-white shadow-lg transition-all duration-200 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                  state.submitting ? "cursor-not-allowed opacity-70" : ""
-                }`}
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
-                {state.submitting ? (
-                  <IconLoader className="relative z-10 mr-2 h-4 w-4 animate-spin" />
-                ) : state.editId ? (
-                  <IconEdit className="relative z-10 mr-2 h-4 w-4" />
-                ) : (
-                  <IconPlus className="relative z-10 mr-2 h-4 w-4" />
-                )}
-                <span className="relative z-10">
-                  {state.submitting
-                    ? "Saving..."
-                    : state.editId
-                    ? "Update Job"
-                    : "Create Job"}
-                </span>
-              </button>
-            </div>
-          </div>
-        )}
-      />
+     
     </div>
   );
 };

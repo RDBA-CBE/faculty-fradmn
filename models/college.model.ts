@@ -12,6 +12,10 @@ const college_dept = {
         url += `&ordering=${encodeURIComponent(body.ordering)}`;
       }
 
+      if (body?.institution) {
+        url += `&institution=${encodeURIComponent(body.institution)}`;
+      }
+
       instance()
         .get(url)
         .then((res) => {

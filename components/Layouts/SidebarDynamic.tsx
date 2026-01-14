@@ -177,6 +177,15 @@ const SidebarDynamic = () => {
 
           {/* Menu */}
           <PerfectScrollbar className="relative h-[calc(100vh-80px)]">
+            <span className="align-middle text-2xl font-semibold dark:text-white-light lg:inline ltr:ml-1.5 rtl:mr-1.5">
+              {t("Own")}
+            </span>
+            <ul className="relative space-y-0.5 p-4 py-0 font-semibold">
+              {getUserMenu()?.length > 0 && renderMenu(getUserMenu())}
+            </ul>
+            <span className="align-middle text-2xl font-semibold dark:text-white-light lg:inline ltr:ml-1.5 rtl:mr-1.5">
+              {t("Team")}
+            </span>
             <ul className="relative space-y-0.5 p-4 py-0 font-semibold">
               {getUserMenu()?.length > 0 && renderMenu(getUserMenu())}
             </ul>

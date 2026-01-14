@@ -142,15 +142,23 @@ export const CreateDepartment = Yup.object().shape({
   department_code: Yup.string().required("Department code is required"),
 });
 
-export const CreateJob = Yup.object().shape({
-  job_title: Yup.string().required("Job title is required"),
-  job_description: Yup.string().required("Job description is required"),
-  college: Yup.number().required("Please select a college"),
-  department: Yup.number().required("Please select a department"),
-  job_type: Yup.string().required("Please select job type"),
-  experience_required: Yup.string().required("Please select experience required"),
+export const CreateNewJob = Yup.object().shape({
+  title: Yup.string().required("Job title is required"),
+  company: Yup.string().required("Company name is required"),
+  location: Yup.string().required("Location is required"),
+  address: Yup.string().required("Address is required"),
+  institution: Yup.object().nullable().required("Institution is required"),
+  college: Yup.object().nullable().required("College is required"),
+  department: Yup.object().nullable().required("Department is required"),
+  jobType: Yup.object().nullable().required("Job type is required"),
+  salary: Yup.string().required("Salary range is required"),
+  deadline: Yup.string().required("Deadline is required"),
+  startDate: Yup.string().required("Start date is required"),
+  endDate: Yup.string().required("End date is required"),
+  numberOfOpenings: Yup.number()
+    .typeError("Must be a number")
+    .positive("Must be a positive number")
+    .required("Number of openings is required"),
+  experience: Yup.string().required("Experience is required"),
   qualification: Yup.string().required("Qualification is required"),
-  salary_range: Yup.string().required("Salary range is required"),
-  last_date: Yup.date().required("Last date is required"),
-  priority: Yup.string().required("Please select priority"),
 });
