@@ -24,12 +24,7 @@ export const menuConfig = {
       href: "/",
     },
 
-    {
-      type: "link",
-      icon: "IconMenuApps",
-      label: "Institutions",
-      href: "/faculty/institution",
-    },
+  
     {
       type: "link",
       icon: "IconMenuNotes",
@@ -260,12 +255,6 @@ export const OwnmenuConfig = {
       href: "/faculty/my_college_and_department",
     },
 
-    {
-      type: "link",
-      icon: "IconMenuUsers",
-      label: "Users",
-      href: "/faculty/my_users",
-    },
 
     {
       type: "link",
@@ -303,13 +292,7 @@ export const OwnmenuConfig = {
       href: "/faculty/my_college_and_department",
     },
 
-    {
-      type: "link",
-      icon: "IconMenuUsers",
-      label: "Users",
-      href: "/faculty/users",
-    },
-
+  
     {
       type: "link",
       icon: "IconMenuForms",

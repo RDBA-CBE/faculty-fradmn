@@ -1197,24 +1197,7 @@ const Institution = () => {
               className="transition-all duration-200 focus:shadow-lg group-hover:shadow-md"
             />
           </div>
-          <div className="group relative">
-            <CustomSelect
-              options={statusOptions}
-              value={state.statusFilter}
-              onChange={handleStatusChange}
-              placeholder="Filter by Status"
-              isClearable={true}
-            />
-          </div>
-          <div className="group relative">
-            <CustomSelect
-              options={typeOptions}
-              value={state.typeFilter}
-              onChange={handleTypeChange}
-              placeholder="Filter by Type"
-              isClearable={true}
-            />
-          </div>
+          
         </div>
       </div>
 

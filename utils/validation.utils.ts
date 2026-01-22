@@ -80,6 +80,16 @@ export const CreateUser = Yup.object().shape({
     then: (schema) => schema.required("Institution is required"),
     otherwise: (schema) => schema.nullable(),
   }),
+  college: Yup.number().when('role', {
+    is: 'hr',
+    then: (schema) => schema.required("College is required"),
+    otherwise: (schema) => schema.nullable(),
+  }),
+  department: Yup.number().when('role', {
+    is: 'hod',
+    then: (schema) => schema.required("Department is required"),
+    otherwise: (schema) => schema.nullable(),
+  }),
 });
 
 export const CreateInstitutionAdmin = Yup.object().shape({

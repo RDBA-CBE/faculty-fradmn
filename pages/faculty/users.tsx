@@ -69,8 +69,23 @@ const Users = () => {
     collegeNext: null,
     departmentNext: null,
 
+    // Institution dropdown specific states for HOD
+    institutionDropdownList: [],
+    institutionDropLoading: false,
+    institutionDropPage: 1,
+    institutionDropNext: null,
+    seletedInstitution: null,
+
+    // Institution dropdown specific states for HR
+    institutionHRList: [],
+    institutionHRLoading: false,
+    institutionHRPage: 1,
+    institutionHRNext: null,
+    selectedHRInstitution: null,
+
     errors: {},
     editId: null,
+    collegeDropdownList: [],
   });
 
   const statusOptions = [
@@ -78,17 +93,14 @@ const Users = () => {
     { value: "inactive", label: "Inactive" },
   ];
 
- 
-
   const debounceSearch = useDebounce(state.search, 500);
 
   useEffect(() => {
     dispatch(setPageTitle("Users"));
     institutionList(1);
     collegeList(1);
-
-    departmentList(1);
-
+    institutionDropdownInit(1);
+    institutionHRInit(1);
   }, [dispatch]);
 
   useEffect(() => {
@@ -116,9 +128,8 @@ const Users = () => {
         qualification: item?.qualification,
         experience: item?.experience,
         status: item?.status,
-        college:item?.college?.name,
-        institution:item?.institution?.name,
-
+        college: item?.college?.name,
+        institution: item?.institution?.name,
       }));
 
       setState({
@@ -170,10 +181,18 @@ const Users = () => {
     }
   };
 
-  const collegeList = async (page, search = "", loadMore = false) => {
+  const collegeList = async (
+    page,
+    search = "",
+    loadMore = false,
+    institutionId = null
+  ) => {
     try {
       setState({ collegeLoading: true });
-      const body = { search };
+      const body: any = { search };
+      if (institutionId) {
+        body.institution = institutionId?.value;
+      }
 
       const res: any = await Models.college.list(page, body);
       const dropdown = Dropdown(res?.results, "college_name");
@@ -181,8 +200,36 @@ const Users = () => {
       setState({
         collegeLoading: false,
         collegePage: page,
-        collegeList: loadMore
-          ? [...state.collegeList, ...dropdown]
+        collegeList: loadMore ? [...state.collegeList, ...dropdown] : dropdown,
+        collegeNext: res?.next,
+      });
+    } catch (error) {
+      console.error("Error fetching colleges:", error);
+      setState({ collegeLoading: false });
+    }
+  };
+
+  const collegeDropdownList = async (
+    page,
+    search = "",
+    loadMore = false,
+    seletedInstitution = null
+  ) => {
+    try {
+      setState({ collegeLoading: true });
+      const body: any = { search };
+      if (seletedInstitution) {
+        body.institution = seletedInstitution?.value;
+      }
+
+      const res: any = await Models.college.list(page, body);
+      const dropdown = Dropdown(res?.results, "college_name");
+
+      setState({
+        collegeLoading: false,
+        collegePage: page,
+        collegeDropdownList: loadMore
+          ? [...state.collegeDropdownList, ...dropdown]
           : dropdown,
         collegeNext: res?.next,
       });
@@ -192,10 +239,18 @@ const Users = () => {
     }
   };
 
-  const departmentList = async (page, search = "", loadMore = false) => {
+  const departmentDropdownList = async (
+    page,
+    search = "",
+    loadMore = false,
+    selectedCollege = null
+  ) => {
     try {
       setState({ departmentLoading: true });
-      const body = { search };
+      const body: any = { search };
+      if (selectedCollege) {
+        body.college = selectedCollege?.value;
+      }
 
       const res: any = await Models.department.list(page, body);
       const dropdown = Dropdown(res?.results, "department_name");
@@ -211,6 +266,52 @@ const Users = () => {
     } catch (error) {
       console.error("Error fetching departments:", error);
       setState({ departmentLoading: false });
+    }
+  };
+
+  const institutionHRInit = async (page, search = "", loadMore = false) => {
+    try {
+      setState({ institutionHRLoading: true });
+      const body = { search };
+      const res: any = await Models.institution.list(page, body);
+      const dropdown = Dropdown(res?.results, "institution_name");
+
+      setState({
+        institutionHRLoading: false,
+        institutionHRPage: page,
+        institutionHRList: loadMore
+          ? [...state.institutionHRList, ...dropdown]
+          : dropdown,
+        institutionHRNext: res?.next,
+      });
+    } catch (error) {
+      console.error("Error fetching institutions for HR:", error);
+      setState({ institutionHRLoading: false });
+    }
+  };
+
+  const institutionDropdownInit = async (
+    page,
+    search = "",
+    loadMore = false
+  ) => {
+    try {
+      setState({ institutionDropLoading: true });
+      const body = { search };
+      const res: any = await Models.institution.list(page, body);
+      const dropdown = Dropdown(res?.results, "institution_name");
+
+      setState({
+        institutionDropLoading: false,
+        institutionDropPage: page,
+        institutionDropdownList: loadMore
+          ? [...state.institutionDropdownList, ...dropdown]
+          : dropdown,
+        institutionDropNext: res?.next,
+      });
+    } catch (error) {
+      console.error("Error fetching institutions for dropdown:", error);
+      setState({ institutionDropLoading: false });
     }
   };
 
@@ -261,7 +362,7 @@ const Users = () => {
   };
 
   const handleEdit = (row) => {
-console.log('✌️row --->', row);
+    console.log("✌️row --->", row);
     setState({
       editId: row.id,
       showModal: true,
@@ -278,7 +379,7 @@ console.log('✌️row --->', row);
   const handleToggleStatus = async (row) => {
     try {
       const newStatus = row.status === "active" ? "inactive" : "active";
-      await Models.auth.updateUser(row.id,{ status: newStatus } );
+      await Models.auth.updateUser(row.id, { status: newStatus });
       Success(`User ${newStatus} successfully!`);
       userList(state.page);
     } catch (error) {
@@ -307,8 +408,8 @@ console.log('✌️row --->', row);
   const handleSubmit = async () => {
     try {
       setState({ submitting: true });
-      
-      const body:any = {
+
+      const body: any = {
         username: state.username,
         email: state.email,
         password: state.password,
@@ -319,12 +420,12 @@ console.log('✌️row --->', row);
         gender: state.gender?.value,
         education_qualification: state.education_qualification,
       };
-      
+
       // Add institution for institution_admin
       if (state.activeTab === "institution_admin") {
         body.institution = state.institution?.value;
       }
-      
+
       // Add department for hr and hod
       if (state.activeTab === "hod") {
         body.department = state.department?.value;
@@ -333,18 +434,19 @@ console.log('✌️row --->', row);
       if (state.activeTab === "hr") {
         body.college = state.college?.value;
       }
-      
+
       // Add qualification and experience for hod and applicant
       if (state.activeTab === "hod" || state.activeTab === "applicant") {
         body.qualification = state.qualification;
         body.experience = state.experience;
       }
-      
+
       // Add position
       // if (state.position) {
       //   body.position = state.position;
       // }
-      
+      console.log("✌️body --->", body);
+
       // Validate form data
       if (!state.editId) {
         try {
@@ -355,13 +457,15 @@ console.log('✌️row --->', row);
           validationError.inner.forEach((error: any) => {
             errors[error.path] = error.message;
           });
+          console.log("✌️errors --->", errors);
+
           setState({ errors });
           return;
         }
       }
 
       if (state.editId) {
-        await Models.auth.updateUser(state.editId,body);
+        await Models.auth.updateUser(state.editId, body);
         Success("User updated successfully!");
       } else {
         await Models.auth.createUser(body);
@@ -372,7 +476,7 @@ console.log('✌️row --->', row);
       handleCloseModal();
     } catch (error: any) {
       console.log("✌️error --->", error);
-      
+
       // Handle API errors with specific field messages
       if (error?.data) {
         const apiErrors = {};
@@ -386,7 +490,7 @@ console.log('✌️row --->', row);
         setState({ errors: apiErrors });
         return;
       }
-      
+
       // Handle validation errors
       if (error?.inner) {
         const errors = {};
@@ -396,12 +500,13 @@ console.log('✌️row --->', row);
         setState({ errors });
         return;
       }
-      
+
       Failure("Operation failed. Please try again.");
     } finally {
       setState({ submitting: false });
     }
   };
+  console.log('✌️state.activeTab --->', state.activeTab);
 
   const renderForm = () => (
     <div className="space-y-6">
@@ -428,7 +533,7 @@ console.log('✌️row --->', row);
           required
         />
       )}
-      
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <TextInput
           title="Username"
@@ -448,46 +553,31 @@ console.log('✌️row --->', row);
           required
         />
       </div>
-      
+
       {/* {!state.editId && ( */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <TextInput
-            title="Password"
-            type={state.showPassword ? "text" : "password"}
-            placeholder="Enter password"
-            value={state.password}
-            onChange={(e) => handleFormChange("password", e.target.value)}
-            error={state.errors.password}
-            rightIcon={
-              state.showPassword ? (
-                <IconEyeOff className="h-4 w-4" />
-              ) : (
-                <IconEye className="h-4 w-4" />
-              )
-            }
-            rightIconOnlick={() => setState({ showPassword: !state.showPassword })}
-            required
-          />
-          <TextInput
-            title="Confirm Password"
-            type={state.showConfirmPassword ? "text" : "password"}
-            placeholder="Confirm password"
-            value={state.confirm_password}
-            onChange={(e) => handleFormChange("confirm_password", e.target.value)}
-            error={state.errors.confirm_password}
-            rightIcon={
-              state.showConfirmPassword ? (
-                <IconEyeOff className="h-4 w-4" />
-              ) : (
-                <IconEye className="h-4 w-4" />
-              )
-            }
-            rightIconOnlick={() => setState({ showConfirmPassword: !state.showConfirmPassword })}
-            required
-          />
-        </div>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <TextInput
+          title="Password"
+          type={state.showPassword ? "text" : "password"}
+          placeholder="Enter password"
+          value={state.password}
+          onChange={(e) => handleFormChange("password", e.target.value)}
+          error={state.errors.password}
+          rightIcon={
+            state.showPassword ? (
+              <IconEyeOff className="h-4 w-4" />
+            ) : (
+              <IconEye className="h-4 w-4" />
+            )
+          }
+          rightIconOnlick={() =>
+            setState({ showPassword: !state.showPassword })
+          }
+          required
+        />
+      </div>
       {/* )} */}
-      
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <CustomPhoneInput
           title="Phone Number"
@@ -500,13 +590,15 @@ console.log('✌️row --->', row);
           title="Gender"
           options={GENDER_OPTION}
           value={state.gender}
-          onChange={(selectedOption) => handleFormChange("gender", selectedOption)}
+          onChange={(selectedOption) =>
+            handleFormChange("gender", selectedOption)
+          }
           placeholder="Select Gender"
           error={state.errors.gender}
           required
         />
       </div>
-      
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* <TextInput
           title="Position"
@@ -520,81 +612,177 @@ console.log('✌️row --->', row);
           title="Education Qualification"
           placeholder="Enter education qualification"
           value={state.education_qualification}
-          onChange={(e) => handleFormChange("education_qualification", e.target.value)}
+          onChange={(e) =>
+            handleFormChange("education_qualification", e.target.value)
+          }
           error={state.errors.education_qualification}
           required
         />
       </div>
 
-       {(state.activeTab === "hr" ) && (
-        <CustomSelect
-          options={state.collegeList}
-          value={state.college}
-          onChange={(selectedOption) =>
-            setState({
-              college: selectedOption,
-              errors: { ...state.errors, college: "" },
-            })
-          }
-          onSearch={(searchTerm) => collegeList(1, searchTerm)}
-          placeholder="Select College"
-          isClearable={true}
-          loadMore={() =>
-            state.collegeNext &&
-            collegeList(state.collegePage + 1, "", true)
-          }
-          loading={state.collegeLoading}
-          title="Select College"
-          error={state.errors.college}
-          required
-          position="top"
-        />
-      )}
-      {( state.activeTab === "hod") && (
-        <CustomSelect
-          options={state.departmentList}
-          value={state.department}
-          onChange={(selectedOption) =>
-            setState({
-              department: selectedOption,
-              errors: { ...state.errors, department: "" },
-            })
-          }
-          onSearch={(searchTerm) => departmentList(1, searchTerm)}
-          placeholder="Select Department"
-          isClearable={true}
-          loadMore={() =>
-            state.departmentNext &&
-            departmentList(state.departmentPage + 1, "", true)
-          }
-          loading={state.departmentLoading}
-          title="Select Department"
-          error={state.errors.department}
-          required
-          position="top"
-
-        />
-      )}
-      
-      {( state.activeTab === "applicant") && (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <TextInput
-            title="Qualification"
-            placeholder="Enter qualification"
-            value={state.qualification}
-            onChange={(e) => handleFormChange("qualification", e.target.value)}
-            error={state.errors.qualification}
-            required
+      {state.activeTab == "hr" && (
+        <>
+          <CustomSelect
+            options={state.institutionHRList}
+            value={state.selectedHRInstitution}
+            onChange={(selectedOption) => {
+              setState({
+                selectedHRInstitution: selectedOption,
+                errors: { ...state.errors, institution: "" },
+                college: null,
+              });
+              if (selectedOption) {
+                collegeList(1, "", false, selectedOption);
+              } else {
+                setState({ collegeList: [] });
+              }
+            }}
+            onSearch={(searchTerm) => institutionHRInit(1, searchTerm)}
+            placeholder="Select Institution"
+            isClearable={true}
+            loadMore={() =>
+              state.institutionHRNext &&
+              institutionHRInit(state.institutionHRPage + 1, "", true)
+            }
+            loading={state.institutionHRLoading}
+            title="Select Institution"
+            error={state.errors.institution}
           />
-          <TextInput
-            title="Experience"
-            placeholder="Enter experience"
-            value={state.experience}
-            onChange={(e) => handleFormChange("experience", e.target.value)}
-            error={state.errors.experience}
+          <CustomSelect
+            options={state.collegeList}
+            value={state.college}
+            onChange={(selectedOption) =>
+              setState({
+                college: selectedOption,
+                errors: { ...state.errors, college: "" },
+              })
+            }
+            onSearch={(searchTerm) =>
+              collegeList(1, searchTerm, false, state.selectedHRInstitution)
+            }
+            placeholder="Select College"
+            isClearable={true}
+            loadMore={() =>
+              state.collegeNext &&
+              collegeList(
+                state.collegePage + 1,
+                "",
+                true,
+                state.selectedHRInstitution
+              )
+            }
+            loading={state.collegeLoading}
+            title="Select College"
+            error={state.errors.college}
             required
+            position="top"
           />
-        </div>
+        </>
+      )}
+      {state.activeTab === "hod" && (
+        <>
+          <CustomSelect
+            options={state.institutionDropdownList}
+            value={state.institutionDept}
+            onChange={(selectedOption) => {
+              if (selectedOption) {
+                setState({
+                  institutionDept: selectedOption,
+                  errors: { ...state.errors, institution: "" },
+                  seletedInstitution: selectedOption,
+                  college: null,
+                });
+                collegeDropdownList(1, "", false, selectedOption);
+              } else {
+                setState({
+                  institutionDept: null,
+                  seletedInstitution: selectedOption,
+                  college: null,
+                  collegeDropdownList: [],
+                });
+              }
+            }}
+            onSearch={(searchTerm) => institutionDropdownInit(1, searchTerm)}
+            placeholder="Select Institution"
+            isClearable={true}
+            loadMore={() =>
+              state.institutionDropNext &&
+              institutionDropdownInit(state.institutionDropPage + 1, "", true)
+            }
+            loading={state.institutionDropLoading}
+            title="Select Institution"
+            error={state.errors.institution}
+          />
+          <CustomSelect
+            options={state.collegeDropdownList}
+            value={state.college}
+            disabled={!state.institutionDept}
+            onChange={(selectedOption) => {
+              setState({
+                college: selectedOption,
+                errors: { ...state.errors, college: "" },
+                department: null, // Reset department when college changes
+              });
+              if (selectedOption) {
+                departmentDropdownList(1, "", false, selectedOption);
+              } else {
+                setState({ departmentList: [] });
+              }
+            }}
+            onSearch={(searchTerm) =>
+              collegeDropdownList(
+                1,
+                searchTerm,
+                false,
+                state.seletedInstitution
+              )
+            }
+            placeholder="Select College"
+            isClearable={true}
+            loadMore={() =>
+              state.collegeNext &&
+              collegeDropdownList(
+                state.collegePage + 1,
+                "",
+                true,
+                state.seletedInstitution
+              )
+            }
+            loading={state.collegeLoading}
+            title="Select College"
+            error={state.errors.college}
+          />
+          <CustomSelect
+            options={state.departmentList}
+            value={state.department}
+            disabled={!state.college}
+            onChange={(selectedOption) =>
+              setState({
+                department: selectedOption,
+                errors: { ...state.errors, department: "" },
+              })
+            }
+            onSearch={(searchTerm) =>
+              departmentDropdownList(1, searchTerm, false, state.college)
+            }
+            placeholder="Select Department"
+            isClearable={true}
+            loadMore={() =>
+              state.departmentNext &&
+              departmentDropdownList(
+                state.departmentPage + 1,
+                "",
+                true,
+                state.college
+              )
+            }
+            loading={state.departmentLoading}
+            title="Select Department"
+            error={state.errors.department}
+            required
+            position="top"
+          />
+        </>
       )}
     </div>
   );
@@ -638,7 +826,7 @@ console.log('✌️row --->', row);
       baseColumns.splice(3, 0, {
         accessor: "college",
         title: "College",
-        render: (row:any) => (
+        render: (row: any) => (
           <div className="text-gray-600 dark:text-gray-400">{row?.college}</div>
         ),
       });
@@ -648,8 +836,10 @@ console.log('✌️row --->', row);
       baseColumns.splice(3, 0, {
         accessor: "department",
         title: "Department",
-        render: (row:any) => (
-          <div className="text-gray-600 dark:text-gray-400">{row?.department}</div>
+        render: (row: any) => (
+          <div className="text-gray-600 dark:text-gray-400">
+            {row?.department}
+          </div>
         ),
       });
     }
@@ -659,7 +849,7 @@ console.log('✌️row --->', row);
         {
           accessor: "qualification",
           title: "Qualification",
-          render: (row:any) => (
+          render: (row: any) => (
             <div className="text-gray-600 dark:text-gray-400">
               {row?.qualification}
             </div>
@@ -668,8 +858,10 @@ console.log('✌️row --->', row);
         {
           accessor: "experience",
           title: "Experience",
-          render: (row:any) => (
-            <div className="text-gray-600 dark:text-gray-400">{row?.experience}</div>
+          render: (row: any) => (
+            <div className="text-gray-600 dark:text-gray-400">
+              {row?.experience}
+            </div>
           ),
         }
       );
@@ -680,13 +872,15 @@ console.log('✌️row --->', row);
       title: "Actions",
       render: (row) => (
         <div className="flex items-center justify-center gap-2">
-          <button
-            onClick={() => handleEdit(row)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 transition-all duration-200 hover:bg-blue-200"
-            title="Edit"
-          >
-            <IconEdit className="h-4 w-4" />
-          </button>
+          {state.activeTab !== "applicant" && (
+            <button
+              onClick={() => handleEdit(row)}
+              className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 transition-all duration-200 hover:bg-blue-200"
+              title="Edit"
+            >
+              <IconEdit className="h-4 w-4" />
+            </button>
+          )}
           <button
             onClick={() => handleToggleStatus(row)}
             className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-200 ${
@@ -736,14 +930,16 @@ console.log('✌️row --->', row);
               Manage {getTabLabel().toLowerCase()} users and their information
             </p>
           </div>
-          <button
-            onClick={() => setState({ showModal: true })}
-            className="group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
-            <IconPlus className="relative z-10 h-5 w-5" />
-            <span className="relative z-10">Add {getTabLabel()}</span>
-          </button>
+          {state.activeTab !== "applicant" && (
+            <button
+              onClick={() => setState({ showModal: true })}
+              className="group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+              <IconPlus className="relative z-10 h-5 w-5" />
+              <span className="relative z-10">Add {getTabLabel()}</span>
+            </button>
+          )}
         </div>
       </div>
 

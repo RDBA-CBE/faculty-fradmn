@@ -16,6 +16,15 @@ const college_dept = {
         url += `&institution=${encodeURIComponent(body.institution)}`;
       }
 
+      if (body?.Is_publish == "Yes") {
+        url += `&Is_publish=${encodeURIComponent(true)}`;
+      }
+      if (body?.Is_publish == "No") {
+        url += `&Is_publish=${encodeURIComponent(false)}`;
+      }
+
+      
+
       instance()
         .get(url)
         .then((res) => {
