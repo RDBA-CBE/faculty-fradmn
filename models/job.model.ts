@@ -85,7 +85,7 @@ const job = {
 
   details: (id: any) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `jobs/${id}/`;
+      let url = `jobs/${id}`;
       instance()
         .get(url)
         .then((res) => {

@@ -6,7 +6,13 @@ export const CLIENT_ID =
 // export const BACKEND_URL = "http://88.222.213.249/api/";
 export const BACKEND_URL = "https://user-service.88.222.213.249.nip.io/api/";
 
-
+export const ROLES = {
+  SUPER_ADMIN: "super_admin",
+  INSTITUTION_ADMIN: "institution_admin",
+  HR: "hr",
+  HOD: "hod",
+  APPLICANT: "applicant",
+};
 
 // menuConfig.ts
 export const menuConfig = {
@@ -160,7 +166,6 @@ export const menuConfig = {
       href: "/",
     },
 
-
     {
       type: "link",
       icon: "IconMenuForms",
@@ -196,21 +201,21 @@ export const OwnmenuConfig = {
       type: "link",
       icon: "IconMenuApps",
       label: "Institutions",
-      href: "/faculty/institution",
+      href: "/faculty/my_institution",
     },
     {
       type: "link",
       icon: "IconMenuNotes",
       label: "Colleges & Departments",
-      href: "/faculty/college_and_department",
+      href: "/faculty/my_college_and_department",
     },
 
-    {
-      type: "link",
-      icon: "IconMenuUsers",
-      label: "Users",
-      href: "/faculty/users",
-    },
+    // {
+    //   type: "link",
+    //   icon: "IconMenuUsers",
+    //   label: "Users",
+    //   href: "/faculty/users",
+    // },
 
     // {
     //   type: "link",
@@ -223,14 +228,14 @@ export const OwnmenuConfig = {
       type: "link",
       icon: "IconMenuForms",
       label: "Job Postings",
-      href: "/faculty/job",
+      href: "/faculty/my_job",
     },
 
     {
       type: "link",
       icon: "IconMenuTables",
       label: "Applications",
-      href: "/faculty/application",
+      href: "/faculty/my_application",
     },
     {
       type: "link",
@@ -252,28 +257,28 @@ export const OwnmenuConfig = {
       type: "link",
       icon: "IconMenuNotes",
       label: "Colleges & Departments",
-      href: "/faculty/college_and_department",
+      href: "/faculty/my_college_and_department",
     },
 
     {
       type: "link",
       icon: "IconMenuUsers",
       label: "Users",
-      href: "/faculty/users",
+      href: "/faculty/my_users",
     },
 
     {
       type: "link",
       icon: "IconMenuForms",
       label: "Job Postings",
-      href: "/faculty/job",
+      href: "/faculty/my_job",
     },
 
     {
       type: "link",
       icon: "IconMenuTables",
       label: "Applications",
-      href: "/faculty/application",
+      href: "/faculty/my_application",
     },
     {
       type: "link",
@@ -295,7 +300,7 @@ export const OwnmenuConfig = {
       type: "link",
       icon: "IconMenuNotes",
       label: "Colleges & Departments",
-      href: "/faculty/college_and_department",
+      href: "/faculty/my_college_and_department",
     },
 
     {
@@ -309,14 +314,14 @@ export const OwnmenuConfig = {
       type: "link",
       icon: "IconMenuForms",
       label: "Job Postings",
-      href: "/faculty/job",
+      href: "/faculty/my_job",
     },
 
     {
       type: "link",
       icon: "IconMenuTables",
       label: "Applications",
-      href: "/faculty/application",
+      href: "/faculty/my_application",
     },
     {
       type: "link",
@@ -333,7 +338,6 @@ export const OwnmenuConfig = {
       label: "dashboard",
       href: "/",
     },
-
 
     {
       type: "link",
@@ -427,15 +431,6 @@ export const Property_status = [
   { value: "pending", label: "pending" },
 ];
 
-export const ROLES = {
-  ADMIN: "admin",
-  SELLER: "seller",
-  BUYER: "buyer",
-  DEVELOPER: "developer",
-  AGENT: "agent",
-  ALL: "All",
-};
-
 export const PROPERTY_TYPE = {
   COMMERCIAL: "Commercial",
   RESIDENTIAL: "Residential",
@@ -525,9 +520,24 @@ export const FILTER_ROLES = [
   },
 ];
 
-
 export const GENDER_OPTION = [
   { value: "male", label: "Male" },
   { value: "female", label: "Female" },
   { value: "other", label: "Other" },
+];
+
+export const EXPERIENCE = [
+  { value: "fresher", label: "Fresher" },
+  { value: "0 – 1 Year", label: "0 – 1 Year" },
+  { value: "1 – 3 Years", label: "1 – 3 Years" },
+  { value: "3 – 5 Years", label: "3 – 5 Years" },
+  { value: "5 – 10 Years", label: "5 – 10 Years" },
+  { value: "10+ Years", label: "10+ Years" },
+];
+
+export const JOB_TYPE = [
+  { value: "Full Time", label: "Full Time" },
+  { value: "Part Time", label: "Part Time" },
+  { value: "Contract", label: "Contract" },
+  { value: "Internship", label: "Internship" },
 ];

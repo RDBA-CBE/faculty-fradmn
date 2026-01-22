@@ -110,6 +110,8 @@ export const handlePasswordChange = (value: string) => {
   return strength;
 };
 
+export const toISO = (date) => new Date(date).toISOString();
+
 export const objIsEmpty = (obj: object) => {
   for (let key in obj) {
     if (obj.hasOwnProperty(key)) return false;

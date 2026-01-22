@@ -10,7 +10,7 @@ import { useRouter } from "next/router";
 import IconCaretsDown from "@/components/Icon/IconCaretsDown";
 import IconCaretDown from "@/components/Icon/IconCaretDown";
 import IconMinus from "@/components/Icon/IconMinus";
-import { menuConfig } from "@/utils/constant.utils";
+import { menuConfig, OwnmenuConfig } from "@/utils/constant.utils";
 import Icons from "@/utils/icons.utils"; // all your icons exported as a map
 
 const SidebarDynamic = () => {
@@ -146,6 +146,12 @@ const SidebarDynamic = () => {
     return menuConfig[group] || menuConfig.default;
   };
 
+
+    const getOwnMenu = () => {
+    if (!group) return OwnmenuConfig.admin;
+    return OwnmenuConfig[group] || OwnmenuConfig.default;
+  };
+
   return (
     <div className={semidark ? "dark" : ""}>
       <nav
@@ -177,17 +183,19 @@ const SidebarDynamic = () => {
 
           {/* Menu */}
           <PerfectScrollbar className="relative h-[calc(100vh-80px)]">
-            <span className="align-middle text-2xl font-semibold dark:text-white-light lg:inline ltr:ml-1.5 rtl:mr-1.5">
+            <span className="align-middle text-xl font-semibold dark:text-white-light lg:inline ltr:ml-1.5 rtl:mr-1.5">
               {t("Own")}
             </span>
             <ul className="relative space-y-0.5 p-4 py-0 font-semibold">
-              {getUserMenu()?.length > 0 && renderMenu(getUserMenu())}
+              {getOwnMenu()?.length > 0 && renderMenu(getOwnMenu())}
+
             </ul>
-            <span className="align-middle text-2xl font-semibold dark:text-white-light lg:inline ltr:ml-1.5 rtl:mr-1.5">
+            <span className="align-middle text-xl font-semibold dark:text-white-light lg:inline ltr:ml-1.5 rtl:mr-1.5">
               {t("Team")}
             </span>
             <ul className="relative space-y-0.5 p-4 py-0 font-semibold">
               {getUserMenu()?.length > 0 && renderMenu(getUserMenu())}
+
             </ul>
           </PerfectScrollbar>
         </div>

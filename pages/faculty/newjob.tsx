@@ -1,10 +1,12 @@
-import { useSetState } from "@/utils/function.utils";
+import { toISO, useSetState } from "@/utils/function.utils";
 import React, { useCallback, useEffect, useRef } from "react";
 import TextInput from "@/components/FormFields/TextInput.component";
 import CustomSelect from "@/components/FormFields/CustomSelect.component";
 import TextArea from "@/components/FormFields/TextArea.component";
 import { CreateNewJob } from "@/utils/validation.utils";
 import { Models } from "@/imports/models.import";
+import { EXPERIENCE, JOB_TYPE } from "@/utils/constant.utils";
+import moment from "moment";
 
 export default function Newjob() {
   const editorRef = useRef(null);
@@ -55,13 +57,6 @@ export default function Newjob() {
     },
     error: {},
   });
-
-  const jobTypeOptions = [
-    { value: "full-time", label: "Full Time" },
-    { value: "part-time", label: "Part Time" },
-    { value: "contract", label: "Contract" },
-    { value: "internship", label: "Internship" },
-  ];
 
   useEffect(() => {
     fetchInstitutions();
@@ -128,9 +123,9 @@ export default function Newjob() {
     const handleScroll = () => {
       const section1 = section1Ref.current?.getBoundingClientRect();
       const section2 = section2Ref.current?.getBoundingClientRect();
-      const section3 = section3Ref.current?.getBoundingClientRect();
+      const section3 = section5Ref.current?.getBoundingClientRect();
       const section4 = section4Ref.current?.getBoundingClientRect();
-      const section5 = section5Ref.current?.getBoundingClientRect();
+      const section5 = section3Ref.current?.getBoundingClientRect();
 
       if (section5 && section5.top < 300) {
         setState({ activeStep: 5 });
@@ -241,11 +236,36 @@ export default function Newjob() {
   };
 
   const handleSubmit = async () => {
-    const savedData = await state.editorInstance?.save();
+    const savedData = await state?.editorInstance?.save();
+    console.log("✌️savedData --->", savedData);
     const keyResponsibilityData =
       await state.keyResponsibilityEditorInstance?.save();
+    console.log("✌️keyResponsibilityData --->", keyResponsibilityData);
+
     const professionalSkillsData =
       await state.professionalSkillsEditorInstance?.save();
+    console.log("✌️professionalSkillsData --->", professionalSkillsData);
+    const valid = {
+      title: state.title,
+      company: state.company,
+      location: state.location,
+      address: state.address,
+      institution: state.institution,
+      college: state.college,
+      department: state.department,
+      jobType: state.jobType,
+      salary: state.salary,
+      deadline: state.deadline,
+      startDate: state.startDate,
+      endDate: state.endDate,
+      numberOfOpenings: state.numberOfOpenings,
+      experience: state.experience?.value,
+      qualification: state.qualification,
+      keyResponsibility: keyResponsibilityData,
+      professionalSkills: professionalSkillsData,
+      jobDescription: savedData,
+    };
+    console.log("✌️valid --->", valid);
 
     try {
       await CreateNewJob.validate(
@@ -263,29 +283,38 @@ export default function Newjob() {
           startDate: state.startDate,
           endDate: state.endDate,
           numberOfOpenings: state.numberOfOpenings,
-          experience: state.experience,
+          experience: state.experience?.value,
           qualification: state.qualification,
+          keyResponsibility: keyResponsibilityData,
+          professionalSkills: professionalSkillsData,
+          jobDescription: savedData,
         },
-        { abortEarly: false }
+        { abortEarly: false },
       );
 
-      console.log({
-        title: state.title,
+      const body = {
+        job_title: state.title,
+        job_description: savedData,
+        college: state.college?.value,
         company: state.company,
+        job_type: state.jobType?.value,
+        experiences: state.experience?.value,
+        qualification: state.qualification,
+        salary_range: state.salary,
         location: state.location,
         address: state.address,
-        jobType: state.jobType?.value,
-        salary: state.salary,
-        deadline: state.deadline,
-        startDate: state.startDate,
-        endDate: state.endDate,
-        numberOfOpenings: state.numberOfOpenings,
+        number_of_openings: Number(state.numberOfOpenings),
+        last_date: toISO(state.endDate),
+        job_status: "draft",
+        deadline: toISO(state.deadline),
+        start_date: toISO(state.startDate),
         keyResponsibility: keyResponsibilityData,
         professionalSkills: professionalSkillsData,
-        qualification: state.qualification,
-        experience: state.experience,
-        description: savedData,
-      });
+      };
+      console.log("✌️body --->", body);
+
+      const res = await Models.job.create(body);
+      console.log("✌️res --->", res);
 
       setState({ error: {} });
     } catch (err: any) {
@@ -294,6 +323,8 @@ export default function Newjob() {
         err.inner.forEach((error: any) => {
           errors[error.path] = error.message;
         });
+        console.log("✌️errors --->", errors);
+
         setState({ error: errors });
       }
     }
@@ -610,63 +641,61 @@ export default function Newjob() {
             </div>
             <div className="p-6">
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-2">
-                  <CustomSelect
-                    title="Institution"
-                    options={state.institutionList}
-                    value={state.institution}
-                    onChange={(option) =>
-                      handleFieldChange("institution", option)
-                    }
-                    placeholder="Select institution"
-                    error={state.error?.institution}
-                    loadMore={() =>
-                      state.institutionHasMore &&
-                      fetchInstitutions(state.institutionPage + 1)
-                    }
-                    required
-                  />
+                <CustomSelect
+                  title="Institution"
+                  options={state.institutionList}
+                  value={state.institution}
+                  onChange={(option) =>
+                    handleFieldChange("institution", option)
+                  }
+                  placeholder="Select institution"
+                  error={state.error?.institution}
+                  loadMore={() =>
+                    state.institutionHasMore &&
+                    fetchInstitutions(state.institutionPage + 1)
+                  }
+                  required
+                />
 
-                  <CustomSelect
-                    title="College"
-                    options={state.collegeList}
-                    value={state.college}
-                    onChange={(option) => handleFieldChange("college", option)}
-                    placeholder="Select college"
-                    error={state.error?.college}
-                    disabled={!state.institution}
-                    loadMore={() =>
-                      state.collegeHasMore &&
-                      fetchColleges(
-                        state.institution?.value,
-                        state.collegePage + 1
-                      )
-                    }
-                    required
-                  />
+                <CustomSelect
+                  title="College"
+                  options={state.collegeList}
+                  value={state.college}
+                  onChange={(option) => handleFieldChange("college", option)}
+                  placeholder="Select college"
+                  error={state.error?.college}
+                  disabled={!state.institution}
+                  loadMore={() =>
+                    state.collegeHasMore &&
+                    fetchColleges(
+                      state.institution?.value,
+                      state.collegePage + 1,
+                    )
+                  }
+                  required
+                />
 
-                  <CustomSelect
-                    title="Department"
-                    options={state.departmentList}
-                    value={state.department}
-                    onChange={(option) =>
-                      handleFieldChange("department", option)
-                    }
-                    placeholder="Select department"
-                    error={state.error?.department}
-                    disabled={!state.college || !state.institution}
-                    loadMore={() =>
-                      state.departmentHasMore &&
-                      fetchDepartments(
-                        state.college?.value,
-                        state.departmentPage + 1
-                      )
-                    }
-                    required
-                  />
+                <CustomSelect
+                  title="Department"
+                  options={state.departmentList}
+                  value={state.department}
+                  onChange={(option) => handleFieldChange("department", option)}
+                  placeholder="Select department"
+                  error={state.error?.department}
+                  disabled={!state.college || !state.institution}
+                  loadMore={() =>
+                    state.departmentHasMore &&
+                    fetchDepartments(
+                      state.college?.value,
+                      state.departmentPage + 1,
+                    )
+                  }
+                  required
+                />
 
                 <CustomSelect
                   title="Job Type"
-                  options={jobTypeOptions}
+                  options={JOB_TYPE}
                   value={state.jobType}
                   onChange={(option) => handleFieldChange("jobType", option)}
                   placeholder="Select job type"
@@ -678,7 +707,7 @@ export default function Newjob() {
                   name="salary"
                   type="text"
                   title="Salary Range"
-                  placeholder="$80k - $120k"
+                  placeholder="₹80k - ₹120k"
                   value={state.salary}
                   onChange={(e) => handleFieldChange("salary", e.target.value)}
                   error={state.error?.salary}
@@ -714,6 +743,7 @@ export default function Newjob() {
                   value={state.endDate}
                   onChange={(e) => handleFieldChange("endDate", e.target.value)}
                   error={state.error?.endDate}
+                  required
                 />
 
                 <TextInput
@@ -729,7 +759,7 @@ export default function Newjob() {
                   required
                 />
 
-                <TextInput
+                {/* <TextInput
                   name="experience"
                   type="text"
                   title="Experience"
@@ -738,6 +768,16 @@ export default function Newjob() {
                   onChange={(e) =>
                     handleFieldChange("experience", e.target.value)
                   }
+                  error={state.error?.experience}
+                  required
+                /> */}
+
+                <CustomSelect
+                  title="Experience"
+                  options={EXPERIENCE}
+                  value={state.experience}
+                  onChange={(option) => handleFieldChange("experience", option)}
+                  placeholder="Select Experience"
                   error={state.error?.experience}
                   required
                 />
@@ -757,6 +797,42 @@ export default function Newjob() {
                   required
                 />
               </div>
+            </div>
+          </div>
+          <div
+            ref={section5Ref}
+            className="scroll-mt-32 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+          >
+            <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-4">
+              <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                  />
+                </svg>
+                Job Description
+              </h2>
+            </div>
+            <div className="p-6">
+              <TextArea
+                name="qualification"
+                placeholder="Job descriptions..."
+                value={state.qualification}
+                onChange={(e) =>
+                  handleFieldChange("qualification", e.target.value)
+                }
+                error={state.error?.qualification}
+                rows={10}
+                required
+              />
             </div>
           </div>
 
@@ -791,9 +867,11 @@ export default function Newjob() {
                   className="max-h-[400px] min-h-[250px] overflow-y-auto p-4"
                 ></div>
               </div>
-              <p className="mt-3 text-xs text-gray-500">
-                💡 Use lists to organize responsibilities
-              </p>
+              {state.error?.keyResponsibility && (
+                <p className="mt-2 text-sm text-red-600">
+                  {state.error.keyResponsibility}
+                </p>
+              )}
             </div>
           </div>
 
@@ -828,48 +906,16 @@ export default function Newjob() {
                   className="max-h-[400px] min-h-[250px] overflow-y-auto p-4"
                 ></div>
               </div>
-              <p className="mt-3 text-xs text-gray-500">
-                💡 Use lists to organize required skills
-              </p>
+              {state.error?.professionalSkills && (
+                <p className="mt-2 text-sm text-red-600">
+                  {state.error.professionalSkills}
+                </p>
+              )}
             </div>
           </div>
 
           {/* Card 5: Description */}
-          <div
-            ref={section5Ref}
-            className="scroll-mt-32 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
-          >
-            <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-4">
-              <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                  />
-                </svg>
-                Job Description
-              </h2>
-            </div>
-            <div className="p-6">
-              <div className="overflow-hidden rounded-lg border-2 border-dashed border-gray-300 transition-colors hover:border-purple-400">
-                <div
-                  ref={editorRef}
-                  id="editorjs"
-                  className="max-h-[500px] min-h-[300px] overflow-y-auto p-4"
-                ></div>
-              </div>
-              <p className="mt-3 text-xs text-gray-500">
-                💡 Use headers, lists, and tables to structure your content
-              </p>
-            </div>
-          </div>
+          
 
           {/* Action Buttons */}
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">

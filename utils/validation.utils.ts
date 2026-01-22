@@ -161,4 +161,52 @@ export const CreateNewJob = Yup.object().shape({
     .required("Number of openings is required"),
   experience: Yup.string().required("Experience is required"),
   qualification: Yup.string().required("Qualification is required"),
+  keyResponsibility: Yup.object()
+    .test('has-blocks', 'Key responsibilities are required', (value: any) => {
+      if (!value || !value.blocks || !Array.isArray(value.blocks) || value.blocks.length === 0) {
+        return false;
+      }
+      return value.blocks.some((block: any) => {
+        if (block.type === 'list' && block.data && block.data.items && Array.isArray(block.data.items)) {
+          return block.data.items.some((item: string) => item && item.trim().length > 0);
+        }
+        if (block.data && block.data.text) {
+          return block.data.text.trim().length > 0;
+        }
+        return false;
+      });
+    })
+    .required("Key responsibilities are required"),
+  professionalSkills: Yup.object()
+    .test('has-blocks', 'Professional skills are required', (value: any) => {
+      if (!value || !value.blocks || !Array.isArray(value.blocks) || value.blocks.length === 0) {
+        return false;
+      }
+      return value.blocks.some((block: any) => {
+        if (block.type === 'list' && block.data && block.data.items && Array.isArray(block.data.items)) {
+          return block.data.items.some((item: string) => item && item.trim().length > 0);
+        }
+        if (block.data && block.data.text) {
+          return block.data.text.trim().length > 0;
+        }
+        return false;
+      });
+    })
+    .required("Professional skills are required"),
+  jobDescription: Yup.object()
+    .test('has-blocks', 'Job description is required', (value: any) => {
+      if (!value || !value.blocks || !Array.isArray(value.blocks) || value.blocks.length === 0) {
+        return false;
+      }
+      return value.blocks.some((block: any) => {
+        if (block.type === 'list' && block.data && block.data.items && Array.isArray(block.data.items)) {
+          return block.data.items.some((item: string) => item && item.trim().length > 0);
+        }
+        if (block.data && block.data.text) {
+          return block.data.text.trim().length > 0;
+        }
+        return false;
+      });
+    })
+    .required("Job description is required"),
 });
