@@ -29,15 +29,15 @@ export const menuConfig = {
       type: "link",
       icon: "IconMenuNotes",
       label: "Colleges & Departments",
-      href: "/faculty/college_and_department",
+      href: "/faculty/admin_college_and_departments",
     },
 
-    {
-      type: "link",
-      icon: "IconMenuUsers",
-      label: "Users",
-      href: "/faculty/users",
-    },
+    // {
+    //   type: "link",
+    //   icon: "IconMenuUsers",
+    //   label: "Users",
+    //   href: "/faculty/users",
+    // },
 
     // {
     //   type: "link",
@@ -79,15 +79,15 @@ export const menuConfig = {
       type: "link",
       icon: "IconMenuNotes",
       label: "Colleges & Departments",
-      href: "/faculty/college_and_department",
+      href: "/faculty/institute_college_and_departments",
     },
 
-    {
-      type: "link",
-      icon: "IconMenuUsers",
-      label: "Users",
-      href: "/faculty/users",
-    },
+    // {
+    //   type: "link",
+    //   icon: "IconMenuUsers",
+    //   label: "Users",
+    //   href: "/faculty/my_users",
+    // },
 
     {
       type: "link",
@@ -121,16 +121,16 @@ export const menuConfig = {
     {
       type: "link",
       icon: "IconMenuNotes",
-      label: "Colleges & Departments",
-      href: "/faculty/college_and_department",
+      label: "Departments",
+      href: "/faculty/departments",
     },
 
-    {
-      type: "link",
-      icon: "IconMenuUsers",
-      label: "Users",
-      href: "/faculty/users",
-    },
+    // {
+    //   type: "link",
+    //   icon: "IconMenuUsers",
+    //   label: "Users",
+    //   href: "/faculty/users",
+    // },
 
     {
       type: "link",
@@ -152,7 +152,6 @@ export const menuConfig = {
       href: "/",
     },
   ],
-
   hod: [
     {
       type: "link",
@@ -161,6 +160,20 @@ export const menuConfig = {
       href: "/",
     },
 
+    // {
+    //   type: "link",
+    //   icon: "IconMenuNotes",
+    //   label: "Departments",
+    //   href: "/faculty/departments",
+    // },
+
+    // {
+    //   type: "link",
+    //   icon: "IconMenuUsers",
+    //   label: "Users",
+    //   href: "/faculty/users",
+    // },
+
     {
       type: "link",
       icon: "IconMenuForms",
@@ -180,7 +193,9 @@ export const menuConfig = {
       label: "Reports",
       href: "/",
     },
-  ],
+  ]
+
+ 
 };
 
 export const OwnmenuConfig = {
@@ -202,15 +217,15 @@ export const OwnmenuConfig = {
       type: "link",
       icon: "IconMenuNotes",
       label: "Colleges & Departments",
-      href: "/faculty/my_college_and_department",
+      href: "/faculty/admin_college_and_department",
     },
 
-    // {
-    //   type: "link",
-    //   icon: "IconMenuUsers",
-    //   label: "Users",
-    //   href: "/faculty/users",
-    // },
+    {
+      type: "link",
+      icon: "IconMenuUsers",
+      label: "Users",
+      href: "/faculty/my_users",
+    },
 
     // {
     //   type: "link",
@@ -252,9 +267,14 @@ export const OwnmenuConfig = {
       type: "link",
       icon: "IconMenuNotes",
       label: "Colleges & Departments",
-      href: "/faculty/my_college_and_department",
+      href: "/faculty/institute_college_and_department",
     },
-
+    {
+      type: "link",
+      icon: "IconMenuUsers",
+      label: "Users",
+      href: "/faculty/my_users",
+    },
 
     {
       type: "link",
@@ -288,10 +308,15 @@ export const OwnmenuConfig = {
     {
       type: "link",
       icon: "IconMenuNotes",
-      label: "Colleges & Departments",
-      href: "/faculty/my_college_and_department",
+      label: "Departments",
+      href: "/faculty/my_department",
     },
-
+    {
+      type: "link",
+      icon: "IconMenuUsers",
+      label: "Users",
+      href: "/faculty/my_users",
+    },
   
     {
       type: "link",
@@ -321,12 +346,24 @@ export const OwnmenuConfig = {
       label: "dashboard",
       href: "/",
     },
+    //   {
+    //   type: "link",
+    //   icon: "IconMenuNotes",
+    //   label: "Departments",
+    //   href: "/faculty/hr_department",
+    // },
+    {
+      type: "link",
+      icon: "IconMenuUsers",
+      label: "Users",
+      href: "/faculty/my_users",
+    },
 
     {
       type: "link",
       icon: "IconMenuForms",
       label: "Job Postings",
-      href: "/faculty/job",
+      href: "/faculty/my_job",
     },
 
     {

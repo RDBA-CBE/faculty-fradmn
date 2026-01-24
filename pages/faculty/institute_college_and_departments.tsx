@@ -86,11 +86,6 @@ const CollegeAndDepartment = () => {
     hod_qualification: "",
     showHODPassword: false,
     showHODConfirmPassword: false,
-    // Institution dropdown specific states
-    institutionDropdownList: [],
-    institutionDropLoading: false,
-    institutionDropPage: 1,
-    institutionDropNext: null,
 
     errors: {},
     editId: null,
@@ -117,7 +112,6 @@ const CollegeAndDepartment = () => {
   useEffect(() => {
     dispatch(setPageTitle("Colleges & Departments"));
     institutionList(1);
-    institutionDropdownInit(1); // Initialize dropdown separately
   }, [dispatch]);
 
   useEffect(() => {
@@ -135,42 +129,9 @@ const CollegeAndDepartment = () => {
     } else {
       deptList(1);
     }
-  }, [
-    debounceSearch,
-    state.statusFilter,
-    state.sortBy,
-    state.institutionFilter,
-    state.collegeFilter,
-  ]);
+  }, [debounceSearch, state.statusFilter, state.sortBy]);
 
   const institutionList = async (page, search = "", loadMore = false) => {
-    try {
-      setState({ institutionLoading: true });
-      const body = { search };
-      console.log("✌️body --->", body);
-
-      const res: any = await Models.institution.list(page, body);
-      console.log("institutionList --->", res);
-
-      const dropdown = Dropdown(res?.results, "institution_name");
-      console.log("✌️dropdown --->", dropdown);
-
-      setState({
-        institutionLoading: false,
-        institutionPage: page,
-        institutionList: loadMore
-          ? [...state.institutionList, ...dropdown]
-          : dropdown,
-        institutionNext: res?.next,
-        institutionPrev: res?.previous,
-      });
-    } catch (error) {
-      console.error("Error fetching institutions:", error);
-      setState({ institutionLoading: false });
-    }
-  };
-
-  const institutionListFilter = async (page, search = "", loadMore = false) => {
     try {
       setState({ institutionLoading: true });
       const body = { search };
@@ -204,6 +165,7 @@ const CollegeAndDepartment = () => {
     seletedInstitution = null
   ) => {
     try {
+
       setState({ collegeLoading: true });
       const body: any = { search };
       if (seletedInstitution) {
@@ -227,28 +189,29 @@ const CollegeAndDepartment = () => {
     }
   };
 
-  const institutionDropdownInit = async (
+  const institutionDropdownList = async (
     page,
     search = "",
     loadMore = false
   ) => {
     try {
-      setState({ institutionDropLoading: true });
+      setState({ institutionLoading: true });
       const body = { search };
+
       const res: any = await Models.institution.list(page, body);
       const dropdown = Dropdown(res?.results, "institution_name");
 
       setState({
-        institutionDropLoading: false,
-        institutionDropPage: page,
+        institutionLoading: false,
+        institutionPage: page,
         institutionDropdownList: loadMore
           ? [...state.institutionDropdownList, ...dropdown]
           : dropdown,
-        institutionDropNext: res?.next,
+        institutionNext: res?.next,
       });
     } catch (error) {
-      console.error("Error fetching institutions for dropdown:", error);
-      setState({ institutionDropLoading: false });
+      console.error("Error fetching institutions:", error);
+      setState({ institutionLoading: false });
     }
   };
 
@@ -259,6 +222,7 @@ const CollegeAndDepartment = () => {
       if (institutionId) {
         body.institution = institutionId?.value;
       }
+
       const res: any = await Models.college.list(page, body);
       const dropdown = Dropdown(res?.results, "college_name");
 
@@ -376,7 +340,6 @@ const CollegeAndDepartment = () => {
       showHODConfirmPassword: false,
       errors: {},
       editId: null,
-      institutionDept: null,
     });
   };
 
@@ -396,20 +359,6 @@ const CollegeAndDepartment = () => {
     if (state.search) {
       body.search = state.search;
     }
-
-    if (state.institutionFilter?.value) {
-      body.institution = state.institutionFilter?.value;
-    }
-
-    if (state.collegeFilter?.value) {
-      body.college = state.collegeFilter?.value;
-    }
-
-    if (state.collegeFilter?.value) {
-      body.college = state.collegeFilter?.value;
-    }
-
-    body.Is_publish = "No";
 
     if (state.sortBy) {
       body.ordering =
@@ -431,7 +380,7 @@ const CollegeAndDepartment = () => {
         college_email: row.college_email,
         college_phone: row.college_phone,
         college_address: row.college_address || "",
-        institutionDept: {
+        institution: {
           value: row?.institution_id,
           label: row.institution_name,
         },
@@ -443,7 +392,7 @@ const CollegeAndDepartment = () => {
         showModal: true,
         department_name: row.department_name,
         department_code: row.department_code,
-        institutionDept: {
+        institution: {
           value: row?.institution_id,
           label: row.institution_name,
         },
@@ -998,11 +947,15 @@ const CollegeAndDepartment = () => {
         institution: state?.institution?.value,
       };
 
+      console.log("✌️body --->", body);
+
       await CreateCollege.validate(body, { abortEarly: false });
       const res = await Models.college.update(body, state.editId);
+      console.log("✌️res --->", res);
       collegeList(1);
       handleCloseModal();
     } catch (error) {
+      console.log("✌️error --->", error);
       if (error?.response?.data) {
         const apiErrors = {};
         Object.keys(error.response.data).forEach((field) => {
@@ -1014,16 +967,6 @@ const CollegeAndDepartment = () => {
         });
         setState({ errors: apiErrors });
         return;
-      } else {
-        if (error?.inner) {
-          const errors = {};
-          error.inner.forEach((err) => {
-            errors[err.path] = err.message;
-          });
-          setState({ errors });
-          console.log("✌️errors --->", errors);
-          return; // Stop execution if validation fails
-        }
       }
       Failure(error?.message || "Operation failed. Please try again.");
     }
@@ -1099,42 +1042,35 @@ const CollegeAndDepartment = () => {
       </div>
     </div>
   );
+  console.log("✌️collegeDropdownList --->", state.collegeDropdownList);
 
   const renderDepartmentForm = () => (
     <div className="space-y-6">
       {state.activeTab === "departments" && (
         <>
           <CustomSelect
-            options={state.institutionDropdownList}
-            value={state.institutionDept}
+            options={state.institutionList}
+            value={state.institution}
             onChange={(selectedOption) => {
               if (selectedOption) {
                 setState({
-                  institutionDept: selectedOption,
+                  institution: selectedOption,
                   errors: { ...state.errors, institution: "" },
                   seletedInstitution: selectedOption,
-                  college: null,
                 });
                 collegeList(1, selectedOption);
-              } else {
-                setState({
-                  institutionDept: null,
-                  seletedInstitution: selectedOption,
-                  college: null,
-                  collegeDropdownList: [],
-                });
               }
             }}
-            onSearch={(searchTerm) => institutionDropdownInit(1, searchTerm)}
+            onSearch={(searchTerm) => institutionDropdownList(1, searchTerm)}
             placeholder="Select Institution"
             isClearable={true}
             loadMore={() =>
-              state.institutionDropNext &&
-              institutionDropdownInit(state.institutionDropPage + 1, "", true)
+              state.institutionNext &&
+              institutionDropdownList(state.instituitonPage + 1, "", true)
             }
-            loading={state.institutionDropLoading}
+            loading={state.instituitonLoading}
             title="Select Institution"
-            error={state.errors.institution}
+            error={state.errors.instituiton}
             required
           />
           <CustomSelect
@@ -1493,22 +1429,13 @@ const CollegeAndDepartment = () => {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
             <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-3xl font-bold text-transparent">
-              Colleges & Departments
+              Team Colleges & Departments
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
               Manage colleges and departments
             </p>
           </div>
-          <button
-            onClick={() => setState({ showModal: true })}
-            className="group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
-            <IconPlus className="relative z-10 h-5 w-5" />
-            <span className="relative z-10">
-              Add {state.activeTab === "colleges" ? "College" : "Department"}
-            </span>
-          </button>
+          
         </div>
       </div>
 
@@ -1555,71 +1482,26 @@ const CollegeAndDepartment = () => {
               className="transition-all duration-200 focus:shadow-lg group-hover:shadow-md"
             />
           </div>
-          {state.activeTab == "colleges" ? (
-            <>
-              <div className="group relative z-50">
-                <CustomSelect
-                  options={state.institutionList}
-                  value={state.institutionFilter}
-                  onChange={(selectedOption) => {
-                    setState({
-                      institutionFilter: selectedOption,
-                      errors: { ...state.errors, institution: "" },
-                    });
-                  }}
-                  onSearch={(searchTerm) =>
-                    institutionListFilter(1, searchTerm)
-                  }
-                  placeholder="Select Institution"
-                  isClearable={true}
-                  loadMore={() =>
-                    state.institutionNext &&
-                    institutionList(state.institutionPage + 1, "", true)
-                  }
-                  loading={state.institutionLoading}
-                />
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="group relative z-50">
-                <CustomSelect
-                  options={state.collegeDropdownList}
-                  value={state.collegeFilter}
-                  onChange={(selectedOption) =>
-                    setState({
-                      collegeFilter: selectedOption,
-                      errors: { ...state.errors, college: "" },
-                    })
-                  }
-                  onSearch={(searchTerm) =>
-                    collegeDropdownList(1, searchTerm, state.seletedInstitution)
-                  }
-                  placeholder="Select College"
-                  isClearable={true}
-                  loadMore={() =>
-                    state.collegeNext &&
-                    collegeDropdownList(
-                      state.collegePage + 1,
-                      "",
-                      true,
-                      state.seletedInstitution
-                    )
-                  }
-                  loading={state.collegeLoading}
-                />
-              </div>
-            </>
-          )}
-          {/* <div className="group relative z-50">
+          <div className="group relative z-50">
             <CustomSelect
               options={statusOptions}
               value={state.statusFilter}
               onChange={handleStatusChange}
-              placeholder="Filter by Status"
+              placeholder="Select HR"
               isClearable={true}
             />
-          </div> */}
+          </div>
+          {state.activeTab === "departments" && (
+           <div className="group relative z-50">
+            <CustomSelect
+              options={statusOptions}
+              value={state.statusFilter}
+              onChange={handleStatusChange}
+              placeholder="Select HOD"
+              isClearable={true}
+            />
+          </div>
+          )}
         </div>
       </div>
 

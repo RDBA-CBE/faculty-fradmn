@@ -48,6 +48,7 @@ const TextInput: React.FC<TextInputProps> = ({
           value={value}
           onChange={onChange}
           placeholder={placeholder}
+          autoComplete="off"
           name={name}
           className={`form-input w-full rounded-md border px-3 py-2 outline-none focus:ring-2 focus:ring-primary ${
             error ? "border-red-500" : "border-gray-300"

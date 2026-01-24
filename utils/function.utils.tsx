@@ -547,3 +547,32 @@ export const formatPriceRange = (
 
   return `${formattedMin} - ${formattedMax}`;
 };
+
+
+export const parseApiError = (error: any): string => {
+  if (error?.response?.data?.error) {
+    const serverError = error.response.data.error;
+    
+    // Handle MySQL duplicate entry errors
+    if (serverError.includes("Duplicate entry")) {
+      if (serverError.includes("email")) {
+        const emailMatch = serverError.match(/'([^']+)' for key/);
+        const email = emailMatch ? emailMatch[1] : "this email";
+        return `Email '${email}' is already registered. Please use a different email.`;
+      }
+      if (serverError.includes("username")) {
+        return "This username is already taken. Please choose a different one.";
+      }
+      return "Duplicate entry detected. This data already exists.";
+    }
+    
+    // Return the clean error message
+    return serverError;
+  }
+  
+  if (error?.message?.includes("Network Error")) {
+    return "Network error. Please check your connection.";
+  }
+  
+  return "An error occurred. Please try again.";
+};

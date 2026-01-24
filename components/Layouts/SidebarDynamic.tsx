@@ -142,14 +142,14 @@ const SidebarDynamic = () => {
     });
 
   const getUserMenu = () => {
-    if (!group) return menuConfig.admin;
-    return menuConfig[group] || menuConfig.default;
+    if (!group) return menuConfig?.admin;
+    return menuConfig?.[group] || menuConfig.default;
   };
 
 
     const getOwnMenu = () => {
     if (!group) return OwnmenuConfig.admin;
-    return OwnmenuConfig[group] || OwnmenuConfig.default;
+    return OwnmenuConfig?.[group] || OwnmenuConfig.default;
   };
 
   return (
@@ -190,6 +190,7 @@ const SidebarDynamic = () => {
               {getOwnMenu()?.length > 0 && renderMenu(getOwnMenu())}
 
             </ul>
+            <>
             <span className="align-middle text-xl font-semibold dark:text-white-light lg:inline ltr:ml-1.5 rtl:mr-1.5">
               {t("Team")}
             </span>
@@ -197,6 +198,7 @@ const SidebarDynamic = () => {
               {getUserMenu()?.length > 0 && renderMenu(getUserMenu())}
 
             </ul>
+            </>
           </PerfectScrollbar>
         </div>
       </nav>
