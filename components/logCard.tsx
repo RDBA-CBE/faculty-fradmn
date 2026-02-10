@@ -1,55 +1,16 @@
-import React, { useState, useRef, useEffect } from "react";
+import React from "react";
 import moment from "moment";
 import IconEdit from "./Icon/IconEdit";
 import Tippy from "@tippyjs/react";
 import ReadMore from "./readMore";
 import { capitalizeFLetter, getFileNameFromUrl } from "@/utils/function.utils";
-import { Send } from "lucide-react";
 
 const LogCard = (props: any) => {
-  const { data, onEdit, onDelete, editIcon, onSendMessage, title, onClose } = props;
-console.log('✌️data --->', data);
-  const [message, setMessage] = useState("");
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [data]);
-
-  const handleSend = () => {
-    if (message.trim() && onSendMessage) {
-      onSendMessage(message.trim());
-      setMessage("");
-    }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
+  const { data, onEdit, onDelete, editIcon } = props;
 
   return (
-    <div className="flex h-[600px] flex-col p-5">
-      {title && (
-        <div className="mb-4 border-b pb-3 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-800 dark:text-white">{title}</h2>
-          {onClose && (
-            <button
-              onClick={onClose}
-              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-            >
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          )}
-        </div>
-      )}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto mb-5">
+    <div className="w-full ">
+      <div className="mb-5">
         <div className="mx-auto max-w-[900px]">
           {data?.map((item) => (
             <div className="flex">
@@ -133,28 +94,6 @@ console.log('✌️data --->', data);
               </div>
             </div>
           ))}
-        </div>
-      </div>
-
-      {/* Fixed Textarea and Send Button */}
-      <div className="border-t bg-white p-4">
-        <div className="flex items-end gap-2">
-          <textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Type your message..."
-            className="flex-1 resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            rows={2}
-          />
-          <button
-            onClick={handleSend}
-            disabled={!message.trim()}
-            className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 text-white transition-colors hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-            title="Send message"
-          >
-            <Send className="h-5 w-5" />
-          </button>
         </div>
       </div>
     </div>

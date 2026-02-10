@@ -63,7 +63,7 @@ export const instance = (): AxiosInstance => {
       console.log('✌️error --->', error);
 
       if (
-        error.response?.data?.error === "invalid or expired token" ||  error.response?.data?.error === "unauthorized" &&
+        error.response?.data?.error === "invalid or expired token" &&
         !originalRequest._retry
       ) {
         originalRequest._retry = true;
