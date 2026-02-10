@@ -155,13 +155,18 @@ export const CreateDepartment = Yup.object().shape({
 export const CreateNewJob = Yup.object().shape({
   title: Yup.string().required("Job title is required"),
   company: Yup.string().required("Company name is required"),
-  location: Yup.string().required("Location is required"),
-  address: Yup.string().required("Address is required"),
+  location: Yup.array()
+    .min(1, "At least one location is required")
+    .required("Location is required"),
   institution: Yup.object().nullable().required("Institution is required"),
   college: Yup.object().nullable().required("College is required"),
   department: Yup.object().nullable().required("Department is required"),
-  jobType: Yup.object().nullable().required("Job type is required"),
+  jobType: Yup.string().required("Job type is required"),
   salary: Yup.string().required("Salary range is required"),
+  category: Yup.array()
+    .min(1, "At least one category is required")
+    .required("Category is required"),
+  priority: Yup.string().required("Priority is required"),
   deadline: Yup.string().required("Deadline is required"),
   startDate: Yup.string().required("Start date is required"),
   endDate: Yup.string().required("End date is required"),
@@ -187,36 +192,10 @@ export const CreateNewJob = Yup.object().shape({
       });
     })
     .required("Key responsibilities are required"),
-  professionalSkills: Yup.object()
-    .test('has-blocks', 'Professional skills are required', (value: any) => {
-      if (!value || !value.blocks || !Array.isArray(value.blocks) || value.blocks.length === 0) {
-        return false;
-      }
-      return value.blocks.some((block: any) => {
-        if (block.type === 'list' && block.data && block.data.items && Array.isArray(block.data.items)) {
-          return block.data.items.some((item: string) => item && item.trim().length > 0);
-        }
-        if (block.data && block.data.text) {
-          return block.data.text.trim().length > 0;
-        }
-        return false;
-      });
-    })
-    .required("Professional skills are required"),
-  jobDescription: Yup.object()
-    .test('has-blocks', 'Job description is required', (value: any) => {
-      if (!value || !value.blocks || !Array.isArray(value.blocks) || value.blocks.length === 0) {
-        return false;
-      }
-      return value.blocks.some((block: any) => {
-        if (block.type === 'list' && block.data && block.data.items && Array.isArray(block.data.items)) {
-          return block.data.items.some((item: string) => item && item.trim().length > 0);
-        }
-        if (block.data && block.data.text) {
-          return block.data.text.trim().length > 0;
-        }
-        return false;
-      });
-    })
-    .required("Job description is required"),
+  skills: Yup.array()
+    .min(1, "At least one skill is required")
+    .required("Skills are required"),
+  company_detail: Yup.string().required("Company detail is required"),
+  job_status: Yup.string().required("Job status is required"),
+  description: Yup.string().required("Job description is required"),
 });

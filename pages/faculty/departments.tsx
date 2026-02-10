@@ -177,8 +177,6 @@ const CollegeAndDepartment = () => {
     }
   };
 
- 
-
   const collegeList = async (page, institutionId = null) => {
     try {
       setState({ loading: true });
@@ -256,8 +254,6 @@ const CollegeAndDepartment = () => {
     collegeList(pageNumber);
   };
 
-
-
   const handleCloseModal = () => {
     setState({
       showModal: false,
@@ -306,23 +302,17 @@ const CollegeAndDepartment = () => {
   const collegeBodyData = () => {
     const body: any = {};
 
+    const userId = localStorage.getItem("userId");
+
     if (state.search) {
       body.search = state.search;
     }
 
-    if (state.institutionFilter?.value) {
-      body.institution = state.institutionFilter?.value;
+    if (userId) {
+      body.created_by = userId;
     }
 
-    if (state.collegeFilter?.value) {
-      body.college = state.collegeFilter?.value;
-    }
-
-    if (state.collegeFilter?.value) {
-      body.college = state.collegeFilter?.value;
-    }
-
-    body.Is_publish = "No";
+    body.team = "Yes";
 
     if (state.sortBy) {
       body.ordering =
@@ -335,24 +325,24 @@ const CollegeAndDepartment = () => {
 
   const handleEdit = (row) => {
     console.log("✌️row --->", row);
-  
-      setState({
-        editId: row.id,
-        showModal: true,
-        department_name: row.department_name,
-        department_code: row.department_code,
-        institutionDept: {
-          value: row?.institution_id,
-          label: row.institution_name,
-        },
-        // department_email: row.department_email,
-        // department_phone: row.department_phone,
-        // department_head: row.department_head,
-        college: {
-          value: row?.college_id,
-          label: row.college_name,
-        },
-      });
+
+    setState({
+      editId: row.id,
+      showModal: true,
+      department_name: row.department_name,
+      department_code: row.department_code,
+      institutionDept: {
+        value: row?.institution_id,
+        label: row.institution_name,
+      },
+      // department_email: row.department_email,
+      // department_phone: row.department_phone,
+      // department_head: row.department_head,
+      college: {
+        value: row?.college_id,
+        label: row.college_name,
+      },
+    });
   };
 
   const handleToggleStatus = async (row) => {
@@ -415,15 +405,14 @@ const CollegeAndDepartment = () => {
   const bulkDeleteRecords = async () => {
     try {
       for (const id of state.selectedRecords) {
-       
-          await Models.department.delete(id);
+        await Models.department.delete(id);
       }
       Success(
         `${state.selectedRecords.length} ${state.activeTab} deleted successfully!`
       );
       setState({ selectedRecords: [] });
-    
-        deptList(state.page);
+
+      deptList(state.page);
     } catch (error) {
       Failure(`Failed to delete ${state.activeTab}. Please try again.`);
     }
@@ -587,6 +576,7 @@ const CollegeAndDepartment = () => {
           department_name: state.department_name,
           department_code: state.department_code,
           college: state.college?.value,
+          institution: state?.profile_institution?.id,
         };
 
         // Validate all department fields at once
@@ -618,245 +608,13 @@ const CollegeAndDepartment = () => {
         // Clear errors if validation passes
         setState({ errors: {} });
 
-        if (state.college?.value) {
-          const res: any = await Models.college.details(state.college?.value);
-          body.institution = res?.institution;
-        }
-
-        console.log("✌️department body --->", body);
-
         if (state.editId) {
           const res = await Models.department.update(body, state.editId);
           Success("Department updated successfully!");
-        } else {
-          const res = await Models.department.create(body);
-          Success("Department created successfully!");
         }
 
         deptList(state.page);
         handleCloseModal();
-        return;
-      }
-
-      // College wizard flow
-      if (state.currentStep === 1) {
-        const body = {
-          college_name: state.college_name,
-          college_code: state.college_code,
-          college_email: state.college_email,
-          college_phone: state.college_phone,
-          college_address: state.college_address,
-          institution: state?.institution?.value,
-        };
-
-        try {
-          await CreateCollege.validate(body, { abortEarly: false });
-          setState({ errors: {} });
-        } catch (validationError: any) {
-          const errors = {};
-          validationError.inner.forEach((error: any) => {
-            errors[error.path] = error.message;
-          });
-          setState({ errors });
-          return;
-        }
-
-        if (state.editId) {
-          const res = await Models.college.update(body, state.editId);
-          Success("College updated successfully!");
-          handleCloseModal();
-        } else {
-          // Just validate and move to next step, don't create college yet
-          // Success("College details saved!");
-
-          // Move to next step without creating college
-          setState({
-            currentStep: 2,
-            completedSteps: [1],
-            errors: {},
-          });
-          return; // Don't close modal, move to step 2
-        }
-      } else if (state.currentStep === 2) {
-        // Validate department details and move to step 3
-        if (!state.department_name || !state.department_code) {
-          setState({
-            errors: {
-              department_name: "Department name is required",
-              department_code: "Department code is required",
-            },
-          });
-          return;
-        }
-
-        // Success("Department details saved!");
-        setState({
-          currentStep: 3,
-          completedSteps: [1, 2],
-          errors: {},
-        });
-      } else if (state.currentStep === 3) {
-        // Validate HOD details and create all entities
-        const hodBody = {
-          hod_username: state.hod_username,
-          hod_email: state.hod_email,
-          hod_password: state.hod_password,
-          hod_confirm_password: state.hod_confirm_password,
-          hod_phone: state.hod_phone,
-          hod_gender: state.hod_gender?.value,
-          hod_qualification: state.hod_qualification,
-        };
-
-        try {
-          await CreateHOD.validate(hodBody, { abortEarly: false });
-        } catch (validationError: any) {
-          const errors = {};
-          validationError.inner.forEach((error: any) => {
-            errors[error.path] = error.message;
-          });
-          setState({ errors });
-          return;
-        }
-
-        let createdRecords = {
-          collegeId: null,
-          departmentId: null,
-          hodId: null,
-        };
-
-        try {
-          // Step 3.1: Create college first
-          const collegeBody = {
-            college_name: state.college_name,
-            college_code: state.college_code,
-            college_email: state.college_email,
-            college_phone: state.college_phone,
-            college_address: state.college_address,
-            institution: state?.institution?.value,
-          };
-
-          console.log("Step 3.1: Creating college...", collegeBody);
-          const collegeRes: any = await Models.college.create(collegeBody);
-          createdRecords.collegeId = collegeRes?.id;
-          console.log(
-            "Step 3.1: College created successfully with ID:",
-            createdRecords.collegeId
-          );
-
-          // Step 3.2: Create department with the created college ID
-          const deptBody = {
-            department_name: state.department_name,
-            department_code: state.department_code,
-            college: collegeRes?.id,
-            institution: state?.institution?.value,
-          };
-
-          console.log("Step 3.2: Creating department...", deptBody);
-          const deptRes: any = await Models.department.create(deptBody);
-          createdRecords.departmentId = deptRes?.id;
-          console.log(
-            "Step 3.2: Department created successfully with ID:",
-            createdRecords.departmentId
-          );
-
-          // Step 3.3: Create HOD with the created department ID
-          const finalHodBody = {
-            username: state.hod_username,
-            email: state.hod_email,
-            password: state.hod_password,
-            password_confirm: state.hod_confirm_password,
-            phone: state.hod_phone,
-            role: "hod",
-            status: "active",
-            gender: state.hod_gender?.value,
-            education_qualification: state.hod_qualification,
-            department: deptRes?.id,
-          };
-
-          console.log("Step 3.3: Creating HOD...", finalHodBody);
-          const hodRes: any = await Models.auth.createUser(finalHodBody);
-          createdRecords.hodId = hodRes?.id;
-          console.log(
-            "Step 3.3: HOD created successfully with ID:",
-            createdRecords.hodId
-          );
-
-          Success("College, Department and HOD created successfully!");
-          handleCloseModal();
-          collegeList(state.page);
-        } catch (error: any) {
-          console.error("Step 3 Error Details:", error);
-
-          // Show step-specific error message based on what was created
-          if (
-            createdRecords.collegeId &&
-            createdRecords.departmentId &&
-            !createdRecords.hodId
-          ) {
-            console.log("Error occurred during HOD creation");
-            if (error?.response?.data) {
-              const apiErrors = error.response.data;
-              let errorMessages = [];
-
-              Object.keys(apiErrors).forEach((field) => {
-                if (Array.isArray(apiErrors[field])) {
-                  apiErrors[field].forEach((msg) => {
-                    errorMessages.push(`${field}: ${msg}`);
-                  });
-                } else {
-                  errorMessages.push(`${field}: ${apiErrors[field]}`);
-                }
-              });
-
-              throw new Error(
-                `Hod  creation failed:\n${errorMessages.join("\n")}`
-              );
-            }
-            throw new Error(`hod  creation failed: ${error?.message}`);
-          } else if (createdRecords.collegeId && !createdRecords.departmentId) {
-            console.log("Error occurred during department creation");
-            if (error?.response?.data) {
-              const apiErrors = error.response.data;
-              let errorMessages = [];
-
-              Object.keys(apiErrors).forEach((field) => {
-                if (Array.isArray(apiErrors[field])) {
-                  apiErrors[field].forEach((msg) => {
-                    errorMessages.push(`${field}: ${msg}`);
-                  });
-                } else {
-                  errorMessages.push(`${field}: ${apiErrors[field]}`);
-                }
-              });
-
-              throw new Error(
-                `Department  creation failed:\n${errorMessages.join("\n")}`
-              );
-            }
-            throw new Error(`Department  creation failed: ${error?.message}`);
-          } else {
-            console.log("Error occurred during college creation");
-            if (error?.response?.data) {
-              const apiErrors = error.response.data;
-              let errorMessages = [];
-              Object.keys(apiErrors).forEach((field) => {
-                if (Array.isArray(apiErrors[field])) {
-                  apiErrors[field].forEach((msg) => {
-                    errorMessages.push(`${field}: ${msg}`);
-                  });
-                } else {
-                  errorMessages.push(`${field}: ${apiErrors[field]}`);
-                }
-              });
-              Failure(` College creation failed:\n${errorMessages.join("\n")}`);
-            } else {
-              Failure("College creation failed.");
-            }
-          }
-
-          // Rollback created records on error
-          await rollbackCreatedRecords(createdRecords);
-        }
       }
     } catch (error: any) {
       console.log("✌️error --->", error);
@@ -873,136 +631,8 @@ const CollegeAndDepartment = () => {
         return;
       }
       Failure(error?.message || "Operation failed. Please try again.");
-    } finally {
-      setState({ submitting: false });
     }
   };
-
-  const updateCollege = async () => {
-    try {
-      const body = {
-        college_name: state.college_name,
-        college_code: state.college_code,
-        college_email: state.college_email,
-        college_phone: state.college_phone,
-        college_address: state.college_address,
-        institution: state?.institution?.value,
-      };
-
-      await CreateCollege.validate(body, { abortEarly: false });
-      const res = await Models.college.update(body, state.editId);
-      collegeList(1);
-      handleCloseModal();
-    } catch (error) {
-      if (error?.response?.data) {
-        const apiErrors = {};
-        Object.keys(error.response.data).forEach((field) => {
-          if (Array.isArray(error.response.data[field])) {
-            apiErrors[field] = error.response.data[field][0];
-          } else {
-            apiErrors[field] = error.response.data[field];
-          }
-        });
-        setState({ errors: apiErrors });
-        return;
-      } else {
-        if (error?.inner) {
-          const errors = {};
-          error.inner.forEach((err) => {
-            errors[err.path] = err.message;
-          });
-          setState({ errors });
-          console.log("✌️errors --->", errors);
-          return; // Stop execution if validation fails
-        }
-      }
-      Failure(error?.message || "Operation failed. Please try again.");
-    }
-  };
-
-  const renderDepartmentForm = () => (
-    <div className="space-y-6">
-        <>
-          <CustomSelect
-            options={state.institutionDropdownList}
-            value={state.institutionDept}
-            onChange={(selectedOption) => {
-              if (selectedOption) {
-                setState({
-                  institutionDept: selectedOption,
-                  errors: { ...state.errors, institution: "" },
-                  seletedInstitution: selectedOption,
-                  college: null,
-                });
-                collegeList(1, selectedOption);
-              } else {
-                setState({
-                  institutionDept: null,
-                  seletedInstitution: selectedOption,
-                  college: null,
-                  collegeDropdownList: [],
-                });
-              }
-            }}
-            placeholder="Select Institution"
-            isClearable={true}
-          
-            loading={state.institutionDropLoading}
-            title="Select Institution"
-            error={state.errors.institution}
-            required
-          />
-          <CustomSelect
-            options={state.collegeDropdownList}
-            value={state.college}
-            onChange={(selectedOption) =>
-              setState({
-                college: selectedOption,
-                errors: { ...state.errors, college: "" },
-              })
-            }
-            onSearch={(searchTerm) =>
-              collegeDropdownList(1, searchTerm, state.seletedInstitution)
-            }
-            placeholder="Select College"
-            isClearable={true}
-            loadMore={() =>
-              state.collegeNext &&
-              collegeDropdownList(
-                state.collegePage + 1,
-                "",
-                true,
-                state.seletedInstitution
-              )
-            }
-            loading={state.collegeLoading}
-            title="Select College"
-            error={state.errors.college}
-            required
-          />
-        </>
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <TextInput
-          title="Department Name"
-          placeholder="Enter department name"
-          value={state.department_name}
-          onChange={(e) => handleFormChange("department_name", e.target.value)}
-          error={state.errors.department_name}
-          required
-        />
-        <TextInput
-          title="Department Code"
-          placeholder="Enter department code"
-          value={state.department_code}
-          onChange={(e) => handleFormChange("department_code", e.target.value)}
-          error={state.errors.department_code}
-          required
-        />
-      </div>
-    </div>
-  );
-
- 
 
   const departmentColumns = [
     {
@@ -1106,7 +736,6 @@ const CollegeAndDepartment = () => {
               Manage departments
             </p>
           </div>
-         
         </div>
       </div>
 
@@ -1130,7 +759,7 @@ const CollegeAndDepartment = () => {
             />
           </div>
 
-          <div className="group relative z-50">
+          {/* <div className="group relative z-50">
             <CustomSelect
               options={state.collegeDropdownList}
               value={state.collegeFilter}
@@ -1156,7 +785,7 @@ const CollegeAndDepartment = () => {
               }
               loading={state.collegeLoading}
             />
-          </div>
+          </div> */}
           {/* <div className="group relative z-50">
             <CustomSelect
               options={statusOptions}
@@ -1247,62 +876,10 @@ const CollegeAndDepartment = () => {
         </div>
       </div>
 
-      {/* Modal */}
-      <Modal
-        open={state.showModal}
-        close={handleCloseModal}
-        addHeader={
-           "Add Department"
-        }
-        renderComponent={() => (
-          <div className="w-full max-w-4xl">
-            <style jsx>{`
-              .scrollbar-hide {
-                -ms-overflow-style: none;
-                scrollbar-width: none;
-              }
-              .scrollbar-hide::-webkit-scrollbar {
-                display: none;
-              }
-            `}</style>
-            {/* Progress Header */}
-         
-            {/* Step Content */}
-            <div className="min-h-[300px]">{renderDepartmentForm()}</div>
-
-            {/* Navigation Footer */}
-            <div className="flex justify-between border-t p-6">
-                <div className="flex w-full justify-end gap-4">
-                  <button
-                    onClick={handleFinalSubmit}
-                    disabled={state.submitting}
-                    className="rounded-lg border px-6 py-2 text-black hover:bg-green-600 disabled:opacity-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSubmit}
-                    disabled={state.submitting}
-                    className="rounded-lg bg-blue-500 px-6 py-2 text-white hover:bg-blue-600 disabled:opacity-50"
-                  >
-                    {state.submitting
-                      ? "Creating..."
-                      : state.editId
-                      ? "Update Department"
-                      : "Create Department"}
-                  </button>
-                </div>
-             
-            </div>
-          </div>
-        )}
-      />
       <Modal
         open={state.showEditModal}
         close={handleCloseModal}
-        addHeader={
-         "Update Department"
-        }
+        addHeader={"Update Department"}
         renderComponent={() => (
           <div className="w-full max-w-4xl">
             <style jsx>{`
@@ -1314,42 +891,113 @@ const CollegeAndDepartment = () => {
                 display: none;
               }
             `}</style>
-            {/* Progress Header */}
 
-            {/* Step Content */}
             <div className="min-h-[300px]">
-              { renderDepartmentForm()}
-              {/* {state.activeTab === "departments" ? (
-                renderDepartmentForm()
-              ) : (
+              <div className="space-y-6">
                 <>
-                  {state.currentStep === 1 && renderCollegeForm()}
-                  {state.currentStep === 2 && renderDepartmentForm()}
-                  {state.currentStep === 3 && renderHODForm()}
+                  <CustomSelect
+                    options={state.institutionDropdownList}
+                    value={state.institutionDept}
+                    onChange={(selectedOption) => {
+                      if (selectedOption) {
+                        setState({
+                          institutionDept: selectedOption,
+                          errors: { ...state.errors, institution: "" },
+                          seletedInstitution: selectedOption,
+                          college: null,
+                        });
+                        collegeList(1, selectedOption);
+                      } else {
+                        setState({
+                          institutionDept: null,
+                          seletedInstitution: selectedOption,
+                          college: null,
+                          collegeDropdownList: [],
+                        });
+                      }
+                    }}
+                    placeholder="Select Institution"
+                    isClearable={true}
+                    loading={state.institutionDropLoading}
+                    title="Select Institution"
+                    error={state.errors.institution}
+                    required
+                  />
+                  <CustomSelect
+                    options={state.collegeDropdownList}
+                    value={state.college}
+                    onChange={(selectedOption) =>
+                      setState({
+                        college: selectedOption,
+                        errors: { ...state.errors, college: "" },
+                      })
+                    }
+                    onSearch={(searchTerm) =>
+                      collegeDropdownList(
+                        1,
+                        searchTerm,
+                        state.seletedInstitution
+                      )
+                    }
+                    placeholder="Select College"
+                    isClearable={true}
+                    loadMore={() =>
+                      state.collegeNext &&
+                      collegeDropdownList(
+                        state.collegePage + 1,
+                        "",
+                        true,
+                        state.seletedInstitution
+                      )
+                    }
+                    loading={state.collegeLoading}
+                    title="Select College"
+                    error={state.errors.college}
+                    required
+                  />
                 </>
-              )} */}
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                  <TextInput
+                    title="Department Name"
+                    placeholder="Enter department name"
+                    value={state.department_name}
+                    onChange={(e) =>
+                      handleFormChange("department_name", e.target.value)
+                    }
+                    error={state.errors.department_name}
+                    required
+                  />
+                  <TextInput
+                    title="Department Code"
+                    placeholder="Enter department code"
+                    value={state.department_code}
+                    onChange={(e) =>
+                      handleFormChange("department_code", e.target.value)
+                    }
+                    error={state.errors.department_code}
+                    required
+                  />
+                </div>
+              </div>
             </div>
 
-            {/* Navigation Footer */}
             <div className="flex justify-between  p-6">
-              {/* {state.activeTab === "departments" ? ( */}
               <div className="flex w-full justify-end gap-4">
                 <button
-                  onClick={handleFinalSubmit}
+                  onClick={() => handleCloseModal()}
                   disabled={state.submitting}
                   className="rounded-lg border px-6 py-2 text-black hover:bg-green-600 disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
-                  onClick={() => updateCollege()}
+                  onClick={() => handleSubmit()}
                   disabled={state.submitting}
                   className="rounded-lg bg-blue-500 px-6 py-2 text-white hover:bg-blue-600 disabled:opacity-50"
                 >
-                  {state.submitting ? "Updating..." : "Update College"}
+                  {state.submitting ? "Updating..." : "Update Department"}
                 </button>
               </div>
-             
             </div>
           </div>
         )}

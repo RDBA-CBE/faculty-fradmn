@@ -14,6 +14,43 @@ export const ROLES = {
   APPLICANT: "applicant",
 };
 
+export const DROPDOWN_ROLES = [
+  {
+    value: ROLES.INSTITUTION_ADMIN,
+    label: "Institution Admin",
+  },
+  {
+    value: ROLES.HR,
+    label: "HR",
+  },
+];
+
+export const DROPDOWN_JOB_ROLES = [
+  {
+    value: ROLES.INSTITUTION_ADMIN,
+    label: "Institution Admin",
+  },
+  {
+    value: ROLES.HR,
+    label: "HR",
+  },
+  {
+    value: ROLES.HOD,
+    label: "HOD",
+  },
+];
+
+export const DROPDOWN_INSTITUTION_ADMIN = [
+  {
+    value: ROLES.HR,
+    label: "HR",
+  },
+  {
+    value: ROLES.HOD,
+    label: "HOD",
+  },
+];
+
 // menuConfig.ts
 export const menuConfig = {
   super_admin: [
@@ -24,7 +61,6 @@ export const menuConfig = {
       href: "/",
     },
 
-  
     {
       type: "link",
       icon: "IconMenuNotes",
@@ -79,7 +115,7 @@ export const menuConfig = {
       type: "link",
       icon: "IconMenuNotes",
       label: "Colleges & Departments",
-      href: "/faculty/institute_college_and_departments",
+      href: "/faculty/admin_college_and_departments",
     },
 
     // {
@@ -151,51 +187,37 @@ export const menuConfig = {
       label: "Reports",
       href: "/",
     },
-  ],
-  hod: [
-    {
-      type: "link",
-      icon: "IconMenuDashboard",
-      label: "dashboard",
-      href: "/",
-    },
-
-    // {
-    //   type: "link",
-    //   icon: "IconMenuNotes",
-    //   label: "Departments",
-    //   href: "/faculty/departments",
-    // },
-
-    // {
-    //   type: "link",
-    //   icon: "IconMenuUsers",
-    //   label: "Users",
-    //   href: "/faculty/users",
-    // },
-
-    {
-      type: "link",
-      icon: "IconMenuForms",
-      label: "Job Postings",
-      href: "/faculty/job",
-    },
-
-    {
-      type: "link",
-      icon: "IconMenuTables",
-      label: "Applications",
-      href: "/faculty/application",
-    },
-    {
-      type: "link",
-      icon: "IconMenuCharts",
-      label: "Reports",
-      href: "/",
-    },
   ]
+  // hod: [
+  //   {
+  //     type: "link",
+  //     icon: "IconMenuDashboard",
+  //     label: "dashboard",
+  //     href: "/",
+  //   },
 
  
+
+  //   {
+  //     type: "link",
+  //     icon: "IconMenuForms",
+  //     label: "Job Postings",
+  //     href: "/faculty/job",
+  //   },
+
+  //   {
+  //     type: "link",
+  //     icon: "IconMenuTables",
+  //     label: "Applications",
+  //     href: "/faculty/application",
+  //   },
+  //   {
+  //     type: "link",
+  //     icon: "IconMenuCharts",
+  //     label: "Reports",
+  //     href: "/",
+  //   },
+  // ],
 };
 
 export const OwnmenuConfig = {
@@ -317,7 +339,7 @@ export const OwnmenuConfig = {
       label: "Users",
       href: "/faculty/my_users",
     },
-  
+
     {
       type: "link",
       icon: "IconMenuForms",

@@ -390,12 +390,9 @@ export const buildFormData = (data: Record<string, any>): FormData => {
 
     // Arrays
     if (Array.isArray(value)) {
-      value.forEach((item, index) => {
-        formData.append(
-          `${key}`,
-          item instanceof File || item instanceof Blob ? item : String(item)
-        );
-      });
+      if (value.length === 0) return;
+      // For arrays, send as JSON string to maintain array format
+      formData.append(key, JSON.stringify(value));
     }
     // Files / Blobs
     else if (value instanceof File || value instanceof Blob) {
@@ -576,7 +573,3 @@ export const parseApiError = (error: any): string => {
   
   return "An error occurred. Please try again.";
 };
-<<<<<<< HEAD
-
-=======
->>>>>>> 4bfe6f2999c06b9c8284ea62e27901014d5a7378

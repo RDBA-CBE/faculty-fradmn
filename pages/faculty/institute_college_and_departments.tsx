@@ -112,6 +112,8 @@ const CollegeAndDepartment = () => {
   useEffect(() => {
     dispatch(setPageTitle("Colleges & Departments"));
     institutionList(1);
+    profile()
+
   }, [dispatch]);
 
   useEffect(() => {
@@ -130,6 +132,21 @@ const CollegeAndDepartment = () => {
       deptList(1);
     }
   }, [debounceSearch, state.statusFilter, state.sortBy]);
+
+   const profile = async (isTabChange = true) => {
+      try {
+        const res: any = await Models.auth.profile()
+        console.log('profile --->', res)
+        setState({ profile: res,profile_institution: res?.institution })
+        if(res?.institution){
+        
+          collegeDropdownList(1,"",false,res?.institution)
+  
+        }
+      } catch (error) {
+        console.error('Error fetching institutions:', error)
+      }
+    }
 
   const institutionList = async (page, search = "", loadMore = false) => {
     try {
@@ -219,6 +236,7 @@ const CollegeAndDepartment = () => {
     try {
       setState({ loading: true });
       const body = collegeBodyData();
+console.log('✌️body --->', body);
       if (institutionId) {
         body.institution = institutionId?.value;
       }
@@ -355,10 +373,15 @@ const CollegeAndDepartment = () => {
 
   const collegeBodyData = () => {
     const body: any = {};
+    const userId=localStorage.getItem("userId")
 
     if (state.search) {
       body.search = state.search;
     }
+    body.created_by=userId
+
+    body.team = "Yes";
+
 
     if (state.sortBy) {
       body.ordering =

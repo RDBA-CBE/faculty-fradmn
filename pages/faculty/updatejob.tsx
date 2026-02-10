@@ -1,18 +1,27 @@
-import { toISO, useSetState } from "@/utils/function.utils";
+import {
+  buildFormData,
+  Dropdown,
+  Success,
+  toISO,
+  useSetState,
+} from "@/utils/function.utils";
 import React, { useCallback, useEffect, useRef } from "react";
 import TextInput from "@/components/FormFields/TextInput.component";
 import CustomSelect from "@/components/FormFields/CustomSelect.component";
 import TextArea from "@/components/FormFields/TextArea.component";
+import ChipInput from "@/components/FormFields/ChipInput.component";
+import ImageUploadWithPreview from "@/components/ImageUploadWithPreview/ImageUploadWithPreview.component";
 import { CreateNewJob } from "@/utils/validation.utils";
 import { Models } from "@/imports/models.import";
-import { EXPERIENCE, JOB_TYPE } from "@/utils/constant.utils";
+import { EXPERIENCE, JOB_TYPE, ROLES } from "@/utils/constant.utils";
 import moment from "moment";
 import { useRouter } from "next/router";
+import UpdatePropertyImagePreview from "@/components/ImageUploadWithPreview/UpdatePropertyImagePreview.component";
 
 export default function Newjob() {
   const router = useRouter();
   const id = router?.query?.id;
-  console.log("✌️id --->", id);
+
   const editorRef = useRef(null);
   const keyResponsibilityEditorRef = useRef(null);
   const professionalSkillsEditorRef = useRef(null);
@@ -42,18 +51,31 @@ export default function Newjob() {
     numberOfOpenings: "",
     qualification: "",
     experience: "",
+    skills: [],
+    tags: [],
+    images: [],
+    newImages: [],
     institutionList: [],
     collegeList: [],
     departmentList: [],
+    skillList: [],
+    tagList: [],
     institutionPage: 1,
     collegePage: 1,
     departmentPage: 1,
+    skillPage: 1,
+    tagPage: 1,
     institutionHasMore: true,
     collegeHasMore: true,
     departmentHasMore: true,
+    skillHasMore: true,
+    tagHasMore: true,
+    skillLoading: false,
+    tagLoading: false,
     editorInstance: null,
     keyResponsibilityEditorInstance: null,
     professionalSkillsEditorInstance: null,
+    responsibilityData: null,
     editorData: {
       time: Date.now(),
       blocks: [],
@@ -63,46 +85,236 @@ export default function Newjob() {
   });
 
   useEffect(() => {
-    getJobDetails();
     fetchInstitutions();
+    locationList(1);
+    salaryRangeList(1);
+    priorityList(1);
+    typeList();
+    jobStatusList();
+    categoryList(1);
+    skillList(1);
+    tagList(1);
   }, []);
 
   useEffect(() => {
-    getJobDetails();
+    if (id) {
+      profile();
+    }
   }, [id]);
 
-  const getJobDetails = async () => {
+  const profile = async () => {
     try {
-      if(id){
-      const res: any = await Models.job.details(id);
-      console.log("getJobDetails --->", res);
-      setState({
-        title: res?.job_title || "",
-        company: res?.company || "",
-        location: res?.location || "",
-        address: res?.address || "",
-        institution: {value:res?.institution?.id,label:res?.institution?.name} ,
-        college: {value:res?.college?.id,label:res?.college?.name},
-        department: {value:res?.department?.id,label:res?.department?.name},
-        jobType: {value:res?.job_type,label:res?.job_type},
+      const res: any = await Models.auth.profile();
+      console.log("✌️res --->", res);
+      setState({ profile: res });
 
-        salary: res?.salary_range || "",
-        deadline: moment(res?.deadline).format("YYYY-MM-DD") || "",
-        startDate: moment(res?.start_date).format("YYYY-MM-DD") || "",
-        endDate: moment(res?.last_date).format("YYYY-MM-DD") || "",
-        numberOfOpenings: res?.number_of_openings || "",
-        qualification: res?.qualification || "",
-        experience: {value:res?.experiences,label:res?.experiences},
+      if (res?.role == ROLES.INSTITUTION_ADMIN) {
+        setState({
+          profile: res,
+          institution: {
+            value: res?.institution?.institution_id,
+            label: res?.institution?.institution_name,
+          },
+        });
+        fetchColleges(res?.institution?.institution_id, 1);
+      } else if (res?.role == ROLES.HR) {
+        setState({
+          profile: res,
+          institution: {
+            value: res?.institution?.institution_id,
+            label: res?.institution?.institution_name,
+          },
+          college: {
+            value: res?.college?.college_id,
+            label: res?.college?.college_name,
+          },
+        });
+        fetchDepartments(res?.college?.college_id, 1);
+      }
+      getJobDetails(res);
+    } catch (error) {
+      console.error("Error fetching institutions:", error);
+    }
+  };
 
-        editorData: res?.job_description || {
-          time: Date.now(),
-          blocks: [],
-          version: "2.19.0",
-        },
-      })
+  const getJobDetails = async (profileResponse) => {
+    try {
+      if (id) {
+        const res: any = await Models.job.details(id);
+        console.log("getJobDetails --->", res);
+        setState({
+          title: res?.job_title || "",
+          company: res?.company || "",
+          company_detail: res?.company_detail,
+          description: res?.job_description,
+          priority: {
+            value: res?.priority_obj?.id,
+            label: res?.priority_obj?.name,
+          },
+          jobType: {
+            value: res?.job_type_obj?.id,
+            label: res?.job_type_obj?.name,
+          },
+          salary: {
+            value: res?.salary_range_obj?.id,
+            label: res?.salary_range_obj?.name,
+          },
+          job_status: {
+            value: res?.job_status_obj?.id,
+            label: res?.job_status_obj?.name,
+          },
+
+          institution: {
+            value: res?.institution?.id,
+            label: res?.institution?.name,
+          },
+          college: { value: res?.college?.id, label: res?.college?.name },
+          department: {
+            value: res?.department?.id,
+            label: res?.department?.name,
+          },
+          deadline: moment(res?.deadline).format("YYYY-MM-DD") || "",
+          startDate: moment(res?.start_date).format("YYYY-MM-DD") || "",
+          endDate: moment(res?.last_date).format("YYYY-MM-DD") || "",
+          numberOfOpenings: res?.number_of_openings || "",
+          qualification: res?.qualification || "",
+          experience: { value: res?.experiences, label: res?.experiences },
+          responsibilityData: res?.responsibility || null,
+          images: res?.company_logo ? [res?.company_logo] : [],
+          tags:
+            res?.tags?.length > 0
+              ? res?.tags?.map((tag: any) => ({
+                  value: tag?.id,
+                  label: tag?.name,
+                }))
+              : [],
+          location:
+            res?.locations?.length > 0
+              ? res?.locations?.map((location: any) => ({
+                  value: location?.id,
+                  label: location?.city,
+                }))
+              : [],
+          category:
+            res?.categories?.length > 0
+              ? res?.categories?.map((category: any) => ({
+                  value: category?.id,
+                  label: category?.name,
+                }))
+              : [],
+          skills:
+            res?.skills?.length > 0
+              ? res?.skills?.map((skills: any) => ({
+                  value: skills?.id,
+                  label: skills?.name,
+                }))
+              : [],
+        });
+        if (profileResponse?.role == ROLES.SUPER_ADMIN) {
+          fetchColleges(res?.institution?.id, 1);
+          fetchDepartments(res?.college?.id, 1);
+        }
       }
     } catch (error) {
       console.log("Error fetching institutions:", error);
+    }
+  };
+
+  const locationList = async (page = 1) => {
+    try {
+      setState({ locationLoading: true });
+      const res: any = await Models.job.job_locations();
+      const dropdown = Dropdown(res?.results, "city");
+      setState({ locationLoading: false, locationList: dropdown });
+    } catch (error) {
+      setState({ locationLoading: false });
+    }
+  };
+
+  const categoryList = async (page = 1) => {
+    try {
+      setState({ categoryLoading: true });
+      const res: any = await Models.job.job_category();
+      const dropdown = Dropdown(res?.results, "name");
+      setState({ categoryLoading: false, categoryList: dropdown });
+    } catch (error) {
+      setState({ categoryLoading: false });
+    }
+  };
+
+  const salaryRangeList = async (page = 1) => {
+    try {
+      setState({ categoryLoading: true });
+      const res: any = await Models.job.job_salary_ranges();
+      const dropdown = Dropdown(res?.results, "name");
+      setState({ salaryRangeLoading: false, salaryRangeList: dropdown });
+    } catch (error) {
+      setState({ categoryLoading: false });
+    }
+  };
+
+  const priorityList = async (page = 1) => {
+    try {
+      setState({ categoryLoading: true });
+      const res: any = await Models.job.job_priority();
+      const dropdown = Dropdown(res?.results, "name");
+      setState({ priorityLoading: false, priorityList: dropdown });
+    } catch (error) {
+      setState({ categoryLoading: false });
+    }
+  };
+  const typeList = async (page = 1) => {
+    try {
+      setState({ categoryLoading: true });
+      const res: any = await Models.job.job_types();
+      const dropdown = Dropdown(res?.results, "name");
+      setState({ typeLoading: false, typeList: dropdown });
+    } catch (error) {
+      setState({ categoryLoading: false });
+    }
+  };
+
+  const jobStatusList = async (page = 1) => {
+    try {
+      setState({ categoryLoading: true });
+      const res: any = await Models.job.job_status();
+      const dropdown = Dropdown(res?.results, "name");
+      setState({ jobStatusLoading: false, jobStatusList: dropdown });
+    } catch (error) {
+      setState({ categoryLoading: false });
+    }
+  };
+
+  const skillList = async (page = 1) => {
+    try {
+      setState({ skillLoading: true });
+      const res: any = await Models.job.job_skills(page);
+      console.log("✌️res --->", res);
+      const dropdown = Dropdown(res?.results, "name");
+      setState({
+        skillLoading: false,
+        skillList: page === 1 ? dropdown : [...state.skillList, ...dropdown],
+        skillPage: page,
+        skillHasMore: !!res?.next,
+      });
+    } catch (error) {
+      setState({ skillLoading: false });
+    }
+  };
+
+  const tagList = async (page = 1) => {
+    try {
+      setState({ tagLoading: true });
+      const res: any = await Models.job.job_tags(page);
+      const dropdown = Dropdown(res?.results, "name");
+      setState({
+        tagLoading: false,
+        tagList: page === 1 ? dropdown : [...state.tagList, ...dropdown],
+        tagPage: page,
+        tagHasMore: !!res?.next,
+      });
+    } catch (error) {
+      setState({ tagLoading: false });
     }
   };
 
@@ -125,6 +337,7 @@ export default function Newjob() {
   };
 
   const fetchColleges = async (institutionId: number, page = 1) => {
+    console.log("✌️fetchColleges --->");
     try {
       const res: any = await Models.college.list(page, {
         institution: institutionId,
@@ -144,6 +357,7 @@ export default function Newjob() {
   };
 
   const fetchDepartments = async (collegeId: number, page = 1) => {
+    console.log("✌️collegeId --->", collegeId);
     try {
       const res: any = await Models.department.list(page, {
         college: collegeId,
@@ -167,15 +381,15 @@ export default function Newjob() {
     const handleScroll = () => {
       const section1 = section1Ref.current?.getBoundingClientRect();
       const section2 = section2Ref.current?.getBoundingClientRect();
+      const section5 = section5Ref.current?.getBoundingClientRect();
       const section3 = section3Ref.current?.getBoundingClientRect();
       const section4 = section4Ref.current?.getBoundingClientRect();
-      const section5 = section5Ref.current?.getBoundingClientRect();
 
-      if (section5 && section5.top < 300) {
+      if (section4 && section4.top < 300) {
         setState({ activeStep: 5 });
-      } else if (section4 && section4.top < 300) {
-        setState({ activeStep: 4 });
       } else if (section3 && section3.top < 300) {
+        setState({ activeStep: 4 });
+      } else if (section5 && section5.top < 300) {
         setState({ activeStep: 3 });
       } else if (section2 && section2.top < 300) {
         setState({ activeStep: 2 });
@@ -214,13 +428,15 @@ export default function Newjob() {
     if (
       typeof window !== "undefined" &&
       keyResponsibilityEditorRef.current &&
-      !isKeyResponsibilityEditorInitialized.current
+      !isKeyResponsibilityEditorInitialized.current &&
+      state.responsibilityData
     ) {
       isKeyResponsibilityEditorInitialized.current = true;
 
       import("@editorjs/editorjs").then(({ default: EditorJS }) => {
         const editor = new EditorJS({
           holder: keyResponsibilityEditorRef.current,
+          data: state.responsibilityData,
           placeholder: "List key responsibilities...",
           tools: {
             list: {
@@ -273,96 +489,145 @@ export default function Newjob() {
         isProfessionalSkillsEditorInitialized.current = false;
       }
     };
-  }, []);
+  }, [state.responsibilityData]);
 
   const scrollToSection = (ref: any) => {
     ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const handleSubmit = async () => {
-    const savedData = await state?.editorInstance?.save();
-    console.log("✌️savedData --->", savedData);
+    setState({ btnLoading: true });
     const keyResponsibilityData =
       await state.keyResponsibilityEditorInstance?.save();
     console.log("✌️keyResponsibilityData --->", keyResponsibilityData);
 
-    const professionalSkillsData =
-      await state.professionalSkillsEditorInstance?.save();
-    console.log("✌️professionalSkillsData --->", professionalSkillsData);
-    const valid = {
+    const valid: any = {
       title: state.title,
       company: state.company,
-      location: state.location,
+      location: state.location?.value,
       address: state.address,
-      institution: state.institution,
-      college: state.college,
-      department: state.department,
       jobType: state.jobType,
       salary: state.salary,
+      category: state.category,
+      priority: state.priority,
       deadline: state.deadline,
       startDate: state.startDate,
       endDate: state.endDate,
       numberOfOpenings: state.numberOfOpenings,
       experience: state.experience?.value,
       qualification: state.qualification,
-      keyResponsibility: keyResponsibilityData,
-      professionalSkills: professionalSkillsData,
-      jobDescription: savedData,
+      responsibility: keyResponsibilityData,
+      // professionalSkills: professionalSkillsData,
+      skills: state.skills,
+      tags: state.tags,
+      jobDescription: state.description,
     };
+
+    if (state.profile?.role == ROLES.SUPER_ADMIN) {
+      valid.institution = state.institution?.value;
+      valid.college = state.college?.value;
+      valid.department = state.department?.value;
+    } else if (state.profile?.role == ROLES.INSTITUTION_ADMIN) {
+      valid.institution = state.profile?.institution?.institution_id;
+      valid.college = state.college?.value;
+      valid.department = state.department?.value;
+    } else if (state.profile?.role == ROLES.HR) {
+      valid.institution = state.profile?.institution?.institution_id;
+      valid.college = state.profile?.college?.college_id;
+      valid.department = state.department?.value;
+    } else {
+      valid.institution = state.profile?.institution?.institution_id;
+      valid.college = state.profile?.college?.college_id;
+      valid.department = state.profile?.department?.department_id;
+    }
+
     console.log("✌️valid --->", valid);
 
     try {
-      await CreateNewJob.validate(
-        {
-          title: state.title,
-          company: state.company,
-          location: state.location,
-          address: state.address,
-          institution: state.institution,
-          college: state.college,
-          department: state.department,
-          jobType: state.jobType,
-          salary: state.salary,
-          deadline: state.deadline,
-          startDate: state.startDate,
-          endDate: state.endDate,
-          numberOfOpenings: state.numberOfOpenings,
-          experience: state.experience?.value,
-          qualification: state.qualification,
-          keyResponsibility: keyResponsibilityData,
-          professionalSkills: professionalSkillsData,
-          jobDescription: savedData,
-        },
-        { abortEarly: false },
-      );
+      // await CreateNewJob.validate(
+      //   {
+      //     title: state.title,
+      //     company: state.company,
+      //     location: state.location?.value,
+      //     address: state.address,
+      //     institution: state.institution,
+      //     college: state.college,
+      //     department: state.department,
+      //     jobType: state.jobType?.value,
+      //     salary: state.salary?.value,
+      //     category: state.category?.value,
+      //     priority: state.priority?.value,
+      //     deadline: state.deadline,
+      //     startDate: state.startDate,
+      //     endDate: state.endDate,
+      //     numberOfOpenings: state.numberOfOpenings,
+      //     experience: state.experience?.value,
+      //     qualification: state.qualification,
+      //     keyResponsibility: keyResponsibilityData,
+      //     professionalSkills: professionalSkillsData,
+      //     skills: state.skills,
+      //     tags: state.tags,
+      //     jobDescription: state.description,
+      //   },
+      //   { abortEarly: false }
+      // );
 
-      const body = {
+      const body: any = {
         job_title: state.title,
-        job_description: savedData,
-        college: state.college?.value,
+        job_description: state.description,
         company: state.company,
-        job_type: state.jobType?.value,
-        experience_required: state.experience?.value,
+        job_type_id: state.jobType?.value,
+        experiences: state.experience?.value,
         qualification: state.qualification,
-        salary_range: state.salary,
-        location: state.location,
-        address: state.address,
+        salary_range_id: state.salary?.value,
+        location_ids: state.location?.map((item) => item?.value),
+        company_detail: state.company_detail,
         number_of_openings: Number(state.numberOfOpenings),
-        last_date: toISO(state.endDate),
-        job_status: "draft",
-        deadline: toISO(state.deadline),
-        start_date: toISO(state.startDate),
-        keyResponsibility: keyResponsibilityData,
-        professionalSkills: professionalSkillsData,
+        last_date: moment(state.endDate).format("YYYY-MM-DD"),
+        job_status_id: state.job_status?.value,
+        deadline: moment(state.deadline).format("YYYY-MM-DD"),
+        start_date: moment(state.startDate).format("YYYY-MM-DD"),
+        responsibility: keyResponsibilityData,
+        skill_ids: state.skills?.map((item) => item?.value),
+        tag_ids: state.tags?.map((item) => item?.value),
+        is_approved: state.profile?.role == ROLES.HR ? true : false,
+        priority_id: state.priority?.value,
+        category_ids: state.category?.map((item) => item?.value),
       };
-      console.log("✌️body --->", body);
+      if (state.newImages?.length > 0 && state.images?.length === 0) {
+        body.company_logo = state.newImages[0];
+      }
 
-      const res = await Models.job.create(body);
+      if (state.profile?.role == ROLES.SUPER_ADMIN) {
+        body.institution = state.institution?.value;
+        body.college = state.college?.value;
+        body.department = state.department?.value;
+      } else if (state.profile?.role == ROLES.INSTITUTION_ADMIN) {
+        body.institution = state.profile?.institution?.institution_id;
+        body.college = state.college?.value;
+        body.department = state.department?.value;
+      } else if (state.profile?.role == ROLES.HR) {
+        body.institution = state.profile?.institution?.institution_id;
+        body.college = state.profile?.college?.college_id;
+        body.department = state.department?.value;
+      } else {
+        body.institution = state.profile?.institution?.institution_id;
+        body.college = state.profile?.college?.college_id;
+        body.department = state.profile?.department?.department_id;
+      }
+
+      console.log("✌️body --->", body);
+      const formData = buildFormData(body);
+
+      const res = await Models.job.update(formData, id);
       console.log("✌️res --->", res);
 
       setState({ error: {} });
+      setState({ btnLoading: false });
+      Success("Job updated successfully.");
+      router.back();
     } catch (err: any) {
-      if (err.inner) {
+      if (err?.inner) {
         const errors: any = {};
         err.inner.forEach((error: any) => {
           errors[error.path] = error.message;
@@ -371,6 +636,7 @@ export default function Newjob() {
 
         setState({ error: errors });
       }
+      setState({ btnLoading: false });
     }
   };
 
@@ -387,12 +653,12 @@ export default function Newjob() {
         collegeList: [],
         departmentList: [],
       });
-      fetchColleges(value.value);
+      fetchColleges(value.value, 1);
     }
 
     if (field === "college" && value) {
       setState({ department: null, departmentList: [] });
-      fetchDepartments(value.value);
+      fetchDepartments(value.value, 1);
     }
   };
 
@@ -511,7 +777,7 @@ export default function Newjob() {
                     state.activeStep >= 3 ? "text-gray-900" : "text-gray-500"
                   }`}
                 >
-                  Responsibility
+                  Description
                 </p>
               </div>
             </div>
@@ -540,7 +806,7 @@ export default function Newjob() {
                     state.activeStep >= 4 ? "text-gray-900" : "text-gray-500"
                   }`}
                 >
-                  Skills
+                  Responsibility
                 </p>
               </div>
             </div>
@@ -569,7 +835,7 @@ export default function Newjob() {
                     state.activeStep >= 5 ? "text-gray-900" : "text-gray-500"
                   }`}
                 >
-                  Description
+                  Skills
                 </p>
               </div>
             </div>
@@ -626,30 +892,49 @@ export default function Newjob() {
                   required
                 />
 
-                <TextInput
-                  name="location"
-                  type="text"
-                  title="Location"
-                  placeholder="City, State or Remote"
+                <CustomSelect
+                  options={state.locationList}
                   value={state.location}
-                  onChange={(e) =>
-                    handleFieldChange("location", e.target.value)
-                  }
-                  error={state.error?.location}
+                  onChange={(option) => handleFieldChange("location", option)}
+                  placeholder="Select location"
+                  title="Select location"
                   required
+                  isClearable={true}
+                  error={state.error?.location}
+                  loading={state.locationLoading}
+                  isMulti={true}
                 />
               </div>
 
               <TextArea
                 name="address"
-                title="Address"
-                placeholder="Full address"
-                value={state.address}
-                onChange={(e) => handleFieldChange("address", e.target.value)}
-                error={state.error?.address}
+                title="Company Details"
+                placeholder="Company Details"
+                value={state.company_detail}
+                onChange={(e) =>
+                  handleFieldChange("company_detail", e.target.value)
+                }
+                error={state.error?.company_detail}
                 rows={3}
                 required
               />
+
+              <div className="mt-5">
+                <UpdatePropertyImagePreview
+                  existingImages={state.images}
+                  onImagesChange={(newImages) => setState({ newImages })}
+                  onDeleteImage={(imageUrl) => {
+                    setState({
+                      images: state.images.filter((img) => img !== imageUrl),
+                    });
+                  }}
+                  maxFiles={1}
+                  title="Company Logo"
+                  description="Upload company logo (JPEG or PNG)"
+                  validateDimensions={false}
+                  isSingleImage={true}
+                />
+              </div>
             </div>
           </div>
 
@@ -678,69 +963,217 @@ export default function Newjob() {
             </div>
             <div className="p-6">
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-2">
+                {state.profile?.role == ROLES.SUPER_ADMIN && (
+                  <>
+                    <CustomSelect
+                      title="Institution"
+                      options={state.institutionList}
+                      value={state.institution}
+                      onChange={(option) =>
+                        handleFieldChange("institution", option)
+                      }
+                      placeholder="Select institution"
+                      error={state.error?.institution}
+                      loadMore={() =>
+                        state.institutionHasMore &&
+                        fetchInstitutions(state.institutionPage + 1)
+                      }
+                      required
+                    />
+                    <CustomSelect
+                      title="College"
+                      options={state.collegeList}
+                      value={state.college}
+                      onChange={(option) =>
+                        handleFieldChange("college", option)
+                      }
+                      placeholder="Select college"
+                      error={state.error?.college}
+                      disabled={!state.institution}
+                      loadMore={() =>
+                        state.collegeHasMore &&
+                        fetchColleges(
+                          state.institution?.value,
+                          state.collegePage + 1
+                        )
+                      }
+                      required
+                    />
+                    <CustomSelect
+                      title="Department"
+                      options={state.departmentList}
+                      value={state.department}
+                      onChange={(option) =>
+                        handleFieldChange("department", option)
+                      }
+                      placeholder="Select department"
+                      error={state.error?.department}
+                      disabled={!state.college || !state.institution}
+                      loadMore={() =>
+                        state.departmentHasMore &&
+                        fetchDepartments(
+                          state.college?.value,
+                          state.departmentPage + 1
+                        )
+                      }
+                      required
+                    />
+                  </>
+                )}
+
+                {state.profile?.role == ROLES.INSTITUTION_ADMIN && (
+                  <>
+                    <TextInput
+                      title="Institution"
+                      placeholder="Institution"
+                      value={state.profile?.institution?.institution_name}
+                      onChange={(e) => {}}
+                      disabled
+                    />
+                    <CustomSelect
+                      title="College"
+                      options={state.collegeList}
+                      value={state.college}
+                      onChange={(option) =>
+                        handleFieldChange("college", option)
+                      }
+                      placeholder="Select college"
+                      error={state.error?.college}
+                      disabled={!state.institution}
+                      loadMore={() =>
+                        state.collegeHasMore &&
+                        fetchColleges(
+                          state.institution?.value,
+                          state.collegePage + 1
+                        )
+                      }
+                      required
+                    />
+                    <CustomSelect
+                      title="Department"
+                      options={state.departmentList}
+                      value={state.department}
+                      onChange={(option) =>
+                        handleFieldChange("department", option)
+                      }
+                      placeholder="Select department"
+                      error={state.error?.department}
+                      disabled={!state.college || !state.institution}
+                      loadMore={() =>
+                        state.departmentHasMore &&
+                        fetchDepartments(
+                          state.college?.value,
+                          state.departmentPage + 1
+                        )
+                      }
+                      required
+                    />
+                  </>
+                )}
+                {state.profile?.role == ROLES.HR && (
+                  <>
+                    <TextInput
+                      title="Institution"
+                      placeholder="Institution"
+                      value={state.profile?.institution?.institution_name}
+                      onChange={(e) => {}}
+                      disabled
+                    />
+                    <TextInput
+                      title="College"
+                      placeholder="College"
+                      value={state.profile?.college?.college_name}
+                      onChange={(e) => {}}
+                      disabled
+                    />
+                    <CustomSelect
+                      title="Department"
+                      options={state.departmentList}
+                      value={state.department}
+                      onChange={(option) =>
+                        handleFieldChange("department", option)
+                      }
+                      placeholder="Select department"
+                      error={state.error?.department}
+                      disabled={!state.college || !state.institution}
+                      loadMore={() =>
+                        state.departmentHasMore &&
+                        fetchDepartments(
+                          state.college?.value,
+                          state.departmentPage + 1
+                        )
+                      }
+                      required
+                    />
+                  </>
+                )}
+                {state.profile?.role == ROLES.HOD && (
+                  <>
+                    <TextInput
+                      title="Institution"
+                      placeholder="Institution"
+                      value={state.profile?.institution?.name}
+                      onChange={(e) => {}}
+                      disabled
+                    />
+                    <TextInput
+                      title="College"
+                      placeholder="College"
+                      value={state.profile?.college?.college_name}
+                      onChange={(e) => {}}
+                      disabled
+                    />
+                    <TextInput
+                      title="Department"
+                      placeholder="Department"
+                      value={state.profile?.department?.department_name}
+                      onChange={(e) => {}}
+                      disabled
+                    />
+                  </>
+                )}
                 <CustomSelect
-                  title="Institution"
-                  options={state.institutionList}
-                  value={state.institution}
-                  onChange={(option) =>
-                    handleFieldChange("institution", option)
-                  }
-                  placeholder="Select institution"
-                  error={state.error?.institution}
-                  loadMore={() =>
-                    state.institutionHasMore &&
-                    fetchInstitutions(state.institutionPage + 1)
-                  }
+                  options={state.priorityList}
+                  value={state.priority}
+                  onChange={(option) => handleFieldChange("priority", option)}
+                  placeholder="Select Priority"
+                  title="Select Priority"
+                  isClearable={true}
+                  error={state.error?.priority}
                   required
                 />
-
                 <CustomSelect
-                  title="College"
-                  options={state.collegeList}
-                  value={state.college}
-                  onChange={(option) => handleFieldChange("college", option)}
-                  placeholder="Select college"
-                  error={state.error?.college}
-                  disabled={!state.institution}
-                  loadMore={() =>
-                    state.collegeHasMore &&
-                    fetchColleges(
-                      state.institution?.value,
-                      state.collegePage + 1,
-                    )
-                  }
-                  required
-                />
-
-                <CustomSelect
-                  title="Department"
-                  options={state.departmentList}
-                  value={state.department}
-                  onChange={(option) => handleFieldChange("department", option)}
-                  placeholder="Select department"
-                  error={state.error?.department}
-                  disabled={!state.college || !state.institution}
-                  loadMore={() =>
-                    state.departmentHasMore &&
-                    fetchDepartments(
-                      state.college?.value,
-                      state.departmentPage + 1,
-                    )
-                  }
-                  required
-                />
-
-                <CustomSelect
-                  title="Job Type"
-                  options={JOB_TYPE}
+                  options={state.typeList}
                   value={state.jobType}
                   onChange={(option) => handleFieldChange("jobType", option)}
                   placeholder="Select job type"
                   error={state.error?.jobType}
                   required
+                  title="Job Type"
+                />
+                <CustomSelect
+                  options={state.salaryRangeList}
+                  title="Salary Range"
+                  placeholder="₹80k - ₹120k"
+                  value={state.salary}
+                  onChange={(option) => handleFieldChange("salary", option)}
+                  error={state.error?.salary}
+                  isClearable={true}
+                  required
                 />
 
-                <TextInput
+                <CustomSelect
+                  options={state.jobStatusList}
+                  title="Select job status"
+                  placeholder="Select job status"
+                  value={state.job_status}
+                  onChange={(option) => handleFieldChange("job_status", option)}
+                  error={state.error?.job_status}
+                  isClearable={true}
+                  required
+                />
+
+                {/* <TextInput
                   name="salary"
                   type="text"
                   title="Salary Range"
@@ -748,18 +1181,7 @@ export default function Newjob() {
                   value={state.salary}
                   onChange={(e) => handleFieldChange("salary", e.target.value)}
                   error={state.error?.salary}
-                />
-
-                <TextInput
-                  name="deadline"
-                  type="date"
-                  title="Deadline"
-                  value={state.deadline}
-                  onChange={(e) =>
-                    handleFieldChange("deadline", e.target.value)
-                  }
-                  error={state.error?.deadline}
-                />
+                /> */}
 
                 <TextInput
                   name="startDate"
@@ -780,6 +1202,21 @@ export default function Newjob() {
                   value={state.endDate}
                   onChange={(e) => handleFieldChange("endDate", e.target.value)}
                   error={state.error?.endDate}
+                  min={state.startDate}
+                  required
+                />
+
+                <TextInput
+                  name="deadline"
+                  type="date"
+                  title="Deadline"
+                  value={state.deadline}
+                  onChange={(e) =>
+                    handleFieldChange("deadline", e.target.value)
+                  }
+                  error={state.error?.deadline}
+                  min={state.startDate}
+                  max={state.endDate}
                   required
                 />
 
@@ -794,6 +1231,19 @@ export default function Newjob() {
                   }
                   error={state.error?.numberOfOpenings}
                   required
+                />
+
+                <CustomSelect
+                  options={state.categoryList}
+                  value={state.category}
+                  onChange={(option) => handleFieldChange("category", option)}
+                  placeholder="Select category"
+                  title="Select category"
+                  required
+                  isClearable={true}
+                  error={state.error?.category}
+                  loading={state.categoryLoading}
+                  isMulti={true}
                 />
 
                 {/* <TextInput
@@ -821,7 +1271,7 @@ export default function Newjob() {
               </div>
 
               <div className="mt-5">
-                <TextArea
+                <TextInput
                   name="qualification"
                   title="Qualification"
                   placeholder="Required qualifications..."
@@ -830,10 +1280,45 @@ export default function Newjob() {
                     handleFieldChange("qualification", e.target.value)
                   }
                   error={state.error?.qualification}
-                  rows={4}
                   required
                 />
               </div>
+            </div>
+          </div>
+          <div
+            ref={section5Ref}
+            className="scroll-mt-32 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+          >
+            <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-4">
+              <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                  />
+                </svg>
+                Job Description
+              </h2>
+            </div>
+            <div className="p-6">
+              <TextArea
+                name="qualification"
+                placeholder="Job descriptions..."
+                value={state.description}
+                onChange={(e) =>
+                  handleFieldChange("description", e.target.value)
+                }
+                error={state.error?.description}
+                rows={10}
+                required
+              />
             </div>
           </div>
 
@@ -900,27 +1385,25 @@ export default function Newjob() {
               </h2>
             </div>
             <div className="p-6">
-              <div className="overflow-hidden rounded-lg border-2 border-dashed border-gray-300 transition-colors hover:border-purple-400">
-                <div
-                  ref={professionalSkillsEditorRef}
-                  id="professionalSkillsEditor"
-                  className="max-h-[400px] min-h-[250px] overflow-y-auto p-4"
-                ></div>
-              </div>
-              {state.error?.professionalSkills && (
-                <p className="mt-2 text-sm text-red-600">
-                  {state.error.professionalSkills}
-                </p>
-              )}
+              <CustomSelect
+                options={state.skillList}
+                value={state.skills}
+                onChange={(option) => handleFieldChange("skills", option)}
+                placeholder="Select Skills"
+                error={state.error?.skills}
+                required
+                isMulti={true}
+                loading={state.skillLoading}
+                loadMore={() =>
+                  state.skillHasMore && skillList(state.skillPage + 1)
+                }
+              />
             </div>
           </div>
 
-          {/* Card 5: Description */}
-          <div
-            ref={section5Ref}
-            className="scroll-mt-32 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
-          >
-            <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-4">
+          {/* Card 5: Skills */}
+          <div className="scroll-mt-32 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+            <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 px-6 py-4">
               <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
                 <svg
                   className="h-5 w-5"
@@ -932,42 +1415,42 @@ export default function Newjob() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
                   />
                 </svg>
-                Job Description
+                Tags
               </h2>
             </div>
             <div className="p-6">
-              <div className="overflow-hidden rounded-lg border-2 border-dashed border-gray-300 transition-colors hover:border-purple-400">
-                <div
-                  ref={editorRef}
-                  id="editorjs"
-                  className="max-h-[500px] min-h-[300px] overflow-y-auto p-4"
-                ></div>
-              </div>
-              {state.error?.jobDescription && (
-                <p className="mt-2 text-sm text-red-600">
-                  {state.error.jobDescription}
-                </p>
-              )}
+              <CustomSelect
+                options={state.tagList}
+                value={state.tags}
+                onChange={(option) => handleFieldChange("tags", option)}
+                placeholder="Select Tags"
+                error={state.error?.tags}
+                required
+                isMulti={true}
+                loading={state.tagLoading}
+                loadMore={() => state.tagHasMore && tagList(state.tagPage + 1)}
+              />
             </div>
           </div>
 
           {/* Action Buttons */}
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
             <button
+            onClick={() => router.back()}
               type="button"
               className="w-full rounded-lg border-2 border-gray-300 px-6 py-3 font-semibold text-gray-700 transition-all hover:bg-gray-50 sm:w-auto"
             >
-              Save as Draft
+              Cancel
             </button>
             <button
               type="button"
               className="w-full rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 px-8 py-3 font-semibold text-white shadow-lg transition-all hover:from-purple-700 hover:to-blue-700 hover:shadow-xl sm:w-auto"
               onClick={() => handleSubmit()}
             >
-              Publish Job
+              Update Job
             </button>
           </div>
         </div>

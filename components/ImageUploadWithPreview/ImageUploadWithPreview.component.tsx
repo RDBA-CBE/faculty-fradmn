@@ -1,8 +1,15 @@
-import React, { useCallback, useState, useRef } from "react";
-import { Upload, X, ChevronLeft, ChevronRight } from "lucide-react";
+import React, { useCallback, useState, useRef, useEffect } from "react";
+import {
+  Upload,
+  X,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 interface ImageUploadProps {
+  existingImages?: string[];
   onImagesChange: (images: File[]) => void;
+  onDeleteImage?: (imageUrl: string) => void;
   maxFiles?: number;
   acceptedFormats?: string[];
   minWidth?: number;
@@ -13,8 +20,10 @@ interface ImageUploadProps {
   isSingleImage?: boolean;
 }
 
-const ImageUploadWithPreview: React.FC<ImageUploadProps> = ({
+const UpdatePropertyImagePreview: React.FC<ImageUploadProps> = ({
+  existingImages = [],
   onImagesChange,
+  onDeleteImage,
   maxFiles = 10,
   acceptedFormats = ["image/jpeg", "image/png"],
   minWidth = 2048,
@@ -24,11 +33,19 @@ const ImageUploadWithPreview: React.FC<ImageUploadProps> = ({
   validateDimensions = true,
   isSingleImage = false,
 }) => {
-  const [images, setImages] = useState<{ file: File; preview: string }[]>([]);
+  const [images, setImages] = useState<{ file?: File; preview: string; isExisting: boolean }[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const existingImageItems = existingImages.map((url) => ({
+      preview: url,
+      isExisting: true,
+    }));
+    setImages(existingImageItems);
+  }, [existingImages]);
 
   const validateImage = (file: File): Promise<boolean> => {
     return new Promise((resolve) => {
@@ -44,7 +61,7 @@ const ImageUploadWithPreview: React.FC<ImageUploadProps> = ({
   };
 
   const processFiles = async (files: FileList) => {
-    const newImages: { file: File; preview: string }[] = [];
+    const newImages: { file: File; preview: string; isExisting: boolean }[] = [];
     setError("");
 
     for (let i = 0; i < files.length; i++) {
@@ -73,22 +90,15 @@ const ImageUploadWithPreview: React.FC<ImageUploadProps> = ({
       }
 
       const preview = URL.createObjectURL(file);
-      newImages.push({ file, preview });
+      newImages.push({ file, preview, isExisting: false });
     }
 
     if (newImages.length > 0) {
       const updatedImages = isSingleImage
-        ? [newImages[0]]
+        ? [...images.filter(img => img.isExisting), ...newImages].slice(0, maxFiles)
         : [...images, ...newImages].slice(0, maxFiles);
       setImages(updatedImages);
-      onImagesChange(updatedImages.map((img) => img.file));
-    }
-  };
-
-  const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      processFiles(event.target.files);
-      event.target.value = "";
+      onImagesChange(updatedImages.filter(img => img.file).map((img) => img.file!));
     }
   };
 
@@ -104,13 +114,27 @@ const ImageUploadWithPreview: React.FC<ImageUploadProps> = ({
     [images]
   );
 
+  const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      processFiles(event.target.files);
+      event.target.value = "";
+    }
+  };
+
   const removeImage = (index: number) => {
-    // Revoke the object URL to avoid memory leaks
-    URL.revokeObjectURL(images[index].preview);
+    const imageToRemove = images[index];
+
+    if (imageToRemove.isExisting && onDeleteImage) {
+      onDeleteImage(imageToRemove.preview);
+    }
+
+    if (!imageToRemove.isExisting) {
+      URL.revokeObjectURL(imageToRemove.preview);
+    }
 
     const updatedImages = images.filter((_, i) => i !== index);
     setImages(updatedImages);
-    onImagesChange(updatedImages.map((img) => img.file));
+    onImagesChange(updatedImages.filter(img => img.file).map((img) => img.file!));
     setError("");
   };
 
@@ -120,7 +144,7 @@ const ImageUploadWithPreview: React.FC<ImageUploadProps> = ({
 
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
-      const scrollAmount = 120; // how much to scroll per click
+      const scrollAmount = 120;
       scrollRef.current.scrollBy({
         left: direction === "left" ? -scrollAmount : scrollAmount,
         behavior: "smooth",
@@ -130,7 +154,6 @@ const ImageUploadWithPreview: React.FC<ImageUploadProps> = ({
 
   return (
     <div className="w-full">
-      {/* Drag and Drop Area */}
       <div
         className={`
           cursor-pointer rounded-lg border-2 border-dashed p-8 text-center transition-all duration-200
@@ -190,14 +213,12 @@ const ImageUploadWithPreview: React.FC<ImageUploadProps> = ({
         </div>
       </div>
 
-      {/* Error Message */}
       {error && (
         <div className="mt-4 rounded-md border border-red-200 bg-red-50 p-3">
           <p className="text-sm text-red-600">{error}</p>
         </div>
       )}
 
-      {/* Uploaded Images Preview */}
       {images.length > 0 && (
         <div className={`mt-6 ${isSingleImage ? '' : 'relative'}`}>
           {!isSingleImage && images.length > 3 && (
@@ -265,4 +286,4 @@ const ImageUploadWithPreview: React.FC<ImageUploadProps> = ({
   );
 };
 
-export default ImageUploadWithPreview;
+export default UpdatePropertyImagePreview;

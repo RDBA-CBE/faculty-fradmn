@@ -86,7 +86,9 @@ const job = {
     let promise = new Promise((resolve, reject) => {
       let url = `jobs/`;
       instance()
-        .post(url, data)
+        .post(url, data, {
+          headers: { "Content-Type": "multipart/form-data" },
+        })
         .then((res) => {
           resolve(res.data);
         })
@@ -155,6 +157,198 @@ const job = {
           }
         });
     });
+    return promise;
+  },
+
+  log_list: (page = 1) => {
+    let promise = new Promise((resolve, reject) => {
+      let url = `activity-logs/`;
+      instance()
+        .get(url)
+        .then((res) => {
+          resolve(res.data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            reject(error.response.message);
+          } else {
+            reject(error);
+          }
+        });
+    });
+
+    return promise;
+  },
+
+  create_log: (data) => {
+    let promise = new Promise((resolve, reject) => {
+      let url = `activity-logs/`;
+      instance()
+        .post(url, data)
+        .then((res) => {
+          resolve(res.data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            reject(error.response.message);
+          } else {
+            reject(error);
+          }
+        });
+    });
+
+    return promise;
+  },
+
+  job_category: () => {
+    let promise = new Promise((resolve, reject) => {
+      let url = `job-categories/`;
+      instance()
+        .get(url)
+        .then((res) => {
+          resolve(res.data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            reject(error.response.message);
+          } else {
+            reject(error);
+          }
+        });
+    });
+    return promise;
+  },
+  job_locations: () => {
+    let promise = new Promise((resolve, reject) => {
+      let url = `job-locations/`;
+      instance()
+        .get(url)
+        .then((res) => {
+          resolve(res.data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            reject(error.response.message);
+          } else {
+            reject(error);
+          }
+        });
+    });
+    return promise;
+  },
+  job_priority: () => {
+    let promise = new Promise((resolve, reject) => {
+      let url = `job-priorities/`;
+      instance()
+        .get(url)
+        .then((res) => {
+          resolve(res.data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            reject(error.response.message);
+          } else {
+            reject(error);
+          }
+        });
+    });
+
+    return promise;
+  },
+  job_status: () => {
+    let promise = new Promise((resolve, reject) => {
+      let url = `job-statuses/`;
+      instance()
+        .get(url)
+        .then((res) => {
+          resolve(res.data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            reject(error.response.message);
+          } else {
+            reject(error);
+          }
+        });
+    });
+
+    return promise;
+  },
+  job_types: () => {
+    let promise = new Promise((resolve, reject) => {
+      let url = `job-types/`;
+      instance()
+        .get(url)
+        .then((res) => {
+          resolve(res.data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            reject(error.response.message);
+          } else {
+            reject(error);
+          }
+        });
+    });
+
+    return promise;
+  },
+  job_salary_ranges: () => {
+    let promise = new Promise((resolve, reject) => {
+      let url = `salary-ranges/`;
+      instance()
+        .get(url)
+        .then((res) => {
+          resolve(res.data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            reject(error.response.message);
+          } else {
+            reject(error);
+          }
+        });
+    });
+
+    return promise;
+  },
+
+  job_skills: (page = 1) => {
+    let promise = new Promise((resolve, reject) => {
+      let url = `job-skills`;
+      instance()
+        .get(url)
+        .then((res) => {
+          resolve(res.data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            reject(error.response.message);
+          } else {
+            reject(error);
+          }
+        });
+    });
+
+    return promise;
+  },
+  job_tags: (page = 1) => {
+    let promise = new Promise((resolve, reject) => {
+      let url = `job-tags/`;
+      instance()
+        .get(url)
+        .then((res) => {
+          resolve(res.data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            reject(error.response.message);
+          } else {
+            reject(error);
+          }
+        });
+    });
+
     return promise;
   },
 };

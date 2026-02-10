@@ -42,12 +42,19 @@ const CollegeAndDepartment = () => {
     pageSize: 10,
     search: '',
     statusFilter: null,
+    collegeFilter: null,
     showModal: false,
     showEditModal: false,
     loading: false,
     submitting: false,
     sortBy: '',
     sortOrder: 'asc',
+
+    // College filter data
+    collegeFilterOptions: [],
+    collegeFilterLoading: false,
+    collegeFilterPage: 1,
+    collegeFilterNext: null,
 
     // College data
     collegeList: [],
@@ -105,7 +112,7 @@ const CollegeAndDepartment = () => {
       collegeList(1)
     } else {
       deptList(1)
-      collegeDropdownList(1) // Load colleges for dropdown
+      loadCollegeFilterOptions(1) // Load colleges for filter dropdown
     }
   }, [state.activeTab])
 
@@ -115,19 +122,16 @@ const CollegeAndDepartment = () => {
     } else {
       deptList(1)
     }
-  }, [debounceSearch, state.statusFilter, state.sortBy])
+  }, [debounceSearch, state.statusFilter, state.collegeFilter, state.sortBy])
 
   const profile = async (isTabChange = true) => {
     try {
       const res: any = await Models.auth.profile()
       console.log('profile --->', res)
-      setState({ profile: res,profile_institution: res?.institution_id })
-      if(res?.institution_id){
-        const dropdown={
-          value:res?.institution_id,
-          label:res?.institution_id
-        }
-        collegeDropdownList(1,"",false,dropdown)
+      setState({ profile: res,profile_institution: res?.institution })
+      if(res?.institution){
+      
+        collegeDropdownList(1,"",false,res?.institution)
 
       }
     } catch (error) {
@@ -172,7 +176,7 @@ const CollegeAndDepartment = () => {
       setState({ collegeLoading: true })
       const body: any = { search }
       if (seletedInstitution) {
-        body.institution = seletedInstitution?.value
+        body.institution = seletedInstitution?.institution_id
       }
 
       const res: any = await Models.college.list(page, body)
@@ -219,6 +223,7 @@ const CollegeAndDepartment = () => {
   }
 
   const collegeList = async (page, institutionId = null) => {
+console.log('✌️institutionId --->', institutionId);
     try {
       setState({ loading: true })
       const body = collegeBodyData()
@@ -259,6 +264,9 @@ const CollegeAndDepartment = () => {
     try {
       setState({ loading: true })
       const body = collegeBodyData()
+      if (state.collegeFilter) {
+        body.college = state.collegeFilter?.value
+      }
       const res: any = await Models.department.list(page, body)
       console.log('deptList --->', res)
 
@@ -290,7 +298,7 @@ const CollegeAndDepartment = () => {
   }
 
   const handleTabChange = tab => {
-    setState({ activeTab: tab, page: 1, search: '', statusFilter: null })
+    setState({ activeTab: tab, page: 1, search: '', statusFilter: null, collegeFilter: null })
   }
 
   const handlePageChange = pageNumber => {
@@ -300,6 +308,45 @@ const CollegeAndDepartment = () => {
 
   const handleStatusChange = selectedOption => {
     setState({ statusFilter: selectedOption, page: 1 })
+  }
+
+  // College filter handlers
+  const loadCollegeFilterOptions = async (page, search = '', loadMore = false) => {
+    try {
+      setState({ collegeFilterLoading: true })
+      const body: any = { search }
+      if (state.profile_institution) {
+        body.institution = state.profile_institution.institution_id
+      }
+      const res: any = await Models.college.list(page, body)
+      const dropdown = Dropdown(res?.results, 'college_name')
+      
+      setState({
+        collegeFilterLoading: false,
+        collegeFilterPage: page,
+        collegeFilterOptions: loadMore
+          ? [...state.collegeFilterOptions, ...dropdown]
+          : dropdown,
+        collegeFilterNext: res?.next,
+      })
+    } catch (error) {
+      console.error('Error loading college filter options:', error)
+      setState({ collegeFilterLoading: false })
+    }
+  }
+
+  const handleCollegeFilterChange = selectedOption => {
+    setState({ collegeFilter: selectedOption, page: 1 })
+  }
+
+  const handleCollegeFilterSearch = searchTerm => {
+    loadCollegeFilterOptions(1, searchTerm)
+  }
+
+  const handleLoadMoreColleges = () => {
+    if (state.collegeFilterNext) {
+      loadCollegeFilterOptions(state.collegeFilterPage + 1, '', true)
+    }
   }
 
   const handleSortStatusChange = ({ columnAccessor, direction }) => {
@@ -347,9 +394,15 @@ const CollegeAndDepartment = () => {
 
   const collegeBodyData = () => {
     const body: any = {}
+    const userId = localStorage.getItem("userId");
 
     if (state.search) {
       body.search = state.search
+    }
+    body.team = "No";
+
+    if (userId) {
+      body.created_by = userId;
     }
     if (state.sortBy) {
       body.ordering =
@@ -671,7 +724,7 @@ const CollegeAndDepartment = () => {
           college_email: state.college_email,
           college_phone: state.college_phone,
           college_address: state.college_address,
-          institution: state?.profile_institution
+          institution: state?.profile_institution?.institution_id
         }
         console.log('✌️body --->', body)
 
@@ -725,7 +778,7 @@ const CollegeAndDepartment = () => {
             college_email: state.college_email,
             college_phone: state.college_phone,
             college_address: state.college_address,
-            institution: state?.profile_institution
+            institution: state?.profile_institution?.institution_id
           }
 
           console.log('Step 2.1: Creating college...', collegeBody)
@@ -741,7 +794,7 @@ const CollegeAndDepartment = () => {
             department_name: state.department_name,
             department_code: state.department_code,
             college: collegeRes?.id,
-            institution: state?.profile_institution
+            institution: state?.profile_institution?.institution_id
           }
 
           console.log('Step 2.2: Creating department...', deptBody)
@@ -798,7 +851,7 @@ const CollegeAndDepartment = () => {
       <TextInput
         title='Institution'
         placeholder='Institution'
-        value={state.profile_institution}
+        value={state.profile_institution?.institution_name}
         onChange={e => {}}
         disabled
       />
@@ -858,7 +911,7 @@ const CollegeAndDepartment = () => {
           <TextInput
             title='Institution'
             placeholder='Institution'
-            value={state.profile_institution}
+            value={state.profile_institution?.institution_name}
             onChange={e => {}}
             disabled
           />
@@ -872,7 +925,7 @@ const CollegeAndDepartment = () => {
               })
             }
             onSearch={searchTerm =>
-              collegeDropdownList(1, searchTerm, state.seletedInstitution)
+              collegeDropdownList(1, searchTerm, state.profile_institution)
             }
             placeholder='Select College'
             isClearable={true}
@@ -882,7 +935,7 @@ const CollegeAndDepartment = () => {
                 state.collegePage + 1,
                 '',
                 true,
-                state.seletedInstitution
+                state.profile_institution
               )
             }
             loading={state.collegeLoading}
@@ -1184,11 +1237,15 @@ const CollegeAndDepartment = () => {
           {state.activeTab === 'departments' && (
             <div className='group relative z-50'>
               <CustomSelect
-                options={statusOptions}
-                value={state.statusFilter}
-                onChange={handleStatusChange}
+                options={state.collegeFilterOptions}
+                value={state.collegeFilter}
+                onChange={handleCollegeFilterChange}
                 placeholder='Select College'
                 isClearable={true}
+                isSearchable={true}
+                onSearch={handleCollegeFilterSearch}
+                loadMore={handleLoadMoreColleges}
+                loading={state.collegeFilterLoading}
               />
             </div>
           )}

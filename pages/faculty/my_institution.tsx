@@ -254,12 +254,6 @@ const Institution = () => {
         await CreateDepartment.validate(deptBody, { abortEarly: false })
       }
 
-      if (stepId === 7) {
-        if (!state.job_title) {
-          throw new Error('Job title is required')
-        }
-      }
-
       setState({
         completedSteps: [...state.completedSteps, stepId],
         errors: {}
@@ -400,12 +394,6 @@ const Institution = () => {
             department_code: state.department_code
           }
           await CreateDepartment.validate(deptBody, { abortEarly: false })
-        }
-
-        if (stepId === 7) {
-          if (!state.job_title) {
-            throw new Error('Job title is required')
-          }
         }
       }
 
@@ -560,23 +548,6 @@ const Institution = () => {
             createdRecords.departmentId = deptRes?.id
           } catch (error: any) {
             throw new Error(`Department creation failed: ${error?.message}`)
-          }
-        }
-
-        // Step 7: Create Job
-        if (stepsToProcess.includes(7)) {
-          try {
-            const jobBody = {
-              job_title: state.job_title,
-              job_description: state.job_description,
-              job_requirements: state.job_requirements,
-              job_salary_min: state.job_salary_min,
-              job_salary_max: state.job_salary_max,
-              department: createdRecords.departmentId
-            }
-            const jobRes = await Models.job.create(jobBody)
-          } catch (error: any) {
-            throw new Error(`Job creation failed: ${error?.message}`)
           }
         }
       }
@@ -1951,67 +1922,6 @@ const Institution = () => {
                   />
                 </div>
               )}
-<<<<<<< HEAD
-=======
-
-              {state.currentStep === 7 && (
-                <div className='space-y-6'>
-                  <h3 className='text-lg font-semibold'>Create Job</h3>
-                  <TextInput
-                    title='Job Title'
-                    placeholder='Enter job title'
-                    value={state.job_title}
-                    onChange={e =>
-                      handleFormChange('job_title', e.target.value)
-                    }
-                    error={state.errors.job_title}
-                    required
-                  />
-                  <TextArea
-                    title='Job Description'
-                    placeholder='Enter job description'
-                    value={state.job_description}
-                    onChange={e =>
-                      handleFormChange('job_description', e.target.value)
-                    }
-                    error={state.errors.job_description}
-                    rows={4}
-                  />
-                  <TextArea
-                    title='Job Requirements'
-                    placeholder='Enter job requirements'
-                    value={state.job_requirements}
-                    onChange={e =>
-                      handleFormChange('job_requirements', e.target.value)
-                    }
-                    error={state.errors.job_requirements}
-                    rows={3}
-                  />
-                  <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
-                    <TextInput
-                      title='Minimum Salary'
-                      type='number'
-                      placeholder='Enter minimum salary'
-                      value={state.job_salary_min}
-                      onChange={e =>
-                        handleFormChange('job_salary_min', e.target.value)
-                      }
-                      error={state.errors.job_salary_min}
-                    />
-                    <TextInput
-                      title='Maximum Salary'
-                      type='number'
-                      placeholder='Enter maximum salary'
-                      value={state.job_salary_max}
-                      onChange={e =>
-                        handleFormChange('job_salary_max', e.target.value)
-                      }
-                      error={state.errors.job_salary_max}
-                    />
-                  </div>
-                </div>
-              )}
->>>>>>> 4bfe6f2999c06b9c8284ea62e27901014d5a7378
             </div>
 
             {/* Navigation Footer */}
