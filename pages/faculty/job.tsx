@@ -1034,7 +1034,7 @@ const Job = () => {
               state.selectedRecords.includes(record.id)
             )}
             onSelectedRecordsChange={records =>
-              setState({ selectedRecords: records.map(r => r.id) })
+              setState({ selectedRecords: records.map((r:any) => r.id) })
             }
             customLoader={
               <div className="flex items-center justify-center py-12">
