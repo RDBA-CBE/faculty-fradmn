@@ -19,6 +19,8 @@ const SidebarDynamic = () => {
   const { t } = useTranslation();
   const [currentMenu, setCurrentMenu] = useState<string>("");
   const [group, setGroup] = useState<string>("");
+  const [showOwn, setShowOwn] = useState<boolean>(true);
+  const [showTeam, setShowTeam] = useState<boolean>(true);
 
   const themeConfig = useSelector((state: IRootState) => state.themeConfig);
   const semidark = useSelector(
@@ -183,20 +185,47 @@ const SidebarDynamic = () => {
 
           {/* Menu */}
           <PerfectScrollbar className="relative h-[calc(100vh-80px)]">
-              <span className="align-middle text-xl font-semibold dark:text-white-light lg:inline ltr:ml-1.5 rtl:mr-1.5">
-                {t("Own")}
-              </span>
-            <ul className="relative space-y-0.5 p-4 py-0 font-semibold">
-              {getOwnMenu()?.length > 0 && renderMenu(getOwnMenu())}
-            </ul>
-            <>
-                <span className="align-middle text-xl font-semibold dark:text-white-light lg:inline ltr:ml-1.5 rtl:mr-1.5">
+            <div className="px-4 py-2">
+              {group !=ROLES.HOD &&
+              <button
+                onClick={() => setShowOwn(!showOwn)}
+                className="flex w-full items-center justify-between"
+              >
+                <span className="align-middle text-xl font-semibold dark:text-white-light">
+                  {t("Own")}
+                </span>
+                <IconCaretDown
+                  className={`transition-transform ${!showOwn ? "-rotate-90" : ""}`}
+                />
+              </button>
+              }
+            </div>
+            <AnimateHeight duration={300} height={showOwn ? "auto" : 0}>
+              <ul className="relative space-y-0.5 p-4 py-0 font-semibold">
+                {getOwnMenu()?.length > 0 && renderMenu(getOwnMenu())}
+              </ul>
+            </AnimateHeight>
+            <div className="px-4 py-2">
+            {group !=ROLES.HOD &&
+
+              <button
+                onClick={() => setShowTeam(!showTeam)}
+                className="flex w-full items-center justify-between"
+              >
+                <span className="align-middle text-xl font-semibold dark:text-white-light">
                   {t("Team")}
                 </span>
+                <IconCaretDown
+                  className={`transition-transform ${!showTeam ? "-rotate-90" : ""}`}
+                />
+              </button>
+}
+            </div>
+            <AnimateHeight duration={300} height={showTeam ? "auto" : 0}>
               <ul className="relative space-y-0.5 p-4 py-0 font-semibold">
                 {getUserMenu()?.length > 0 && renderMenu(getUserMenu())}
               </ul>
-            </>
+            </AnimateHeight>
           </PerfectScrollbar>
         </div>
       </nav>

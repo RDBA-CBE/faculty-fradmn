@@ -15,6 +15,7 @@ import IconEdit from "@/components/Icon/IconEdit";
 import IconHistory from "@/components/Icon/IconHistory";
 import Pagination from "@/components/pagination/pagination";
 import {
+  buildFormData,
   capitalizeFLetter,
   Dropdown,
   showDeleteAlert,
@@ -647,7 +648,8 @@ const Job = () => {
   const handleToggleStatus = async (row: any) => {
     try {
       const newStatus = row?.status === "active" ? "inactive" : "active";
-      await Models.job.update({ status: newStatus }, row?.id);
+      const formData=buildFormData({ status: newStatus })
+      await Models.job.update(formData, row?.id);
       Success(`Job ${newStatus} successfully!`);
       jobList(state.page);
     } catch (error) {

@@ -127,9 +127,7 @@ const Header = () => {
         console.log("getUserRole --->", res);
         setState({
           name: `${capitalizeFLetter(res?.first_name)} ${res?.last_name}`,
-          user_type: capitalizeFLetter(res?.
-            role_display
-            ),
+          user_type: capitalizeFLetter(res?.role_display),
           email: res?.email,
         });
       }
@@ -634,7 +632,7 @@ const Header = () => {
                           type="button"
                           className="text-black/60 hover:text-primary dark:text-dark-light/60 dark:hover:text-white"
                         >
-                         {state.email}
+                          {state.email}
                         </button>
                       </div>
                     </div>
@@ -666,6 +664,16 @@ const Header = () => {
                       Lock Screen
                     </Link>
                   </li> */}
+
+                  <li className="border-t border-white-light dark:border-white-light/10">
+                    <Link
+                      href="/auth/change-password.tsx"
+                      className="dark:hover:text-white"
+                    >
+                      <IconLockDots className="h-4.5 w-4.5 shrink-0 ltr:mr-2 rtl:ml-2" />
+                      Change Password
+                    </Link>
+                  </li>
                   {state.token ? (
                     <li className="border-t border-white-light dark:border-white-light/10">
                       <button

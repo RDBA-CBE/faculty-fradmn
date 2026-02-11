@@ -20,7 +20,7 @@ import { Models } from "@/imports/models.import";
 import { Success, Failure } from "@/utils/function.utils";
 import useDebounce from "@/hook/useDebounce";
 import Swal from "sweetalert2";
-import { FileText, Clock, CheckCircle, XCircle } from "lucide-react";
+import { FileText, Clock, CheckCircle, XCircle, ChevronDown, ChevronUp } from "lucide-react";
 import CustomeDatePicker from "@/components/datePicker";
 import moment from "moment";
 import { ROLES } from "@/utils/constant.utils";
@@ -101,14 +101,9 @@ const Application = () => {
     jobStatusLoading: false,
 
     profile: null,
+    showAdvancedFilters: false,
   });
 
-  const statusOptions = [
-    { value: "Pending", label: "Pending" },
-    { value: "Reviewed", label: "Reviewed" },
-    { value: "Accepted", label: "Accepted" },
-    { value: "Rejected", label: "Rejected" },
-  ];
 
   const debounceSearch = useDebounce(state.search, 500);
 
@@ -125,7 +120,7 @@ const Application = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    // applicationList(1);
+    applicationList(1);
   }, [
     debounceSearch,
     state.statusFilter,
@@ -612,228 +607,137 @@ const Application = () => {
 
       {/* Filters Section */}
       <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
-        <div className="mb-4 flex items-center gap-2">
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-            Filters
-          </h3>
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-white">Filters</h3>
+          <button
+            onClick={() => setState({ showAdvancedFilters: !state.showAdvancedFilters })}
+            className="flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+          >
+            {state.showAdvancedFilters ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            {state.showAdvancedFilters ? "Hide" : "Show"} Advanced Filters
+          </button>
         </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div className="group relative">
-            <TextInput
-              placeholder="Search applications..."
-              value={state.search}
-              onChange={(e) => setState({ search: e.target.value })}
-              icon={<IconSearch className="h-4 w-4" />}
+        
+        {/* Primary Filters */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+          <TextInput
+            placeholder="Search applications..."
+            value={state.search}
+            onChange={(e) => setState({ search: e.target.value })}
+            icon={<IconSearch className="h-4 w-4" />}
+          />
+          {state.profile?.role == ROLES.SUPER_ADMIN && (
+            <CustomSelect
+              options={state.institutionList}
+              value={state.institutionFilter}
+              onChange={handleInstitutionChange}
+              placeholder="Select institution"
+              isClearable={true}
+              onSearch={(searchTerm) => institutionDropdownList(1, searchTerm)}
+              loadMore={() => state.institutionNext && institutionDropdownList(state.institutionPage + 1, "", true)}
+              loading={state.institutionLoading}
+            />
+          )}
+          {(state.profile?.role == ROLES.SUPER_ADMIN || state.profile?.role == ROLES.INSTITUTION_ADMIN) && (
+            <CustomSelect
+              options={state.collegeList}
+              value={state.collegeFilter}
+              onChange={handleCollegeChange}
+              placeholder="Select college"
+              isClearable={true}
+              onSearch={(searchTerm) => {
+                const institutionId = state.profile?.role === ROLES.SUPER_ADMIN ? state.institutionFilter?.value : null;
+                collegeDropdownList(1, searchTerm, false, institutionId, state.profile?.id);
+              }}
+              loadMore={() => {
+                const institutionId = state.profile?.role === ROLES.SUPER_ADMIN ? state.institutionFilter?.value : state.profile?.institution?.institution_id;
+                state.collegeNext && collegeDropdownList(state.collegePage + 1, "", true, institutionId, state.profile?.id);
+              }}
+              loading={state.collegeLoading}
+            />
+          )}
+          <CustomSelect
+            options={state.jobStatusList}
+            value={state.statusFilter}
+            onChange={(e) => setState({ statusFilter: e })}
+            placeholder="Filter by status"
+            isClearable={true}
+          />
+        </div>
+
+        {/* Advanced Filters */}
+        {state.showAdvancedFilters && (
+          <div className="mt-4 grid grid-cols-1 gap-4 border-t border-gray-200 pt-4 dark:border-gray-700 md:grid-cols-4">
+            {(state.profile?.role == ROLES.SUPER_ADMIN || state.profile?.role == ROLES.INSTITUTION_ADMIN || state.profile?.role == ROLES.HR) && (
+              <CustomSelect
+                options={state.departmentList}
+                value={state.departmentFilter}
+                onChange={handleDepartmentChange}
+                placeholder="Select department"
+                isClearable={true}
+                onSearch={(searchTerm) => {
+                  const collegeId = state.collegeFilter?.value;
+                  collegeId && departmentDropdownList(1, searchTerm, false, collegeId, state.profile?.id);
+                }}
+                loadMore={() => {
+                  const collegeId = state.collegeFilter?.value;
+                  state.departmentNext && collegeId && departmentDropdownList(state.departmentPage + 1, "", true, collegeId, state.profile?.id);
+                }}
+                loading={state.departmentLoading}
+                disabled={!state.collegeFilter && state.profile?.role !== ROLES.HR}
+              />
+            )}
+            <CustomeDatePicker
+              value={state.start_date}
+              placeholder="From Date"
+              onChange={(e) => setState({ start_date: e })}
+              showTimeSelect={false}
+            />
+            <CustomeDatePicker
+              value={state.end_date}
+              placeholder="To Date"
+              onChange={(e) => setState({ end_date: e })}
+              showTimeSelect={false}
+            />
+            <CustomSelect
+              options={state.locationList}
+              value={state.locationFilter}
+              onChange={(e) => setState({ locationFilter: e })}
+              placeholder="Select location"
+              isClearable={true}
+              loading={state.locationLoading}
+            />
+            <CustomSelect
+              options={state.categoryList}
+              value={state.categoryFilter}
+              onChange={(e) => setState({ categoryFilter: e })}
+              placeholder="Select category"
+              isClearable={true}
+              loading={state.categoryLoading}
+            />
+            <CustomSelect
+              options={state.salaryRangeList}
+              value={state.salaryFilter}
+              onChange={(e) => setState({ salaryFilter: e })}
+              placeholder="Salary range"
+              isClearable={true}
+            />
+            <CustomSelect
+              options={state.typeList}
+              value={state.typeFilter}
+              onChange={(e) => setState({ typeFilter: e })}
+              placeholder="Job type"
+              isClearable={true}
+            />
+            <CustomSelect
+              options={state.priorityList}
+              value={state.priorityFilter}
+              onChange={(e) => setState({ priorityFilter: e })}
+              placeholder="Priority"
+              isClearable={true}
             />
           </div>
-          <>
-            {(state.profile?.role == ROLES.SUPER_ADMIN ||
-              state.profile?.role == ROLES.INSTITUTION_ADMIN) && (
-              <>
-                {state.profile?.role == ROLES.SUPER_ADMIN && (
-                  <CustomSelect
-                    options={state.institutionList}
-                    value={state.institutionFilter}
-                    onChange={handleInstitutionChange}
-                    placeholder="Select institution"
-                    isClearable={true}
-                    onSearch={(searchTerm) =>
-                      institutionDropdownList(1, searchTerm)
-                    }
-                    loadMore={() =>
-                      state.institutionNext &&
-                      institutionDropdownList(
-                        state.institutionPage + 1,
-                        "",
-                        true
-                      )
-                    }
-                    loading={state.institutionLoading}
-                  />
-                )}
-                <CustomSelect
-                  options={state.collegeList}
-                  value={state.collegeFilter}
-                  onChange={handleCollegeChange}
-                  placeholder="Select college"
-                  isClearable={true}
-                  onSearch={(searchTerm) => {
-                    const institutionId =
-                      state.profile?.role === ROLES.SUPER_ADMIN
-                        ? state.institutionFilter?.value
-                        : null;
-                    collegeDropdownList(
-                      1,
-                      searchTerm,
-                      false,
-                      institutionId,
-                      state.profile?.id
-                    );
-                  }}
-                  loadMore={() => {
-                    const institutionId =
-                      state.profile?.role === ROLES.SUPER_ADMIN
-                        ? state.institutionFilter?.value
-                        : state.profile?.institution?.institution_id;
-                    state.collegeNext &&
-                      collegeDropdownList(
-                        state.collegePage + 1,
-                        "",
-                        true,
-                        institutionId,
-                        state.profile?.id
-                      );
-                  }}
-                  loading={state.collegeLoading}
-                />
-
-                <CustomSelect
-                  options={state.departmentList}
-                  value={state.departmentFilter}
-                  onChange={handleDepartmentChange}
-                  placeholder="Select department"
-                  isClearable={true}
-                  onSearch={(searchTerm) => {
-                    const collegeId = state.collegeFilter?.value;
-                    collegeId &&
-                      departmentDropdownList(
-                        1,
-                        searchTerm,
-                        false,
-                        collegeId,
-                        state.profile?.id
-                      );
-                  }}
-                  loadMore={() => {
-                    const collegeId = state.collegeFilter?.value;
-                    state.departmentNext &&
-                      collegeId &&
-                      departmentDropdownList(
-                        state.departmentPage + 1,
-                        "",
-                        true,
-                        collegeId,
-                        state.profile?.id
-                      );
-                  }}
-                  loading={state.departmentLoading}
-                  disabled={!state.collegeFilter}
-                />
-              </>
-            )}
-            {state.profile?.role == ROLES.HR && (
-              <>
-                <CustomSelect
-                  options={state.departmentList}
-                  value={state.departmentFilter}
-                  onChange={handleDepartmentChange}
-                  placeholder="Select department"
-                  isClearable={true}
-                  onSearch={(searchTerm) => {
-                    const collegeId = state.collegeFilter?.value;
-                    collegeId &&
-                      departmentDropdownList(
-                        1,
-                        searchTerm,
-                        false,
-                        collegeId,
-                        state.profile?.id
-                      );
-                  }}
-                  loadMore={() => {
-                    const collegeId = state.collegeFilter?.value;
-                    state.departmentNext &&
-                      collegeId &&
-                      departmentDropdownList(
-                        state.departmentPage + 1,
-                        "",
-                        true,
-                        collegeId,
-                        state.profile?.id
-                      );
-                  }}
-                  loading={state.departmentLoading}
-                />
-              </>
-            )}
-
-            <div className="group relative">
-              <CustomeDatePicker
-                value={state.start_date}
-                placeholder="Choose From"
-                onChange={(e) => setState({ start_date: e })}
-                showTimeSelect={false}
-              />
-            </div>
-            <div className="group relative">
-              <CustomeDatePicker
-                value={state.end_date}
-                placeholder="Choose To"
-                onChange={(e) => setState({ end_date: e })}
-                showTimeSelect={false}
-              />
-            </div>
-            <div className="group relative">
-              <CustomSelect
-                options={state.locationList}
-                value={state.locationFilter}
-                onChange={(e) => setState({ locationFilter: e })}
-                placeholder="Select location"
-                isClearable={true}
-                loading={state.locationLoading}
-              />
-            </div>
-
-            <div className="group relative">
-              <CustomSelect
-                options={state.categoryList}
-                value={state.categoryFilter}
-                onChange={(e) => setState({ categoryFilter: e })}
-                placeholder="Select category"
-                isClearable={true}
-                loading={state.categoryLoading}
-              />
-            </div>
-
-            <div className="group relative">
-              <CustomSelect
-                options={state.jobStatusList}
-                value={state.statusFilter}
-                onChange={(e) => setState({ statusFilter: e })}
-                placeholder="Filter by status"
-                isClearable={true}
-              />
-            </div>
-            <div className="group relative">
-              <CustomSelect
-                options={state.salaryRangeList}
-                value={state.salaryFilter}
-                onChange={(e) => setState({ salaryFilter: e })}
-                placeholder="Select salary range"
-                isClearable={true}
-              />
-            </div>
-            <div className="group relative">
-              <CustomSelect
-                options={state.typeList}
-                value={state.typeFilter}
-                onChange={(e) => setState({ typeFilter: e })}
-                placeholder="Select job type"
-                isClearable={true}
-              />
-            </div>
-
-            <div className="group relative">
-              <CustomSelect
-                options={state.priorityList}
-                value={state.priorityFilter}
-                onChange={(e) => setState({ priorityFilter: e })}
-                placeholder="Filter by priority"
-                isClearable={true}
-              />
-            </div>
-          </>
-        </div>
+        )}
       </div>
 
       {/* Table Section */}

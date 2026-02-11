@@ -13,7 +13,12 @@ import IconEyeOff from "@/components/Icon/IconEyeOff";
 import IconLoader from "@/components/Icon/IconLoader";
 import IconEdit from "@/components/Icon/IconEdit";
 import Pagination from "@/components/pagination/pagination";
-import { Dropdown, showDeleteAlert, useSetState } from "@/utils/function.utils";
+import {
+  buildFormData,
+  Dropdown,
+  showDeleteAlert,
+  useSetState,
+} from "@/utils/function.utils";
 import Modal from "@/components/modal/modal.component";
 import { Models } from "@/imports/models.import";
 import { Success, Failure } from "@/utils/function.utils";
@@ -468,7 +473,8 @@ const Users = () => {
         await Models.auth.updateUser(state.editId, body);
         Success("User updated successfully!");
       } else {
-        await Models.auth.createUser(body);
+        const formData = buildFormData(body);
+        await Models.auth.createUser(formData);
         Success("User created successfully!");
       }
 
@@ -506,7 +512,7 @@ const Users = () => {
       setState({ submitting: false });
     }
   };
-  console.log('✌️state.activeTab --->', state.activeTab);
+  console.log("✌️state.activeTab --->", state.activeTab);
 
   const renderForm = () => (
     <div className="space-y-6">

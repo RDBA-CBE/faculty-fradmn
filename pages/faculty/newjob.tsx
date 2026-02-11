@@ -15,7 +15,8 @@ import { CreateNewJob } from "@/utils/validation.utils";
 import { Models } from "@/imports/models.import";
 import { EXPERIENCE, JOB_TYPE, ROLES } from "@/utils/constant.utils";
 import moment from "moment";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/router";
+
 import PrivateRouter from "@/hook/privateRouter";
 
 const Newjob = () => {
@@ -82,7 +83,6 @@ const Newjob = () => {
 
   useEffect(() => {
     fetchInstitutions();
-    profile();
     locationList(1);
     salaryRangeList(1);
     priorityList(1);
@@ -91,6 +91,10 @@ const Newjob = () => {
     categoryList(1);
     skillList(1);
     tagList(1);
+  }, []);
+
+  useEffect(() => {
+    profile();
   }, []);
 
   const profile = async () => {
@@ -194,7 +198,6 @@ const Newjob = () => {
     try {
       setState({ skillLoading: true });
       const res: any = await Models.job.job_skills(page);
-      console.log("✌️res --->", res);
       const dropdown = Dropdown(res?.results, "name");
       setState({
         skillLoading: false,
@@ -281,31 +284,45 @@ const Newjob = () => {
   };
 
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      const section1 = section1Ref.current?.getBoundingClientRect();
-      const section2 = section2Ref.current?.getBoundingClientRect();
-      const section5 = section5Ref.current?.getBoundingClientRect();
-      const section3 = section3Ref.current?.getBoundingClientRect();
-      const section4 = section4Ref.current?.getBoundingClientRect();
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const section1 = section1Ref.current?.getBoundingClientRect();
+          const section2 = section2Ref.current?.getBoundingClientRect();
+          const section5 = section5Ref.current?.getBoundingClientRect();
+          const section3 = section3Ref.current?.getBoundingClientRect();
+          const section4 = section4Ref.current?.getBoundingClientRect();
 
-      if (section4 && section4.top < 300) {
-        setState({ activeStep: 5 });
-      } else if (section3 && section3.top < 300) {
-        setState({ activeStep: 4 });
-      } else if (section5 && section5.top < 300) {
-        setState({ activeStep: 3 });
-      } else if (section2 && section2.top < 300) {
-        setState({ activeStep: 2 });
-      } else if (section1 && section1.top < 300) {
-        setState({ activeStep: 1 });
+          let newStep = 1;
+          if (section4 && section4.top < 300) {
+            newStep = 5;
+          } else if (section3 && section3.top < 300) {
+            newStep = 4;
+          } else if (section5 && section5.top < 300) {
+            newStep = 3;
+          } else if (section2 && section2.top < 300) {
+            newStep = 2;
+          } else if (section1 && section1.top < 300) {
+            newStep = 1;
+          }
+
+          setState({ activeStep: newStep });
+          ticking = false;
+        });
+        ticking = true;
       }
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
+    let editorInstance = null;
+    let keyResponsibilityInstance = null;
+    let professionalSkillsInstance = null;
+
     if (
       typeof window !== "undefined" &&
       editorRef.current &&
@@ -314,7 +331,7 @@ const Newjob = () => {
       isEditorInitialized.current = true;
 
       import("@editorjs/editorjs").then(({ default: EditorJS }) => {
-        const editor = new EditorJS({
+        editorInstance = new EditorJS({
           holder: editorRef.current,
           data: state.editorData,
           placeholder: "Start typing your job description...",
@@ -324,7 +341,7 @@ const Newjob = () => {
             },
           },
         });
-        setState({ editorInstance: editor });
+        setState({ editorInstance });
       });
     }
 
@@ -336,7 +353,7 @@ const Newjob = () => {
       isKeyResponsibilityEditorInitialized.current = true;
 
       import("@editorjs/editorjs").then(({ default: EditorJS }) => {
-        const editor = new EditorJS({
+        keyResponsibilityInstance = new EditorJS({
           holder: keyResponsibilityEditorRef.current,
           placeholder: "List key responsibilities...",
           tools: {
@@ -345,7 +362,7 @@ const Newjob = () => {
             },
           },
         });
-        setState({ keyResponsibilityEditorInstance: editor });
+        setState({ keyResponsibilityEditorInstance: keyResponsibilityInstance });
       });
     }
 
@@ -357,7 +374,7 @@ const Newjob = () => {
       isProfessionalSkillsEditorInitialized.current = true;
 
       import("@editorjs/editorjs").then(({ default: EditorJS }) => {
-        const editor = new EditorJS({
+        professionalSkillsInstance = new EditorJS({
           holder: professionalSkillsEditorRef.current,
           placeholder: "List required professional skills...",
           tools: {
@@ -366,27 +383,21 @@ const Newjob = () => {
             },
           },
         });
-        setState({ professionalSkillsEditorInstance: editor });
+        setState({ professionalSkillsEditorInstance: professionalSkillsInstance });
       });
     }
 
     return () => {
-      if (state.editorInstance && isEditorInitialized.current) {
-        state.editorInstance?.destroy?.();
+      if (editorInstance && isEditorInitialized.current) {
+        editorInstance?.destroy?.();
         isEditorInitialized.current = false;
       }
-      if (
-        state.keyResponsibilityEditorInstance &&
-        isKeyResponsibilityEditorInitialized.current
-      ) {
-        state.keyResponsibilityEditorInstance?.destroy?.();
+      if (keyResponsibilityInstance && isKeyResponsibilityEditorInitialized.current) {
+        keyResponsibilityInstance?.destroy?.();
         isKeyResponsibilityEditorInitialized.current = false;
       }
-      if (
-        state.professionalSkillsEditorInstance &&
-        isProfessionalSkillsEditorInitialized.current
-      ) {
-        state.professionalSkillsEditorInstance?.destroy?.();
+      if (professionalSkillsInstance && isProfessionalSkillsEditorInitialized.current) {
+        professionalSkillsInstance?.destroy?.();
         isProfessionalSkillsEditorInitialized.current = false;
       }
     };
@@ -407,7 +418,6 @@ const Newjob = () => {
         console.error("Error saving key responsibility:", error);
       }
     }
-    console.log("✌️keyResponsibilityData --->", keyResponsibilityData);
 
     const valid: any = {
       title: state.title,
@@ -447,8 +457,6 @@ const Newjob = () => {
       valid.college = state.profile?.college?.college_id;
       valid.department = state.profile?.department?.department_id;
     }
-
-    console.log("✌️valid --->", valid);
 
     try {
       await CreateNewJob.validate(
@@ -521,7 +529,6 @@ const Newjob = () => {
         body.department = state.profile?.department?.department_id;
       }
 
-      console.log("✌️body --->", body);
       const formData = buildFormData(body);
 
       const res = await Models.job.create(formData);
@@ -538,7 +545,6 @@ const Newjob = () => {
         err.inner.forEach((error: any) => {
           errors[error.path] = error.message;
         });
-        console.log("✌️errors --->", errors);
 
         setState({ error: errors });
       }

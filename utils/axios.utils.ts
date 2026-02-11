@@ -60,7 +60,6 @@ export const instance = (): AxiosInstance => {
     (response) => response,
     async (error: AxiosError | any) => {
       const originalRequest: any = error.config;
-      console.log('✌️error --->', error);
 
       if (
         error.response?.data?.error === "invalid or expired token" ||  error.response?.data?.error === "unauthorized" &&
@@ -96,7 +95,6 @@ export const instance = (): AxiosInstance => {
                 refresh: refreshToken,
               }
             );
-            console.log('refresh API --->', response);
 
             const { access, refresh } = response.data;
             localStorage.setItem("token", access);

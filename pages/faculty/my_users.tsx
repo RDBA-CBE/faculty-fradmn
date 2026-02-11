@@ -14,6 +14,7 @@ import IconLoader from "@/components/Icon/IconLoader";
 import IconEdit from "@/components/Icon/IconEdit";
 import Pagination from "@/components/pagination/pagination";
 import {
+  buildFormData,
   capitalizeFLetter,
   Dropdown,
   showDeleteAlert,
@@ -53,7 +54,7 @@ const Users = () => {
     qualification: "",
     experience: "",
     password: "",
-    confirm_password: "",
+    password_confirm: "",
     gender: null,
     education_qualification: "",
     showPassword: false,
@@ -176,13 +177,13 @@ const Users = () => {
         };
 
         setState({
-          profile_institution: res?.institution?.name,
+          profile_institution: res?.institution?.institution_name,
           selectedHRInstitution: dropdown,
         });
         hrCollegeList(1, "", false, dropdown);
 
         setState({
-          profile_institution: res?.institution?.name,
+          profile_institution: res?.institution?.institution_name,
           selectedHODInstitution: dropdown,
         });
         hodCollegeList(1, "", false, dropdown);
@@ -192,7 +193,7 @@ const Users = () => {
         if (res?.college) {
           const dropdown = Dropdown(res?.institution, "institution_name");
           setState({
-            profile_institution: res?.institution?.name,
+            profile_institution: res?.institution?.institution_name,
             selectedHODInstitution: dropdown,
           });
           hodCollegeList(1, "", false, dropdown);
@@ -694,7 +695,7 @@ const Users = () => {
       qualification: "",
       experience: "",
       password: "",
-      confirm_password: "",
+      password_confirm: "",
       gender: null,
       education_qualification: "",
       institution: null,
@@ -817,7 +818,7 @@ const Users = () => {
         username: state.username,
         email: state.email,
         password: state.password,
-        password_confirm: state.confirm_password,
+        password_confirm: state.password_confirm,
         phone: state.phone,
         role: state.activeTab,
         status: "active",
@@ -844,7 +845,8 @@ const Users = () => {
         body.experience = state.experience;
       }
 
-    
+      const formData = buildFormData(body);
+
       if (!state.editId) {
         try {
           await CreateUser.validate(body, { abortEarly: false });
@@ -854,16 +856,18 @@ const Users = () => {
           validationError.inner.forEach((error: any) => {
             errors[error.path] = error.message;
           });
+          console.log("✌️errors --->", errors);
+
           setState({ errors });
           return;
         }
       }
 
       if (state.editId) {
-        await Models.auth.updateUser(state.editId, body);
+        await Models.auth.updateUser(state.editId, formData);
         Success("User updated successfully!");
       } else {
-        await Models.auth.createUser(body);
+        await Models.auth.createUser(formData);
         Success("User created successfully!");
       }
 
@@ -974,11 +978,11 @@ const Users = () => {
             title="Confirm Password"
             type={state.showConfirmPassword ? "text" : "password"}
             placeholder="Confirm password"
-            value={state.confirm_password}
+            value={state.password_confirm}
             onChange={(e) =>
-              handleFormChange("confirm_password", e.target.value)
+              handleFormChange("password_confirm", e.target.value)
             }
-            error={state.errors.confirm_password}
+            error={state.errors.password_confirm}
             rightIcon={
               state.showConfirmPassword ? (
                 <IconEyeOff className="h-4 w-4" />
@@ -1462,7 +1466,7 @@ const Users = () => {
               className="transition-all duration-200 focus:shadow-lg group-hover:shadow-md"
             />
           </div>
-        
+
           {(state.profile?.role === ROLES.INSTITUTION_ADMIN ||
             state.profile?.role === ROLES.SUPER_ADMIN) && (
             <>
@@ -1597,11 +1601,11 @@ const Users = () => {
             className="table-hover whitespace-nowrap"
             records={state.userList}
             fetching={state.loading}
-            selectedRecords={state.userList.filter(record =>
+            selectedRecords={state.userList.filter((record) =>
               state.selectedRecords.includes(record.id)
             )}
-            onSelectedRecordsChange={records =>
-              setState({ selectedRecords: records.map((r:any) => r.id) })
+            onSelectedRecordsChange={(records) =>
+              setState({ selectedRecords: records.map((r: any) => r.id) })
             }
             customLoader={
               <div className="flex items-center justify-center py-12">

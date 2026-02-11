@@ -1445,7 +1445,7 @@ console.log('✌️institutionId --->', institutionId);
                     className='rounded-lg bg-blue-500 px-6 py-2 text-white hover:bg-blue-600 disabled:opacity-50'
                   >
                     {state.submitting
-                      ? 'Creating...'
+                      ? 'Updating...'
                       : state.editId
                       ? 'Update Department'
                       : 'Create Department'}

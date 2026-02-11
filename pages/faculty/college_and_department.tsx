@@ -14,7 +14,7 @@ import IconEyeOff from "@/components/Icon/IconEyeOff";
 import IconLoader from "@/components/Icon/IconLoader";
 import { GraduationCap, BookOpen, UserCheck } from "lucide-react";
 import Pagination from "@/components/pagination/pagination";
-import { Dropdown, showDeleteAlert, useSetState } from "@/utils/function.utils";
+import { buildFormData, Dropdown, showDeleteAlert, useSetState } from "@/utils/function.utils";
 import Modal from "@/components/modal/modal.component";
 import { Success, Failure } from "@/utils/function.utils";
 import useDebounce from "@/hook/useDebounce";
@@ -832,7 +832,9 @@ const CollegeAndDepartment = () => {
           };
 
           console.log("Step 3.3: Creating HOD...", finalHodBody);
-          const hodRes: any = await Models.auth.createUser(finalHodBody);
+                      const formData=buildFormData(finalHodBody)
+          
+          const hodRes: any = await Models.auth.createUser(formData);
           createdRecords.hodId = hodRes?.id;
           console.log(
             "Step 3.3: HOD created successfully with ID:",
@@ -1697,7 +1699,7 @@ const CollegeAndDepartment = () => {
                     className="rounded-lg bg-blue-500 px-6 py-2 text-white hover:bg-blue-600 disabled:opacity-50"
                   >
                     {state.submitting
-                      ? "Creating..."
+                      ? "Loading..."
                       : state.editId
                       ? "Update Department"
                       : "Create Department"}

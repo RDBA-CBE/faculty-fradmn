@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import Pagination from "@/components/pagination/pagination";
 import PrimaryButton from "@/components/FormFields/PrimaryButton.component";
-import { showDeleteAlert, useSetState } from "@/utils/function.utils";
+import { buildFormData, showDeleteAlert, useSetState } from "@/utils/function.utils";
 import Modal from "@/components/modal/modal.component";
 import {
   CreateInstituion,
@@ -456,7 +456,9 @@ const Institution = () => {
               education_qualification: state.admin_education_qualification,
               institution: createdRecords.institutionId,
             };
-            const adminRes: any = await Models.auth.createUser(adminBody);
+                      const formData=buildFormData(adminBody)
+            
+            const adminRes: any = await Models.auth.createUser(formData);
             createdRecords.institutionAdminId = adminRes?.id;
           } catch (error: any) {
             if (error?.response?.data) {
@@ -500,7 +502,9 @@ const Institution = () => {
               education_qualification: state.hr_qualification,
               institution: createdRecords.institutionId,
             };
-            const hrRes: any = await Models.auth.createUser(hrBody);
+            const formData=buildFormData(hrBody)
+
+            const hrRes: any = await Models.auth.createUser(formData);
             createdRecords.hrId = hrRes?.id;
           } catch (error: any) {
             throw new Error(`HR creation failed: ${error?.message}`);
@@ -540,7 +544,9 @@ const Institution = () => {
               education_qualification: state.hod_qualification,
               college: createdRecords.collegeId,
             };
-            const hodRes: any = await Models.auth.createUser(hodBody);
+            const formData=buildFormData(hodBody)
+
+            const hodRes: any = await Models.auth.createUser(formData);
             createdRecords.hodId = hodRes?.id;
           } catch (error: any) {
             throw new Error(`HOD creation failed: ${error?.message}`);
@@ -726,7 +732,9 @@ const Institution = () => {
               education_qualification: state.admin_education_qualification,
               institution: createdRecords.institutionId,
             };
-            const adminRes: any = await Models.auth.createUser(adminBody);
+            const formData=buildFormData(adminBody)
+
+            const adminRes: any = await Models.auth.createUser(formData);
             createdRecords.institutionAdminId = adminRes?.id;
           } catch (error: any) {
             // Handle API validation errors
@@ -788,7 +796,9 @@ const Institution = () => {
                 education_qualification: state.hr_qualification,
                 college: createdRecords.collegeId,
               };
-              const hrRes: any = await Models.auth.createUser(hrBody);
+            const formData=buildFormData(hrBody)
+
+              const hrRes: any = await Models.auth.createUser(formData);
               createdRecords.hrId = hrRes?.id;
             } catch (error: any) {
               if (error?.response?.data) {
@@ -843,7 +853,9 @@ const Institution = () => {
                   education_qualification: state.hod_qualification,
                   department: createdRecords.departmentId,
                 };
-                const hodRes: any = await Models.auth.createUser(hodBody);
+            const formData=buildFormData(hodBody)
+
+                const hodRes: any = await Models.auth.createUser(formData);
                 createdRecords.hodId = hodRes?.id;
               } catch (error: any) {
                 throw new Error(`HOD creation failed: ${error?.message}`);

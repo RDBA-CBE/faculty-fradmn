@@ -12,9 +12,20 @@ import IconTrash from "@/components/Icon/IconTrash";
 import IconEye from "@/components/Icon/IconEye";
 import IconEyeOff from "@/components/Icon/IconEyeOff";
 import IconLoader from "@/components/Icon/IconLoader";
-import { GraduationCap, BookOpen, UserCheck, ToggleLeft, ToggleRight } from "lucide-react";
+import {
+  GraduationCap,
+  BookOpen,
+  UserCheck,
+  ToggleLeft,
+  ToggleRight,
+} from "lucide-react";
 import Pagination from "@/components/pagination/pagination";
-import { Dropdown, showDeleteAlert, useSetState } from "@/utils/function.utils";
+import {
+  buildFormData,
+  Dropdown,
+  showDeleteAlert,
+  useSetState,
+} from "@/utils/function.utils";
 import Modal from "@/components/modal/modal.component";
 import { Success, Failure } from "@/utils/function.utils";
 import useDebounce from "@/hook/useDebounce";
@@ -194,13 +205,10 @@ const CollegeAndDepartment = () => {
     try {
       setState({ institutionLoading: true });
       const body = { search };
-      console.log("✌️body --->", body);
 
       const res: any = await Models.institution.list(page, body);
-      console.log("institutionList --->", res);
 
       const dropdown = Dropdown(res?.results, "institution_name");
-      console.log("✌️dropdown --->", dropdown);
 
       setState({
         institutionLoading: false,
@@ -274,18 +282,18 @@ const CollegeAndDepartment = () => {
   };
 
   const collegeList = async (page, institutionId = null) => {
-console.log('✌️collegeList --->', );
     try {
       setState({ loading: true });
-      const body = null;
-      const userid= localStorage.getItem("userId");
+      const body: any = {};
+      const userid = localStorage.getItem("userId");
 
       if (institutionId || state.institutionFilter) {
         body.institution =
           institutionId?.value || state.institutionFilter?.value;
       }
-      body.created_by=userid
-      body.team = "No"
+
+      body.created_by = userid;
+      body.team = "No";
 
       const res: any = await Models.college.list(page, body);
       const dropdown = Dropdown(res?.results, "college_name");
@@ -313,7 +321,6 @@ console.log('✌️collegeList --->', );
         body.college = state.collegeFilter?.value;
       }
       const res: any = await Models.department.list(page, body);
-      console.log("deptList --->", res);
 
       const tableData = res?.results?.map((item) => ({
         id: item?.id,
@@ -390,7 +397,10 @@ console.log('✌️collegeList --->', );
   };
 
   const handleInstitutionChange = (selectedOption) => {
-    setState({ institutionFilter: selectedOption, page: 1 });
+    setState({ institutionFilter: selectedOption, page: 1, collegeFilter: null });
+    if (state.activeTab === "departments") {
+      loadCollegeFilterOptions(1, "", false, selectedOption);
+    }
   };
 
   const handleInstitutionSearch = (searchTerm) => {
@@ -404,16 +414,22 @@ console.log('✌️collegeList --->', );
   };
 
   // College filter handlers
-  const loadCollegeFilterOptions = async (page, search = "", loadMore = false) => {
+  const loadCollegeFilterOptions = async (
+    page,
+    search = "",
+    loadMore = false,
+    institutionOption = null
+  ) => {
     try {
       setState({ collegeFilterLoading: true });
       const body: any = { search };
-      if (state.institutionFilter) {
-        body.institution = state.institutionFilter.value;
+      const selectedInstitution = institutionOption || state.institutionFilter;
+      if (selectedInstitution) {
+        body.institution = selectedInstitution.value;
       }
       const res: any = await Models.college.list(page, body);
       const dropdown = Dropdown(res?.results, "college_name");
-      
+
       setState({
         collegeFilterLoading: false,
         collegeFilterPage: page,
@@ -443,7 +459,6 @@ console.log('✌️collegeList --->', );
   };
 
   const handleSortStatusChange = ({ columnAccessor, direction }) => {
-    console.log("Sort:", columnAccessor, direction);
     setState({
       sortBy: columnAccessor,
       sortOrder: direction === "desc" ? "desc" : "asc",
@@ -510,14 +525,12 @@ console.log('✌️collegeList --->', );
     if (state.sortBy) {
       body.ordering =
         state.sortOrder === "desc" ? `-${state.sortBy}` : state.sortBy;
-      console.log("Ordering:", body.ordering);
     }
 
     return body;
   };
 
   const handleEdit = (row) => {
-    console.log("✌️row --->", row);
     if (state.activeTab === "colleges") {
       setState({
         editId: row.id,
@@ -635,24 +648,16 @@ console.log('✌️collegeList --->', );
   };
 
   const rollbackCreatedRecords = async (records: any) => {
-    console.log("Starting rollback for records:", records);
     try {
       if (records.hodId) {
-        console.log("Rolling back HOD:", records.hodId);
         await Models.auth.deleteUser(records.hodId);
-        console.log("Successfully deleted HOD:", records.hodId);
       }
       if (records.departmentId) {
-        console.log("Rolling back Department:", records.departmentId);
         await Models.department.delete(records.departmentId);
-        console.log("Successfully deleted Department:", records.departmentId);
       }
       if (records.collegeId) {
-        console.log("Rolling back College:", records.collegeId);
         await Models.college.delete(records.collegeId);
-        console.log("Successfully deleted College:", records.collegeId);
       }
-      console.log("Rollback completed successfully");
     } catch (rollbackError) {
       console.error("Rollback error:", rollbackError);
       Failure(
@@ -700,14 +705,9 @@ console.log('✌️collegeList --->', );
         let createdRecords = { collegeId: null, departmentId: null };
 
         try {
-          console.log("Step 2.1: Creating college...", collegeBody);
           const collegeRes: any = await Models.college.create(collegeBody);
           createdRecords.collegeId = collegeRes?.id;
-          console.log(
-            "Step 2.1: College created successfully with ID:",
-            createdRecords.collegeId
-          );
-
+        
           const deptBody = {
             department_name: state.department_name,
             department_code: state.department_code,
@@ -715,13 +715,9 @@ console.log('✌️collegeList --->', );
             institution: state?.institution?.value,
           };
 
-          console.log("Step 2.2: Creating department...", deptBody);
           const deptRes: any = await Models.department.create(deptBody);
           createdRecords.departmentId = deptRes?.id;
-          console.log(
-            "Step 2.2: Department created successfully with ID:",
-            createdRecords.departmentId
-          );
+         
 
           Success("College and Department created successfully!");
           handleCloseModal();
@@ -731,12 +727,10 @@ console.log('✌️collegeList --->', );
 
           // Show step-specific error message
           if (createdRecords.collegeId && !createdRecords.departmentId) {
-            console.log("Error occurred during department creation");
             Failure(
               "Step 2.2 failed: Department creation failed. College was created but removed due to error."
             );
           } else {
-            console.log("Error occurred during college creation");
             Failure("Step 2.1 failed: College creation failed.");
           }
 
@@ -744,7 +738,6 @@ console.log('✌️collegeList --->', );
         }
       }
     } catch (error: any) {
-      console.log("✌️error --->", error);
       if (error?.inner) {
         const errors = {};
         error.inner.forEach((err) => {
@@ -828,7 +821,6 @@ console.log('✌️collegeList --->', );
           body.institution = res?.institution;
         }
 
-        console.log("✌️department body --->", body);
 
         if (state.editId) {
           const res = await Models.department.update(body, state.editId);
@@ -940,13 +932,9 @@ console.log('✌️collegeList --->', );
             institution: state?.institution?.value,
           };
 
-          console.log("Step 3.1: Creating college...", collegeBody);
           const collegeRes: any = await Models.college.create(collegeBody);
           createdRecords.collegeId = collegeRes?.id;
-          console.log(
-            "Step 3.1: College created successfully with ID:",
-            createdRecords.collegeId
-          );
+        
 
           // Step 3.2: Create department with the created college ID
           const deptBody = {
@@ -956,13 +944,9 @@ console.log('✌️collegeList --->', );
             institution: state?.institution?.value,
           };
 
-          console.log("Step 3.2: Creating department...", deptBody);
           const deptRes: any = await Models.department.create(deptBody);
           createdRecords.departmentId = deptRes?.id;
-          console.log(
-            "Step 3.2: Department created successfully with ID:",
-            createdRecords.departmentId
-          );
+         
 
           // Step 3.3: Create HOD with the created department ID
           const finalHodBody = {
@@ -977,14 +961,11 @@ console.log('✌️collegeList --->', );
             education_qualification: state.hod_qualification,
             department: deptRes?.id,
           };
+          const formData = buildFormData(finalHodBody);
 
-          console.log("Step 3.3: Creating HOD...", finalHodBody);
-          const hodRes: any = await Models.auth.createUser(finalHodBody);
+          const hodRes: any = await Models.auth.createUser(formData);
           createdRecords.hodId = hodRes?.id;
-          console.log(
-            "Step 3.3: HOD created successfully with ID:",
-            createdRecords.hodId
-          );
+         
 
           Success("College, Department and HOD created successfully!");
           handleCloseModal();
@@ -998,7 +979,6 @@ console.log('✌️collegeList --->', );
             createdRecords.departmentId &&
             !createdRecords.hodId
           ) {
-            console.log("Error occurred during HOD creation");
             if (error?.response?.data) {
               const apiErrors = error.response.data;
               let errorMessages = [];
@@ -1019,7 +999,6 @@ console.log('✌️collegeList --->', );
             }
             throw new Error(`hod  creation failed: ${error?.message}`);
           } else if (createdRecords.collegeId && !createdRecords.departmentId) {
-            console.log("Error occurred during department creation");
             if (error?.response?.data) {
               const apiErrors = error.response.data;
               let errorMessages = [];
@@ -1040,7 +1019,6 @@ console.log('✌️collegeList --->', );
             }
             throw new Error(`Department  creation failed: ${error?.message}`);
           } else {
-            console.log("Error occurred during college creation");
             if (error?.response?.data) {
               const apiErrors = error.response.data;
               let errorMessages = [];
@@ -1064,7 +1042,6 @@ console.log('✌️collegeList --->', );
         }
       }
     } catch (error: any) {
-      console.log("✌️error --->", error);
       if (error?.response?.data) {
         const apiErrors = {};
         Object.keys(error.response.data).forEach((field) => {
@@ -1094,15 +1071,13 @@ console.log('✌️collegeList --->', );
         institution: state?.institution?.value,
       };
 
-      console.log("✌️body --->", body);
 
       await CreateCollege.validate(body, { abortEarly: false });
       const res = await Models.college.update(body, state.editId);
-      console.log("✌️res --->", res);
       collegeTableList(1);
       handleCloseModal();
+      Success("College updated successfully!");
     } catch (error) {
-      console.log("✌️error --->", error);
       if (error?.response?.data) {
         const apiErrors = {};
         Object.keys(error.response.data).forEach((field) => {
@@ -1203,6 +1178,7 @@ console.log('✌️collegeList --->', );
                   institution: selectedOption,
                   errors: { ...state.errors, institution: "" },
                   seletedInstitution: selectedOption,
+                  college:null
                 });
                 collegeList(1, selectedOption);
               }
@@ -1551,9 +1527,9 @@ console.log('✌️collegeList --->', );
             title={row.status === "active" ? "Deactivate" : "Activate"}
           >
             {row.status === "active" ? (
-              <IconEye className="h-4 w-4" />
+              <ToggleLeft className="h-4 w-4" />
             ) : (
-              <IconEyeOff className="h-4 w-4" />
+              <ToggleRight className="h-4 w-4" />
             )}
           </button>
           <button
@@ -1850,7 +1826,7 @@ console.log('✌️collegeList --->', );
               {state.activeTab === "departments" ? (
                 <div className="flex w-full justify-end gap-4">
                   <button
-                    onClick={handleFinalSubmit}
+                    onClick={()=>handleCloseModal()}
                     disabled={state.submitting}
                     className="rounded-lg border px-6 py-2 text-black hover:bg-green-600 disabled:opacity-50"
                   >

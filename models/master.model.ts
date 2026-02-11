@@ -1,104 +1,272 @@
-import instance from '@/utils/axios.utils';
+import instance from "@/utils/axios.utils";
 
 const master = {
-    list: () => {
-        let promise = new Promise((resolve, reject) => {
-            let url = 'filter/leads';
-            instance()
-                .get(url)
-                .then((res) => {
-                    resolve(res.data);
-                })
-                .catch((error) => {
-                    if (error.response) {
-                        reject(error.response.message);
-                    } else {
-                        reject(error);
-                    }
-                });
-        });
-        return promise;
-    },
+  // Category APIs
+  category_list: (body: any = {}) => {
+    let promise = new Promise((resolve, reject) => {
+      let url = "job-categories/";
+      if (body?.search) url += `?search=${encodeURIComponent(body.search)}`;
+      if (body?.ordering)
+        url += `${body.search ? "&" : "?"}ordering=${encodeURIComponent(
+          body.ordering
+        )}`;
+      instance()
+        .get(url)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
 
-    create: (data: any) => {
-        let promise = new Promise((resolve, reject) => {
-            let url = `lead/create/`;
-            instance()
-                .post(url, data)
-                .then((res) => {
-                    resolve(res.data);
-                })
-                .catch((error) => {
-                    if (error.response) {
-                        reject(error.response.data.message);
-                    } else {
-                        reject(error);
-                    }
-                });
-        });
-        return promise;
-    },
+  create_category: (data: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .post("job-categories/", data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
 
-    update: (data: any, id: any) => {
-        let promise = new Promise((resolve, reject) => {
-            let url = `lead/update/${id}`;
+  update_category: (data: any, id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .patch(`job-categories/${id}/`, data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
 
-            instance()
-                .post(url, data)
-                .then((res) => {
-                    resolve(res.data);
-                })
-                .catch((error) => {
-                    if (error.response) {
-                        reject(error.response.data.message);
-                    } else {
-                        reject(error);
-                    }
-                });
-        });
-        return promise;
-    },
+  delete_category: (id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .delete(`job-categories/${id}/`)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
 
-    delete: (id: any) => {
-        let promise = new Promise((resolve, reject) => {
-            let url = `lead/delete/${id}`;
+  // Job Type APIs
+  job_type_list: (body: any = {}) => {
+    let promise = new Promise((resolve, reject) => {
+      let url = "job-types/";
+      if (body?.search) url += `?search=${encodeURIComponent(body.search)}`;
+      if (body?.ordering)
+        url += `${body.search ? "&" : "?"}ordering=${encodeURIComponent(
+          body.ordering
+        )}`;
+      instance()
+        .get(url)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+  create_job_type: (data: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .post("job-types/", data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+  update_job_type: (data: any, id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .patch(`job-types/${id}/`, data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+  delete_job_type: (id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .delete(`job-types/${id}/`)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
 
-            instance()
-                .post(url)
-                .then((res) => {
-                    resolve(res.data);
-                })
-                .catch((error) => {
-                    if (error.response) {
-                        reject(error.response.data.message);
-                    } else {
-                        reject(error);
-                    }
-                });
-        });
-        return promise;
-    },
+  // Location APIs
+  location_list: (body: any = {}) => {
+    let promise = new Promise((resolve, reject) => {
+      let url = "job-locations/";
+      if (body?.search) url += `?search=${encodeURIComponent(body.search)}`;
+      if (body?.ordering)
+        url += `${body.search ? "&" : "?"}ordering=${encodeURIComponent(
+          body.ordering
+        )}`;
+      instance()
+        .get(url)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+  create_location: (data: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .post("job-locations/", data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+  update_location: (data: any, id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .patch(`job-locations/${id}/`, data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+  delete_location: (id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .delete(`job-locations/${id}/`)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
 
-    details: (id: any) => {
-        let promise = new Promise((resolve, reject) => {
-            let url = `auth/view_user/${id}`;
-            instance()
-                .post(url)
-                .then((res) => {
-                    resolve(res.data);
-                })
-                .catch((error) => {
-                    if (error.response) {
-                        reject(error.response.data.message);
-                    } else {
-                        reject(error);
-                    }
-                });
-        });
-        return promise;
-    },
+  // Salary Range APIs
+  salary_range_list: (body: any = {}) => {
+    let promise = new Promise((resolve, reject) => {
+      let url = "salary-ranges/";
+      if (body?.search) url += `?search=${encodeURIComponent(body.search)}`;
+      if (body?.ordering)
+        url += `${body.search ? "&" : "?"}ordering=${encodeURIComponent(
+          body.ordering
+        )}`;
+      instance()
+        .get(url)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+  create_salary_range: (data: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .post("salary-ranges/", data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+  update_salary_range: (data: any, id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .patch(`salary-ranges/${id}/`, data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+  delete_salary_range: (id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .delete(`salary-ranges/${id}/`)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
 
-   
+  // Skill APIs
+  skill_list: (body: any = {}) => {
+    let promise = new Promise((resolve, reject) => {
+      let url = "job-skills/";
+      if (body?.search) url += `?search=${encodeURIComponent(body.search)}`;
+      if (body?.ordering)
+        url += `${body.search ? "&" : "?"}ordering=${encodeURIComponent(
+          body.ordering
+        )}`;
+      instance()
+        .get(url)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+  create_skill: (data: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .post("job-skills/", data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+  update_skill: (data: any, id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .patch(`job-skills/${id}/`, data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+  delete_skill: (id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .delete(`job-skills/${id}/`)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+
+  // Tags APIs
+  tags_list: (body: any = {}) => {
+    let promise = new Promise((resolve, reject) => {
+      let url = "job-tags/";
+      if (body?.search) url += `?search=${encodeURIComponent(body.search)}`;
+      if (body?.ordering)
+        url += `${body.search ? "&" : "?"}ordering=${encodeURIComponent(
+          body.ordering
+        )}`;
+      instance()
+        .get(url)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+  create_tag: (data: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .post("job-tags/", data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+  update_tag: (data: any, id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .patch(`job-tags/${id}/`, data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+  delete_tag: (id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .delete(`job-tags/${id}/`)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
 };
 
 export default master;

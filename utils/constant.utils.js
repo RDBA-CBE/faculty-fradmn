@@ -101,6 +101,39 @@ export const menuConfig = {
       label: "Reports",
       href: "/",
     },
+    {
+      type: "submenu",
+      icon: "IconMenuCharts",
+      label: "Master",
+      key: "master",
+      children: [
+      
+        {
+          label: "Category",
+          href: "/faculty/master/category",
+        },
+        {
+          label: "Job Type",
+          href: "/faculty/master/job_type",
+        },
+        {
+          label: "Location",
+          href: "/faculty/master/location",
+        },
+        {
+          label: "Salary Range",
+          href: "/faculty/master/salary_range",
+        },
+        {
+          label: "Skill",
+          href: "/faculty/master/skill",
+        },
+        {
+          label: "Tags",
+          href: "/faculty/master/tags",
+        },
+      ],
+    },
   ],
 
   institution_admin: [
@@ -143,6 +176,39 @@ export const menuConfig = {
       icon: "IconMenuCharts",
       label: "Reports",
       href: "/",
+    },
+    {
+      type: "submenu",
+      icon: "IconMenuCharts",
+      label: "Master",
+      key: "master",
+      children: [
+      
+        {
+          label: "Category",
+          href: "/faculty/master/category",
+        },
+        {
+          label: "Job Type",
+          href: "/faculty/master/job_type",
+        },
+        {
+          label: "Location",
+          href: "/faculty/master/location",
+        },
+        {
+          label: "Salary Range",
+          href: "/faculty/master/salary_range",
+        },
+        {
+          label: "Skill",
+          href: "/faculty/master/skill",
+        },
+        {
+          label: "Tags",
+          href: "/faculty/master/tags",
+        },
+      ],
     },
   ],
 
@@ -187,6 +253,40 @@ export const menuConfig = {
       label: "Reports",
       href: "/",
     },
+    {
+      type: "submenu",
+      icon: "IconMenuCharts",
+      label: "Master",
+      key: "master",
+      children: [
+      
+        {
+          label: "Category",
+          href: "/faculty/master/category",
+        },
+        {
+          label: "Job Type",
+          href: "/faculty/master/job_type",
+        },
+        {
+          label: "Location",
+          href: "/faculty/master/location",
+        },
+        {
+          label: "Salary Range",
+          href: "/faculty/master/salary_range",
+        },
+        {
+          label: "Skill",
+          href: "/faculty/master/skill",
+        },
+        {
+          label: "Tags",
+          href: "/faculty/master/tags",
+        },
+      ],
+    },
+    
   ]
   // hod: [
   //   {
@@ -399,6 +499,39 @@ export const OwnmenuConfig = {
       icon: "IconMenuCharts",
       label: "Reports",
       href: "/",
+    },
+    {
+      type: "submenu",
+      icon: "IconMenuCharts",
+      label: "Master",
+      key: "master",
+      children: [
+      
+        {
+          label: "Category",
+          href: "/faculty/master/category",
+        },
+        {
+          label: "Job Type",
+          href: "/faculty/master/job_type",
+        },
+        {
+          label: "Location",
+          href: "/faculty/master/location",
+        },
+        {
+          label: "Salary Range",
+          href: "/faculty/master/salary_range",
+        },
+        {
+          label: "Skill",
+          href: "/faculty/master/skill",
+        },
+        {
+          label: "Tags",
+          href: "/faculty/master/tags",
+        },
+      ],
     },
   ],
 };
