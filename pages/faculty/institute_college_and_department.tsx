@@ -112,7 +112,6 @@ const CollegeAndDepartment = () => {
       collegeList(1)
     } else {
       deptList(1)
-      loadCollegeFilterOptions(1) // Load colleges for filter dropdown
     }
   }, [state.activeTab])
 
@@ -315,6 +314,7 @@ console.log('✌️institutionId --->', institutionId);
     try {
       setState({ collegeFilterLoading: true })
       const body: any = { search }
+
       if (state.profile_institution) {
         body.institution = state.profile_institution.institution_id
       }
@@ -927,9 +927,11 @@ console.log('✌️handleFinalSubmit --->', );
                 errors: { ...state.errors, college: '' }
               })
             }
-            onSearch={searchTerm =>
-              collegeDropdownList(1, searchTerm, state.profile_institution)
-            }
+            onSearch={searchTerm => {
+              if (searchTerm !== undefined) {
+                collegeDropdownList(1, searchTerm, false, state.profile_institution);
+              }
+            }}
             placeholder='Select College'
             isClearable={true}
             loadMore={() =>
