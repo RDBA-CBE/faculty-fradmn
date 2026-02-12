@@ -63,7 +63,11 @@ const JobDetails = () => {
   const fetchApplicants = async (page: number) => {
     try {
       setState({ applicantLoading: true });
-      const res: any = await Models.job.applicants(jobId, page);
+      const body={jobId}
+
+      const res: any = await Models.application.list(page, body);
+console.log('✌️res --->', res);
+
       setState({
         applicantList: res?.results || [],
         applicantCount: res?.count || 0,
@@ -367,7 +371,7 @@ const JobDetails = () => {
                 title: "Name",
                 render: (row: any) => (
                   <div className="font-semibold text-gray-900 dark:text-white">
-                    {row?.user?.first_name} {row?.user?.last_name}
+                    {row?.first_name} {row?.last_name}
                   </div>
                 ),
               },
@@ -375,14 +379,14 @@ const JobDetails = () => {
                 accessor: "email",
                 title: "Email",
                 render: (row: any) => (
-                  <span className="text-gray-600 dark:text-gray-400">{row?.user?.email}</span>
+                  <span className="text-gray-600 dark:text-gray-400">{row?.email}</span>
                 ),
               },
               {
                 accessor: "phone",
                 title: "Phone",
                 render: (row: any) => (
-                  <span className="text-gray-600 dark:text-gray-400">{row?.user?.phone || "N/A"}</span>
+                  <span className="text-gray-600 dark:text-gray-400">{row?.phone || "-"}</span>
                 ),
               },
               {

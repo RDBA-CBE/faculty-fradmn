@@ -9,6 +9,9 @@ console.log('✌️bodssssy --->', body);
       if (body?.search) {
         url += `&search=${encodeURIComponent(body.search)}`;
       }
+      if (body?.jobId) {
+        url += `&job=${encodeURIComponent(body.jobId)}`;
+      }
       if (body?.ordering) {
         url += `&ordering=${encodeURIComponent(body.ordering)}`;
       }

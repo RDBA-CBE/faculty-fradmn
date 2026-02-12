@@ -1152,9 +1152,9 @@ console.log('✌️row --->', row);
                 ),
               },
               {
-                accessor: "job_status",
+                accessor: "is_approved",
                 title: "Status",
-                render: (row) => (
+                render: (row: any) => (
                   <span
                     onClick={() => {
                       if (state.profile?.role == ROLES.HR) {
@@ -1162,18 +1162,18 @@ console.log('✌️row --->', row);
                       }
                     }}
                     className={`inline-flex cursor-pointer items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${
-                      row.is_approved
+                      (row as any)?.is_approved
                         ? "bg-green-100 text-green-800 hover:bg-green-200"
                         : "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
                     }`}
                   >
-                    {row.is_approved ? (
+                    {(row as any)?.is_approved ? (
                       <CheckCircle className="h-3 w-3" />
                     ) : (
                       <Clock className="h-3 w-3" />
                     )}
                     {capitalizeFLetter(
-                      row.is_approved ? "Approved" : "Pending"
+                      (row as any)?.is_approved ? "Approved" : "Pending"
                     ) || "-"}
                   </span>
                 ),

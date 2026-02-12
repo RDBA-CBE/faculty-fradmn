@@ -1362,7 +1362,7 @@ export default function Newjob() {
               className="w-full rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 px-8 py-3 font-semibold text-white shadow-lg transition-all hover:from-purple-700 hover:to-blue-700 hover:shadow-xl sm:w-auto"
               onClick={() => handleSubmit()}
             >
-              Update Job
+              Create Job
             </button>
           </div>
         </div>

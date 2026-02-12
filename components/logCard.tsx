@@ -9,6 +9,7 @@ import { Send } from "lucide-react";
 const LogCard = (props: any) => {
   const { data, onEdit, onDelete, editIcon, onSendMessage, title, onClose } =
     props;
+
   console.log("✌️data --->", data);
   const [message, setMessage] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -63,6 +64,31 @@ const LogCard = (props: any) => {
         </div>
       )}
       <div ref={scrollRef} className="mb-5 flex-1 overflow-y-auto">
+        {data == null || data?.length === 0 ? (
+          <div className="flex h-full items-center justify-center">
+            <div className="text-center">
+              <svg
+                className="mx-auto h-16 w-16 text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                />
+              </svg>
+              <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-white">
+                No logs found
+              </h3>
+              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                There are no activity logs to display yet.
+              </p>
+            </div>
+          </div>
+        ) : (
         <div className="mx-auto max-w-[900px]">
           {data?.map((item) => (
             <div className="flex">
@@ -106,6 +132,7 @@ const LogCard = (props: any) => {
             </div>
           ))}
         </div>
+        )}
       </div>
 
       {/* Fixed Textarea and Send Button */}
