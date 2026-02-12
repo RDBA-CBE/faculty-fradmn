@@ -108,7 +108,7 @@ console.log('✌️bodssssy --->', body);
 
   update: (data: any, id: any) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `applications/${id}/`;
+      let url = `applications/${id}`;
 
       instance()
         .patch(url, data)

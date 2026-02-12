@@ -2,7 +2,6 @@ import instance from "@/utils/axios.utils";
 
 const college_dept = {
   list: (page, body) => {
-console.log('list --->', body);
     let promise = new Promise((resolve, reject) => {
       let url = `colleges/?page=${page}`;
 

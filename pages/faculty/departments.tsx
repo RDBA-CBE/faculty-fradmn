@@ -324,6 +324,7 @@ const CollegeAndDepartment = () => {
       showModal: true,
       department_name: row.department_name,
       department_code: row.department_code,
+      showEditModal: true,
       institutionDept: {
         value: row?.institution_id,
         label: row.institution_name,
@@ -334,7 +335,9 @@ const CollegeAndDepartment = () => {
       college: {
         value: row?.college_id,
         label: row.college_name,
+        
       },
+
     });
   };
 

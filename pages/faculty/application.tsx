@@ -25,7 +25,7 @@ import { Models } from "@/imports/models.import";
 import { Success, Failure } from "@/utils/function.utils";
 import useDebounce from "@/hook/useDebounce";
 import Swal from "sweetalert2";
-import { FileText, Clock, CheckCircle, XCircle } from "lucide-react";
+import { FileText, Clock, CheckCircle, XCircle, UserCheck, UserX } from "lucide-react";
 import CustomeDatePicker from "@/components/datePicker";
 import PrivateRouter from "@/hook/privateRouter";
 import moment from "moment";
@@ -109,6 +109,12 @@ const Application = () => {
     jobStatusLoading: false,
 
     profile: null,
+    
+    showStatusModal: false,
+    selectedApplication: null,
+    selectedStatus: null,
+    applicationStatusList: [],
+    applicationStatusLoading: false,
   });
 
   const debounceSearch = useDebounce(state.search, 500);
@@ -127,6 +133,7 @@ const Application = () => {
     typeList();
     jobStatusList();
     categoryList(1);
+    applicationStatusList();
   }, []);
 
   useEffect(() => {
@@ -215,10 +222,10 @@ const Application = () => {
         position_applied: item?.position_applied,
         qualification: item?.qualification,
         experience: item?.experience,
-        status: item?.status,
         id: item?.id,
         applied_date: item?.created_at,
         job_title: item?.job_detail?.job_title,
+        status:item?.status
       }));
       setState({
         loading: false,
@@ -331,12 +338,21 @@ const Application = () => {
   };
 
   const handleUpdateStatus = async (row: any, newStatus: string) => {
+    setState({ showStatusModal: true, selectedApplication: row });
+  };
+
+  const handleStatusSubmit = async () => {
     try {
+      if (!state.selectedStatus) {
+        Failure("Please select a status");
+        return;
+      }
       const body = {
-        status: newStatus,
+        status: state.selectedStatus.value,
       };
-      await Models.application.update(body, row?.id);
-      Success(`Application ${newStatus.toLowerCase()} successfully!`);
+      await Models.application.update(body, state.selectedApplication?.id);
+      Success("Application status updated successfully!");
+      setState({ showStatusModal: false, selectedApplication: null, selectedStatus: null });
       const role = state.profile?.role;
       if (role === ROLES.SUPER_ADMIN) {
         applicationList(state.page, null, null, null, state.profile?.id);
@@ -546,6 +562,22 @@ const Application = () => {
     }
   };
 
+  const applicationStatusList = async () => {
+console.log('✌️applicationStatusList --->', );
+    try {
+      setState({ applicationStatusLoading: true });
+      const res: any = await Models.master.application_status_list();
+console.log('✌️res --->', res);
+      const dropdown = res?.map((item) => ({
+        value: item.id,
+        label: item.name,
+      }));
+      setState({ applicationStatusLoading: false, applicationStatusList: dropdown });
+    } catch (error) {
+      setState({ applicationStatusLoading: false });
+    }
+  };
+
   const handleInstitutionChange = (selectedOption: any) => {
     setState({
       institutionFilter: selectedOption,
@@ -681,11 +713,11 @@ const Application = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Pending
+                Applied
               </p>
               <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
                 {state.applicationList?.filter(
-                  (app) => app.status === "Pending"
+                  (app) => app.status === "Applied"
                 )?.length || 0}
               </p>
             </div>
@@ -699,11 +731,11 @@ const Application = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Accepted
+               Selected
               </p>
               <p className="text-3xl font-bold text-green-600 dark:text-green-400">
                 {state.applicationList?.filter(
-                  (app) => app.status === "Accepted"
+                  (app) => app.status === "Selected"
                 )?.length || 0}
               </p>
             </div>
@@ -717,11 +749,11 @@ const Application = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Rejected
+              Interview Sheduled
               </p>
               <p className="text-3xl font-bold text-red-600 dark:text-red-400">
                 {state.applicationList?.filter(
-                  (app) => app.status === "Rejected"
+                  (app) => app.status === "Interview Sheduled"
                 )?.length || 0}
               </p>
             </div>
@@ -1091,7 +1123,7 @@ const Application = () => {
                         : "bg-red-100 text-red-800"
                     }`}
                   >
-                    {status}
+                    {capitalizeFLetter(status)}
                   </span>
                 ),
                 sortable: true,
@@ -1104,29 +1136,18 @@ const Application = () => {
                   <div className="flex items-center justify-center gap-2">
                     <button
                       onClick={() => handleEdit(row)}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-100 text-green-600 transition-all duration-200 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-400"
-                      title="Edit"
+                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 transition-all duration-200 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-400"
+                      title="View"
                     >
                       <IconEye className="h-4 w-4" />
                     </button>
-                    {row?.status === "Pending" && (
-                      <>
-                        <button
-                          onClick={() => handleUpdateStatus(row, "Accepted")}
-                          className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-100 text-green-600 transition-all duration-200 hover:bg-green-200 dark:bg-green-900 dark:text-green-400"
-                          title="Accept"
-                        >
-                          <IconEye className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => handleUpdateStatus(row, "Rejected")}
-                          className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600 transition-all duration-200 hover:bg-red-200 dark:bg-red-900 dark:text-red-400"
-                          title="Reject"
-                        >
-                          <IconEyeOff className="h-4 w-4" />
-                        </button>
-                      </>
-                    )}
+                    <button
+                      onClick={() => handleUpdateStatus(row, "")} 
+                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 text-purple-600 transition-all duration-200 hover:bg-purple-200 dark:bg-purple-900 dark:text-purple-400"
+                      title="Update Status"
+                    >
+                      <UserCheck className="h-4 w-4" />
+                    </button>
                     <button
                       onClick={() => handleDelete(row)}
                       className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600 transition-all duration-200 hover:bg-red-200 dark:bg-red-900 dark:text-red-400"
@@ -1163,6 +1184,52 @@ const Application = () => {
           />
         </div>
       </div>
+
+      {/* Status Update Modal */}
+      <Modal
+        open={state.showStatusModal}
+        close={() => setState({ showStatusModal: false, selectedApplication: null, selectedStatus: null })}
+        renderComponent={() => (
+          <div className="p-6">
+            <div className="mb-6 text-center">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900 dark:to-blue-900">
+                <UserCheck className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Update Application Status
+              </h2>
+              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                Select a new status for this application
+              </p>
+            </div>
+
+            <div className="mb-6">
+              <CustomSelect
+                options={state.applicationStatusList}
+                value={state.selectedStatus}
+                onChange={(e) => setState({ selectedStatus: e })}
+                placeholder="Select status"
+                loading={state.applicationStatusLoading}
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setState({ showStatusModal: false, selectedApplication: null, selectedStatus: null })}
+                className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleStatusSubmit}
+                className="flex-1 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 text-white hover:shadow-lg"
+              >
+                Update Status
+              </button>
+            </div>
+          </div>
+        )}
+      />
 
       {/* Modal */}
       <Modal
