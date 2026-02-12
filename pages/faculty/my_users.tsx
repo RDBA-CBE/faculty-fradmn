@@ -207,6 +207,14 @@ const Users = () => {
         if (isTabChange) {
           setState({ activeTab: ROLES.HOD });
         }
+        setState({
+          profile_institution: res?.institution?.institution_name,
+          selectedHODCollege: {
+            value: res?.college?.college_id,
+            label: res?.college?.college_name,
+          },
+        });
+        superAdminDepartmentList(1, "", false, res?.college?.college_id);
       }
 
       if (res?.role === ROLES.HOD) {
@@ -1073,6 +1081,7 @@ const Users = () => {
               disabled
             />
           )}
+
           <CustomSelect
             options={state.collegeList}
             value={state.college}
@@ -1147,41 +1156,58 @@ const Users = () => {
               disabled
             />
           )}
-          <CustomSelect
-            options={state.hodCollegeList}
-            value={state.selectedHODCollege}
-            onChange={(selectedOption) => {
-              setState({
-                selectedHODCollege: selectedOption,
-                errors: { ...state.errors, college: "" },
-                department: null,
-              });
-              if (selectedOption) {
-                hodDepartmentList(1, "", false, selectedOption);
-              } else {
-                setState({ departmentList: [] });
+          {state.profile?.role == ROLES.HR ? (
+            <TextInput
+              title="College"
+              placeholder="College"
+              value={state.profile?.college?.college_name}
+              onChange={(e) => {}}
+              required
+              disabled
+            />
+          ) : (
+            <CustomSelect
+              options={state.hodCollegeList}
+              value={state.selectedHODCollege}
+              onChange={(selectedOption) => {
+                setState({
+                  selectedHODCollege: selectedOption,
+                  errors: { ...state.errors, college: "" },
+                  department: null,
+                });
+                if (selectedOption) {
+                  hodDepartmentList(1, "", false, selectedOption);
+                } else {
+                  setState({ departmentList: [] });
+                }
+              }}
+              onSearch={(searchTerm) =>
+                hodCollegeList(
+                  1,
+                  searchTerm,
+                  false,
+                  state.selectedHODInstitution
+                )
               }
-            }}
-            onSearch={(searchTerm) =>
-              hodCollegeList(1, searchTerm, false, state.selectedHODInstitution)
-            }
-            placeholder="Select College"
-            isClearable={true}
-            loadMore={() =>
-              state.hodCollegeNext &&
-              hodCollegeList(
-                state.hodCollegePage + 1,
-                "",
-                true,
-                state.selectedHODInstitution
-              )
-            }
-            loading={state.hodCollegeLoading}
-            title="Select College"
-            error={state.errors.college}
-            required
-            disabled={!state.selectedHODInstitution}
-          />
+              placeholder="Select College"
+              isClearable={true}
+              loadMore={() =>
+                state.hodCollegeNext &&
+                hodCollegeList(
+                  state.hodCollegePage + 1,
+                  "",
+                  true,
+                  state.selectedHODInstitution
+                )
+              }
+              loading={state.hodCollegeLoading}
+              title="Select College"
+              error={state.errors.college}
+              required
+              disabled={!state.selectedHODInstitution}
+            />
+          )}
+
           <CustomSelect
             options={state.departmentList}
             value={state.department}

@@ -1,5 +1,5 @@
 import { DataTable } from "mantine-datatable";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { setPageTitle } from "../../store/themeConfigSlice";
 import TextInput from "@/components/FormFields/TextInput.component";
@@ -109,25 +109,15 @@ const CollegeAndDepartment = () => {
     stepId === 1 || isStepCompleted(stepId - 1);
 
   const debounceSearch = useDebounce(state.search, 500);
+  const profileRef = useRef(null);
 
   useEffect(() => {
     dispatch(setPageTitle("Colleges & Departments"));
-    profile(); // Initialize dropdown separately
+    profile();
   }, [dispatch]);
 
   useEffect(() => {
-    if (state.activeTab === "colleges") {
-      collegeList(1);
-    } else {
-      deptList(1);
-      collegeDropdownList(1); // Load colleges for dropdown
-    }
-  }, [state.activeTab]);
-
-  useEffect(() => {
-    if (state.activeTab === "colleges") {
-      collegeList(1);
-    } else {
+    if (profileRef.current) {
       deptList(1);
     }
   }, [
@@ -141,7 +131,9 @@ const CollegeAndDepartment = () => {
   const profile = async () => {
     try {
       const res: any = await Models.auth.profile();
+      profileRef.current = res;
       setState({ profile: res });
+      deptList(1);
     } catch (error) {
       console.error("Error fetching institutions:", error);
     }
@@ -219,6 +211,7 @@ const CollegeAndDepartment = () => {
     try {
       setState({ loading: true });
       const body = collegeBodyData();
+      body.college = profileRef.current?.college?.college_id
       const res: any = await Models.department.list(page, body);
       console.log("deptList --->", res);
 
