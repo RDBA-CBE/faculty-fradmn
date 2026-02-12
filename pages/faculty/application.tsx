@@ -348,7 +348,7 @@ const Application = () => {
         return;
       }
       const body = {
-        status: state.selectedStatus.value,
+        status: state.selectedStatus.label,
       };
       await Models.application.update(body, state.selectedApplication?.id);
       Success("Application status updated successfully!");
