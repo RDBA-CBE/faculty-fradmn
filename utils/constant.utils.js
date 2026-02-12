@@ -132,6 +132,10 @@ export const menuConfig = {
           label: "Tags",
           href: "/faculty/master/tags",
         },
+        {
+          label: "Application Status",
+          href: "/faculty/master/application_status",
+        },
       ],
     },
   ],

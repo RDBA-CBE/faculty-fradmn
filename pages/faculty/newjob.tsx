@@ -16,11 +16,12 @@ import { Models } from "@/imports/models.import";
 import { EXPERIENCE, JOB_TYPE, ROLES } from "@/utils/constant.utils";
 import moment from "moment";
 import { useRouter } from "next/router";
+import UpdatePropertyImagePreview from "@/components/ImageUploadWithPreview/UpdatePropertyImagePreview.component";
 
-import PrivateRouter from "@/hook/privateRouter";
-
-const Newjob = () => {
+export default function Newjob() {
   const router = useRouter();
+  const id = router?.query?.id;
+
   const editorRef = useRef(null);
   const keyResponsibilityEditorRef = useRef(null);
   const professionalSkillsEditorRef = useRef(null);
@@ -52,6 +53,7 @@ const Newjob = () => {
     skills: [],
     tags: [],
     images: [],
+    newImages: [],
     institutionList: [],
     collegeList: [],
     departmentList: [],
@@ -72,13 +74,14 @@ const Newjob = () => {
     editorInstance: null,
     keyResponsibilityEditorInstance: null,
     professionalSkillsEditorInstance: null,
+    responsibilityData: null,
     editorData: {
       time: Date.now(),
       blocks: [],
       version: "2.19.0",
     },
     error: {},
-    location:[]
+    location: [],
   });
 
   useEffect(() => {
@@ -87,7 +90,7 @@ const Newjob = () => {
     salaryRangeList(1);
     priorityList(1);
     typeList();
-    jobStatusList();
+    // jobStatusList();
     categoryList(1);
     skillList(1);
     tagList(1);
@@ -183,21 +186,22 @@ const Newjob = () => {
     }
   };
 
-  const jobStatusList = async (page = 1) => {
-    try {
-      setState({ categoryLoading: true });
-      const res: any = await Models.job.job_status();
-      const dropdown = Dropdown(res?.results, "name");
-      setState({ jobStatusLoading: false, jobStatusList: dropdown });
-    } catch (error) {
-      setState({ categoryLoading: false });
-    }
-  };
+  // const jobStatusList = async (page = 1) => {
+  //   try {
+  //     setState({ categoryLoading: true });
+  //     const res: any = await Models.job.job_status();
+  //     const dropdown = Dropdown(res?.results, "name");
+  //     setState({ jobStatusLoading: false, jobStatusList: dropdown });
+  //   } catch (error) {
+  //     setState({ categoryLoading: false });
+  //   }
+  // };
 
   const skillList = async (page = 1) => {
     try {
       setState({ skillLoading: true });
       const res: any = await Models.job.job_skills(page);
+      console.log("✌️res --->", res);
       const dropdown = Dropdown(res?.results, "name");
       setState({
         skillLoading: false,
@@ -245,6 +249,7 @@ const Newjob = () => {
   };
 
   const fetchColleges = async (institutionId: number, page = 1) => {
+    console.log("✌️fetchColleges --->");
     try {
       const res: any = await Models.college.list(page, {
         institution: institutionId,
@@ -264,6 +269,7 @@ const Newjob = () => {
   };
 
   const fetchDepartments = async (collegeId: number, page = 1) => {
+    console.log("✌️collegeId --->", collegeId);
     try {
       const res: any = await Models.department.list(page, {
         college: collegeId,
@@ -284,124 +290,118 @@ const Newjob = () => {
   };
 
   useEffect(() => {
-    let ticking = false;
     const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const section1 = section1Ref.current?.getBoundingClientRect();
-          const section2 = section2Ref.current?.getBoundingClientRect();
-          const section5 = section5Ref.current?.getBoundingClientRect();
-          const section3 = section3Ref.current?.getBoundingClientRect();
-          const section4 = section4Ref.current?.getBoundingClientRect();
+      const section1 = section1Ref.current?.getBoundingClientRect();
+      const section2 = section2Ref.current?.getBoundingClientRect();
+      const section5 = section5Ref.current?.getBoundingClientRect();
+      const section3 = section3Ref.current?.getBoundingClientRect();
+      const section4 = section4Ref.current?.getBoundingClientRect();
 
-          let newStep = 1;
-          if (section4 && section4.top < 300) {
-            newStep = 5;
-          } else if (section3 && section3.top < 300) {
-            newStep = 4;
-          } else if (section5 && section5.top < 300) {
-            newStep = 3;
-          } else if (section2 && section2.top < 300) {
-            newStep = 2;
-          } else if (section1 && section1.top < 300) {
-            newStep = 1;
-          }
-
-          setState({ activeStep: newStep });
-          ticking = false;
-        });
-        ticking = true;
+      if (section4 && section4.top < 300) {
+        setState({ activeStep: 5 });
+      } else if (section3 && section3.top < 300) {
+        setState({ activeStep: 4 });
+      } else if (section5 && section5.top < 300) {
+        setState({ activeStep: 3 });
+      } else if (section2 && section2.top < 300) {
+        setState({ activeStep: 2 });
+      } else if (section1 && section1.top < 300) {
+        setState({ activeStep: 1 });
       }
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => {
-    let editorInstance = null;
-    let keyResponsibilityInstance = null;
-    let professionalSkillsInstance = null;
+  
 
-    if (
-      typeof window !== "undefined" &&
-      editorRef.current &&
-      !isEditorInitialized.current
-    ) {
-      isEditorInitialized.current = true;
-
-      import("@editorjs/editorjs").then(({ default: EditorJS }) => {
-        editorInstance = new EditorJS({
-          holder: editorRef.current,
-          data: state.editorData,
-          placeholder: "Start typing your job description...",
-          tools: {
-            list: {
-              class: require("@editorjs/list"),
+    useEffect(() => {
+      if (
+        typeof window !== "undefined" &&
+        editorRef.current &&
+        !isEditorInitialized.current
+      ) {
+        isEditorInitialized.current = true;
+  
+        import("@editorjs/editorjs").then(({ default: EditorJS }) => {
+          const editor = new EditorJS({
+            holder: editorRef.current,
+            data: state.editorData,
+            placeholder: "Start typing your job description...",
+            tools: {
+              list: {
+                class: require("@editorjs/list"),
+              },
             },
-          },
+          });
+          setState({ editorInstance: editor });
         });
-        setState({ editorInstance });
-      });
-    }
-
-    if (
-      typeof window !== "undefined" &&
-      keyResponsibilityEditorRef.current &&
-      !isKeyResponsibilityEditorInitialized.current
-    ) {
-      isKeyResponsibilityEditorInitialized.current = true;
-
-      import("@editorjs/editorjs").then(({ default: EditorJS }) => {
-        keyResponsibilityInstance = new EditorJS({
-          holder: keyResponsibilityEditorRef.current,
-          placeholder: "List key responsibilities...",
-          tools: {
-            list: {
-              class: require("@editorjs/list"),
+      }
+  
+      if (
+        typeof window !== "undefined" &&
+        keyResponsibilityEditorRef.current &&
+        !isKeyResponsibilityEditorInitialized.current
+      ) {
+        isKeyResponsibilityEditorInitialized.current = true;
+  
+        import("@editorjs/editorjs").then(({ default: EditorJS }) => {
+          const editor = new EditorJS({
+            holder: keyResponsibilityEditorRef.current,
+            placeholder: "List key responsibilities...",
+            tools: {
+              list: {
+                class: require("@editorjs/list"),
+              },
             },
-          },
+          });
+          setState({ keyResponsibilityEditorInstance: editor });
         });
-        setState({ keyResponsibilityEditorInstance: keyResponsibilityInstance });
-      });
-    }
-
-    if (
-      typeof window !== "undefined" &&
-      professionalSkillsEditorRef.current &&
-      !isProfessionalSkillsEditorInitialized.current
-    ) {
-      isProfessionalSkillsEditorInitialized.current = true;
-
-      import("@editorjs/editorjs").then(({ default: EditorJS }) => {
-        professionalSkillsInstance = new EditorJS({
-          holder: professionalSkillsEditorRef.current,
-          placeholder: "List required professional skills...",
-          tools: {
-            list: {
-              class: require("@editorjs/list"),
+      }
+  
+      if (
+        typeof window !== "undefined" &&
+        professionalSkillsEditorRef.current &&
+        !isProfessionalSkillsEditorInitialized.current
+      ) {
+        isProfessionalSkillsEditorInitialized.current = true;
+  
+        import("@editorjs/editorjs").then(({ default: EditorJS }) => {
+          const editor = new EditorJS({
+            holder: professionalSkillsEditorRef.current,
+            placeholder: "List required professional skills...",
+            tools: {
+              list: {
+                class: require("@editorjs/list"),
+              },
             },
-          },
+          });
+          setState({ professionalSkillsEditorInstance: editor });
         });
-        setState({ professionalSkillsEditorInstance: professionalSkillsInstance });
-      });
-    }
-
-    return () => {
-      if (editorInstance && isEditorInitialized.current) {
-        editorInstance?.destroy?.();
-        isEditorInitialized.current = false;
       }
-      if (keyResponsibilityInstance && isKeyResponsibilityEditorInitialized.current) {
-        keyResponsibilityInstance?.destroy?.();
-        isKeyResponsibilityEditorInitialized.current = false;
-      }
-      if (professionalSkillsInstance && isProfessionalSkillsEditorInitialized.current) {
-        professionalSkillsInstance?.destroy?.();
-        isProfessionalSkillsEditorInitialized.current = false;
-      }
-    };
-  }, []);
+  
+      return () => {
+        if (state.editorInstance && isEditorInitialized.current) {
+          state.editorInstance?.destroy?.();
+          isEditorInitialized.current = false;
+        }
+        if (
+          state.keyResponsibilityEditorInstance &&
+          isKeyResponsibilityEditorInitialized.current
+        ) {
+          state.keyResponsibilityEditorInstance?.destroy?.();
+          isKeyResponsibilityEditorInitialized.current = false;
+        }
+        if (
+          state.professionalSkillsEditorInstance &&
+          isProfessionalSkillsEditorInitialized.current
+        ) {
+          state.professionalSkillsEditorInstance?.destroy?.();
+          isProfessionalSkillsEditorInitialized.current = false;
+        }
+      };
+    }, [state.responsibilityData]);
 
   const scrollToSection = (ref: any) => {
     ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -409,15 +409,9 @@ const Newjob = () => {
 
   const handleSubmit = async () => {
     setState({ btnLoading: true });
-    
-    let keyResponsibilityData = null;
-    if (state.keyResponsibilityEditorInstance && typeof state.keyResponsibilityEditorInstance.save === 'function') {
-      try {
-        keyResponsibilityData = await state.keyResponsibilityEditorInstance.save();
-      } catch (error) {
-        console.error("Error saving key responsibility:", error);
-      }
-    }
+    const keyResponsibilityData =
+      await state.keyResponsibilityEditorInstance?.save();
+    console.log("✌️keyResponsibilityData --->", keyResponsibilityData);
 
     const valid: any = {
       title: state.title,
@@ -440,6 +434,7 @@ const Newjob = () => {
       tags: state.tags,
       jobDescription: state.description,
     };
+
     if (state.profile?.role == ROLES.SUPER_ADMIN) {
       valid.institution = state.institution?.value;
       valid.college = state.college?.value;
@@ -457,6 +452,8 @@ const Newjob = () => {
       valid.college = state.profile?.college?.college_id;
       valid.department = state.profile?.department?.department_id;
     }
+
+    console.log("✌️valid --->", valid);
 
     try {
       await CreateNewJob.validate(
@@ -481,7 +478,7 @@ const Newjob = () => {
           keyResponsibility: keyResponsibilityData,
           skills: state.skills,
           company_detail: state.company_detail,
-          job_status: state.job_status?.value,
+          // job_status: state.job_status?.value,
           description: state.description,
         },
         { abortEarly: false }
@@ -499,17 +496,19 @@ const Newjob = () => {
         company_detail: state.company_detail,
         number_of_openings: Number(state.numberOfOpenings),
         last_date: moment(state.endDate).format("YYYY-MM-DD"),
-        job_status_id: state.job_status?.value,
+        // job_status_id: state.job_status?.value,
         deadline: moment(state.deadline).format("YYYY-MM-DD"),
         start_date: moment(state.startDate).format("YYYY-MM-DD"),
         responsibility: keyResponsibilityData,
         skill_ids: state.skills?.map((item) => item?.value),
         tag_ids: state.tags?.map((item) => item?.value),
-        company_logo: state.images?.length > 0 && state.images[0],
         is_approved: state.profile?.role == ROLES.HR ? true : false,
         priority_id: state.priority?.value,
         category_ids: state.category?.map((item) => item?.value),
       };
+      if (state.newImages?.length > 0 && state.images?.length === 0) {
+        body.company_logo = state.newImages[0];
+      }
 
       if (state.profile?.role == ROLES.SUPER_ADMIN) {
         body.institution = state.institution?.value;
@@ -529,22 +528,23 @@ const Newjob = () => {
         body.department = state.profile?.department?.department_id;
       }
 
+      console.log("✌️body --->", body);
       const formData = buildFormData(body);
 
       const res = await Models.job.create(formData);
+      console.log("✌️res --->", res);
 
       setState({ error: {} });
       setState({ btnLoading: false });
-      Success(
-        "Job created successfully. This job will be published after HR verification"
-      );
+      Success("Job created successfully.");
       router.back();
     } catch (err: any) {
-      if (err.inner) {
+      if (err?.inner) {
         const errors: any = {};
         err.inner.forEach((error: any) => {
           errors[error.path] = error.message;
         });
+        console.log("✌️errors --->", errors);
 
         setState({ error: errors });
       }
@@ -602,14 +602,7 @@ const Newjob = () => {
               <h1 className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-2xl font-bold text-transparent sm:text-3xl">
                 Create Job Posting
               </h1>
-              <p className="mt-1 text-sm text-gray-500">
-                Post a new opportunity
-              </p>
-            </div>
-            <div className="hidden items-center gap-2 text-sm sm:flex">
-              <span className="rounded-full bg-purple-100 px-3 py-1 font-medium text-purple-700">
-                Draft
-              </span>
+              <p className="mt-1 text-sm text-gray-500"> Post a new opportunity</p>
             </div>
           </div>
         </div>
@@ -839,9 +832,19 @@ const Newjob = () => {
               />
 
               <div className="mt-5">
-                <ImageUploadWithPreview
-                  onImagesChange={(images) => setState({ images })}
+                <UpdatePropertyImagePreview
+                  existingImages={state.images}
+                  onImagesChange={(newImages) => setState({ newImages })}
+                  onDeleteImage={(imageUrl) => {
+                    setState({
+                      images: state.images.filter((img) => img !== imageUrl),
+                    });
+                  }}
                   maxFiles={1}
+                  title="Company Logo"
+                  description="Upload company logo (JPEG or PNG)"
+                  validateDimensions={false}
+                  isSingleImage={true}
                 />
               </div>
             </div>
@@ -958,6 +961,25 @@ const Newjob = () => {
                       }
                       required
                     />
+                    <CustomSelect
+                      title="Department"
+                      options={state.departmentList}
+                      value={state.department}
+                      onChange={(option) =>
+                        handleFieldChange("department", option)
+                      }
+                      placeholder="Select department"
+                      error={state.error?.department}
+                      disabled={!state.college || !state.institution}
+                      loadMore={() =>
+                        state.departmentHasMore &&
+                        fetchDepartments(
+                          state.college?.value,
+                          state.departmentPage + 1
+                        )
+                      }
+                      required
+                    />
                   </>
                 )}
                 {state.profile?.role == ROLES.HR && (
@@ -1052,7 +1074,7 @@ const Newjob = () => {
                   required
                 />
 
-                <CustomSelect
+                {/* <CustomSelect
                   options={state.jobStatusList}
                   title="Select job status"
                   placeholder="Select job status"
@@ -1061,7 +1083,7 @@ const Newjob = () => {
                   error={state.error?.job_status}
                   isClearable={true}
                   required
-                />
+                /> */}
 
                 {/* <TextInput
                   name="salary"
@@ -1340,13 +1362,11 @@ const Newjob = () => {
               className="w-full rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 px-8 py-3 font-semibold text-white shadow-lg transition-all hover:from-purple-700 hover:to-blue-700 hover:shadow-xl sm:w-auto"
               onClick={() => handleSubmit()}
             >
-              Publish Job
+              Update Job
             </button>
           </div>
         </div>
       </div>
     </div>
   );
-};
-
-export default PrivateRouter(Newjob);
+}

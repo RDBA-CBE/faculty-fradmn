@@ -196,6 +196,6 @@ export const CreateNewJob = Yup.object().shape({
     .min(1, "At least one skill is required")
     .required("Skills are required"),
   company_detail: Yup.string().required("Company detail is required"),
-  job_status: Yup.string().required("Job status is required"),
+  // job_status: Yup.string().required("Job status is required"),
   description: Yup.string().required("Job description is required"),
 });

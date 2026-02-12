@@ -14,6 +14,7 @@ import IconLoader from "@/components/Icon/IconLoader";
 import IconEdit from "@/components/Icon/IconEdit";
 import Pagination from "@/components/pagination/pagination";
 import {
+  buildFormData,
   capitalizeFLetter,
   Dropdown,
   showDeleteAlert,
@@ -24,7 +25,14 @@ import useDebounce from "@/hook/useDebounce";
 import Swal from "sweetalert2";
 import { Models } from "@/imports/models.import";
 import CustomeDatePicker from "@/components/datePicker";
-import { Briefcase, Users, Building2, AlertCircle } from "lucide-react";
+import {
+  Briefcase,
+  Users,
+  Building2,
+  AlertCircle,
+  CheckCircle,
+  Clock,
+} from "lucide-react";
 import moment from "moment";
 import { useRouter } from "next/navigation";
 import {
@@ -32,6 +40,9 @@ import {
   DROPDOWN_JOB_ROLES,
   ROLES,
 } from "@/utils/constant.utils";
+import IconHistory from "@/components/Icon/IconHistory";
+import Modal from "@/components/modal/modal.component";
+import LogCard from "@/components/logCard";
 
 const Job = () => {
   const dispatch = useDispatch();
@@ -100,36 +111,9 @@ const Job = () => {
 
     categoryList: [],
     categoryLoading: false,
-
+    isOpen: false,
     errors: {},
   });
-
-  const statusOptions = [
-    { value: "active", label: "Active" },
-    { value: "inactive", label: "Inactive" },
-  ];
-
-  const jobTypeOptions = [
-    { value: "full_time", label: "Full Time" },
-    { value: "part_time", label: "Part Time" },
-    { value: "contract", label: "Contract" },
-    { value: "internship", label: "Internship" },
-  ];
-
-  const priorityOptions = [
-    { value: "low", label: "Low" },
-    { value: "medium", label: "Medium" },
-    { value: "high", label: "High" },
-    { value: "urgent", label: "Urgent" },
-  ];
-
-  const experienceOptions = [
-    { value: "0-1 years", label: "0-1 years" },
-    { value: "1-3 years", label: "1-3 years" },
-    { value: "3-5 years", label: "3-5 years" },
-    { value: "5-10 years", label: "5-10 years" },
-    { value: "10+ years", label: "10+ years" },
-  ];
 
   const debounceSearch = useDebounce(state.search, 500);
 
@@ -148,7 +132,9 @@ const Job = () => {
   }, []);
 
   useEffect(() => {
-    jobList(1, "", "", "", state?.profile?.id);
+    if (state?.profile?.id) {
+      jobList(1, "", "", "", state?.profile?.id);
+    }
   }, [
     debounceSearch,
     state.statusFilter,
@@ -164,7 +150,6 @@ const Job = () => {
     state.priorityFilter,
     state.typeFilter,
     state.salaryFilter,
-    state.statusFilter,
   ]);
 
   const profile = async () => {
@@ -190,10 +175,8 @@ const Job = () => {
         departmentDropdownList(1, "", false, res?.college?.college_id, res?.id);
         jobList(1, "", res?.college?.college_id, "", res?.id);
         userDropdownList(1, "", false, "hod", res?.college?.college_id);
-
       } else if (res?.role == ROLES.HOD) {
         jobList(1, "", "", res?.department?.id, res?.id);
-
       }
     } catch (error) {
       console.error("Error fetching institutions:", error);
@@ -211,23 +194,23 @@ const Job = () => {
       setState({ loading: true });
 
       const body = bodyData();
-      if (institutionId) {
-        body.institution_id = institutionId;
-      }
-      if (collegeId) {
-        body.college_id = collegeId;
-      }
-      if (deptId) {
-        body.department_id = deptId;
-      }
+      // if (institutionId) {
+      //   body.institution_id = institutionId;
+      // }
+      // if (collegeId) {
+      //   body.college_id = collegeId;
+      // }
+      // if (deptId) {
+      //   body.department_id = deptId;
+      // }
 
-      if (state.userFilter?.value) {
-        body.created_by = createdBy;
-        body.team = "No";
-      } else {
-        body.created_by = createdBy;
-        body.team = "Yes";
-      }
+      // if (state.userFilter?.value) {
+      //   body.created_by = state.userFilter?.value;
+      //   body.team = "No";
+      // } else {
+      //   body.created_by = createdBy;
+      //   body.team = "Yes";
+      // }
       console.log("✌️body --->", body);
 
       const res: any = await Models.job.list(page, body);
@@ -254,6 +237,7 @@ const Job = () => {
 
         college_id: item?.college?.id,
         department_id: item?.department?.id,
+        is_approved: item?.is_approved,
       }));
 
       setState({
@@ -658,6 +642,68 @@ const Job = () => {
     }
   };
 
+  const handleApprove = async (row: any) => {
+    const result = await Swal.fire({
+      title: row.is_approved ? "Unapprove Job?" : "Approve Job?",
+      text: row.is_approved
+        ? "Are you sure you want to unapprove this job?"
+        : "Are you sure you want to approve this job?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: row.is_approved
+        ? "Yes, unapprove it!"
+        : "Yes, approve it!",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const formData = buildFormData({ is_approved: !row.is_approved });
+        await Models.job.update(formData, row?.id);
+        Success(
+          row.is_approved
+            ? "Job unapproved successfully!"
+            : "Job approved successfully!"
+        );
+        jobList(state.page);
+      } catch (error) {
+        Failure(
+          row.is_approved ? "Failed to unapprove job" : "Failed to approve job"
+        );
+      }
+    }
+  };
+
+  const handleLog = async (row) => {
+console.log('✌️row --->', row);
+    try {
+      setState({ isOpen: true, editId: row.id });
+
+      const res: any = await Models.job.log_list(row.id);
+      console.log("✌️res --->", res);
+      setState({ logData: res});
+    } catch (error) {
+      console.log("✌️error --->", error);
+    }
+  };
+
+  const createJobLog = async (message) => {
+    try {
+      const body = {
+        message,
+        job_id: state.editId,
+        created_by: parseInt(localStorage.getItem("userId")),
+      };
+      await Models.job.create_log(body);
+      const res: any = await Models.job.log_list(state.editId);
+      setState({ logData: res });
+      Success("Log created successfully!");
+    } catch (error) {
+      console.error("Failed to create log", error);
+    }
+  };
+
   const handleEdit = (row) => {
     console.log("✌️row --->", row);
     router.push(`/faculty/updatejob?id=${row.id}`);
@@ -1030,11 +1076,11 @@ const Job = () => {
             className="table-hover whitespace-nowrap"
             records={state.jobList}
             fetching={state.loading}
-            selectedRecords={state.jobList?.filter(record =>
+            selectedRecords={state.jobList?.filter((record) =>
               state.selectedRecords.includes(record.id)
             )}
-            onSelectedRecordsChange={records =>
-              setState({ selectedRecords: records.map((r:any) => r.id) })
+            onSelectedRecordsChange={(records) =>
+              setState({ selectedRecords: records.map((r: any) => r.id) })
             }
             customLoader={
               <div className="flex items-center justify-center py-12">
@@ -1108,17 +1154,27 @@ const Job = () => {
               {
                 accessor: "job_status",
                 title: "Status",
-                render: ({ job_status }) => (
+                render: (row) => (
                   <span
-                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-                      job_status === "published"
-                        ? "bg-green-100 text-green-800"
-                        : job_status === "draft"
-                        ? "bg-gray-100 text-gray-700"
-                        : "bg-yellow-100 text-yellow-800"
+                    onClick={() => {
+                      if (state.profile?.role == ROLES.HR) {
+                        handleApprove(row);
+                      }
+                    }}
+                    className={`inline-flex cursor-pointer items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${
+                      row.is_approved
+                        ? "bg-green-100 text-green-800 hover:bg-green-200"
+                        : "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
                     }`}
                   >
-                    {capitalizeFLetter(job_status) || "-"}
+                    {row.is_approved ? (
+                      <CheckCircle className="h-3 w-3" />
+                    ) : (
+                      <Clock className="h-3 w-3" />
+                    )}
+                    {capitalizeFLetter(
+                      row.is_approved ? "Approved" : "Pending"
+                    ) || "-"}
                   </span>
                 ),
               },
@@ -1167,6 +1223,13 @@ const Job = () => {
                 title: "Actions",
                 render: (row: any) => (
                   <div className="flex items-center justify-center gap-2">
+                    <button
+                      onClick={() => handleLog(row)}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 text-purple-600 hover:bg-purple-200"
+                      title="Logs"
+                    >
+                      <IconHistory className="h-4 w-4" />
+                    </button>
                     <button
                       onClick={() => handleEdit(row)}
                       className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200"
@@ -1236,6 +1299,21 @@ const Job = () => {
             pageSize={state.pageSize}
           />
         </div>
+        <Modal
+          open={state.isOpen}
+          close={() => setState({ isOpen: false })}
+          padding="px-2"
+          renderComponent={() => (
+            <>
+              <LogCard
+                data={state.logData}
+                title="Job Logs"
+                onClose={() => setState({ isOpen: false })}
+                onSendMessage={(e) => createJobLog(e)}
+              />
+            </>
+          )}
+        />
       </div>
     </div>
   );

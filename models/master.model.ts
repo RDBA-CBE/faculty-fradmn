@@ -267,6 +267,50 @@ const master = {
     });
     return promise;
   },
+
+  // Application Status APIs
+  application_status_list: (body: any = {}) => {
+    let promise = new Promise((resolve, reject) => {
+      let url = "application-statuses/";
+      if (body?.search) url += `?search=${encodeURIComponent(body.search)}`;
+      if (body?.ordering)
+        url += `${body.search ? "&" : "?"}ordering=${encodeURIComponent(
+          body.ordering
+        )}`;
+      instance()
+        .get(url)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+  create_application_status: (data: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .post("application-statuses/", data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+  update_application_status: (data: any, id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .patch(`application-statuses/${id}/`, data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+  delete_application_status: (id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .delete(`application-statuses/${id}/`)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
 };
 
 export default master;

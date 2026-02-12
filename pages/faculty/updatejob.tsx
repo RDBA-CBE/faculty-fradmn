@@ -90,7 +90,7 @@ export default function Newjob() {
     salaryRangeList(1);
     priorityList(1);
     typeList();
-    jobStatusList();
+    // jobStatusList();
     categoryList(1);
     skillList(1);
     tagList(1);
@@ -274,16 +274,16 @@ export default function Newjob() {
     }
   };
 
-  const jobStatusList = async (page = 1) => {
-    try {
-      setState({ categoryLoading: true });
-      const res: any = await Models.job.job_status();
-      const dropdown = Dropdown(res?.results, "name");
-      setState({ jobStatusLoading: false, jobStatusList: dropdown });
-    } catch (error) {
-      setState({ categoryLoading: false });
-    }
-  };
+  // const jobStatusList = async (page = 1) => {
+  //   try {
+  //     setState({ categoryLoading: true });
+  //     const res: any = await Models.job.job_status();
+  //     const dropdown = Dropdown(res?.results, "name");
+  //     setState({ jobStatusLoading: false, jobStatusList: dropdown });
+  //   } catch (error) {
+  //     setState({ categoryLoading: false });
+  //   }
+  // };
 
   const skillList = async (page = 1) => {
     try {
@@ -544,33 +544,33 @@ export default function Newjob() {
     console.log("✌️valid --->", valid);
 
     try {
-      // await CreateNewJob.validate(
-      //   {
-      //     title: state.title,
-      //     company: state.company,
-      //     location: state.location?.value,
-      //     address: state.address,
-      //     institution: state.institution,
-      //     college: state.college,
-      //     department: state.department,
-      //     jobType: state.jobType?.value,
-      //     salary: state.salary?.value,
-      //     category: state.category?.value,
-      //     priority: state.priority?.value,
-      //     deadline: state.deadline,
-      //     startDate: state.startDate,
-      //     endDate: state.endDate,
-      //     numberOfOpenings: state.numberOfOpenings,
-      //     experience: state.experience?.value,
-      //     qualification: state.qualification,
-      //     keyResponsibility: keyResponsibilityData,
-      //     professionalSkills: professionalSkillsData,
-      //     skills: state.skills,
-      //     tags: state.tags,
-      //     jobDescription: state.description,
-      //   },
-      //   { abortEarly: false }
-      // );
+      await CreateNewJob.validate(
+        {
+          title: state.title,
+          company: state.company,
+          location: state.location,
+          address: state.address,
+          institution: state.institution,
+          college: state.college,
+          department: state.department,
+          jobType: state.jobType?.value,
+          salary: state.salary?.value,
+          category: state.category,
+          priority: state.priority?.value,
+          deadline: state.deadline,
+          startDate: state.startDate,
+          endDate: state.endDate,
+          numberOfOpenings: state.numberOfOpenings,
+          experience: state.experience?.value,
+          qualification: state.qualification,
+          keyResponsibility: keyResponsibilityData,
+          skills: state.skills,
+          company_detail: state.company_detail,
+          // job_status: state.job_status?.value,
+          description: state.description,
+        },
+        { abortEarly: false }
+      );
 
       const body: any = {
         job_title: state.title,
@@ -584,7 +584,7 @@ export default function Newjob() {
         company_detail: state.company_detail,
         number_of_openings: Number(state.numberOfOpenings),
         last_date: moment(state.endDate).format("YYYY-MM-DD"),
-        job_status_id: state.job_status?.value,
+        // job_status_id: state.job_status?.value,
         deadline: moment(state.deadline).format("YYYY-MM-DD"),
         start_date: moment(state.startDate).format("YYYY-MM-DD"),
         responsibility: keyResponsibilityData,
@@ -1162,7 +1162,7 @@ export default function Newjob() {
                   required
                 />
 
-                <CustomSelect
+                {/* <CustomSelect
                   options={state.jobStatusList}
                   title="Select job status"
                   placeholder="Select job status"
@@ -1171,7 +1171,7 @@ export default function Newjob() {
                   error={state.error?.job_status}
                   isClearable={true}
                   required
-                />
+                /> */}
 
                 {/* <TextInput
                   name="salary"

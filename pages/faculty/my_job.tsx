@@ -34,6 +34,10 @@ import {
   AlertCircle,
   ToggleLeft,
   ToggleRight,
+  Check,
+  X,
+  CheckCircle,
+  Clock,
 } from "lucide-react";
 import moment from "moment";
 import { useRouter } from "next/navigation";
@@ -53,120 +57,9 @@ const Job = () => {
     submitting: false,
     sortBy: "",
     sortOrder: "asc",
-
+    logData:[],
     // Log data
-    logData: [
-      {
-        id: 1,
-        user: "John Doe",
-        message: "Job created successfully",
-        timestamp: "2024-02-07T10:30:00",
-        type: "success",
-        action_display: "Job Created",
-        performed_by: { first_name: "John", last_name: "Doe" },
-        description: "New job posting created",
-        created_on: "2024-02-07T10:30:00",
-      },
-      {
-        id: 2,
-        user: "Jane Smith",
-        message: "Job updated",
-        timestamp: "2024-02-07T11:00:00",
-        type: "info",
-        action_display: "Job Updated",
-        performed_by: { first_name: "Jane", last_name: "Smith" },
-        description: "Job details modified",
-        created_on: "2024-02-07T11:00:00",
-      },
-      {
-        id: 3,
-        user: "Mike Johnson",
-        message: "Job published",
-        timestamp: "2024-02-07T12:00:00",
-        type: "success",
-        action_display: "Job Published",
-        performed_by: { first_name: "Mike", last_name: "Johnson" },
-        description: "Job posting made live",
-        created_on: "2024-02-07T12:00:00",
-      },
-      {
-        id: 4,
-        user: "Sarah Williams",
-        message: "Application received",
-        timestamp: "2024-02-07T13:30:00",
-        type: "info",
-        action_display: "Application Received",
-        performed_by: { first_name: "Sarah", last_name: "Williams" },
-        description: "New application submitted",
-        created_on: "2024-02-07T13:30:00",
-      },
-      {
-        id: 5,
-        user: "David Brown",
-        message: "Job unpublished",
-        timestamp: "2024-02-07T14:00:00",
-        type: "warning",
-        action_display: "Job Unpublished",
-        performed_by: { first_name: "David", last_name: "Brown" },
-        description: "Job posting removed from public view",
-        created_on: "2024-02-07T14:00:00",
-      },
-      {
-        id: 6,
-        user: "Emily Davis",
-        message: "Priority changed",
-        timestamp: "2024-02-07T15:00:00",
-        type: "info",
-        action_display: "Priority Updated",
-        performed_by: { first_name: "Emily", last_name: "Davis" },
-        description: "Job priority set to urgent",
-        created_on: "2024-02-07T15:00:00",
-      },
-      {
-        id: 7,
-        user: "Robert Miller",
-        message: "Deadline extended",
-        timestamp: "2024-02-07T16:00:00",
-        type: "success",
-        action_display: "Deadline Extended",
-        performed_by: { first_name: "Robert", last_name: "Miller" },
-        description: "Application deadline extended by 7 days",
-        created_on: "2024-02-07T16:00:00",
-      },
-      {
-        id: 8,
-        user: "Lisa Anderson",
-        message: "Requirements updated",
-        timestamp: "2024-02-07T17:00:00",
-        type: "info",
-        action_display: "Requirements Updated",
-        performed_by: { first_name: "Lisa", last_name: "Anderson" },
-        description: "Job requirements and qualifications modified",
-        created_on: "2024-02-07T17:00:00",
-      },
-      {
-        id: 9,
-        user: "James Wilson",
-        message: "Salary range updated",
-        timestamp: "2024-02-07T18:00:00",
-        type: "info",
-        action_display: "Salary Updated",
-        performed_by: { first_name: "James", last_name: "Wilson" },
-        description: "Salary range adjusted",
-        created_on: "2024-02-07T18:00:00",
-      },
-      {
-        id: 10,
-        user: "Maria Garcia",
-        message: "Job archived",
-        timestamp: "2024-02-07T19:00:00",
-        type: "warning",
-        action_display: "Job Archived",
-        performed_by: { first_name: "Maria", last_name: "Garcia" },
-        description: "Job posting archived after completion",
-        created_on: "2024-02-07T19:00:00",
-      },
-    ],
+  
     isOpen: false,
 
     // Job data
@@ -210,33 +103,6 @@ const Job = () => {
     errors: {},
     selectedRecords: [],
   });
-
-  const statusOptions = [
-    { value: "active", label: "Active" },
-    { value: "inactive", label: "Inactive" },
-  ];
-
-  const jobTypeOptions = [
-    { value: "full_time", label: "Full Time" },
-    { value: "part_time", label: "Part Time" },
-    { value: "contract", label: "Contract" },
-    { value: "internship", label: "Internship" },
-  ];
-
-  const priorityOptions = [
-    { value: "low", label: "Low" },
-    { value: "medium", label: "Medium" },
-    { value: "high", label: "High" },
-    { value: "urgent", label: "Urgent" },
-  ];
-
-  const experienceOptions = [
-    { value: "0-1 years", label: "0-1 years" },
-    { value: "1-3 years", label: "1-3 years" },
-    { value: "3-5 years", label: "3-5 years" },
-    { value: "5-10 years", label: "5-10 years" },
-    { value: "10+ years", label: "10+ years" },
-  ];
 
   const debounceSearch = useDebounce(state.search, 500);
 
@@ -322,11 +188,13 @@ const Job = () => {
         last_date: item?.last_date,
         priority: item?.priority,
         job_status: item?.job_status,
+        is_approved: item?.is_approved,
 
         total_applications: item?.total_applications,
 
         college_id: item?.college?.id,
         department_id: item?.department?.id,
+
       }));
 
       setState({
@@ -512,7 +380,7 @@ const Job = () => {
     if (state.institutionFilter?.value) {
       body.institution_id = state.institutionFilter.value;
     }
-    body.created_by = userId;
+    body.created_by = parseInt(userId);
 
     if (state.collegeFilter?.value) {
       body.college_id = state.collegeFilter.value;
@@ -577,11 +445,13 @@ const Job = () => {
   };
 
   const handleLog = async (row) => {
+console.log('✌️row --->', row);
     try {
       setState({ isOpen: true, editId: row.id });
 
-      const res: any = await Models.job.log_list(1);
-      setState({ logData: res?.results });
+      const res: any = await Models.job.log_list(row.id);
+      console.log("✌️res --->", res);
+      setState({ logData: res });
     } catch (error) {
       console.log("✌️error --->", error);
     }
@@ -591,9 +461,15 @@ const Job = () => {
     try {
       const body = {
         message,
-        job: state.editId,
+        job_id: state.editId,
+        created_by: parseInt(localStorage.getItem("userId")),
       };
+console.log('✌️body --->', body);
+
       await Models.job.create_log(body);
+      const res: any = await Models.job.log_list(state.editId);
+      setState({ logData: res });
+      Success("Log created successfully!");
     } catch (error) {
       console.error("Failed to create log", error);
     }
@@ -645,10 +521,43 @@ const Job = () => {
     });
   };
 
+  const handleApprove = async (row: any) => {
+    const result = await Swal.fire({
+      title: row.is_approved ? "Unapprove Job?" : "Approve Job?",
+      text: row.is_approved
+        ? "Are you sure you want to unapprove this job?"
+        : "Are you sure you want to approve this job?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: row.is_approved
+        ? "Yes, unapprove it!"
+        : "Yes, approve it!",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const formData = buildFormData({ is_approved: !row.is_approved });
+        await Models.job.update(formData, row?.id);
+        Success(
+          row.is_approved
+            ? "Job unapproved successfully!"
+            : "Job approved successfully!"
+        );
+        jobList(state.page);
+      } catch (error) {
+        Failure(
+          row.is_approved ? "Failed to unapprove job" : "Failed to approve job"
+        );
+      }
+    }
+  };
+
   const handleToggleStatus = async (row: any) => {
     try {
       const newStatus = row?.status === "active" ? "inactive" : "active";
-      const formData=buildFormData({ status: newStatus })
+      const formData = buildFormData({ status: newStatus });
       await Models.job.update(formData, row?.id);
       Success(`Job ${newStatus} successfully!`);
       jobList(state.page);
@@ -1088,11 +997,11 @@ const Job = () => {
             className="table-hover whitespace-nowrap"
             records={state.jobList}
             fetching={state.loading}
-            selectedRecords={state.jobList?.filter(record =>
+            selectedRecords={state.jobList?.filter((record) =>
               state.selectedRecords.includes(record.id)
             )}
-            onSelectedRecordsChange={records =>
-              setState({ selectedRecords: records.map((r:any) => r.id) })
+            onSelectedRecordsChange={(records) =>
+              setState({ selectedRecords: records.map((r: any) => r.id) })
             }
             customLoader={
               <div className="flex items-center justify-center py-12">
@@ -1166,17 +1075,27 @@ const Job = () => {
               {
                 accessor: "job_status",
                 title: "Status",
-                render: ({ job_status }) => (
+                render: (row) => (
                   <span
-                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-                      job_status === "published"
-                        ? "bg-green-100 text-green-800"
-                        : job_status === "draft"
-                        ? "bg-gray-100 text-gray-700"
-                        : "bg-yellow-100 text-yellow-800"
+                    onClick={() => {
+                      if (state.profile?.role == ROLES.HR) {
+                        handleApprove(row);
+                      }
+                    }}
+                    className={`inline-flex cursor-pointer items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${
+                      row.is_approved
+                        ? "bg-green-100 text-green-800 hover:bg-green-200"
+                        : "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
                     }`}
                   >
-                    {capitalizeFLetter(job_status) || "-"}
+                    {row.is_approved ? (
+                      <CheckCircle className="h-3 w-3" />
+                    ) : (
+                      <Clock className="h-3 w-3" />
+                    )}
+                    {capitalizeFLetter(
+                      row.is_approved ? "Approved" : "Pending"
+                    ) || "-"}
                   </span>
                 ),
               },
@@ -1226,13 +1145,19 @@ const Job = () => {
                 render: (row: any) => (
                   <div className="flex items-center justify-center gap-2">
                     <button
-                      onClick={() => handleEdit(row)}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200"
-                      title="Edit"
+                      onClick={() => router.push(`/faculty/job_details?id=${row.id}`)}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 hover:bg-indigo-200"
+                      title="View"
                     >
-                      <IconEdit className="h-4 w-4" />
+                      <IconEye className="h-4 w-4" />
                     </button>
-
+                    <button
+                      onClick={() => handleLog(row)}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 text-purple-600 hover:bg-purple-200"
+                      title="Logs"
+                    >
+                      <IconHistory className="h-4 w-4" />
+                    </button>
                     <button
                       onClick={() => handleToggleStatus(row)}
                       className={`flex h-8 w-8 items-center justify-center rounded-lg ${
@@ -1252,13 +1177,12 @@ const Job = () => {
                         <ToggleRight className="h-4 w-4" />
                       )}
                     </button>
-
                     <button
-                      onClick={() => handleLog(row)}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 text-purple-600 hover:bg-purple-200"
-                      title="Logs"
+                      onClick={() => handleEdit(row)}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200"
+                      title="Edit"
                     >
-                      <IconHistory className="h-4 w-4" />
+                      <IconEdit className="h-4 w-4" />
                     </button>
 
                     <button
@@ -1299,7 +1223,7 @@ const Job = () => {
       </div>
       <Modal
         open={state.isOpen}
-        close={() => setState({ isOpen: false })}
+        close={() => setState({ isOpen: false,editId:null })}
         padding="px-2"
         renderComponent={() => (
           <>

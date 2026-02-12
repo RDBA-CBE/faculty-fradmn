@@ -160,9 +160,9 @@ const job = {
     return promise;
   },
 
-  log_list: (page = 1) => {
+  log_list: (jobId = 1) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `activity-logs/`;
+      let url = `jobs/${jobId}/logs`;
       instance()
         .get(url)
         .then((res) => {
@@ -182,7 +182,7 @@ const job = {
 
   create_log: (data) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `activity-logs/`;
+      let url = `job-logs/`;
       instance()
         .post(url, data)
         .then((res) => {

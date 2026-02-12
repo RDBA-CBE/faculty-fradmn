@@ -240,10 +240,10 @@ const UpdatePropertyImagePreview: React.FC<ImageUploadProps> = ({
               isSingleImage ? '' : 'px-8 py-5'
             }`}
           >
-            {images.map((image: any, index: number) => (
-              <div key={index} className="group relative flex-shrink-0">
+            {images?.map((image: any, index: number) => (
+              <div key={index} className="group relative flex-shrink-0 p-2">
                 <div
-                  className={`overflow-hidden rounded-lg border-2 border-gray-200 bg-white shadow-sm transition-all hover:shadow-md ${
+                  className={`overflow-hidden rounded-lg border-2 border-gray-200 bg-white shadow-sm transition-all hover:shadow-md  ${
                     isSingleImage ? 'h-32 w-32' : 'h-28 w-28'
                   }`}
                 >
@@ -259,7 +259,7 @@ const UpdatePropertyImagePreview: React.FC<ImageUploadProps> = ({
                     e.stopPropagation();
                     removeImage(index);
                   }}
-                  className="absolute -right-2 -top-2 rounded-full bg-red-500 p-1.5 text-white shadow-md transition-all hover:bg-red-600 hover:scale-110"
+                  className="absolute -right-2 -top-0 rounded-full bg-red-500 p-1.5 text-white shadow-md transition-all hover:bg-red-600 hover:scale-110"
                   title="Remove image"
                 >
                   <X className="h-4 w-4" />
