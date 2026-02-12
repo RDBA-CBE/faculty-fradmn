@@ -211,7 +211,7 @@ const CollegeAndDepartment = () => {
     try {
       setState({ loading: true });
       const body = collegeBodyData();
-      body.college = profileRef.current?.college?.college_id
+      body.college = profileRef.current?.college?.college_id;
       const res: any = await Models.department.list(page, body);
       console.log("deptList --->", res);
 
@@ -335,9 +335,7 @@ const CollegeAndDepartment = () => {
       college: {
         value: row?.college_id,
         label: row.college_name,
-        
       },
-
     });
   };
 
@@ -564,54 +562,57 @@ const CollegeAndDepartment = () => {
 
   const handleSubmit = async () => {
     try {
-      setState({ submitting: true });
+      // setState({ submitting: true });
 
       // If activeTab is departments, show single step department form
-      if (state.activeTab === "departments") {
-        const body: any = {
-          department_name: state.department_name,
-          department_code: state.department_code,
-          college: state.college?.value,
-          institution: state?.profile_institution?.id,
-        };
 
-        // Validate all department fields at once
-        const validationBody = {
-          college: state.college?.value,
-          department_name: state.department_name,
-          department_code: state.department_code,
-        };
+      const body: any = {
+        department_name: state.department_name,
+        department_code: state.department_code,
+        college: state.college?.value,
+        institution: state?.profile_institution?.institution?.id,
+      };
+      console.log("✌️body --->", body);
 
-        const errors: any = {};
+      // Validate all department fields at once
+      const validationBody = {
+        college: state.college?.value,
+        department_name: state.department_name,
+        department_code: state.department_code,
+      };
 
-        // Check all required fields
-        if (!validationBody.college) {
-          errors.college = "Please select a college";
-        }
-        if (!validationBody.department_name) {
-          errors.department_name = "Department name is required";
-        }
-        if (!validationBody.department_code) {
-          errors.department_code = "Department code is required";
-        }
+      const errors: any = {};
 
-        // If any validation errors, show all at once
-        if (Object.keys(errors).length > 0) {
-          setState({ errors });
-          return;
-        }
-
-        // Clear errors if validation passes
-        setState({ errors: {} });
-
-        if (state.editId) {
-          const res = await Models.department.update(body, state.editId);
-          Success("Department updated successfully!");
-        }
-
-        deptList(state.page);
-        handleCloseModal();
+      // Check all required fields
+      if (!validationBody.college) {
+        errors.college = "Please select a college";
       }
+      if (!validationBody.department_name) {
+        errors.department_name = "Department name is required";
+      }
+      if (!validationBody.department_code) {
+        errors.department_code = "Department code is required";
+      }
+      console.log("✌️errors --->", errors);
+
+      // If any validation errors, show all at once
+      if (Object.keys(errors).length > 0) {
+        setState({ errors });
+        return;
+        setState({ submitting: true });
+      }
+
+      // Clear errors if validation passes
+      setState({ errors: {} });
+
+      if (state.editId) {
+        const res = await Models.department.update(body, state.editId);
+        Success("Department updated successfully!");
+      }
+
+      deptList(state.page);
+      handleCloseModal();
+      setState({ submitting: false });
     } catch (error: any) {
       console.log("✌️error --->", error);
       if (error?.response?.data) {
