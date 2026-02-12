@@ -151,8 +151,8 @@ export const menuConfig = {
     {
       type: "link",
       icon: "IconMenuNotes",
-      label: "Colleges & Departments",
-      href: "/faculty/admin_college_and_departments",
+      label: "Departments",
+      href: "/faculty/departments",
     },
 
     // {
@@ -496,7 +496,7 @@ export const OwnmenuConfig = {
       type: "link",
       icon: "IconMenuTables",
       label: "Applications",
-      href: "/faculty/application",
+      href: "/faculty/my_application",
     },
     {
       type: "link",

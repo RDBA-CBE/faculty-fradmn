@@ -31,7 +31,7 @@ const master = {
   update_category: (data: any, id: any) => {
     let promise = new Promise((resolve, reject) => {
       instance()
-        .patch(`job-categories/${id}/`, data)
+        .put(`job-categories/${id}/`, data)
         .then((res) => resolve(res.data))
         .catch((error) => reject(error.response || error));
     });
@@ -76,7 +76,7 @@ const master = {
   update_job_type: (data: any, id: any) => {
     let promise = new Promise((resolve, reject) => {
       instance()
-        .patch(`job-types/${id}/`, data)
+        .put(`job-types/${id}/`, data)
         .then((res) => resolve(res.data))
         .catch((error) => reject(error.response || error));
     });
@@ -120,7 +120,7 @@ const master = {
   update_location: (data: any, id: any) => {
     let promise = new Promise((resolve, reject) => {
       instance()
-        .patch(`job-locations/${id}/`, data)
+        .put(`job-locations/${id}/`, data)
         .then((res) => resolve(res.data))
         .catch((error) => reject(error.response || error));
     });
@@ -164,7 +164,7 @@ const master = {
   update_salary_range: (data: any, id: any) => {
     let promise = new Promise((resolve, reject) => {
       instance()
-        .patch(`salary-ranges/${id}/`, data)
+        .put(`salary-ranges/${id}/`, data)
         .then((res) => resolve(res.data))
         .catch((error) => reject(error.response || error));
     });
@@ -183,7 +183,7 @@ const master = {
   // Skill APIs
   skill_list: (body: any = {}) => {
     let promise = new Promise((resolve, reject) => {
-      let url = "job-skills/";
+      let url = "job-skills";
       if (body?.search) url += `?search=${encodeURIComponent(body.search)}`;
       if (body?.ordering)
         url += `${body.search ? "&" : "?"}ordering=${encodeURIComponent(
@@ -199,7 +199,7 @@ const master = {
   create_skill: (data: any) => {
     let promise = new Promise((resolve, reject) => {
       instance()
-        .post("job-skills/", data)
+        .post("job-skills", data)
         .then((res) => resolve(res.data))
         .catch((error) => reject(error.response || error));
     });
@@ -208,7 +208,7 @@ const master = {
   update_skill: (data: any, id: any) => {
     let promise = new Promise((resolve, reject) => {
       instance()
-        .patch(`job-skills/${id}/`, data)
+        .put(`job-skills/${id}/`, data)
         .then((res) => resolve(res.data))
         .catch((error) => reject(error.response || error));
     });
@@ -252,7 +252,7 @@ const master = {
   update_tag: (data: any, id: any) => {
     let promise = new Promise((resolve, reject) => {
       instance()
-        .patch(`job-tags/${id}/`, data)
+        .put(`job-tags/${id}/`, data)
         .then((res) => resolve(res.data))
         .catch((error) => reject(error.response || error));
     });
@@ -296,7 +296,7 @@ const master = {
   update_application_status: (data: any, id: any) => {
     let promise = new Promise((resolve, reject) => {
       instance()
-        .patch(`application-statuses/${id}/`, data)
+        .put(`application-statuses/${id}/`, data)
         .then((res) => resolve(res.data))
         .catch((error) => reject(error.response || error));
     });

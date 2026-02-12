@@ -1,6 +1,7 @@
 import { DataTable } from "mantine-datatable";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
+import { useRouter } from "next/router";
 import { setPageTitle } from "../../store/themeConfigSlice";
 import TextInput from "@/components/FormFields/TextInput.component";
 import TextArea from "@/components/FormFields/TextArea.component";
@@ -14,20 +15,27 @@ import IconEyeOff from "@/components/Icon/IconEyeOff";
 import IconLoader from "@/components/Icon/IconLoader";
 import IconEdit from "@/components/Icon/IconEdit";
 import Pagination from "@/components/pagination/pagination";
-import { capitalizeFLetter, Dropdown, showDeleteAlert, useSetState } from "@/utils/function.utils";
+import {
+  capitalizeFLetter,
+  showDeleteAlert,
+  useSetState,
+} from "@/utils/function.utils";
 import Modal from "@/components/modal/modal.component";
 import { Models } from "@/imports/models.import";
 import { Success, Failure } from "@/utils/function.utils";
 import useDebounce from "@/hook/useDebounce";
 import Swal from "sweetalert2";
-import { FileText, Clock, CheckCircle, XCircle, ChevronDown, ChevronUp } from "lucide-react";
+import { FileText, Clock, CheckCircle, XCircle } from "lucide-react";
 import CustomeDatePicker from "@/components/datePicker";
+import PrivateRouter from "@/hook/privateRouter";
 import moment from "moment";
 import { ROLES } from "@/utils/constant.utils";
-import PrivateRouter from "@/hook/privateRouter";
 
 const Application = () => {
   const dispatch = useDispatch();
+  const router = useRouter();
+  const profileRef = useRef(null);
+
   const [state, setState] = useSetState({
     page: 1,
     pageSize: 10,
@@ -101,11 +109,13 @@ const Application = () => {
     jobStatusLoading: false,
 
     profile: null,
-    showAdvancedFilters: false,
   });
 
-
   const debounceSearch = useDebounce(state.search, 500);
+
+  useEffect(() => {
+    profile();
+  }, [dispatch]);
 
   useEffect(() => {
     dispatch(setPageTitle("Applications"));
@@ -117,10 +127,21 @@ const Application = () => {
     typeList();
     jobStatusList();
     categoryList(1);
-  }, [dispatch]);
+  }, []);
 
   useEffect(() => {
-    applicationList(1);
+    if (profileRef.current) {
+      const role = state.profile?.role;
+      if (role === ROLES.SUPER_ADMIN) {
+        applicationList(1, null, null, null, state.profile?.id);
+      } else if (role === ROLES.INSTITUTION_ADMIN) {
+        applicationList(1, state.profile?.institution?.institution_id, null, null, state.profile?.id);
+      } else if (role === ROLES.HR) {
+        applicationList(1, null, state.profile?.college?.college_id, null, state.profile?.id);
+      } else if (role === ROLES.HOD) {
+        applicationList(1, null, null, state.profile?.department?.department_id, state.profile?.id);
+      }
+    }
   }, [
     debounceSearch,
     state.statusFilter,
@@ -137,24 +158,67 @@ const Application = () => {
     state.salaryFilter,
   ]);
 
-  const applicationList = async (page) => {
+  const profile = async () => {
+    try {
+      const res: any = await Models.auth.profile();
+      setState({ profile: res });
+      profileRef.current = true;
+      if (res?.role == ROLES.SUPER_ADMIN) {
+        collegeDropdownList(1, "", false, "", res.id);
+        applicationList(1, null, null, null, res?.id);
+      } else if (res?.role == ROLES.INSTITUTION_ADMIN) {
+        collegeDropdownList(1, "", false, res?.institution?.institution_id, res.id);
+        applicationList(1, res?.institution?.institution_id, null, null, res?.id);
+      } else if (res?.role == ROLES.HR) {
+        departmentDropdownList(1, "", false, res?.college?.college_id, res.id);
+        applicationList(1, null, res?.college?.college_id, null, res?.id);
+      } else if (res?.role == ROLES.HOD) {
+        applicationList(1, null, null, res?.department?.department_id, res?.id);
+      }
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    }
+  };
+
+  const applicationList = async (
+    page,
+    institutionId = null,
+    collegeId = null,
+    deptId = null,
+    profileId = null
+  ) => {
     try {
       setState({ loading: true });
       const body = bodyData();
+      if (institutionId) {
+        body.institution = institutionId;
+      }
+      if (collegeId) {
+        body.college = collegeId;
+      }
+      if (deptId) {
+        body.department = deptId;
+      }
+      if (profileId) {
+        body.created_by = profileId;
+      }
+      body.team = "Yes";
+      console.log("✌️body --->", body);
 
       const res: any = await Models.application.list(page, body);
       console.log("✌️res --->", res);
 
       const tableData = res?.results?.map((item) => ({
-        applicant_name: item?.applicant_name,
-        applicant_email: item?.applicant_email,
-        applicant_phone: item?.applicant_phone,
+        applicant_name: `${item?.first_name} ${item?.last_name}`,
+        applicant_email: item?.email,
+        applicant_phone: item?.phone,
         position_applied: item?.position_applied,
         qualification: item?.qualification,
         experience: item?.experience,
         status: item?.status,
         id: item?.id,
-        applied_date: item?.applied_date,
+        applied_date: item?.created_at,
+        job_title: item?.job_detail?.job_title,
       }));
       setState({
         loading: false,
@@ -176,21 +240,17 @@ const Application = () => {
 
   const bodyData = () => {
     const body: any = {};
-    const userId = localStorage.getItem("userId");
     if (state.search) {
       body.search = state.search;
     }
     if (state.institutionFilter?.value) {
-      body.institution_id = state.institutionFilter.value;
-    }
-    if (userId) {
-      body.created_by = userId;
+      body.institution = state.institutionFilter.value;
     }
     if (state.collegeFilter?.value) {
-      body.college_id = state.collegeFilter.value;
+      body.college= state.collegeFilter.value;
     }
     if (state.departmentFilter?.value) {
-      body.department_id = state.departmentFilter.value;
+      body.department = state.departmentFilter.value;
     }
     if (state.start_date) {
       body.start_date = moment(state.start_date).format("YYYY-MM-DD");
@@ -216,16 +276,25 @@ const Application = () => {
     if (state.statusFilter?.value) {
       body.status = state.statusFilter.value;
     }
-    body.team = "No";
     if (state.sortBy) {
-      body.ordering = state.sortOrder === "desc" ? `-${state.sortBy}` : state.sortBy;
+      body.ordering =
+        state.sortOrder === "desc" ? `-${state.sortBy}` : state.sortBy;
     }
     return body;
   };
 
   const handlePageChange = (pageNumber: number) => {
     setState({ page: pageNumber });
-    applicationList(pageNumber);
+    const role = state.profile?.role;
+    if (role === ROLES.SUPER_ADMIN) {
+      applicationList(pageNumber, null, null, null, state.profile?.id);
+    } else if (role === ROLES.INSTITUTION_ADMIN) {
+      applicationList(pageNumber, state.profile?.institution?.institution_id, null, null, state.profile?.id);
+    } else if (role === ROLES.HR) {
+      applicationList(pageNumber, null, state.profile?.college?.college_id, null, state.profile?.id);
+    } else if (role === ROLES.HOD) {
+      applicationList(pageNumber, null, null, state.profile?.department?.department_id, state.profile?.id);
+    }
   };
 
   const handleStatusChange = (selectedOption: any) => {
@@ -258,16 +327,7 @@ const Application = () => {
   };
 
   const handleEdit = (row) => {
-    setState({
-      editId: row?.id,
-      showModal: true,
-      applicant_name: row?.applicant_name,
-      applicant_email: row?.applicant_email,
-      applicant_phone: row?.applicant_phone,
-      position_applied: row?.position_applied,
-      qualification: row?.qualification,
-      experience: row?.experience,
-    });
+    router.push(`/faculty/application_detail?id=${row?.id}`);
   };
 
   const handleUpdateStatus = async (row: any, newStatus: string) => {
@@ -277,7 +337,16 @@ const Application = () => {
       };
       await Models.application.update(body, row?.id);
       Success(`Application ${newStatus.toLowerCase()} successfully!`);
-      applicationList(state.page);
+      const role = state.profile?.role;
+      if (role === ROLES.SUPER_ADMIN) {
+        applicationList(state.page, null, null, null, state.profile?.id);
+      } else if (role === ROLES.INSTITUTION_ADMIN) {
+        applicationList(state.page, state.profile?.institution?.institution_id, null, null, state.profile?.id);
+      } else if (role === ROLES.HR) {
+        applicationList(state.page, null, state.profile?.college?.college_id, null, state.profile?.id);
+      } else if (role === ROLES.HOD) {
+        applicationList(state.page, null, null, state.profile?.department?.department_id, state.profile?.id);
+      }
     } catch (error) {
       Failure("Failed to update status. Please try again.");
     }
@@ -295,9 +364,231 @@ const Application = () => {
     );
   };
 
-  const deleteRecord = async (id: number) => {
+  const institutionDropdownList = async (
+    page,
+    search = "",
+    loadMore = false
+  ) => {
     try {
-      await Models.application.delete(id);
+      setState({ institutionLoading: true });
+      const body = { search };
+      const res: any = await Models.institution.list(page, body);
+      const dropdown = res?.results?.map((item) => ({
+        value: item.id,
+        label: item.institution_name,
+      }));
+      setState({
+        institutionLoading: false,
+        institutionPage: page,
+        institutionList: loadMore
+          ? [...state.institutionList, ...dropdown]
+          : dropdown,
+        institutionNext: res?.next,
+      });
+    } catch (error) {
+      setState({ institutionLoading: false });
+    }
+  };
+
+  const collegeDropdownList = async (
+    page,
+    search = "",
+    loadMore = false,
+    institutionId = null,
+    createdBy = null
+  ) => {
+    try {
+      setState({ collegeLoading: true });
+      const body: any = { search };
+      if (institutionId) {
+        body.institution = institutionId;
+      } else if (state.profile?.role === "institution_admin") {
+        body.institution = state.profile?.institution?.institution_id;
+      }
+      if (createdBy) {
+        body.created_by = createdBy;
+      }
+      body.team = "No";
+      const res: any = await Models.college.list(page, body);
+      const dropdown = res?.results?.map((item) => ({
+        value: item.id,
+        label: item.college_name,
+      }));
+      setState({
+        collegeLoading: false,
+        collegePage: page,
+        collegeList: loadMore ? [...state.collegeList, ...dropdown] : dropdown,
+        collegeNext: res?.next,
+      });
+    } catch (error) {
+      setState({ collegeLoading: false });
+    }
+  };
+
+  const departmentDropdownList = async (
+    page,
+    search = "",
+    loadMore = false,
+    collegeId = null,
+    createdBy = null
+  ) => {
+    try {
+      setState({ departmentLoading: true });
+      const body: any = { search };
+      if (collegeId) {
+        body.college = collegeId;
+      } else if (state.profile?.role === "hr") {
+        body.college = state.profile?.college?.college_id;
+      }
+      if (createdBy) {
+        body.created_by = createdBy;
+      }
+      body.team = "No";
+      const res: any = await Models.department.list(page, body);
+      const dropdown = res?.results?.map((item) => ({
+        value: item.id,
+        label: item.department_name,
+      }));
+      setState({
+        departmentLoading: false,
+        departmentPage: page,
+        departmentList: loadMore
+          ? [...state.departmentList, ...dropdown]
+          : dropdown,
+        departmentNext: res?.next,
+      });
+    } catch (error) {
+      setState({ departmentLoading: false });
+    }
+  };
+
+  const locationList = async (page = 1) => {
+    try {
+      setState({ locationLoading: true });
+      const res: any = await Models.job.job_locations();
+      const dropdown = res?.results?.map((item) => ({
+        value: item.id,
+        label: item.city,
+      }));
+      setState({ locationLoading: false, locationList: dropdown });
+    } catch (error) {
+      setState({ locationLoading: false });
+    }
+  };
+
+  const categoryList = async (page = 1) => {
+    try {
+      setState({ categoryLoading: true });
+      const res: any = await Models.job.job_category();
+      const dropdown = res?.results?.map((item) => ({
+        value: item.id,
+        label: item.name,
+      }));
+      setState({ categoryLoading: false, categoryList: dropdown });
+    } catch (error) {
+      setState({ categoryLoading: false });
+    }
+  };
+
+  const salaryRangeList = async (page = 1) => {
+    try {
+      setState({ salaryRangeLoading: true });
+      const res: any = await Models.job.job_salary_ranges();
+      const dropdown = res?.results?.map((item) => ({
+        value: item.id,
+        label: item.name,
+      }));
+      setState({ salaryRangeLoading: false, salaryRangeList: dropdown });
+    } catch (error) {
+      setState({ salaryRangeLoading: false });
+    }
+  };
+
+  const priorityList = async (page = 1) => {
+    try {
+      setState({ priorityLoading: true });
+      const res: any = await Models.job.job_priority();
+      const dropdown = res?.results?.map((item) => ({
+        value: item.id,
+        label: item.name,
+      }));
+      setState({ priorityLoading: false, priorityList: dropdown });
+    } catch (error) {
+      setState({ priorityLoading: false });
+    }
+  };
+
+  const typeList = async (page = 1) => {
+    try {
+      setState({ typeLoading: true });
+      const res: any = await Models.job.job_types();
+      const dropdown = res?.results?.map((item) => ({
+        value: item.id,
+        label: item.name,
+      }));
+      setState({ typeLoading: false, typeList: dropdown });
+    } catch (error) {
+      setState({ typeLoading: false });
+    }
+  };
+
+  const jobStatusList = async (page = 1) => {
+    try {
+      setState({ jobStatusLoading: true });
+      const res: any = await Models.job.job_status();
+      const dropdown = res?.results?.map((item) => ({
+        value: item.id,
+        label: item.name,
+      }));
+      setState({ jobStatusLoading: false, jobStatusList: dropdown });
+    } catch (error) {
+      setState({ jobStatusLoading: false });
+    }
+  };
+
+  const handleInstitutionChange = (selectedOption: any) => {
+    setState({
+      institutionFilter: selectedOption,
+      collegeFilter: null,
+      collegeList: [],
+      page: 1,
+    });
+    if (selectedOption?.value) {
+      collegeDropdownList(
+        1,
+        "",
+        false,
+        selectedOption.value,
+        state.profile?.id
+      );
+    }
+  };
+
+  const handleCollegeChange = (selectedOption: any) => {
+    setState({
+      collegeFilter: selectedOption,
+      departmentFilter: null,
+      departmentList: [],
+      page: 1,
+    });
+    if (selectedOption?.value) {
+      departmentDropdownList(
+        1,
+        "",
+        false,
+        selectedOption.value,
+        state.profile?.id
+      );
+    }
+  };
+
+  const handleDepartmentChange = (selectedOption: any) => {
+    setState({ departmentFilter: selectedOption, page: 1 });
+  };
+
+  const deleteRecord = async (row: any) => {
+    try {
+      await Models.application.delete(row?.id);
       Success("Application deleted successfully!");
       applicationList(state.page);
     } catch (error) {
@@ -344,186 +635,6 @@ const Application = () => {
     }
   };
 
-  const profile = async () => {
-    try {
-      const res: any = await Models.auth.profile();
-      setState({ profile: res });
-      if (res?.role == ROLES.SUPER_ADMIN) {
-        collegeDropdownList(1, "", false, "", res.id);
-      } else if (res?.role == ROLES.INSTITUTION_ADMIN) {
-        collegeDropdownList(1, "", false, res?.institution?.institution_id, res.id);
-      } else if (res?.role == ROLES.HR) {
-        departmentDropdownList(1, "", false, res?.college?.college_id, res.id);
-      }
-    } catch (error) {
-      console.error("Error fetching profile:", error);
-    }
-  };
-
-  const institutionDropdownList = async (page, search = "", loadMore = false) => {
-    try {
-      setState({ institutionLoading: true });
-      const body = { search };
-      const res: any = await Models.institution.list(page, body);
-      const dropdown = Dropdown(res?.results, "institution_name");
-      setState({
-        institutionLoading: false,
-        institutionPage: page,
-        institutionList: loadMore ? [...state.institutionList, ...dropdown] : dropdown,
-        institutionNext: res?.next,
-      });
-    } catch (error) {
-      setState({ institutionLoading: false });
-    }
-  };
-
-  const collegeDropdownList = async (page, search = "", loadMore = false, institutionId = null, createdBy = null) => {
-    try {
-      setState({ collegeLoading: true });
-      const body: any = { search };
-      if (institutionId) {
-        body.institution = institutionId;
-      } else if (state.profile?.role === "institution_admin") {
-        body.institution = state.profile?.institution?.institution_id;
-      }
-      if (createdBy) {
-        body.created_by = createdBy;
-      }
-      body.team = "No";
-      const res: any = await Models.college.list(page, body);
-      const dropdown = Dropdown(res?.results, "college_name");
-      setState({
-        collegeLoading: false,
-        collegePage: page,
-        collegeList: loadMore ? [...state.collegeList, ...dropdown] : dropdown,
-        collegeNext: res?.next,
-      });
-    } catch (error) {
-      setState({ collegeLoading: false });
-    }
-  };
-
-  const departmentDropdownList = async (page, search = "", loadMore = false, collegeId = null, createdBy = null) => {
-    try {
-      setState({ departmentLoading: true });
-      const body: any = { search };
-      if (collegeId) {
-        body.college = collegeId;
-      } else if (state.profile?.role === "hr") {
-        body.college = state.profile?.college?.college_id;
-      }
-      if (createdBy) {
-        body.created_by = createdBy;
-      }
-      body.team = "No";
-      const res: any = await Models.department.list(page, body);
-      const dropdown = Dropdown(res?.results, "department_name");
-      setState({
-        departmentLoading: false,
-        departmentPage: page,
-        departmentList: loadMore ? [...state.departmentList, ...dropdown] : dropdown,
-        departmentNext: res?.next,
-      });
-    } catch (error) {
-      setState({ departmentLoading: false });
-    }
-  };
-
-  const locationList = async (page = 1) => {
-    try {
-      setState({ locationLoading: true });
-      const res: any = await Models.job.job_locations();
-      const dropdown = Dropdown(res?.results, "city");
-      setState({ locationLoading: false, locationList: dropdown });
-    } catch (error) {
-      setState({ locationLoading: false });
-    }
-  };
-
-  const categoryList = async (page = 1) => {
-    try {
-      setState({ categoryLoading: true });
-      const res: any = await Models.job.job_category();
-      const dropdown = Dropdown(res?.results, "name");
-      setState({ categoryLoading: false, categoryList: dropdown });
-    } catch (error) {
-      setState({ categoryLoading: false });
-    }
-  };
-
-  const salaryRangeList = async (page = 1) => {
-    try {
-      setState({ salaryRangeLoading: true });
-      const res: any = await Models.job.job_salary_ranges();
-      const dropdown = Dropdown(res?.results, "name");
-      setState({ salaryRangeLoading: false, salaryRangeList: dropdown });
-    } catch (error) {
-      setState({ salaryRangeLoading: false });
-    }
-  };
-
-  const priorityList = async (page = 1) => {
-    try {
-      setState({ priorityLoading: true });
-      const res: any = await Models.job.job_priority();
-      const dropdown = Dropdown(res?.results, "name");
-      setState({ priorityLoading: false, priorityList: dropdown });
-    } catch (error) {
-      setState({ priorityLoading: false });
-    }
-  };
-
-  const typeList = async (page = 1) => {
-    try {
-      setState({ typeLoading: true });
-      const res: any = await Models.job.job_types();
-      const dropdown = Dropdown(res?.results, "name");
-      setState({ typeLoading: false, typeList: dropdown });
-    } catch (error) {
-      setState({ typeLoading: false });
-    }
-  };
-
-  const jobStatusList = async (page = 1) => {
-    try {
-      setState({ jobStatusLoading: true });
-      const res: any = await Models.job.job_status();
-      const dropdown = Dropdown(res?.results, "name");
-      setState({ jobStatusLoading: false, jobStatusList: dropdown });
-    } catch (error) {
-      setState({ jobStatusLoading: false });
-    }
-  };
-
-  const handleInstitutionChange = (selectedOption: any) => {
-    setState({
-      institutionFilter: selectedOption,
-      collegeFilter: null,
-      collegeList: [],
-      page: 1,
-    });
-    if (selectedOption?.value) {
-      collegeDropdownList(1, "", false, selectedOption.value, state.profile?.id);
-    }
-  };
-
-  const handleCollegeChange = (selectedOption: any) => {
-    setState({
-      collegeFilter: selectedOption,
-      departmentFilter: null,
-      departmentList: [],
-      page: 1,
-    });
-    if (selectedOption?.value) {
-      departmentDropdownList(1, "", false, selectedOption.value, state.profile?.id);
-    }
-  };
-
-  const handleDepartmentChange = (selectedOption: any) => {
-    setState({ departmentFilter: selectedOption, page: 1 });
-  };
-
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-3 dark:from-gray-900 dark:to-gray-800">
       {/* Header Section */}
@@ -531,20 +642,20 @@ const Application = () => {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
             <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-3xl font-bold text-transparent">
-              Application Management
+              Team Application Management
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
               Manage and review job applications
             </p>
           </div>
-          <button
+          {/* <button
             onClick={() => setState({ showModal: true })}
-            className="group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+            className='group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl'
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
-            <IconPlus className="relative z-10 h-5 w-5" />
-            <span className="relative z-10">Add Application</span>
-          </button>
+            <div className='absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100'></div>
+            <IconPlus className='relative z-10 h-5 w-5' />
+            <span className='relative z-10'>Add Application</span>
+          </button> */}
         </div>
       </div>
 
@@ -553,8 +664,12 @@ const Application = () => {
         <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-sm transition-all duration-200 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Applications</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white">{state.count || 0}</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                Total Applications
+              </p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                {state.count || 0}
+              </p>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900">
               <FileText className="h-6 w-6 text-blue-600 dark:text-blue-400" />
@@ -565,9 +680,13 @@ const Application = () => {
         <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-sm transition-all duration-200 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Pending</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                Pending
+              </p>
               <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
-                {state.applicationList?.filter(app => app.status === 'Pending')?.length || 0}
+                {state.applicationList?.filter(
+                  (app) => app.status === "Pending"
+                )?.length || 0}
               </p>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-yellow-100 dark:bg-yellow-900">
@@ -579,9 +698,13 @@ const Application = () => {
         <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-sm transition-all duration-200 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Accepted</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                Accepted
+              </p>
               <p className="text-3xl font-bold text-green-600 dark:text-green-400">
-                {state.applicationList?.filter(app => app.status === 'Accepted')?.length || 0}
+                {state.applicationList?.filter(
+                  (app) => app.status === "Accepted"
+                )?.length || 0}
               </p>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 dark:bg-green-900">
@@ -593,9 +716,13 @@ const Application = () => {
         <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-sm transition-all duration-200 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Rejected</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                Rejected
+              </p>
               <p className="text-3xl font-bold text-red-600 dark:text-red-400">
-                {state.applicationList?.filter(app => app.status === 'Rejected')?.length || 0}
+                {state.applicationList?.filter(
+                  (app) => app.status === "Rejected"
+                )?.length || 0}
               </p>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100 dark:bg-red-900">
@@ -607,137 +734,264 @@ const Application = () => {
 
       {/* Filters Section */}
       <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white">Filters</h3>
-          <button
-            onClick={() => setState({ showAdvancedFilters: !state.showAdvancedFilters })}
-            className="flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
-          >
-            {state.showAdvancedFilters ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-            {state.showAdvancedFilters ? "Hide" : "Show"} Advanced Filters
-          </button>
+        <div className="mb-4 flex items-center gap-2">
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+            Filters
+          </h3>
         </div>
-        
-        {/* Primary Filters */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-          <TextInput
-            placeholder="Search applications..."
-            value={state.search}
-            onChange={(e) => setState({ search: e.target.value })}
-            icon={<IconSearch className="h-4 w-4" />}
-          />
-          {state.profile?.role == ROLES.SUPER_ADMIN && (
-            <CustomSelect
-              options={state.institutionList}
-              value={state.institutionFilter}
-              onChange={handleInstitutionChange}
-              placeholder="Select institution"
-              isClearable={true}
-              onSearch={(searchTerm) => institutionDropdownList(1, searchTerm)}
-              loadMore={() => state.institutionNext && institutionDropdownList(state.institutionPage + 1, "", true)}
-              loading={state.institutionLoading}
-            />
-          )}
-          {(state.profile?.role == ROLES.SUPER_ADMIN || state.profile?.role == ROLES.INSTITUTION_ADMIN) && (
-            <CustomSelect
-              options={state.collegeList}
-              value={state.collegeFilter}
-              onChange={handleCollegeChange}
-              placeholder="Select college"
-              isClearable={true}
-              onSearch={(searchTerm) => {
-                const institutionId = state.profile?.role === ROLES.SUPER_ADMIN ? state.institutionFilter?.value : null;
-                collegeDropdownList(1, searchTerm, false, institutionId, state.profile?.id);
-              }}
-              loadMore={() => {
-                const institutionId = state.profile?.role === ROLES.SUPER_ADMIN ? state.institutionFilter?.value : state.profile?.institution?.institution_id;
-                state.collegeNext && collegeDropdownList(state.collegePage + 1, "", true, institutionId, state.profile?.id);
-              }}
-              loading={state.collegeLoading}
-            />
-          )}
-          <CustomSelect
-            options={state.jobStatusList}
-            value={state.statusFilter}
-            onChange={(e) => setState({ statusFilter: e })}
-            placeholder="Filter by status"
-            isClearable={true}
-          />
-        </div>
-
-        {/* Advanced Filters */}
-        {state.showAdvancedFilters && (
-          <div className="mt-4 grid grid-cols-1 gap-4 border-t border-gray-200 pt-4 dark:border-gray-700 md:grid-cols-4">
-            {(state.profile?.role == ROLES.SUPER_ADMIN || state.profile?.role == ROLES.INSTITUTION_ADMIN || state.profile?.role == ROLES.HR) && (
-              <CustomSelect
-                options={state.departmentList}
-                value={state.departmentFilter}
-                onChange={handleDepartmentChange}
-                placeholder="Select department"
-                isClearable={true}
-                onSearch={(searchTerm) => {
-                  const collegeId = state.collegeFilter?.value;
-                  collegeId && departmentDropdownList(1, searchTerm, false, collegeId, state.profile?.id);
-                }}
-                loadMore={() => {
-                  const collegeId = state.collegeFilter?.value;
-                  state.departmentNext && collegeId && departmentDropdownList(state.departmentPage + 1, "", true, collegeId, state.profile?.id);
-                }}
-                loading={state.departmentLoading}
-                disabled={!state.collegeFilter && state.profile?.role !== ROLES.HR}
-              />
-            )}
-            <CustomeDatePicker
-              value={state.start_date}
-              placeholder="From Date"
-              onChange={(e) => setState({ start_date: e })}
-              showTimeSelect={false}
-            />
-            <CustomeDatePicker
-              value={state.end_date}
-              placeholder="To Date"
-              onChange={(e) => setState({ end_date: e })}
-              showTimeSelect={false}
-            />
-            <CustomSelect
-              options={state.locationList}
-              value={state.locationFilter}
-              onChange={(e) => setState({ locationFilter: e })}
-              placeholder="Select location"
-              isClearable={true}
-              loading={state.locationLoading}
-            />
-            <CustomSelect
-              options={state.categoryList}
-              value={state.categoryFilter}
-              onChange={(e) => setState({ categoryFilter: e })}
-              placeholder="Select category"
-              isClearable={true}
-              loading={state.categoryLoading}
-            />
-            <CustomSelect
-              options={state.salaryRangeList}
-              value={state.salaryFilter}
-              onChange={(e) => setState({ salaryFilter: e })}
-              placeholder="Salary range"
-              isClearable={true}
-            />
-            <CustomSelect
-              options={state.typeList}
-              value={state.typeFilter}
-              onChange={(e) => setState({ typeFilter: e })}
-              placeholder="Job type"
-              isClearable={true}
-            />
-            <CustomSelect
-              options={state.priorityList}
-              value={state.priorityFilter}
-              onChange={(e) => setState({ priorityFilter: e })}
-              placeholder="Priority"
-              isClearable={true}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="group relative">
+            <TextInput
+              placeholder="Search jobs..."
+              value={state.search}
+              onChange={(e) => setState({ search: e.target.value })}
+              icon={<IconSearch className="h-4 w-4" />}
             />
           </div>
-        )}
+          <>
+            {(state.profile?.role == ROLES.SUPER_ADMIN ||
+              state.profile?.role == ROLES.INSTITUTION_ADMIN) && (
+              <>
+                {state.profile?.role == ROLES.SUPER_ADMIN && (
+                  <CustomSelect
+                    options={state.institutionList}
+                    value={state.institutionFilter}
+                    onChange={handleInstitutionChange}
+                    placeholder="Select institution"
+                    isClearable={true}
+                    onSearch={(searchTerm) =>
+                      institutionDropdownList(1, searchTerm)
+                    }
+                    loadMore={() =>
+                      state.institutionNext &&
+                      institutionDropdownList(
+                        state.institutionPage + 1,
+                        "",
+                        true
+                      )
+                    }
+                    loading={state.institutionLoading}
+                  />
+                )}
+                <CustomSelect
+                  options={state.collegeList}
+                  value={state.collegeFilter}
+                  onChange={handleCollegeChange}
+                  placeholder="Select college"
+                  isClearable={true}
+                  onSearch={(searchTerm) => {
+                    const institutionId =
+                      state.profile?.role === ROLES.SUPER_ADMIN
+                        ? state.institutionFilter?.value
+                        : null;
+                    collegeDropdownList(
+                      1,
+                      searchTerm,
+                      false,
+                      institutionId,
+                      state.profile?.id
+                    );
+                  }}
+                  loadMore={() => {
+                    const institutionId =
+                      state.profile?.role === ROLES.SUPER_ADMIN
+                        ? state.institutionFilter?.value
+                        : state.profile?.institution?.institution_id;
+                    state.collegeNext &&
+                      collegeDropdownList(
+                        state.collegePage + 1,
+                        "",
+                        true,
+                        institutionId,
+                        state.profile?.id
+                      );
+                  }}
+                  loading={state.collegeLoading}
+                />
+
+                <CustomSelect
+                  options={state.departmentList}
+                  value={state.departmentFilter}
+                  onChange={handleDepartmentChange}
+                  placeholder="Select department"
+                  isClearable={true}
+                  onSearch={(searchTerm) => {
+                    const collegeId = state.collegeFilter?.value;
+                    collegeId &&
+                      departmentDropdownList(
+                        1,
+                        searchTerm,
+                        false,
+                        collegeId,
+                        state.profile?.id
+                      );
+                  }}
+                  loadMore={() => {
+                    const collegeId = state.collegeFilter?.value;
+                    state.departmentNext &&
+                      collegeId &&
+                      departmentDropdownList(
+                        state.departmentPage + 1,
+                        "",
+                        true,
+                        collegeId,
+                        state.profile?.id
+                      );
+                  }}
+                  loading={state.departmentLoading}
+                  disabled={!state.collegeFilter}
+                />
+              </>
+            )}
+            {state.profile?.role == ROLES.HR && (
+              <>
+                {/* <CustomSelect
+                  options={state.collegeList}
+                  value={state.collegeFilter}
+                  onChange={handleCollegeChange}
+                  placeholder="Select college"
+                  isClearable={true}
+                  onSearch={(searchTerm) => {
+                    const institutionId =
+                      state.profile?.role === ROLES.SUPER_ADMIN
+                        ? state.institutionFilter?.value
+                        : null;
+                    collegeDropdownList(
+                      1,
+                      searchTerm,
+                      false,
+                      institutionId,
+                      state.profile?.id
+                    );
+                  }}
+                  loadMore={() => {
+                    const institutionId =
+                      state.profile?.role === ROLES.SUPER_ADMIN
+                        ? state.institutionFilter?.value
+                        : state.profile?.institution?.institution_id;
+                    state.collegeNext &&
+                      collegeDropdownList(
+                        state.collegePage + 1,
+                        "",
+                        true,
+                        institutionId,
+                        state.profile?.id
+                      );
+                  }}
+                  loading={state.collegeLoading}
+                /> */}
+
+                <CustomSelect
+                  options={state.departmentList}
+                  value={state.departmentFilter}
+                  onChange={handleDepartmentChange}
+                  placeholder="Select department"
+                  isClearable={true}
+                  onSearch={(searchTerm) => {
+                    const collegeId = state.collegeFilter?.value;
+                    collegeId &&
+                      departmentDropdownList(
+                        1,
+                        searchTerm,
+                        false,
+                        collegeId,
+                        state.profile?.id
+                      );
+                  }}
+                  loadMore={() => {
+                    const collegeId = state.collegeFilter?.value;
+                    state.departmentNext &&
+                      collegeId &&
+                      departmentDropdownList(
+                        state.departmentPage + 1,
+                        "",
+                        true,
+                        collegeId,
+                        state.profile?.id
+                      );
+                  }}
+                  loading={state.departmentLoading}
+                />
+              </>
+            )}
+
+            <div className="group relative">
+              <CustomeDatePicker
+                value={state.start_date}
+                placeholder="Choose From"
+                onChange={(e) => setState({ start_date: e })}
+                showTimeSelect={false}
+              />
+            </div>
+            <div className="group relative">
+              <CustomeDatePicker
+                value={state.end_date}
+                placeholder="Choose To "
+                onChange={(e) => setState({ end_date: e })}
+                showTimeSelect={false}
+              />
+            </div>
+            <div className="group relative">
+              <CustomSelect
+                options={state.locationList}
+                value={state.locationFilter}
+                onChange={(e) => setState({ locationFilter: e })}
+                placeholder="Select location"
+                isClearable={true}
+                loading={state.locationLoading}
+              />
+            </div>
+
+            <div className="group relative">
+              <CustomSelect
+                options={state.categoryList}
+                value={state.categoryFilter}
+                onChange={(e) => setState({ categoryFilter: e })}
+                placeholder="Select category"
+                isClearable={true}
+                loading={state.categoryLoading}
+              />
+            </div>
+
+            <div className="group relative">
+              <CustomSelect
+                options={state.jobStatusList}
+                value={state.statusFilter}
+                onChange={(e) => setState({ statusFilter: e })}
+                placeholder="Filter by status"
+                isClearable={true}
+              />
+            </div>
+            <div className="group relative">
+              <CustomSelect
+                options={state.salaryRangeList}
+                value={state.salaryFilter}
+                onChange={(e) => setState({ salaryFilter: e })}
+                placeholder="Select salary range"
+                isClearable={true}
+              />
+            </div>
+            <div className="group relative">
+              <CustomSelect
+                options={state.typeList}
+                value={state.typeFilter}
+                onChange={(e) => setState({ typeFilter: e })}
+                placeholder="Select job type"
+                isClearable={true}
+              />
+            </div>
+
+            <div className="group relative">
+              <CustomSelect
+                options={state.priorityList}
+                value={state.priorityFilter}
+                onChange={(e) => setState({ priorityFilter: e })}
+                placeholder="Filter by priority"
+                isClearable={true}
+              />
+            </div>
+          </>
+        </div>
       </div>
 
       {/* Table Section */}
@@ -764,11 +1018,23 @@ const Application = () => {
               <div className="flex items-center justify-center py-12">
                 <div className="flex items-center gap-3">
                   <IconLoader className="h-6 w-6 animate-spin text-blue-600" />
-                  <span className="text-gray-600 dark:text-gray-400">Loading applications...</span>
+                  <span className="text-gray-600 dark:text-gray-400">
+                    Loading applications...
+                  </span>
                 </div>
               </div>
             }
             columns={[
+              {
+                accessor: "Job Position",
+                title: "Job Position",
+                render: ({ job_title }) => (
+                  <div className="text-gray-600 dark:text-gray-400">
+                    {capitalizeFLetter(job_title)}
+                  </div>
+                ),
+                sortable: true,
+              },
               {
                 accessor: "applicant_name",
                 title: "Applicant Name",
@@ -790,35 +1056,41 @@ const Application = () => {
                 ),
               },
               {
-                accessor: "position_applied",
-                title: "Position",
-                render: ({ position_applied }) => (
+                accessor: "applicant_phone",
+                title: "Phone",
+                render: ({ applicant_phone }) => (
                   <div className="text-gray-600 dark:text-gray-400">
-                    {position_applied}
+                    {applicant_phone}
                   </div>
                 ),
                 sortable: true,
               },
               {
-                accessor: "qualification",
-                title: "Qualification",
-                render: ({ qualification }) => (
+                accessor: "experience",
+                title: "Experience",
+                render: ({ experience }) => (
                   <div className="text-gray-600 dark:text-gray-400">
-                    {qualification}
+                    {experience}
                   </div>
                 ),
                 sortable: true,
               },
+
               {
                 accessor: "status",
                 title: "Status",
                 render: ({ status }) => (
-                  <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-                    status === "Pending" ? "bg-yellow-100 text-yellow-800" :
-                    status === "Reviewed" ? "bg-blue-100 text-blue-800" :
-                    status === "Accepted" ? "bg-green-100 text-green-800" :
-                    "bg-red-100 text-red-800"
-                  }`}>
+                  <span
+                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
+                      status === "Pending"
+                        ? "bg-yellow-100 text-yellow-800"
+                        : status === "Reviewed"
+                        ? "bg-blue-100 text-blue-800"
+                        : status === "Accepted"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
+                  >
                     {status}
                   </span>
                 ),
@@ -832,10 +1104,10 @@ const Application = () => {
                   <div className="flex items-center justify-center gap-2">
                     <button
                       onClick={() => handleEdit(row)}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 transition-all duration-200 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-400"
+                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-100 text-green-600 transition-all duration-200 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-400"
                       title="Edit"
                     >
-                      <IconEdit className="h-4 w-4" />
+                      <IconEye className="h-4 w-4" />
                     </button>
                     {row?.status === "Pending" && (
                       <>
@@ -996,7 +1268,9 @@ const Application = () => {
                     title="Experience"
                     placeholder="Enter experience"
                     value={state.experience}
-                    onChange={(e) => handleFormChange("experience", e.target.value)}
+                    onChange={(e) =>
+                      handleFormChange("experience", e.target.value)
+                    }
                     error={state.errors.experience}
                     className="transition-all duration-200 focus:shadow-lg group-hover:shadow-md"
                     required
@@ -1010,7 +1284,9 @@ const Application = () => {
                   title="Cover Letter"
                   placeholder="Enter cover letter"
                   value={state.cover_letter}
-                  onChange={(e) => handleFormChange("cover_letter", e.target.value)}
+                  onChange={(e) =>
+                    handleFormChange("cover_letter", e.target.value)
+                  }
                   error={state.errors.cover_letter}
                   rows={4}
                   className="transition-all duration-200 focus:shadow-lg group-hover:shadow-md"

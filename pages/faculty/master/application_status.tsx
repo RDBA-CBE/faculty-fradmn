@@ -56,7 +56,7 @@ const ApplicationStatus = () => {
       }
 
       const res: any = await Models.master.application_status_list(body);
-      const tableData = res?.results?.map((item) => ({
+      const tableData = res?.map((item) => ({
         id: item?.id,
         name: item?.name,
       }));
@@ -268,14 +268,14 @@ const ApplicationStatus = () => {
           />
         </div>
 
-        <div className="border-t border-gray-200 p-6 dark:border-gray-700">
+        {/* <div className="border-t border-gray-200 p-6 dark:border-gray-700">
           <Pagination
             activeNumber={handlePageChange}
             totalPage={state.count}
             currentPages={state.page}
             pageSize={state.pageSize}
           />
-        </div>
+        </div> */}
       </div>
 
       <Modal
