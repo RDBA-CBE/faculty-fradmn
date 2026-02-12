@@ -551,6 +551,7 @@ console.log('✌️institutionId --->', institutionId);
   }
 
   const handleFinalSubmit = async () => {
+console.log('✌️handleFinalSubmit --->', );
     try {
       setState({ submitting: true })
 
@@ -562,8 +563,9 @@ console.log('✌️institutionId --->', institutionId);
           college_email: state.college_email,
           college_phone: state.college_phone,
           college_address: state.college_address,
-          institution: state?.profile_institution
+          institution: state?.profile_institution?.institution_id
         }
+        console.log('✌️collegeBody --->', collegeBody);
 
         try {
           await CreateCollege.validate(collegeBody, { abortEarly: false })
@@ -588,8 +590,9 @@ console.log('✌️institutionId --->', institutionId);
           college_email: state.college_email,
           college_phone: state.college_phone,
           college_address: state.college_address,
-          institution: state?.profile_institution
+          institution: state?.profile_institution?.institution_id
         }
+        console.log('✌️collegeBody --->', collegeBody);
 
         try {
           await CreateCollege.validate(collegeBody, { abortEarly: false })
@@ -627,7 +630,7 @@ console.log('✌️institutionId --->', institutionId);
             department_name: state.department_name,
             department_code: state.department_code,
             college: createdRecords.collegeId,
-            institution: state?.profile_institution
+            institution: state?.profile_institution?.institution_id
           }
 
           console.log('Step 2.2: Creating department...', deptBody)
