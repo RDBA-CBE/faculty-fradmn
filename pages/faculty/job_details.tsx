@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { setPageTitle } from "../../store/themeConfigSlice";
-import { useSetState } from "@/utils/function.utils";
+import { capitalizeFLetter, useSetState } from "@/utils/function.utils";
 import { Models } from "@/imports/models.import";
 import { Failure } from "@/utils/function.utils";
 import IconLoader from "@/components/Icon/IconLoader";
@@ -157,7 +157,7 @@ console.log('✌️res --->', res);
                 "bg-gradient-to-r from-gray-400 to-gray-500 text-white"
               }`}>
                 <AlertCircle className="h-4 w-4" />
-                {job?.priority_display || "N/A"} Priority
+                {capitalizeFLetter(job?.priority_display) || "N/A"} Priority
               </span>
               <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 px-5 py-2.5 text-sm font-bold text-white shadow-lg">
                 <Briefcase className="h-4 w-4" />
@@ -284,7 +284,7 @@ console.log('✌️res --->', res);
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Additional Information</h2>
         </div>
         
-        <div className="space-y-6">
+        <div className="space-y-6 ">
           {job?.categories?.length > 0 && (
             <div>
               <p className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Categories</p>
