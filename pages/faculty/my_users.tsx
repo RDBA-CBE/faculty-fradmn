@@ -245,7 +245,7 @@ const Users = () => {
         qualification: item?.education_qualification,
         experience: item?.experience,
         status: item?.status,
-        college: item?.college?.name,
+        college: item?.colleges?.map((item) => item?.name).join(", "),
         institution: item?.institution?.name,
         institutionData: item?.institution
           ? { label: item?.institution?.name, value: item?.institution?.id }
@@ -253,8 +253,11 @@ const Users = () => {
         genderData: item?.gender
           ? { label: capitalizeFLetter(item?.gender), value: item?.gender }
           : null,
-        collegeData: item?.college
-          ? { label: item?.college?.name, value: item?.college?.id }
+        collegeData: item?.colleges
+          ? item?.colleges?.map((c) => ({
+              label: c?.name,
+              value: c?.id,
+            }))
           : null,
         deptData: item?.department
           ? { label: item?.department?.name, value: item?.department?.id }
@@ -580,6 +583,11 @@ const Users = () => {
     }
   };
 
+  console.log("state.collegeList", state.collegeList);
+  console.log("state.college",state.college);
+  
+  
+
   const hodInstitutionList = async (page, search = "", loadMore = false) => {
     try {
       setState({ hodInstitutionLoading: true });
@@ -730,6 +738,8 @@ const Users = () => {
   };
 
   const handleEdit = (row) => {
+    console.log("row", row);
+    
     setState({
       editId: row.id,
       showModal: true,
@@ -844,7 +854,7 @@ const Users = () => {
       }
 
       if (state.activeTab === "hr") {
-        body.college = state.college?.value;
+        body.college = state.college?.map((item) => Number(item.value));
       }
 
       // Add qualification and experience for hod and applicant
@@ -852,6 +862,10 @@ const Users = () => {
         body.qualification = state.education_qualification;
         body.experience = state.experience;
       }
+
+
+      console.log("body", body);
+      
 
       const formData = buildFormData(body);
 
@@ -1096,6 +1110,7 @@ const Users = () => {
             }
             placeholder="Select College"
             isClearable={true}
+            isMulti={true}
             loadMore={() =>
               state.collegeNext &&
               hrCollegeList(
@@ -1471,7 +1486,7 @@ const Users = () => {
                   : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
               }`}
             >
-              Applicant
+              Faculty
             </button>
           </div>
         </div>

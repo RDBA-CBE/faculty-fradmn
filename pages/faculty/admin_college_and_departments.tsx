@@ -14,7 +14,12 @@ import IconEyeOff from "@/components/Icon/IconEyeOff";
 import IconLoader from "@/components/Icon/IconLoader";
 import { GraduationCap, BookOpen, UserCheck } from "lucide-react";
 import Pagination from "@/components/pagination/pagination";
-import { Dropdown, showDeleteAlert, useSetState } from "@/utils/function.utils";
+import {
+  buildFormData,
+  Dropdown,
+  showDeleteAlert,
+  useSetState,
+} from "@/utils/function.utils";
 import Modal from "@/components/modal/modal.component";
 import { Success, Failure } from "@/utils/function.utils";
 import useDebounce from "@/hook/useDebounce";
@@ -28,6 +33,7 @@ import {
 import PrivateRouter from "@/hook/privateRouter";
 import IconEdit from "@/components/Icon/IconEdit";
 import { DROPDOWN_ROLES, ROLES } from "@/utils/constant.utils";
+import UpdatePropertyImagePreview from "@/components/ImageUploadWithPreview/UpdatePropertyImagePreview.component";
 
 const CollegeAndDepartment = () => {
   const dispatch = useDispatch();
@@ -63,6 +69,8 @@ const CollegeAndDepartment = () => {
     college_phone: "",
     college_address: "",
     institution: null,
+     images: [],
+    newImages: [],
 
     // Institution filter data
     institutionFilterOptions: [],
@@ -74,7 +82,7 @@ const CollegeAndDepartment = () => {
     departmentList: [],
     departmentCount: 0,
     department_name: "",
-    department_code: "",
+    // department_code: "",
     department_email: "",
     department_phone: "",
     department_head: "",
@@ -169,7 +177,7 @@ const CollegeAndDepartment = () => {
   const loadCollegeFilterForInstitution = async (
     profileData,
     page = 1,
-    loadMore = false
+    loadMore = false,
   ) => {
     try {
       setState({ collegeFilterLoading: true });
@@ -202,7 +210,7 @@ const CollegeAndDepartment = () => {
       loadCollegeFilterForInstitution(
         state.profile,
         state.collegeFilterPage + 1,
-        true
+        true,
       );
     }
   };
@@ -257,11 +265,32 @@ const CollegeAndDepartment = () => {
     }
   };
 
+  const HRList = async (page = 1, search = "", loadMore = false) => {
+    try {
+      setState({ hrLoading: true });
+      const body = {
+        role: "hr",
+        search,
+      };
+      const res: any = await Models.auth.userList(page, body);
+      const dropdown = Dropdown(res?.results, "username");
+      setState({
+        hrOptions: loadMore ? [...state.hrOptions, ...dropdown] : dropdown,
+        hrLoading: false,
+        hrPage: page,
+        hrNext: res?.next,
+      });
+    } catch (error) {
+      setState({ hrLoading: false });
+      console.error("Error fetching HR users:", error);
+    }
+  };
+
   const collegeDropdownList = async (
     page,
     search = "",
     loadMore = false,
-    seletedInstitution = null
+    seletedInstitution = null,
   ) => {
     try {
       setState({ collegeLoading: true });
@@ -290,7 +319,7 @@ const CollegeAndDepartment = () => {
   const institutionDropdownList = async (
     page,
     search = "",
-    loadMore = false
+    loadMore = false,
   ) => {
     try {
       setState({ institutionLoading: true });
@@ -336,6 +365,8 @@ const CollegeAndDepartment = () => {
         total_departments: item?.total_departments,
         total_jobs: item?.total_jobs,
         college_address: item?.college_address,
+        college_hr: item?.college_hr,
+        college_logo: item?.college_logo,
       }));
 
       setState({
@@ -362,7 +393,7 @@ const CollegeAndDepartment = () => {
       const tableData = res?.results?.map((item) => ({
         id: item?.id,
         department_name: item?.department_name,
-        department_code: item?.department_code,
+        // department_code: item?.department_code,
         department_email: item?.department_email,
         department_phone: item?.department_phone,
         status: item?.status,
@@ -409,7 +440,7 @@ const CollegeAndDepartment = () => {
   const loadInstitutionFilterOptions = async (
     page,
     search = "",
-    loadMore = false
+    loadMore = false,
   ) => {
     try {
       setState({ institutionFilterLoading: true });
@@ -528,9 +559,11 @@ const CollegeAndDepartment = () => {
       college_email: "",
       college_phone: "",
       college_address: "",
+      college_hr: null,
+      college_logo: [],
       institution: null,
       department_name: "",
-      department_code: "",
+      // department_code: "",
       department_email: "",
       department_phone: "",
       department_head: "",
@@ -578,7 +611,7 @@ const CollegeAndDepartment = () => {
       // if (state.profile?.role === ROLES.INSTITUTION_ADMIN) {
       //   body.team = "No";
       // } else {
-        body.team = "No";
+      body.team = "No";
       // }
     } else if (state.collegeFilter?.value) {
       body.created_by = userId;
@@ -619,13 +652,18 @@ const CollegeAndDepartment = () => {
           label: row.institution_name,
         },
         showEditModal: true,
+        college_hr: {
+          value: row?.college_hr?.id,
+          label: row.college_hr?.username,
+        },
+        college_logo: row.college_logo ? [row.college_logo] : [],
       });
     } else {
       setState({
         editId: row.id,
         showModal: true,
         department_name: row.department_name,
-        department_code: row.department_code,
+        // department_code: row.department_code,
         institution: {
           value: row?.institution_id,
           label: row.institution_name,
@@ -640,7 +678,7 @@ const CollegeAndDepartment = () => {
       });
     }
   };
-  
+
   const handleToggleStatus = async (row) => {
     try {
       const newStatus = row.status === "active" ? "inactive" : "active";
@@ -664,7 +702,7 @@ const CollegeAndDepartment = () => {
     showDeleteAlert(
       () => deleteRecord(row.id),
       () => Swal.fire("Cancelled", "Record is safe", "info"),
-      "Are you sure you want to delete this record?"
+      "Are you sure you want to delete this record?",
     );
   };
 
@@ -676,7 +714,7 @@ const CollegeAndDepartment = () => {
       () => {
         Swal.fire("Cancelled", "Your Records are safe :)", "info");
       },
-      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`
+      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`,
     );
   };
 
@@ -693,7 +731,7 @@ const CollegeAndDepartment = () => {
       }
     } catch (error) {
       Failure(
-        `Failed to delete ${state.activeTab.slice(0, -1)}. Please try again.`
+        `Failed to delete ${state.activeTab.slice(0, -1)}. Please try again.`,
       );
     }
   };
@@ -708,7 +746,7 @@ const CollegeAndDepartment = () => {
         }
       }
       Success(
-        `${state.selectedRecords.length} ${state.activeTab} deleted successfully!`
+        `${state.selectedRecords.length} ${state.activeTab} deleted successfully!`,
       );
       setState({ selectedRecords: [] });
       if (state.activeTab === "colleges") {
@@ -743,7 +781,7 @@ const CollegeAndDepartment = () => {
     } catch (rollbackError) {
       console.error("Rollback error:", rollbackError);
       Failure(
-        "Failed to cleanup created records. Please contact administrator."
+        "Failed to cleanup created records. Please contact administrator.",
       );
     }
   };
@@ -755,14 +793,14 @@ const CollegeAndDepartment = () => {
       if (state.activeTab === "departments") {
         const body: any = {
           department_name: state.department_name,
-          department_code: state.department_code,
+          // department_code: state.department_code,
           college: state.college?.value,
         };
 
         const validationBody = {
           college: state.college?.value,
           department_name: state.department_name,
-          department_code: state.department_code,
+          // department_code: state.department_code,
         };
 
         const errors: any = {};
@@ -773,9 +811,9 @@ const CollegeAndDepartment = () => {
         if (!validationBody.department_name) {
           errors.department_name = "Department name is required";
         }
-        if (!validationBody.department_code) {
-          errors.department_code = "Department code is required";
-        }
+        // if (!validationBody.department_code) {
+        //   errors.department_code = "Department code is required";
+        // }
 
         if (Object.keys(errors).length > 0) {
           setState({ errors });
@@ -820,19 +858,25 @@ const CollegeAndDepartment = () => {
   const updateCollege = async () => {
     try {
       setState({ updateCollegeLoading: true });
-      const body = {
+      const body: any = {
         college_name: state.college_name,
         college_code: state.college_code,
         college_email: state.college_email,
         college_phone: state.college_phone,
         college_address: state.college_address,
         institution: state?.institution?.value,
+        college_hr: state.college_hr?.value,
       };
+
+      if (state.newImages?.length > 0 && state.images?.length === 0) {
+        body.college_logo = state.newImages[0];
+      }
 
       console.log("✌️body --->", body);
 
       await CreateCollege.validate(body, { abortEarly: false });
-      const res = await Models.college.update(body, state.editId);
+      const formData = buildFormData(body);
+      const res = await Models.college.update(formData, state.editId);
       console.log("✌️res --->", res);
       collegeList(1);
       handleCloseModal();
@@ -968,16 +1012,16 @@ const CollegeAndDepartment = () => {
   ];
 
   const departmentColumns = [
-    {
-      accessor: "department_code",
-      title: "Department Code",
-      sortable: true,
-      render: ({ department_code }) => (
-        <span className="inline-flex items-center justify-center rounded-full bg-purple-100 px-4 py-2 text-sm font-medium text-purple-800 dark:bg-purple-900 dark:text-purple-200">
-          {department_code}
-        </span>
-      ),
-    },
+    // {
+    //   accessor: "department_code",
+    //   title: "Department Code",
+    //   sortable: true,
+    //   render: ({ department_code }) => (
+    //     <span className="inline-flex items-center justify-center rounded-full bg-purple-100 px-4 py-2 text-sm font-medium text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+    //       {department_code}
+    //     </span>
+    //   ),
+    // },
     {
       accessor: "department_name",
       title: "Department Name",
@@ -1362,7 +1406,7 @@ const CollegeAndDepartment = () => {
                       state.collegePage + 1,
                       "",
                       true,
-                      state.seletedInstitution
+                      state.seletedInstitution,
                     )
                   }
                   loading={state.collegeLoading}
@@ -1381,7 +1425,7 @@ const CollegeAndDepartment = () => {
                     error={state.errors.department_name}
                     required
                   />
-                  <TextInput
+                  {/* <TextInput
                     title="Department Code"
                     placeholder="Enter department code"
                     value={state.department_code}
@@ -1390,7 +1434,7 @@ const CollegeAndDepartment = () => {
                     }
                     error={state.errors.department_code}
                     required
-                  />
+                  /> */}
                 </div>
               </div>
             </div>
@@ -1472,6 +1516,20 @@ const CollegeAndDepartment = () => {
                   error={state.errors.college_name}
                   required
                 />
+                <UpdatePropertyImagePreview
+                  existingImages={state.college_logo}
+                  onImagesChange={(newImages) => setState({ newImages })}
+                  onDeleteImage={(imageUrl) => {
+                    setState({
+                      college_logo: state.college_logo.filter((img) => img !== imageUrl),
+                    });
+                  }}
+                  maxFiles={1}
+                  title="College Logo"
+                  description="Upload college logo (JPEG or PNG)"
+                  validateDimensions={false}
+                  isSingleImage={true}
+                />
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                   <TextInput
                     title="Email Address"
@@ -1506,18 +1564,36 @@ const CollegeAndDepartment = () => {
                     error={state.errors.college_phone}
                     required
                   />
-                  <TextArea
-                    title="Address"
-                    placeholder="Enter college address"
-                    value={state.college_address}
-                    onChange={(e) =>
-                      handleFormChange("college_address", e.target.value)
+                  <CustomSelect
+                    options={state.hrOptions}
+                    value={state.college_hr}
+                    onChange={(selectedOption) => {
+                      setState({
+                        college_hr: selectedOption,
+                      });
+                    }}
+                    onSearch={(searchTerm) => HRList(1, searchTerm)}
+                    placeholder="Assign HR"
+                    isClearable={true}
+                    loadMore={() =>
+                      state.hrNext && HRList(state.hrPage + 1, "", true)
                     }
-                    error={state.errors.college_address}
-                    rows={3}
+                    loading={state.hrLoading}
+                    title="Assign HR"
                     required
                   />
                 </div>
+                <TextArea
+                  title="Address"
+                  placeholder="Enter college address"
+                  value={state.college_address}
+                  onChange={(e) =>
+                    handleFormChange("college_address", e.target.value)
+                  }
+                  error={state.errors.college_address}
+                  rows={3}
+                  required
+                />
               </div>
             </div>
 

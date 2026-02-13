@@ -186,7 +186,7 @@ const UpdatePropertyImagePreview: React.FC<ImageUploadProps> = ({
           className="hidden"
         />
 
-        <Upload className="mx-auto mb-4 h-12 w-12 text-blue-500" />
+        <Upload className="mx-auto mb-4  w-12 text-blue-500" />
 
         <div className="space-y-2">
           <p className="text-lg font-semibold text-gray-700">{title}</p>

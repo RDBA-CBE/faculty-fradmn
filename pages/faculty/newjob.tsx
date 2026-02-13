@@ -94,6 +94,7 @@ export default function Newjob() {
     categoryList(1);
     skillList(1);
     tagList(1);
+    fetchExperience(1)
   }, []);
 
   useEffect(() => {
@@ -289,6 +290,24 @@ export default function Newjob() {
     }
   };
 
+  const fetchExperience = async (page = 1) => {
+    try {
+      const res: any = await Models.master.experience_list(page);
+      const options = res?.results?.map((item: any) => ({
+        value: item.id,
+        label: item.name,
+      }));
+      setState({
+        experienceList:
+          page === 1 ? options : [...state.experienceList, ...options],
+        experiencePage: page,
+        experienceHasMore: !!res?.next,
+      });
+    } catch (error) {
+      console.error("Error fetching experiences:", error);
+    }
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       const section1 = section1Ref.current?.getBoundingClientRect();
@@ -415,12 +434,12 @@ export default function Newjob() {
 
     const valid: any = {
       title: state.title,
-      company: state.company,
+      
       location: state.location?.value,
-      address: state.address,
-      jobType: state.jobType,
+      // address: state.address,
+      
       salary: state.salary,
-      category: state.category,
+      
       priority: state.priority,
       deadline: state.deadline,
       startDate: state.startDate,
@@ -430,8 +449,8 @@ export default function Newjob() {
       qualification: state.qualification,
       responsibility: keyResponsibilityData,
       // professionalSkills: professionalSkillsData,
-      skills: state.skills,
-      tags: state.tags,
+      // skills: state.skills,
+      
       jobDescription: state.description,
     };
 
@@ -459,26 +478,24 @@ export default function Newjob() {
       await CreateNewJob.validate(
         {
           title: state.title,
-          company: state.company,
+        
           location: state.location,
-          address: state.address,
+          // address: state.address,
           institution: state.institution,
           college: state.college,
           department: state.department,
-          jobType: state.jobType?.value,
+          
           salary: state.salary?.value,
-          category: state.category,
+          
           priority: state.priority?.value,
           deadline: state.deadline,
           startDate: state.startDate,
           endDate: state.endDate,
-          numberOfOpenings: state.numberOfOpenings,
+          
           experience: state.experience?.value,
           qualification: state.qualification,
           keyResponsibility: keyResponsibilityData,
-          skills: state.skills,
-          company_detail: state.company_detail,
-          // job_status: state.job_status?.value,
+         
           description: state.description,
         },
         { abortEarly: false }
@@ -487,28 +504,25 @@ export default function Newjob() {
       const body: any = {
         job_title: state.title,
         job_description: state.description,
-        company: state.company,
+        
         job_type_id: state.jobType?.value,
         experiences: state.experience?.value,
         qualification: state.qualification,
         salary_range_id: state.salary?.value,
         location_ids: state.location?.map((item) => item?.value),
-        company_detail: state.company_detail,
+
         number_of_openings: Number(state.numberOfOpenings),
         last_date: moment(state.endDate).format("YYYY-MM-DD"),
         // job_status_id: state.job_status?.value,
         deadline: moment(state.deadline).format("YYYY-MM-DD"),
         start_date: moment(state.startDate).format("YYYY-MM-DD"),
         responsibility: keyResponsibilityData,
-        skill_ids: state.skills?.map((item) => item?.value),
-        tag_ids: state.tags?.map((item) => item?.value),
+        
         is_approved: state.profile?.role == ROLES.HR ? true : false,
         priority_id: state.priority?.value,
-        category_ids: state.category?.map((item) => item?.value),
+        
       };
-      if (state.newImages?.length > 0 && state.images?.length === 0) {
-        body.company_logo = state.newImages[0];
-      }
+
 
       if (state.profile?.role == ROLES.SUPER_ADMIN) {
         body.institution = state.institution?.value;
@@ -781,7 +795,11 @@ export default function Newjob() {
               </h2>
             </div>
             <div className="space-y-5 p-6">
-              <TextInput
+              
+
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+
+                <TextInput
                 name="title"
                 type="text"
                 title="Job Title"
@@ -791,18 +809,6 @@ export default function Newjob() {
                 error={state.error?.title}
                 required
               />
-
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                <TextInput
-                  name="company"
-                  type="text"
-                  title="Company"
-                  placeholder="Company name"
-                  value={state.company}
-                  onChange={(e) => handleFieldChange("company", e.target.value)}
-                  error={state.error?.company}
-                  required
-                />
 
                 <CustomSelect
                   options={state.locationList}
@@ -818,35 +824,8 @@ export default function Newjob() {
                 />
               </div>
 
-              <TextArea
-                name="address"
-                title="Company Details"
-                placeholder="Company Details"
-                value={state.company_detail}
-                onChange={(e) =>
-                  handleFieldChange("company_detail", e.target.value)
-                }
-                error={state.error?.company_detail}
-                rows={3}
-                required
-              />
 
-              <div className="mt-5">
-                <UpdatePropertyImagePreview
-                  existingImages={state.images}
-                  onImagesChange={(newImages) => setState({ newImages })}
-                  onDeleteImage={(imageUrl) => {
-                    setState({
-                      images: state.images.filter((img) => img !== imageUrl),
-                    });
-                  }}
-                  maxFiles={1}
-                  title="Company Logo"
-                  description="Upload company logo (JPEG or PNG)"
-                  validateDimensions={false}
-                  isSingleImage={true}
-                />
-              </div>
+              
             </div>
           </div>
 
@@ -1054,15 +1033,7 @@ export default function Newjob() {
                   error={state.error?.priority}
                   required
                 />
-                <CustomSelect
-                  options={state.typeList}
-                  value={state.jobType}
-                  onChange={(option) => handleFieldChange("jobType", option)}
-                  placeholder="Select job type"
-                  error={state.error?.jobType}
-                  required
-                  title="Job Type"
-                />
+               
                 <CustomSelect
                   options={state.salaryRangeList}
                   title="Salary Range"
@@ -1141,22 +1112,10 @@ export default function Newjob() {
                   onChange={(e) =>
                     handleFieldChange("numberOfOpenings", e.target.value)
                   }
-                  error={state.error?.numberOfOpenings}
-                  required
+                  
                 />
 
-                <CustomSelect
-                  options={state.categoryList}
-                  value={state.category}
-                  onChange={(option) => handleFieldChange("category", option)}
-                  placeholder="Select category"
-                  title="Select category"
-                  required
-                  isClearable={true}
-                  error={state.error?.category}
-                  loading={state.categoryLoading}
-                  isMulti={true}
-                />
+               
 
                 {/* <TextInput
                   name="experience"
@@ -1273,81 +1232,8 @@ export default function Newjob() {
             </div>
           </div>
 
-          {/* Card 4: Professional Skills */}
-          <div
-            ref={section4Ref}
-            className="scroll-mt-32 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
-          >
-            <div className="bg-gradient-to-r from-teal-500 to-teal-600 px-6 py-4">
-              <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                  />
-                </svg>
-                Professional Skills
-              </h2>
-            </div>
-            <div className="p-6">
-              <CustomSelect
-                options={state.skillList}
-                value={state.skills}
-                onChange={(option) => handleFieldChange("skills", option)}
-                placeholder="Select Skills"
-                error={state.error?.skills}
-                required
-                isMulti={true}
-                loading={state.skillLoading}
-                loadMore={() =>
-                  state.skillHasMore && skillList(state.skillPage + 1)
-                }
-              />
-            </div>
-          </div>
-
-          {/* Card 5: Skills */}
-          <div className="scroll-mt-32 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md">
-            <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 px-6 py-4">
-              <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                  />
-                </svg>
-                Tags
-              </h2>
-            </div>
-            <div className="p-6">
-              <CustomSelect
-                options={state.tagList}
-                value={state.tags}
-                onChange={(option) => handleFieldChange("tags", option)}
-                placeholder="Select Tags"
-                error={state.error?.tags}
-                required
-                isMulti={true}
-                loading={state.tagLoading}
-                loadMore={() => state.tagHasMore && tagList(state.tagPage + 1)}
-              />
-            </div>
-          </div>
-
+         
+         
           {/* Action Buttons */}
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
             <button

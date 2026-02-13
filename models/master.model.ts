@@ -8,7 +8,7 @@ const master = {
       if (body?.search) url += `?search=${encodeURIComponent(body.search)}`;
       if (body?.ordering)
         url += `${body.search ? "&" : "?"}ordering=${encodeURIComponent(
-          body.ordering
+          body.ordering,
         )}`;
       instance()
         .get(url)
@@ -55,7 +55,7 @@ const master = {
       if (body?.search) url += `?search=${encodeURIComponent(body.search)}`;
       if (body?.ordering)
         url += `${body.search ? "&" : "?"}ordering=${encodeURIComponent(
-          body.ordering
+          body.ordering,
         )}`;
       instance()
         .get(url)
@@ -99,7 +99,7 @@ const master = {
       if (body?.search) url += `?search=${encodeURIComponent(body.search)}`;
       if (body?.ordering)
         url += `${body.search ? "&" : "?"}ordering=${encodeURIComponent(
-          body.ordering
+          body.ordering,
         )}`;
       instance()
         .get(url)
@@ -143,7 +143,7 @@ const master = {
       if (body?.search) url += `?search=${encodeURIComponent(body.search)}`;
       if (body?.ordering)
         url += `${body.search ? "&" : "?"}ordering=${encodeURIComponent(
-          body.ordering
+          body.ordering,
         )}`;
       instance()
         .get(url)
@@ -187,7 +187,7 @@ const master = {
       if (body?.search) url += `?search=${encodeURIComponent(body.search)}`;
       if (body?.ordering)
         url += `${body.search ? "&" : "?"}ordering=${encodeURIComponent(
-          body.ordering
+          body.ordering,
         )}`;
       instance()
         .get(url)
@@ -231,7 +231,7 @@ const master = {
       if (body?.search) url += `?search=${encodeURIComponent(body.search)}`;
       if (body?.ordering)
         url += `${body.search ? "&" : "?"}ordering=${encodeURIComponent(
-          body.ordering
+          body.ordering,
         )}`;
       instance()
         .get(url)
@@ -275,7 +275,7 @@ const master = {
       if (body?.search) url += `?search=${encodeURIComponent(body.search)}`;
       if (body?.ordering)
         url += `${body.search ? "&" : "?"}ordering=${encodeURIComponent(
-          body.ordering
+          body.ordering,
         )}`;
       instance()
         .get(url)
@@ -306,6 +306,18 @@ const master = {
     let promise = new Promise((resolve, reject) => {
       instance()
         .delete(`application-statuses/${id}/`)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+
+  experience_list: (page: any = 1) => {
+    let promise = new Promise((resolve, reject) => {
+      let url = `experiences/?page=${page}`;
+
+      instance()
+        .get(url)
         .then((res) => resolve(res.data))
         .catch((error) => reject(error.response || error));
     });

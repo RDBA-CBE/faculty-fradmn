@@ -47,11 +47,11 @@ const instution = {
           resolve(res.data);
         })
         .catch((error) => {
-          if (error.response) {
-            reject(error.response);
-          } else {
-            reject(error);
-          }
+          console.log("model error", error);
+          
+          
+            reject(error.response?.data?.message || error);
+          
         });
     });
     return promise;

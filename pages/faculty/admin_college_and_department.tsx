@@ -38,6 +38,7 @@ import {
 } from "@/utils/validation.utils";
 import PrivateRouter from "@/hook/privateRouter";
 import IconEdit from "@/components/Icon/IconEdit";
+import UpdatePropertyImagePreview from "@/components/ImageUploadWithPreview/UpdatePropertyImagePreview.component";
 
 const CollegeAndDepartment = () => {
   const dispatch = useDispatch();
@@ -86,12 +87,14 @@ const CollegeAndDepartment = () => {
     college_phone: "",
     college_address: "",
     institution: null,
+    images: [],
+    newImages: [],
 
     // Department data
     departmentList: [],
     departmentCount: 0,
     department_name: "",
-    department_code: "",
+    // department_code: "",
     department_email: "",
     department_phone: "",
     department_head: "",
@@ -187,6 +190,8 @@ const CollegeAndDepartment = () => {
         total_departments: item?.total_departments,
         total_jobs: item?.total_jobs,
         college_address: item?.college_address,
+        college_hr: item?.college_hr,
+        college_logo: item?.college_logo,
       }));
 
       setState({
@@ -225,11 +230,32 @@ const CollegeAndDepartment = () => {
     }
   };
 
+  const HRList = async (page = 1, search = "", loadMore = false) => {
+    try {
+      setState({ hrLoading: true });
+      const body = {
+        role: "hr",
+        search,
+      };
+      const res: any = await Models.auth.userList(page, body);
+      const dropdown = Dropdown(res?.results, "username");
+      setState({
+        hrOptions: loadMore ? [...state.hrOptions, ...dropdown] : dropdown,
+        hrLoading: false,
+        hrPage: page,
+        hrNext: res?.next,
+      });
+    } catch (error) {
+      setState({ hrLoading: false });
+      console.error("Error fetching HR users:", error);
+    }
+  };
+
   const collegeDropdownList = async (
     page,
     search = "",
     loadMore = false,
-    seletedInstitution = null
+    seletedInstitution = null,
   ) => {
     try {
       setState({ collegeLoading: true });
@@ -258,7 +284,7 @@ const CollegeAndDepartment = () => {
   const institutionDropdownList = async (
     page,
     search = "",
-    loadMore = false
+    loadMore = false,
   ) => {
     try {
       setState({ institutionLoading: true });
@@ -325,7 +351,7 @@ const CollegeAndDepartment = () => {
       const tableData = res?.results?.map((item) => ({
         id: item?.id,
         department_name: item?.department_name,
-        department_code: item?.department_code,
+        // department_code: item?.department_code,
         department_email: item?.department_email,
         department_phone: item?.department_phone,
         status: item?.status,
@@ -374,7 +400,7 @@ const CollegeAndDepartment = () => {
   const loadInstitutionOptions = async (
     page,
     search = "",
-    loadMore = false
+    loadMore = false,
   ) => {
     try {
       setState({ institutionLoading: true });
@@ -397,7 +423,11 @@ const CollegeAndDepartment = () => {
   };
 
   const handleInstitutionChange = (selectedOption) => {
-    setState({ institutionFilter: selectedOption, page: 1, collegeFilter: null });
+    setState({
+      institutionFilter: selectedOption,
+      page: 1,
+      collegeFilter: null,
+    });
     if (state.activeTab === "departments") {
       loadCollegeFilterOptions(1, "", false, selectedOption);
     }
@@ -418,7 +448,7 @@ const CollegeAndDepartment = () => {
     page,
     search = "",
     loadMore = false,
-    institutionOption = null
+    institutionOption = null,
   ) => {
     try {
       setState({ collegeFilterLoading: true });
@@ -466,6 +496,8 @@ const CollegeAndDepartment = () => {
   };
 
   const handleCloseModal = () => {
+    console.log("hellor");
+    
     setState({
       showModal: false,
       showEditModal: false,
@@ -478,9 +510,11 @@ const CollegeAndDepartment = () => {
       college_email: "",
       college_phone: "",
       college_address: "",
+      college_hr: null,
+      college_logo: null,
       institution: null,
       department_name: "",
-      department_code: "",
+      // department_code: "",
       department_email: "",
       department_phone: "",
       department_head: "",
@@ -532,6 +566,7 @@ const CollegeAndDepartment = () => {
 
   const handleEdit = (row) => {
     if (state.activeTab === "colleges") {
+     
       setState({
         editId: row.id,
         showModal: false,
@@ -544,6 +579,11 @@ const CollegeAndDepartment = () => {
           value: row?.institution_id,
           label: row.institution_name,
         },
+        college_hr: {
+          value: row?.college_hr?.id,
+          label: row.college_hr?.username,
+        },
+        college_logo: row.college_logo ? [row.college_logo] : [],
         showEditModal: true,
       });
     } else {
@@ -551,7 +591,7 @@ const CollegeAndDepartment = () => {
         editId: row.id,
         showModal: true,
         department_name: row.department_name,
-        department_code: row.department_code,
+        // department_code: row.department_code,
         institution: {
           value: row?.institution_id,
           label: row.institution_name,
@@ -590,7 +630,7 @@ const CollegeAndDepartment = () => {
     showDeleteAlert(
       () => deleteRecord(row.id),
       () => Swal.fire("Cancelled", "Record is safe", "info"),
-      "Are you sure you want to delete this record?"
+      "Are you sure you want to delete this record?",
     );
   };
 
@@ -602,7 +642,7 @@ const CollegeAndDepartment = () => {
       () => {
         Swal.fire("Cancelled", "Your Records are safe :)", "info");
       },
-      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`
+      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`,
     );
   };
 
@@ -619,7 +659,7 @@ const CollegeAndDepartment = () => {
       }
     } catch (error) {
       Failure(
-        `Failed to delete ${state.activeTab.slice(0, -1)}. Please try again.`
+        `Failed to delete ${state.activeTab.slice(0, -1)}. Please try again.`,
       );
     }
   };
@@ -634,7 +674,7 @@ const CollegeAndDepartment = () => {
         }
       }
       Success(
-        `${state.selectedRecords.length} ${state.activeTab} deleted successfully!`
+        `${state.selectedRecords.length} ${state.activeTab} deleted successfully!`,
       );
       setState({ selectedRecords: [] });
       if (state.activeTab === "colleges") {
@@ -661,7 +701,7 @@ const CollegeAndDepartment = () => {
     } catch (rollbackError) {
       console.error("Rollback error:", rollbackError);
       Failure(
-        "Failed to cleanup created records. Please contact administrator."
+        "Failed to cleanup created records. Please contact administrator.",
       );
     }
   };
@@ -672,52 +712,63 @@ const CollegeAndDepartment = () => {
 
       if (state.currentStep === 1) {
         // Step 1: Create College only
-        const collegeBody = {
+        const collegeBody:any = {
           college_name: state.college_name,
           college_code: state.college_code,
           college_email: state.college_email,
           college_phone: state.college_phone,
           college_address: state.college_address,
+          college_hr: state.college_hr?.value,
           institution: state?.institution?.value,
         };
+
+        if (state.newImages?.length > 0 && state.images?.length === 0) {
+          collegeBody.college_logo = state.newImages[0];
+        }
         await CreateCollege.validate(collegeBody, { abortEarly: false });
 
-        const collegeRes = await Models.college.create(collegeBody);
+        const formData = buildFormData(collegeBody);
+        const collegeRes = await Models.college.create(formData);
         Success("College created successfully!");
         handleCloseModal();
         collegeTableList(state.page);
       } else if (state.currentStep === 2) {
         // Step 2: Create College and Department
-        const collegeBody = {
+        const collegeBody :any = {
           college_name: state.college_name,
           college_code: state.college_code,
           college_email: state.college_email,
           college_phone: state.college_phone,
           college_address: state.college_address,
           institution: state?.institution?.value,
+          college_hr: state.college_hr?.value,
         };
+        if (state.newImages?.length > 0 && state.images?.length === 0) {
+          collegeBody.college_logo = state.newImages[0];
+        }
         await CreateCollege.validate(collegeBody, { abortEarly: false });
 
-        if (!state.department_name || !state.department_code) {
-          Failure("Department name and code are required");
+        if (!state.department_name) {
+          Failure("Department name is required");
         }
 
         let createdRecords = { collegeId: null, departmentId: null };
 
         try {
-          const collegeRes: any = await Models.college.create(collegeBody);
+          // Step 2.1: Create college first
+          const formData = buildFormData(collegeBody);
+          const collegeRes: any = await Models.college.create(formData);
           createdRecords.collegeId = collegeRes?.id;
-        
+
           const deptBody = {
             department_name: state.department_name,
-            department_code: state.department_code,
+            // department_code: state.department_code,
             college: createdRecords.collegeId,
             institution: state?.institution?.value,
           };
 
           const deptRes: any = await Models.department.create(deptBody);
           createdRecords.departmentId = deptRes?.id;
-         
 
           Success("College and Department created successfully!");
           handleCloseModal();
@@ -728,7 +779,7 @@ const CollegeAndDepartment = () => {
           // Show step-specific error message
           if (createdRecords.collegeId && !createdRecords.departmentId) {
             Failure(
-              "Step 2.2 failed: Department creation failed. College was created but removed due to error."
+              "Step 2.2 failed: Department creation failed. College was created but removed due to error.",
             );
           } else {
             Failure("Step 2.1 failed: College creation failed.");
@@ -766,7 +817,7 @@ const CollegeAndDepartment = () => {
           Failure(
             `Step ${state.currentStep} failed: ${
               error?.message || "Creation failed. Please try again."
-            }`
+            }`,
           );
         }
       }
@@ -774,6 +825,8 @@ const CollegeAndDepartment = () => {
       setState({ submitting: false });
     }
   };
+
+  console.log("state.images", state.images);
 
   const handleSubmit = async () => {
     try {
@@ -783,7 +836,7 @@ const CollegeAndDepartment = () => {
       if (state.activeTab === "departments") {
         const body: any = {
           department_name: state.department_name,
-          department_code: state.department_code,
+          // department_code: state.department_code,
           college: state.college?.value,
         };
 
@@ -791,7 +844,7 @@ const CollegeAndDepartment = () => {
         const validationBody = {
           college: state.college?.value,
           department_name: state.department_name,
-          department_code: state.department_code,
+          // department_code: state.department_code,
         };
 
         const errors: any = {};
@@ -803,9 +856,9 @@ const CollegeAndDepartment = () => {
         if (!validationBody.department_name) {
           errors.department_name = "Department name is required";
         }
-        if (!validationBody.department_code) {
-          errors.department_code = "Department code is required";
-        }
+        // if (!validationBody.department_code) {
+        //   errors.department_code = "Department code is required";
+        // }
 
         // If any validation errors, show all at once
         if (Object.keys(errors).length > 0) {
@@ -820,7 +873,6 @@ const CollegeAndDepartment = () => {
           const res: any = await Models.college.details(state.college?.value);
           body.institution = res?.institution;
         }
-
 
         if (state.editId) {
           const res = await Models.department.update(body, state.editId);
@@ -837,14 +889,19 @@ const CollegeAndDepartment = () => {
 
       // College wizard flow
       if (state.currentStep === 1) {
-        const body = {
+        const body:any = {
           college_name: state.college_name,
           college_code: state.college_code,
           college_email: state.college_email,
           college_phone: state.college_phone,
           college_address: state.college_address,
           institution: state?.institution?.value,
+          college_hr: state?.college_hr?.value,
         };
+
+        if (state.newImages?.length > 0 && state.images?.length === 0) {
+          body.college_logo = state.newImages[0];
+        }
 
         try {
           await CreateCollege.validate(body, { abortEarly: false });
@@ -859,7 +916,8 @@ const CollegeAndDepartment = () => {
         }
 
         if (state.editId) {
-          const res = await Models.college.update(body, state.editId);
+          const formData = buildFormData(body);
+          const res = await Models.college.update(formData, state.editId);
           Success("College updated successfully!");
           handleCloseModal();
         } else {
@@ -876,11 +934,11 @@ const CollegeAndDepartment = () => {
         }
       } else if (state.currentStep === 2) {
         // Validate department details and move to step 3
-        if (!state.department_name || !state.department_code) {
+        if (!state.department_name ) {
           setState({
             errors: {
               department_name: "Department name is required",
-              department_code: "Department code is required",
+              // department_code: "Department code is required",
             },
           });
           return;
@@ -923,30 +981,35 @@ const CollegeAndDepartment = () => {
 
         try {
           // Step 3.1: Create college first
-          const collegeBody = {
+          const collegeBody:any = {
             college_name: state.college_name,
             college_code: state.college_code,
             college_email: state.college_email,
             college_phone: state.college_phone,
             college_address: state.college_address,
             institution: state?.institution?.value,
+            college_hr: state?.college_hr?.value,
           };
 
-          const collegeRes: any = await Models.college.create(collegeBody);
+          if (state.newImages?.length > 0 && state.images?.length === 0) {
+            collegeBody.college_logo = state.newImages[0];
+          }
+
+          const collegeformData = buildFormData(collegeBody);
+
+          const collegeRes: any = await Models.college.create(collegeformData);
           createdRecords.collegeId = collegeRes?.id;
-        
 
           // Step 3.2: Create department with the created college ID
           const deptBody = {
             department_name: state.department_name,
-            department_code: state.department_code,
+            // department_code: state.department_code,
             college: collegeRes?.id,
             institution: state?.institution?.value,
           };
 
           const deptRes: any = await Models.department.create(deptBody);
           createdRecords.departmentId = deptRes?.id;
-         
 
           // Step 3.3: Create HOD with the created department ID
           const finalHodBody = {
@@ -965,7 +1028,6 @@ const CollegeAndDepartment = () => {
 
           const hodRes: any = await Models.auth.createUser(formData);
           createdRecords.hodId = hodRes?.id;
-         
 
           Success("College, Department and HOD created successfully!");
           handleCloseModal();
@@ -994,7 +1056,7 @@ const CollegeAndDepartment = () => {
               });
 
               throw new Error(
-                `Hod  creation failed:\n${errorMessages.join("\n")}`
+                `Hod  creation failed:\n${errorMessages.join("\n")}`,
               );
             }
             throw new Error(`hod  creation failed: ${error?.message}`);
@@ -1014,7 +1076,7 @@ const CollegeAndDepartment = () => {
               });
 
               throw new Error(
-                `Department  creation failed:\n${errorMessages.join("\n")}`
+                `Department  creation failed:\n${errorMessages.join("\n")}`,
               );
             }
             throw new Error(`Department  creation failed: ${error?.message}`);
@@ -1062,18 +1124,23 @@ const CollegeAndDepartment = () => {
 
   const updateCollege = async () => {
     try {
-      const body = {
+      const body:any = {
         college_name: state.college_name,
         college_code: state.college_code,
         college_email: state.college_email,
         college_phone: state.college_phone,
         college_address: state.college_address,
         institution: state?.institution?.value,
+        college_hr: state?.college_hr?.value,
       };
 
+      if (state.newImages?.length > 0 && state.images?.length === 0) {
+        body.college_logo = state.newImages[0];
+      }
 
       await CreateCollege.validate(body, { abortEarly: false });
-      const res = await Models.college.update(body, state.editId);
+      const formData = buildFormData(body);
+      const res = await Models.college.update(formData, state.editId);
       collegeTableList(1);
       handleCloseModal();
       Success("College updated successfully!");
@@ -1124,6 +1191,22 @@ const CollegeAndDepartment = () => {
         error={state.errors.college_name}
         required
       />
+
+      <UpdatePropertyImagePreview
+        existingImages={state.college_logo}
+        onImagesChange={(newImages) => setState({ newImages })}
+        onDeleteImage={(imageUrl) => {
+          setState({
+            college_logo: state.college_logo.filter((img) => img !== imageUrl),
+          });
+        }}
+        maxFiles={1}
+        title="College Logo"
+        description="Upload college logo (JPEG or PNG)"
+        validateDimensions={false}
+        isSingleImage={true}
+      />
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <TextInput
           title="Email Address"
@@ -1152,16 +1235,33 @@ const CollegeAndDepartment = () => {
           error={state.errors.college_phone}
           required
         />
-        <TextArea
-          title="Address"
-          placeholder="Enter college address"
-          value={state.college_address}
-          onChange={(e) => handleFormChange("college_address", e.target.value)}
-          error={state.errors.college_address}
-          rows={3}
+
+        <CustomSelect
+          options={state.hrOptions}
+          value={state.college_hr}
+          onChange={(selectedOption) => {
+            setState({
+              college_hr: selectedOption,
+            });
+          }}
+          onSearch={(searchTerm) => HRList(1, searchTerm)}
+          placeholder="Assign HR"
+          isClearable={true}
+          loadMore={() => state.hrNext && HRList(state.hrPage + 1, "", true)}
+          loading={state.hrLoading}
+          title="Assign HR"
           required
         />
       </div>
+      <TextArea
+        title="Address"
+        placeholder="Enter college address"
+        value={state.college_address}
+        onChange={(e) => handleFormChange("college_address", e.target.value)}
+        error={state.errors.college_address}
+        rows={3}
+        required
+      />
     </div>
   );
 
@@ -1178,7 +1278,7 @@ const CollegeAndDepartment = () => {
                   institution: selectedOption,
                   errors: { ...state.errors, institution: "" },
                   seletedInstitution: selectedOption,
-                  college:null
+                  college: null,
                 });
                 collegeList(1, selectedOption);
               }
@@ -1215,7 +1315,7 @@ const CollegeAndDepartment = () => {
                 state.collegePage + 1,
                 "",
                 true,
-                state.seletedInstitution
+                state.seletedInstitution,
               )
             }
             loading={state.collegeLoading}
@@ -1234,14 +1334,14 @@ const CollegeAndDepartment = () => {
           error={state.errors.department_name}
           required
         />
-        <TextInput
+        {/* <TextInput
           title="Department Code"
           placeholder="Enter department code"
           value={state.department_code}
           onChange={(e) => handleFormChange("department_code", e.target.value)}
           error={state.errors.department_code}
           required
-        />
+        /> */}
       </div>
     </div>
   );
@@ -1456,16 +1556,7 @@ const CollegeAndDepartment = () => {
   ];
 
   const departmentColumns = [
-    {
-      accessor: "department_code",
-      title: "Department Code",
-      sortable: true,
-      render: ({ department_code }) => (
-        <span className="inline-flex items-center justify-center rounded-full bg-purple-100 px-4 py-2 text-sm font-medium text-purple-800 dark:bg-purple-900 dark:text-purple-200">
-          {department_code}
-        </span>
-      ),
-    },
+    
     {
       accessor: "department_name",
       title: "Department Name",
@@ -1826,7 +1917,7 @@ const CollegeAndDepartment = () => {
               {state.activeTab === "departments" ? (
                 <div className="flex w-full justify-end gap-4">
                   <button
-                    onClick={()=>handleCloseModal()}
+                    onClick={() => handleCloseModal()}
                     disabled={state.submitting}
                     className="rounded-lg border px-6 py-2 text-black hover:bg-green-600 disabled:opacity-50"
                   >
@@ -1930,7 +2021,7 @@ const CollegeAndDepartment = () => {
               {/* {state.activeTab === "departments" ? ( */}
               <div className="flex w-full justify-end gap-4">
                 <button
-                  onClick={handleFinalSubmit}
+                  onClick={handleCloseModal}
                   disabled={state.submitting}
                   className="rounded-lg border px-6 py-2 text-black hover:bg-green-600 disabled:opacity-50"
                 >

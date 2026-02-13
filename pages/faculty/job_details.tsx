@@ -254,21 +254,21 @@ console.log('✌️res --->', res);
         )}
 
         {/* Company Info */}
-        {job?.company && (
+        {job?.college && (
           <div className="group rounded-3xl border border-white/20 bg-white/80 p-6 shadow-xl backdrop-blur-xl transition-all hover:shadow-2xl dark:border-gray-700/50 dark:bg-gray-800/80">
             <div className="mb-4 flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-blue-500">
                 <Building2 className="h-5 w-5 text-white" />
               </div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Company</h2>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">College</h2>
             </div>
             <div className="flex items-start gap-4">
-              {job?.company_logo && (
-                <img src={job.company_logo} alt={job.company} className="h-16 w-16 rounded-xl object-cover shadow-lg" />
+              {job?.college?.college_logo && (
+                <img src={job.college?.college_logo} alt={job.college.name} className="h-16 w-16 rounded-xl object-cover shadow-lg" />
               )}
               <div>
-                <p className="text-lg font-bold text-gray-900 dark:text-white">{job.company}</p>
-                <p className="text-gray-600 dark:text-gray-400">{job.company_detail}</p>
+                <p className="text-lg font-bold text-gray-900 dark:text-white">{job.college?.name}</p>
+                <p className="text-gray-600 dark:text-gray-400">{job.college?.company_detail}</p>
               </div>
             </div>
           </div>

@@ -149,31 +149,26 @@ export const CreateHOD = Yup.object().shape({
 
 export const CreateDepartment = Yup.object().shape({
   department_name: Yup.string().required("Department name is required"),
-  department_code: Yup.string().required("Department code is required"),
+  // department_code: Yup.string().required("Department code is required"),
 });
 
 export const CreateNewJob = Yup.object().shape({
   title: Yup.string().required("Job title is required"),
-  company: Yup.string().required("Company name is required"),
+  
   location: Yup.array()
     .min(1, "At least one location is required")
     .required("Location is required"),
   institution: Yup.object().nullable().required("Institution is required"),
   college: Yup.object().nullable().required("College is required"),
   department: Yup.object().nullable().required("Department is required"),
-  jobType: Yup.string().required("Job type is required"),
+  
   salary: Yup.string().required("Salary range is required"),
-  category: Yup.array()
-    .min(1, "At least one category is required")
-    .required("Category is required"),
+  
   priority: Yup.string().required("Priority is required"),
   deadline: Yup.string().required("Deadline is required"),
   startDate: Yup.string().required("Start date is required"),
   endDate: Yup.string().required("End date is required"),
-  numberOfOpenings: Yup.number()
-    .typeError("Must be a number")
-    .positive("Must be a positive number")
-    .required("Number of openings is required"),
+
   experience: Yup.string().required("Experience is required"),
   qualification: Yup.string().required("Qualification is required"),
   keyResponsibility: Yup.object()
@@ -192,10 +187,6 @@ export const CreateNewJob = Yup.object().shape({
       });
     })
     .required("Key responsibilities are required"),
-  skills: Yup.array()
-    .min(1, "At least one skill is required")
-    .required("Skills are required"),
-  company_detail: Yup.string().required("Company detail is required"),
-  // job_status: Yup.string().required("Job status is required"),
+ 
   description: Yup.string().required("Job description is required"),
 });

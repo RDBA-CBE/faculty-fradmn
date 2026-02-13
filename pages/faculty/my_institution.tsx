@@ -117,7 +117,7 @@ const Institution = () => {
     // Department fields
     departments: [],
     department_name: '',
-    department_code: '',
+    // department_code: '',
     selectedCollege: null,
 
     // HOD fields
@@ -250,7 +250,7 @@ const Institution = () => {
       if (stepId === 6) {
         const deptBody = {
           department_name: state.department_name,
-          department_code: state.department_code
+          // department_code: state.department_code
         }
         await CreateDepartment.validate(deptBody, { abortEarly: false })
       }
@@ -392,7 +392,7 @@ const Institution = () => {
         if (stepId === 6) {
           const deptBody = {
             department_name: state.department_name,
-            department_code: state.department_code
+            // department_code: state.department_code
           }
           await CreateDepartment.validate(deptBody, { abortEarly: false })
         }
@@ -546,7 +546,7 @@ const Institution = () => {
           try {
             const deptBody = {
               department_name: state.department_name,
-              department_code: state.department_code,
+              // department_code: state.department_code,
               college: createdRecords.collegeId,
               institution: createdRecords.institutionId
             }
@@ -627,6 +627,8 @@ const Institution = () => {
       } else {
         // Rollback created records
         await rollbackCreatedRecords(createdRecords)
+        console.log("error", error.message);
+        
         Failure(
           error?.message ||
             'Setup failed. All created records have been removed.'
@@ -801,7 +803,7 @@ const Institution = () => {
             try {
               const deptBody = {
                 department_name: state.department_name,
-                department_code: state.department_code,
+                // department_code: state.department_code,
                 college: createdRecords.collegeId,
                 institution: createdRecords.institutionId
               }
@@ -1024,7 +1026,7 @@ const Institution = () => {
       hod_qualification: '',
 
       department_name: '',
-      department_code: '',
+      // department_code: '',
 
       job_title: '',
       job_description: '',
@@ -1922,16 +1924,16 @@ const Institution = () => {
                     error={state.errors.department_name}
                     required
                   />
-                  <TextInput
-                    title='Department Code'
-                    placeholder='Enter department code'
-                    value={state.department_code}
-                    onChange={e =>
-                      handleFormChange('department_code', e.target.value)
-                    }
-                    error={state.errors.department_code}
-                    required
-                  />
+                  {/* <TextInput
+                   // title='Department Code'
+                    // placeholder='Enter department code'
+                    // value={state.department_code}
+                    // onChange={e =>
+                    //   handleFormChange('department_code', e.target.value)
+                    // }
+                    // error={state.errors.department_code}
+                    // required
+                   /> */}
                 </div>
               )}
             </div>
