@@ -401,7 +401,7 @@ const Job = () => {
   ) => {
     try {
       setState({ institutionLoading: true });
-      const body: any = { search, team: "Yes" };
+      const body: any = { search, team: "No" };
       if (createdBy) {
         body.created_by = createdBy;
       }
