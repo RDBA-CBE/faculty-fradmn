@@ -849,7 +849,7 @@ const Users = () => {
 
       // Add qualification and experience for hod and applicant
       if (state.activeTab === "hod" || state.activeTab === "applicant") {
-        body.qualification = state.qualification;
+        body.qualification = state.education_qualification;
         body.experience = state.experience;
       }
 
@@ -1243,14 +1243,14 @@ const Users = () => {
 
       {state.activeTab === "applicant" && (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <TextInput
+          {/* <TextInput
             title="Qualification"
             placeholder="Enter qualification"
             value={state.qualification}
             onChange={(e) => handleFormChange("qualification", e.target.value)}
             error={state.errors.qualification}
             required
-          />
+          /> */}
           <TextInput
             title="Experience"
             placeholder="Enter experience"
@@ -1409,14 +1409,16 @@ const Users = () => {
               Manage {getTabLabel().toLowerCase()} users and their information
             </p>
           </div>
-          <button
-            onClick={() => setState({ showModal: true })}
-            className="group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
-            <IconPlus className="relative z-10 h-5 w-5" />
-            <span className="relative z-10">Add {getTabLabel()}</span>
-          </button>
+          {/* {state.activeTab !== ROLES.APPLICANT && ( */}
+            <button
+              onClick={() => setState({ showModal: true })}
+              className="group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+              <IconPlus className="relative z-10 h-5 w-5" />
+              <span className="relative z-10">Add {getTabLabel()}</span>
+            </button>
+          {/* )} */}
         </div>
       </div>
 
