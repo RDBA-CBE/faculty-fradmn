@@ -49,7 +49,7 @@ console.log('✌️bodssssy --->', body);
         url = url + `&category=${body.category}`;
       }
       if (body?.location) {
-        url = url + `&location=${body.location}`;
+        url = url + `&location_id=${body.location}`;
       }
 
       if (body?.start_date) {
@@ -59,7 +59,7 @@ console.log('✌️bodssssy --->', body);
         url = url + `&date_posted_before=${body.end_date}`;
       }
       if (body?.status) {
-        url = url + `&status=${body.status}`;
+        url = url + `&application_status_id=${body.status}`;
       }
       if (body?.priority) {
         url = url + `&priority=${body.priority}`;
@@ -68,7 +68,7 @@ console.log('✌️bodssssy --->', body);
         url = url + `&job_type=${body.job_type}`;
       }
       if (body?.salary_range) {
-        url = url + `&salary_range=${body.salary_range}`;
+        url = url + `&salary_range_id=${body.salary_range}`;
       }
     
       instance()

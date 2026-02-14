@@ -38,11 +38,13 @@ import {
   X,
   CheckCircle,
   Clock,
+  CheckCheckIcon,
 } from "lucide-react";
 import moment from "moment";
 import { useRouter } from "next/navigation";
 import { ROLES } from "@/utils/constant.utils";
 import LogCard from "@/components/logCard";
+import { MdApproval } from "react-icons/md";
 
 const Job = () => {
   const dispatch = useDispatch();
@@ -57,9 +59,9 @@ const Job = () => {
     submitting: false,
     sortBy: "",
     sortOrder: "asc",
-    logData:[],
+    logData: [],
     // Log data
-  
+
     isOpen: false,
 
     // Job data
@@ -154,7 +156,7 @@ const Job = () => {
           "",
           false,
           res?.institution?.institution_id,
-          res.id
+          res.id,
         );
       } else if (res?.role == ROLES.HR) {
         departmentDropdownList(1, "", false, res?.college?.college_id, res.id);
@@ -180,7 +182,10 @@ const Job = () => {
         department_name: item?.department?.name || "-",
 
         job_type: item?.job_type,
-        experiences: item?.experiences,
+        experiences: {
+          value: item?.experiences?.id,
+          label: item?.experiences?.name,
+        },
         qualification: item?.qualification,
         salary_range: item?.salary_range,
         number_of_openings: item?.number_of_openings,
@@ -194,7 +199,6 @@ const Job = () => {
 
         college_id: item?.college?.id,
         department_id: item?.department?.id,
-
       }));
 
       setState({
@@ -278,7 +282,7 @@ const Job = () => {
   const institutionDropdownList = async (
     page,
     search = "",
-    loadMore = false
+    loadMore = false,
   ) => {
     try {
       setState({ institutionLoading: true });
@@ -304,7 +308,7 @@ const Job = () => {
     search = "",
     loadMore = false,
     institutionId = null,
-    createdBy = null
+    createdBy = null,
   ) => {
     try {
       setState({ collegeLoading: true });
@@ -340,7 +344,7 @@ const Job = () => {
     search = "",
     loadMore = false,
     collegeId = null,
-    createdBy = null
+    createdBy = null,
   ) => {
     try {
       setState({ departmentLoading: true });
@@ -439,13 +443,13 @@ const Job = () => {
         "",
         false,
         selectedOption.value,
-        state.profile?.id
+        state.profile?.id,
       );
     }
   };
 
   const handleLog = async (row) => {
-console.log('✌️row --->', row);
+    console.log("✌️row --->", row);
     try {
       setState({ isOpen: true, editId: row.id });
 
@@ -464,7 +468,7 @@ console.log('✌️row --->', row);
         job_id: state.editId,
         created_by: parseInt(localStorage.getItem("userId")),
       };
-console.log('✌️body --->', body);
+      console.log("✌️body --->", body);
 
       await Models.job.create_log(body);
       const res: any = await Models.job.log_list(state.editId);
@@ -489,7 +493,7 @@ console.log('✌️body --->', body);
         "",
         false,
         selectedOption.value,
-        state.profile?.id
+        state.profile?.id,
       );
     }
   };
@@ -543,12 +547,12 @@ console.log('✌️body --->', body);
         Success(
           row.is_approved
             ? "Job unapproved successfully!"
-            : "Job approved successfully!"
+            : "Job approved successfully!",
         );
         jobList(state.page);
       } catch (error) {
         Failure(
-          row.is_approved ? "Failed to unapprove job" : "Failed to approve job"
+          row.is_approved ? "Failed to unapprove job" : "Failed to approve job",
         );
       }
     }
@@ -556,8 +560,8 @@ console.log('✌️body --->', body);
 
   const handleToggleStatus = async (row: any) => {
     try {
-      const newStatus = row?.status === "active" ? "inactive" : "active";
-      const formData = buildFormData({ status: newStatus });
+      const newStatus = row?.job_status === "active" ? "inactive" : "active";
+      const formData = buildFormData({ job_status_id: newStatus });
       await Models.job.update(formData, row?.id);
       Success(`Job ${newStatus} successfully!`);
       jobList(state.page);
@@ -570,7 +574,7 @@ console.log('✌️body --->', body);
     showDeleteAlert(
       () => deleteRecord(row?.id),
       () => Swal.fire("Cancelled", "Record is safe", "info"),
-      "Are you sure you want to delete this job?"
+      "Are you sure you want to delete this job?",
     );
   };
 
@@ -588,7 +592,7 @@ console.log('✌️body --->', body);
     showDeleteAlert(
       () => bulkDeleteRecords(),
       () => Swal.fire("Cancelled", "Your Records are safe :)", "info"),
-      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`
+      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`,
     );
   };
 
@@ -656,7 +660,7 @@ console.log('✌️body --->', body);
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Active Jobs
+                Approved Jobs
               </p>
               <p className="text-3xl font-bold text-green-600 dark:text-green-400">
                 {state.jobList?.filter((job) => job.status === "active")
@@ -664,7 +668,24 @@ console.log('✌️body --->', body);
               </p>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 dark:bg-green-900">
-              <Users className="h-6 w-6 text-green-600 dark:text-green-400" />
+              <CheckCheckIcon className="h-6 w-6 text-green-600 dark:text-green-400" />
+            </div>
+          </div>
+        </div>
+
+        <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-sm transition-all duration-200 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                Pending Jobs
+              </p>
+              <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+                {state.jobList?.filter((job) => job.job_type === "full_time")
+                  ?.length || 0}
+              </p>
+            </div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 dark:bg-purple-900">
+              <Building2 className="h-6 w-6 text-purple-600 dark:text-purple-400" />
             </div>
           </div>
         </div>
@@ -682,23 +703,6 @@ console.log('✌️body --->', body);
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100 dark:bg-red-900">
               <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
-            </div>
-          </div>
-        </div>
-
-        <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-sm transition-all duration-200 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Full Time
-              </p>
-              <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
-                {state.jobList?.filter((job) => job.job_type === "full_time")
-                  ?.length || 0}
-              </p>
-            </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 dark:bg-purple-900">
-              <Building2 className="h-6 w-6 text-purple-600 dark:text-purple-400" />
             </div>
           </div>
         </div>
@@ -739,7 +743,7 @@ console.log('✌️body --->', body);
                       institutionDropdownList(
                         state.institutionPage + 1,
                         "",
-                        true
+                        true,
                       )
                     }
                     loading={state.institutionLoading}
@@ -761,7 +765,7 @@ console.log('✌️body --->', body);
                       searchTerm,
                       false,
                       institutionId,
-                      state.profile?.id
+                      state.profile?.id,
                     );
                   }}
                   loadMore={() => {
@@ -775,7 +779,7 @@ console.log('✌️body --->', body);
                         "",
                         true,
                         institutionId,
-                        state.profile?.id
+                        state.profile?.id,
                       );
                   }}
                   loading={state.collegeLoading}
@@ -795,7 +799,7 @@ console.log('✌️body --->', body);
                         searchTerm,
                         false,
                         collegeId,
-                        state.profile?.id
+                        state.profile?.id,
                       );
                   }}
                   loadMore={() => {
@@ -807,7 +811,7 @@ console.log('✌️body --->', body);
                         "",
                         true,
                         collegeId,
-                        state.profile?.id
+                        state.profile?.id,
                       );
                   }}
                   loading={state.departmentLoading}
@@ -867,7 +871,7 @@ console.log('✌️body --->', body);
                         searchTerm,
                         false,
                         collegeId,
-                        state.profile?.id
+                        state.profile?.id,
                       );
                   }}
                   loadMore={() => {
@@ -879,7 +883,7 @@ console.log('✌️body --->', body);
                         "",
                         true,
                         collegeId,
-                        state.profile?.id
+                        state.profile?.id,
                       );
                   }}
                   loading={state.departmentLoading}
@@ -914,7 +918,7 @@ console.log('✌️body --->', body);
               />
             </div>
 
-            <div className="group relative">
+            {/* <div className="group relative">
               <CustomSelect
                 options={state.categoryList}
                 value={state.categoryFilter}
@@ -923,7 +927,7 @@ console.log('✌️body --->', body);
                 isClearable={true}
                 loading={state.categoryLoading}
               />
-            </div>
+            </div> */}
 
             <div className="group relative">
               <CustomSelect
@@ -943,7 +947,7 @@ console.log('✌️body --->', body);
                 isClearable={true}
               />
             </div>
-            <div className="group relative">
+            {/* <div className="group relative">
               <CustomSelect
                 options={state.typeList}
                 value={state.typeFilter}
@@ -951,7 +955,7 @@ console.log('✌️body --->', body);
                 placeholder="Select job type"
                 isClearable={true}
               />
-            </div>
+            </div> */}
 
             <div className="group relative">
               <CustomSelect
@@ -998,7 +1002,7 @@ console.log('✌️body --->', body);
             records={state.jobList}
             fetching={state.loading}
             selectedRecords={state.jobList?.filter((record) =>
-              state.selectedRecords.includes(record.id)
+              state.selectedRecords.includes(record.id),
             )}
             onSelectedRecordsChange={(records) =>
               setState({ selectedRecords: records.map((r: any) => r.id) })
@@ -1045,21 +1049,21 @@ console.log('✌️body --->', body);
                 ),
               },
 
-              {
-                accessor: "job_type",
-                title: "Type",
-                render: ({ job_type }) => (
-                  <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                    {job_type?.replace("_", " ") || "-"}
-                  </span>
-                ),
-              },
+              // {
+              //   accessor: "job_type",
+              //   title: "Type",
+              //   render: ({ job_type }) => (
+              //     <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+              //       {job_type?.replace("_", " ") || "-"}
+              //     </span>
+              //   ),
+              // },
               {
                 accessor: "experiences",
                 title: "Experience",
                 render: ({ experiences }) => (
                   <span className="text-gray-600 dark:text-gray-400">
-                    {experiences || "-"}
+                    {experiences?.label || "-"}
                   </span>
                 ),
               },
@@ -1094,7 +1098,7 @@ console.log('✌️body --->', body);
                       <Clock className="h-3 w-3" />
                     )}
                     {capitalizeFLetter(
-                      (row as any).is_approved ? "Approved" : "Pending"
+                      (row as any).is_approved ? "Approved" : "Pending",
                     ) || "-"}
                   </span>
                 ),
@@ -1145,7 +1149,9 @@ console.log('✌️body --->', body);
                 render: (row: any) => (
                   <div className="flex items-center justify-center gap-2">
                     <button
-                      onClick={() => router.push(`/faculty/job_details?id=${row.id}`)}
+                      onClick={() =>
+                        router.push(`/faculty/job_details?id=${row.id}`)
+                      }
                       className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 hover:bg-indigo-200"
                       title="View"
                     >
@@ -1223,7 +1229,7 @@ console.log('✌️body --->', body);
       </div>
       <Modal
         open={state.isOpen}
-        close={() => setState({ isOpen: false,editId:null })}
+        close={() => setState({ isOpen: false, editId: null })}
         padding="px-2"
         renderComponent={() => (
           <>

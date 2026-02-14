@@ -147,7 +147,7 @@ const Application = () => {
     }
   }, [
     debounceSearch,
-    state.statusFilter,
+    state.selectedStatus,
     state.sortBy,
     state.institutionFilter,
     state.collegeFilter,
@@ -238,6 +238,7 @@ const Application = () => {
         id: item?.id,
         applied_date: item?.created_at,
         job_title: item?.job_detail?.job_title,
+        application_status:{value: item?.application_status?.id, label: item?.application_status?.name}
       }));
       setState({
         loading: false,
@@ -292,8 +293,8 @@ const Application = () => {
     if (state.salaryFilter?.value) {
       body.salary_range = state.salaryFilter.value;
     }
-    if (state.statusFilter?.value) {
-      body.status = state.statusFilter.value;
+    if (state.selectedStatus?.value) {
+      body.status = state.selectedStatus.value;
     }
     if (state.sortBy) {
       body.ordering =
@@ -978,7 +979,7 @@ const Application = () => {
                 showTimeSelect={false}
               />
             </div>
-            <div className="group relative">
+            {/* <div className="group relative">
               <CustomSelect
                 options={state.locationList}
                 value={state.locationFilter}
@@ -987,9 +988,9 @@ const Application = () => {
                 isClearable={true}
                 loading={state.locationLoading}
               />
-            </div>
+            </div> */}
 
-            <div className="group relative">
+            {/* <div className="group relative">
               <CustomSelect
                 options={state.categoryList}
                 value={state.categoryFilter}
@@ -998,18 +999,18 @@ const Application = () => {
                 isClearable={true}
                 loading={state.categoryLoading}
               />
-            </div>
+            </div> */}
 
             <div className="group relative">
-              <CustomSelect
-                options={state.jobStatusList}
-                value={state.statusFilter}
-                onChange={(e) => setState({ statusFilter: e })}
-                placeholder="Filter by status"
-                isClearable={true}
+               <CustomSelect
+                options={state.applicationStatusList}
+                value={state.selectedStatus}
+                onChange={(e) => setState({ selectedStatus: e })}
+                placeholder="Select status"
+                loading={state.applicationStatusLoading}
               />
             </div>
-            <div className="group relative">
+            {/* <div className="group relative">
               <CustomSelect
                 options={state.salaryRangeList}
                 value={state.salaryFilter}
@@ -1017,8 +1018,8 @@ const Application = () => {
                 placeholder="Select salary range"
                 isClearable={true}
               />
-            </div>
-            <div className="group relative">
+            </div> */}
+            {/* <div className="group relative">
               <CustomSelect
                 options={state.typeList}
                 value={state.typeFilter}
@@ -1026,9 +1027,9 @@ const Application = () => {
                 placeholder="Select job type"
                 isClearable={true}
               />
-            </div>
+            </div> */}
 
-            <div className="group relative">
+            {/* <div className="group relative">
               <CustomSelect
                 options={state.priorityList}
                 value={state.priorityFilter}
@@ -1036,7 +1037,7 @@ const Application = () => {
                 placeholder="Filter by priority"
                 isClearable={true}
               />
-            </div>
+            </div> */}
           </>
         </div>
       </div>
@@ -1157,7 +1158,11 @@ const Application = () => {
                       <IconEye className="h-4 w-4" />
                     </button>
                     <button
-                      onClick={() => setState({showStatusModal: true, selectedApplication: row })} 
+                      onClick={() => {console.log(row)
+                        setState({showStatusModal: true, selectedApplication: row,
+                        selectedStatus: row.application_status
+                       } 
+                       )}} 
                       className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 text-purple-600 transition-all duration-200 hover:bg-purple-200 dark:bg-purple-900 dark:text-purple-400"
                       title="Update Status"
                     >

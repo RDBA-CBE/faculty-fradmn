@@ -32,6 +32,8 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
+  ToggleLeft,
+  ToggleRight,
 } from "lucide-react";
 import moment from "moment";
 import { useRouter } from "next/navigation";
@@ -167,7 +169,7 @@ const Job = () => {
           "",
           false,
           res?.institution?.institution_id,
-          res?.id
+          res?.id,
         );
         departmentDropdownList(1, "", false, "", res?.id);
         jobList(1, res?.institution?.institution_id, "", "", res?.id);
@@ -188,7 +190,7 @@ const Job = () => {
     institutionId = null,
     collegeId = null,
     deptId = null,
-    createdBy = null
+    createdBy = null,
   ) => {
     try {
       setState({ loading: true });
@@ -224,7 +226,10 @@ const Job = () => {
         department_name: item?.department?.name || "-",
 
         job_type: item?.job_type,
-        experiences: item?.experiences,
+        experiences: {
+          value: item?.experiences?.id,
+          label: item?.experiences?.name,
+        },
         qualification: item?.qualification,
         salary_range: item?.salary_range,
         number_of_openings: item?.number_of_openings,
@@ -259,7 +264,7 @@ const Job = () => {
     search = "",
     loadMore = false,
     institutionId = null,
-    createdBy = null
+    createdBy = null,
   ) => {
     try {
       setState({ collegeLoading: true });
@@ -341,7 +346,7 @@ const Job = () => {
       state.instiutionFilter,
       state.collegeFilter,
       state.departmentFilter,
-      state?.profile?.id
+      state?.profile?.id,
     );
   };
 
@@ -366,7 +371,7 @@ const Job = () => {
     search = "",
     loadMore = false,
     role = null,
-    collegeId = null
+    collegeId = null,
   ) => {
     try {
       setState({ userLoading: true });
@@ -397,7 +402,7 @@ const Job = () => {
     page = 1,
     search = "",
     loadMore = false,
-    createdBy = null
+    createdBy = null,
   ) => {
     try {
       setState({ institutionLoading: true });
@@ -427,7 +432,7 @@ const Job = () => {
     search = "",
     loadMore = false,
     collegeId = null,
-    createdBy = null
+    createdBy = null,
   ) => {
     try {
       setState({ departmentLoading: true });
@@ -529,7 +534,7 @@ const Job = () => {
         "",
         false,
         selectedOption?.value,
-        state?.profile?.id
+        state?.profile?.id,
       );
     }
   };
@@ -546,7 +551,7 @@ const Job = () => {
         "",
         false,
         selectedOption?.value,
-        state?.profile?.id
+        state?.profile?.id,
       );
     }
   };
@@ -575,16 +580,18 @@ const Job = () => {
   };
 
   const handleToggleStatus = async (row: any) => {
+    console.log("row", row);
+    
     try {
-      const newStatus = row?.status === "active" ? "inactive" : "active";
-      await Models.job.update({ status: newStatus }, row?.id);
+      const newStatus = row?.job_status === "active" ? "inactive" : "active";
+      await Models.job.update({ job_status: newStatus }, row?.id);
       Success(`Job ${newStatus} successfully!`);
       jobList(
         state.page,
         state.instiutionFilter,
         state.collegeFilter,
         state.departmentFilter,
-        state?.profile?.id
+        state?.profile?.id,
       );
     } catch (error) {
       Failure("Failed to update status");
@@ -595,7 +602,7 @@ const Job = () => {
     showDeleteAlert(
       () => deleteRecord(row?.id),
       () => Swal.fire("Cancelled", "Record is safe", "info"),
-      "Are you sure you want to delete this job?"
+      "Are you sure you want to delete this job?",
     );
   };
 
@@ -608,7 +615,7 @@ const Job = () => {
         state.instiutionFilter,
         state.collegeFilter,
         state.departmentFilter,
-        state?.profile?.id
+        state?.profile?.id,
       );
     } catch (error) {
       Failure("Failed to delete job");
@@ -619,7 +626,7 @@ const Job = () => {
     showDeleteAlert(
       () => bulkDeleteRecords(),
       () => Swal.fire("Cancelled", "Your Records are safe :)", "info"),
-      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`
+      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`,
     );
   };
 
@@ -635,7 +642,7 @@ const Job = () => {
         state.instiutionFilter,
         state.collegeFilter,
         state.departmentFilter,
-        state?.profile?.id
+        state?.profile?.id,
       );
     } catch (error) {
       Failure("Failed to delete jobs. Please try again.");
@@ -664,25 +671,25 @@ const Job = () => {
         Success(
           row.is_approved
             ? "Job unapproved successfully!"
-            : "Job approved successfully!"
+            : "Job approved successfully!",
         );
         jobList(state.page);
       } catch (error) {
         Failure(
-          row.is_approved ? "Failed to unapprove job" : "Failed to approve job"
+          row.is_approved ? "Failed to unapprove job" : "Failed to approve job",
         );
       }
     }
   };
 
   const handleLog = async (row) => {
-console.log('✌️row --->', row);
+    console.log("✌️row --->", row);
     try {
       setState({ isOpen: true, editId: row.id });
 
       const res: any = await Models.job.log_list(row.id);
       console.log("✌️res --->", res);
-      setState({ logData: res});
+      setState({ logData: res });
     } catch (error) {
       console.log("✌️error --->", error);
     }
@@ -855,7 +862,7 @@ console.log('✌️row --->', row);
                         searchTerm,
                         false,
                         state.roleFilter?.value,
-                        state.collegeFilter?.value
+                        state.collegeFilter?.value,
                       )
                     }
                     loadMore={() =>
@@ -865,7 +872,7 @@ console.log('✌️row --->', row);
                         "",
                         true,
                         state.roleFilter?.value,
-                        state.collegeFilter?.value
+                        state.collegeFilter?.value,
                       )
                     }
                   />
@@ -888,7 +895,7 @@ console.log('✌️row --->', row);
                         1,
                         searchTerm,
                         false,
-                        state.profile?.id
+                        state.profile?.id,
                       )
                     }
                     loadMore={() =>
@@ -897,7 +904,7 @@ console.log('✌️row --->', row);
                         state.institutionPage + 1,
                         "",
                         true,
-                        state.profile?.id
+                        state.profile?.id,
                       )
                     }
                     loading={state.institutionLoading}
@@ -916,7 +923,7 @@ console.log('✌️row --->', row);
                         searchTerm,
                         false,
                         state.institutionFilter?.value,
-                        state.profile?.id
+                        state.profile?.id,
                       )
                     }
                     loadMore={() =>
@@ -926,7 +933,7 @@ console.log('✌️row --->', row);
                         "",
                         true,
                         state.institutionFilter?.value,
-                        state.profile?.id
+                        state.profile?.id,
                       )
                     }
                     loading={state.collegeLoading}
@@ -948,7 +955,7 @@ console.log('✌️row --->', row);
                       searchTerm,
                       false,
                       state.collegeFilter?.value,
-                      state.profile?.id
+                      state.profile?.id,
                     )
                   }
                   loadMore={() =>
@@ -958,7 +965,7 @@ console.log('✌️row --->', row);
                       "",
                       true,
                       state.collegeFilter?.value,
-                      state.profile?.id
+                      state.profile?.id,
                     )
                   }
                   loading={state.departmentLoading}
@@ -993,7 +1000,7 @@ console.log('✌️row --->', row);
               />
             </div>
 
-            <div className="group relative">
+            {/* <div className="group relative">
               <CustomSelect
                 options={state.categoryList}
                 value={state.categoryFilter}
@@ -1002,7 +1009,7 @@ console.log('✌️row --->', row);
                 isClearable={true}
                 loading={state.categoryLoading}
               />
-            </div>
+            </div> */}
 
             <div className="group relative">
               <CustomSelect
@@ -1022,7 +1029,7 @@ console.log('✌️row --->', row);
                 isClearable={true}
               />
             </div>
-            <div className="group relative">
+            {/* <div className="group relative">
               <CustomSelect
                 options={state.typeList}
                 value={state.typeFilter}
@@ -1030,7 +1037,7 @@ console.log('✌️row --->', row);
                 placeholder="Select job type"
                 isClearable={true}
               />
-            </div>
+            </div> */}
 
             <div className="group relative">
               <CustomSelect
@@ -1077,7 +1084,7 @@ console.log('✌️row --->', row);
             records={state.jobList}
             fetching={state.loading}
             selectedRecords={state.jobList?.filter((record) =>
-              state.selectedRecords.includes(record.id)
+              state.selectedRecords.includes(record.id),
             )}
             onSelectedRecordsChange={(records) =>
               setState({ selectedRecords: records.map((r: any) => r.id) })
@@ -1124,21 +1131,21 @@ console.log('✌️row --->', row);
                 ),
               },
 
-              {
-                accessor: "job_type",
-                title: "Type",
-                render: ({ job_type }) => (
-                  <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                    {job_type?.replace("_", " ") || "-"}
-                  </span>
-                ),
-              },
+              // {
+              //   accessor: "job_type",
+              //   title: "Type",
+              //   render: ({ job_type }) => (
+              //     <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+              //       {job_type?.replace("_", " ") || "-"}
+              //     </span>
+              //   ),
+              // },
               {
                 accessor: "experiences",
                 title: "Experience",
                 render: ({ experiences }) => (
                   <span className="text-gray-600 dark:text-gray-400">
-                    {experiences || "-"}
+                    {experiences?.label || "-"}
                   </span>
                 ),
               },
@@ -1173,7 +1180,7 @@ console.log('✌️row --->', row);
                       <Clock className="h-3 w-3" />
                     )}
                     {capitalizeFLetter(
-                      (row as any)?.is_approved ? "Approved" : "Pending"
+                      (row as any)?.is_approved ? "Approved" : "Pending",
                     ) || "-"}
                   </span>
                 ),
@@ -1224,6 +1231,15 @@ console.log('✌️row --->', row);
                 render: (row: any) => (
                   <div className="flex items-center justify-center gap-2">
                     <button
+                      onClick={() =>
+                        router.push(`/faculty/job_details?id=${row.id}`)
+                      }
+                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 hover:bg-indigo-200"
+                      title="View"
+                    >
+                      <IconEye className="h-4 w-4" />
+                    </button>
+                    <button
                       onClick={() => handleLog(row)}
                       className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 text-purple-600 hover:bg-purple-200"
                       title="Logs"
@@ -1238,7 +1254,7 @@ console.log('✌️row --->', row);
                       <IconEdit className="h-4 w-4" />
                     </button>
 
-                    <button
+                    {/* <button
                       onClick={() => handleToggleStatus(row)}
                       className={`flex h-8 w-8 items-center justify-center rounded-lg ${
                         row?.job_status === "published"
@@ -1252,11 +1268,11 @@ console.log('✌️row --->', row);
                       }
                     >
                       {row?.job_status === "published" ? (
-                        <IconEyeOff className="h-4 w-4" />
+                        <ToggleLeft className="h-4 w-4" />
                       ) : (
-                        <IconEye className="h-4 w-4" />
+                        <ToggleRight className="h-4 w-4" />
                       )}
-                    </button>
+                    </button> */}
 
                     <button
                       onClick={() => handleDelete(row)}
@@ -1284,7 +1300,7 @@ console.log('✌️row --->', row);
                 state.instiutionFilter,
                 state.collegeFilter,
                 state.departmentFilter,
-                state?.profile?.id
+                state?.profile?.id,
               );
             }}
             minHeight={200}

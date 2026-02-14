@@ -44,7 +44,7 @@ const job = {
         url = url + `&category=${body.category}`;
       }
       if (body?.location) {
-        url = url + `&location=${body.location}`;
+        url = url + `&location_id=${body.location}`;
       }
 
       if (body?.start_date) {
@@ -57,13 +57,13 @@ const job = {
         url = url + `&status=${body.status}`;
       }
       if (body?.priority) {
-        url = url + `&priority=${body.priority}`;
+        url = url + `&priority_id=${body.priority}`;
       }
       if (body?.job_type) {
         url = url + `&job_type=${body.job_type}`;
       }
       if (body?.salary_range) {
-        url = url + `&salary_range=${body.salary_range}`;
+        url = url + `&salary_range_id=${body.salary_range}`;
       }
 
       instance()

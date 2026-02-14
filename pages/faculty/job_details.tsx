@@ -25,6 +25,7 @@ import {
   XCircle,
 } from "lucide-react";
 import moment from "moment";
+import IconEye from "@/components/Icon/IconEye";
 
 const JobDetails = () => {
   const dispatch = useDispatch();
@@ -63,10 +64,10 @@ const JobDetails = () => {
   const fetchApplicants = async (page: number) => {
     try {
       setState({ applicantLoading: true });
-      const body={jobId}
+      const body = { jobId };
 
       const res: any = await Models.application.list(page, body);
-console.log('✌️res --->', res);
+      console.log("✌️res --->", res);
 
       setState({
         applicantList: res?.results || [],
@@ -79,12 +80,18 @@ console.log('✌️res --->', res);
     }
   };
 
+  const handleEdit = (row) => {
+    router.push(`/faculty/application_detail?id=${row?.id}`);
+  };
+
   if (state.loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800">
         <div className="flex items-center gap-3">
           <IconLoader className="h-8 w-8 animate-spin text-indigo-600" />
-          <span className="text-lg font-medium text-gray-700 dark:text-gray-300">Loading...</span>
+          <span className="text-lg font-medium text-gray-700 dark:text-gray-300">
+            Loading...
+          </span>
         </div>
       </div>
     );
@@ -123,7 +130,11 @@ console.log('✌️res --->', res);
                 ) : (
                   <XCircle className="h-6 w-6 text-yellow-500" />
                 )}
-                <span className={`text-sm font-semibold ${job?.is_approved ? "text-green-600" : "text-yellow-600"}`}>
+                <span
+                  className={`text-sm font-semibold ${
+                    job?.is_approved ? "text-green-600" : "text-yellow-600"
+                  }`}
+                >
                   {job?.is_approved ? "Approved" : "Pending Approval"}
                 </span>
               </div>
@@ -144,25 +155,32 @@ console.log('✌️res --->', res);
                 {job?.locations?.[0] && (
                   <div className="flex items-center gap-2 rounded-lg bg-white/60 px-3 py-2 backdrop-blur-sm dark:bg-gray-700/60">
                     <MapPin className="h-5 w-5 text-pink-600" />
-                    <span className="font-medium">{job?.locations[0]?.city}, {job?.locations[0]?.state}</span>
+                    <span className="font-medium">
+                      {job?.locations[0]?.city}, {job?.locations[0]?.state}
+                    </span>
                   </div>
                 )}
               </div>
             </div>
             <div className="flex flex-col gap-3">
-              <span className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold shadow-lg ${
-                job?.priority_display === "urgent" ? "bg-gradient-to-r from-red-500 to-pink-500 text-white" :
-                job?.priority_display === "high" ? "bg-gradient-to-r from-orange-500 to-red-500 text-white" :
-                job?.priority_display === "medium" ? "bg-gradient-to-r from-yellow-400 to-orange-400 text-white" :
-                "bg-gradient-to-r from-gray-400 to-gray-500 text-white"
-              }`}>
+              <span
+                className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold shadow-lg ${
+                  job?.priority_display === "urgent"
+                    ? "bg-gradient-to-r from-red-500 to-pink-500 text-white"
+                    : job?.priority_display === "high"
+                    ? "bg-gradient-to-r from-orange-500 to-red-500 text-white"
+                    : job?.priority_display === "medium"
+                    ? "bg-gradient-to-r from-yellow-400 to-orange-400 text-white"
+                    : "bg-gradient-to-r from-gray-400 to-gray-500 text-white"
+                }`}
+              >
                 <AlertCircle className="h-4 w-4" />
                 {capitalizeFLetter(job?.priority_display) || "N/A"} Priority
               </span>
-              <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 px-5 py-2.5 text-sm font-bold text-white shadow-lg">
+              {/* <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 px-5 py-2.5 text-sm font-bold text-white shadow-lg">
                 <Briefcase className="h-4 w-4" />
                 {job?.job_type_obj?.name || job?.job_type}
-              </span>
+              </span> */}
             </div>
           </div>
 
@@ -172,32 +190,50 @@ console.log('✌️res --->', res);
               <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 shadow-lg">
                 <DollarSign className="h-6 w-6 text-white" />
               </div>
-              <p className="text-xs font-medium text-gray-600 dark:text-gray-400">Salary Range</p>
-              <p className="text-lg font-bold text-gray-900 dark:text-white">{job?.salary_range || "Not specified"}</p>
+              <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                Salary Range
+              </p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">
+                {job?.salary_range || "Not specified"}
+              </p>
             </div>
 
             <div className="group rounded-2xl border border-white/40 bg-gradient-to-br from-green-500/10 to-emerald-500/10 p-4 backdrop-blur-sm transition-all hover:scale-105 hover:shadow-lg dark:border-gray-700/40">
               <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 shadow-lg">
                 <Users className="h-6 w-6 text-white" />
               </div>
-              <p className="text-xs font-medium text-gray-600 dark:text-gray-400">Openings</p>
-              <p className="text-lg font-bold text-gray-900 dark:text-white">{job?.number_of_openings || 0}</p>
+              <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                Openings
+              </p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">
+                {job?.number_of_openings || 0}
+              </p>
             </div>
 
             <div className="group rounded-2xl border border-white/40 bg-gradient-to-br from-purple-500/10 to-pink-500/10 p-4 backdrop-blur-sm transition-all hover:scale-105 hover:shadow-lg dark:border-gray-700/40">
               <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 shadow-lg">
                 <Clock className="h-6 w-6 text-white" />
               </div>
-              <p className="text-xs font-medium text-gray-600 dark:text-gray-400">Experience</p>
-              <p className="text-lg font-bold text-gray-900 dark:text-white">{job?.experiences || "Not specified"}</p>
+              <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                Experience
+              </p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">
+                {job?.experiences?.name || "Not specified"}
+              </p>
             </div>
 
             <div className="group rounded-2xl border border-white/40 bg-gradient-to-br from-orange-500/10 to-red-500/10 p-4 backdrop-blur-sm transition-all hover:scale-105 hover:shadow-lg dark:border-gray-700/40">
               <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-red-500 shadow-lg">
                 <Calendar className="h-6 w-6 text-white" />
               </div>
-              <p className="text-xs font-medium text-gray-600 dark:text-gray-400">Deadline</p>
-              <p className="text-lg font-bold text-gray-900 dark:text-white">{job?.last_date ? moment(job.last_date).format("MMM DD") : "N/A"}</p>
+              <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                Deadline
+              </p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">
+                {job?.last_date
+                  ? moment(job.last_date).format("MMM DD")
+                  : "N/A"}
+              </p>
             </div>
           </div>
         </div>
@@ -205,18 +241,36 @@ console.log('✌️res --->', res);
 
       {/* Content Grid */}
       <div className="mb-8 grid gap-6 lg:grid-cols-2">
-        {/* Job Description */}
-        <div className="group rounded-3xl border border-white/20 bg-white/80 p-6 shadow-xl backdrop-blur-xl transition-all hover:shadow-2xl dark:border-gray-700/50 dark:bg-gray-800/80">
-          <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500">
-              <FileText className="h-5 w-5 text-white" />
+        {/* Company Info */}
+        {job?.college && (
+          <div className="group rounded-3xl border border-white/20 bg-white/80 p-6 shadow-xl backdrop-blur-xl transition-all hover:shadow-2xl dark:border-gray-700/50 dark:bg-gray-800/80">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-blue-500">
+                <Building2 className="h-5 w-5 text-white" />
+              </div>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                College
+              </h2>
             </div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Job Description</h2>
+            <div className="flex items-start gap-4">
+              {job?.college?.college_logo && (
+                <img
+                  src={job.college?.college_logo}
+                  alt={job.college.name}
+                  className="h-16 w-16 rounded-xl object-cover shadow-lg"
+                />
+              )}
+              <div>
+                <p className="text-lg font-bold text-gray-900 dark:text-white">
+                  {job.college?.name}
+                </p>
+                <p className="text-gray-600 dark:text-gray-400">
+                  {job.college?.company_detail}
+                </p>
+              </div>
+            </div>
           </div>
-          <p className="whitespace-pre-wrap leading-relaxed text-gray-600 dark:text-gray-400">
-            {job?.job_description || "No description provided"}
-          </p>
-        </div>
+        )}
 
         {/* Qualification */}
         <div className="group rounded-3xl border border-white/20 bg-white/80 p-6 shadow-xl backdrop-blur-xl transition-all hover:shadow-2xl dark:border-gray-700/50 dark:bg-gray-800/80">
@@ -224,7 +278,9 @@ console.log('✌️res --->', res);
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-500">
               <Award className="h-5 w-5 text-white" />
             </div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Qualification</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+              Qualification
+            </h2>
           </div>
           <p className="whitespace-pre-wrap leading-relaxed text-gray-600 dark:text-gray-400">
             {job?.qualification || "Not specified"}
@@ -238,107 +294,148 @@ console.log('✌️res --->', res);
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-pink-500">
                 <AlertCircle className="h-5 w-5 text-white" />
               </div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Key Responsibilities</h2>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                Key Responsibilities
+              </h2>
             </div>
             <ul className="space-y-2">
-              {job.responsibility.blocks.map((block: any, idx: number) => (
-                block.type === "list" && block.data.items.map((item: string, i: number) => (
-                  <li key={`${idx}-${i}`} className="flex items-start gap-3">
-                    <span className="mt-1.5 flex h-2 w-2 flex-shrink-0 rounded-full bg-gradient-to-r from-purple-500 to-pink-500"></span>
-                    <span className="text-gray-600 dark:text-gray-400">{item}</span>
-                  </li>
-                ))
-              ))}
+              {job.responsibility?.blocks.map((block: any, idx: number) => {
+                // 👉 Paragraph
+                if (block.type === "paragraph") {
+                  return (
+                    <p
+                      key={idx}
+                      className="mb-2 text-gray-600 dark:text-gray-400"
+                      dangerouslySetInnerHTML={{ __html: block.data.text }}
+                    />
+                  );
+                }
+
+                // 👉 List
+                if (block.type === "list") {
+                  return block.data.items.map((item: string, i: number) => (
+                    <li key={`${idx}-${i}`} className="flex items-start gap-3">
+                      <span className="mt-1.5 flex h-2 w-2 flex-shrink-0 rounded-full bg-gradient-to-r from-purple-500 to-pink-500"></span>
+                      <span
+                        className="text-gray-600 dark:text-gray-400"
+                        dangerouslySetInnerHTML={{ __html: item }}
+                      />
+                    </li>
+                  ));
+                }
+
+                return null;
+              })}
             </ul>
           </div>
         )}
 
-        {/* Company Info */}
-        {job?.college && (
-          <div className="group rounded-3xl border border-white/20 bg-white/80 p-6 shadow-xl backdrop-blur-xl transition-all hover:shadow-2xl dark:border-gray-700/50 dark:bg-gray-800/80">
-            <div className="mb-4 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-blue-500">
-                <Building2 className="h-5 w-5 text-white" />
-              </div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">College</h2>
+        {/* Additional Info  */}
+        <div className="group rounded-3xl border border-white/20 bg-white/80 p-6 shadow-xl backdrop-blur-xl transition-all hover:shadow-2xl dark:border-gray-700/50 dark:bg-gray-800/80">
+          <div className="mb-6 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-red-500">
+              <Tag className="h-5 w-5 text-white" />
             </div>
-            <div className="flex items-start gap-4">
-              {job?.college?.college_logo && (
-                <img src={job.college?.college_logo} alt={job.college.name} className="h-16 w-16 rounded-xl object-cover shadow-lg" />
-              )}
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+              Additional Information
+            </h2>
+          </div>
+
+          <div className="space-y-6 ">
+            {/* {job?.categories?.length > 0 && (
               <div>
-                <p className="text-lg font-bold text-gray-900 dark:text-white">{job.college?.name}</p>
-                <p className="text-gray-600 dark:text-gray-400">{job.college?.company_detail}</p>
+                <p className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Categories
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {job.categories.map((cat: any) => (
+                    <span
+                      key={cat.id}
+                      className="rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 px-4 py-2 text-sm font-semibold text-white shadow-lg"
+                    >
+                      {cat.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {job?.skills?.length > 0 && (
+              <div>
+                <p className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Skills Required
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {job.skills.map((skill: any) => (
+                    <span
+                      key={skill.id}
+                      className="rounded-full bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-lg"
+                    >
+                      {skill.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {job?.tags?.length > 0 && (
+              <div>
+                <p className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Tags
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {job.tags.map((tag: any) => (
+                    <span
+                      key={tag.id}
+                      className="rounded-full px-4 py-2 text-sm font-semibold shadow-lg"
+                      style={{ backgroundColor: tag.color, color: "#fff" }}
+                    >
+                      {tag.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )} */}
+
+            <div className="grid gap-4 border-t pt-6 md:grid-cols-2">
+              <div className="flex items-center justify-between rounded-xl bg-gradient-to-r from-indigo-50 to-purple-50 p-4 dark:from-indigo-900/20 dark:to-purple-900/20">
+                <span className="font-medium text-gray-700 dark:text-gray-300">
+                  Start Date
+                </span>
+                <span className="font-bold text-gray-900 dark:text-white">
+                  {job?.start_date
+                    ? moment(job.start_date).format("MMM DD, YYYY")
+                    : "N/A"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between rounded-xl bg-gradient-to-r from-pink-50 to-red-50 p-4 dark:from-pink-900/20 dark:to-red-900/20">
+                <span className="font-medium text-gray-700 dark:text-gray-300">
+                  Deadline
+                </span>
+                <span className="font-bold text-gray-900 dark:text-white">
+                  {job?.deadline
+                    ? moment(job.deadline).format("MMM DD, YYYY")
+                    : "N/A"}
+                </span>
               </div>
             </div>
           </div>
-        )}
+        </div>
       </div>
 
-      {/* Additional Info */}
+      {/* Job Description */}
       <div className="mb-8 rounded-3xl border border-white/20 bg-white/80 p-6 shadow-xl backdrop-blur-xl dark:border-gray-700/50 dark:bg-gray-800/80">
-        <div className="mb-6 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-red-500">
-            <Tag className="h-5 w-5 text-white" />
+        <div className="mb-4 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500">
+            <FileText className="h-5 w-5 text-white" />
           </div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Additional Information</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+            Job Description
+          </h2>
         </div>
-        
-        <div className="space-y-6 ">
-          {job?.categories?.length > 0 && (
-            <div>
-              <p className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Categories</p>
-              <div className="flex flex-wrap gap-2">
-                {job.categories.map((cat: any) => (
-                  <span key={cat.id} className="rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 px-4 py-2 text-sm font-semibold text-white shadow-lg">
-                    {cat.name}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-          
-          {job?.skills?.length > 0 && (
-            <div>
-              <p className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Skills Required</p>
-              <div className="flex flex-wrap gap-2">
-                {job.skills.map((skill: any) => (
-                  <span key={skill.id} className="rounded-full bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-lg">
-                    {skill.name}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-          
-          {job?.tags?.length > 0 && (
-            <div>
-              <p className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Tags</p>
-              <div className="flex flex-wrap gap-2">
-                {job.tags.map((tag: any) => (
-                  <span key={tag.id} className="rounded-full px-4 py-2 text-sm font-semibold shadow-lg" style={{ backgroundColor: tag.color, color: '#fff' }}>
-                    {tag.name}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="grid gap-4 border-t pt-6 md:grid-cols-2">
-            <div className="flex items-center justify-between rounded-xl bg-gradient-to-r from-indigo-50 to-purple-50 p-4 dark:from-indigo-900/20 dark:to-purple-900/20">
-              <span className="font-medium text-gray-700 dark:text-gray-300">Start Date</span>
-              <span className="font-bold text-gray-900 dark:text-white">
-                {job?.start_date ? moment(job.start_date).format("MMM DD, YYYY") : "N/A"}
-              </span>
-            </div>
-            <div className="flex items-center justify-between rounded-xl bg-gradient-to-r from-pink-50 to-red-50 p-4 dark:from-pink-900/20 dark:to-red-900/20">
-              <span className="font-medium text-gray-700 dark:text-gray-300">Deadline</span>
-              <span className="font-bold text-gray-900 dark:text-white">
-                {job?.deadline ? moment(job.deadline).format("MMM DD, YYYY") : "N/A"}
-              </span>
-            </div>
-          </div>
-        </div>
+        <p className="whitespace-pre-wrap leading-relaxed text-gray-600 dark:text-gray-400">
+          {job?.job_description || "No description provided"}
+        </p>
       </div>
 
       {/* Applicants Section */}
@@ -349,7 +446,8 @@ console.log('✌️res --->', res);
               <Users className="h-5 w-5 text-white" />
             </div>
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Applicants <span className="text-purple-600">({state.applicantCount})</span>
+              Applicants{" "}
+              <span className="text-purple-600">({state.applicantCount})</span>
             </h2>
           </div>
         </div>
@@ -379,14 +477,18 @@ console.log('✌️res --->', res);
                 accessor: "email",
                 title: "Email",
                 render: (row: any) => (
-                  <span className="text-gray-600 dark:text-gray-400">{row?.email}</span>
+                  <span className="text-gray-600 dark:text-gray-400">
+                    {row?.email}
+                  </span>
                 ),
               },
               {
                 accessor: "phone",
                 title: "Phone",
                 render: (row: any) => (
-                  <span className="text-gray-600 dark:text-gray-400">{row?.phone || "-"}</span>
+                  <span className="text-gray-600 dark:text-gray-400">
+                    {row?.phone || "-"}
+                  </span>
                 ),
               },
               {
@@ -402,13 +504,35 @@ console.log('✌️res --->', res);
                 accessor: "status",
                 title: "Status",
                 render: (row: any) => (
-                  <span className={`inline-flex rounded-full px-3 py-1 text-xs font-bold shadow-md ${
-                    row?.status === "accepted" ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white" :
-                    row?.status === "rejected" ? "bg-gradient-to-r from-red-500 to-pink-500 text-white" :
-                    "bg-gradient-to-r from-yellow-400 to-orange-400 text-white"
-                  }`}>
+                  <span
+                    className={`inline-flex rounded-full px-3 py-1 text-xs font-bold shadow-md ${
+                      row?.status === "accepted"
+                        ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white"
+                        : row?.status === "rejected"
+                        ? "bg-gradient-to-r from-red-500 to-pink-500 text-white"
+                        : "bg-gradient-to-r from-yellow-400 to-orange-400 text-white"
+                    }`}
+                  >
                     {row?.status || "Pending"}
                   </span>
+                ),
+              },
+
+              {
+                accessor: "actions",
+                title: "Actions",
+                textAlignment: "center",
+                render: (row: any) => (
+                  <div className="flex items-center justify-center gap-2">
+                    <button
+                      onClick={() => handleEdit(row)}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 transition-all duration-200 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-400"
+                      title="View"
+                    >
+                      <IconEye className="h-4 w-4" />
+                    </button>
+                   
+                  </div>
                 ),
               },
             ]}

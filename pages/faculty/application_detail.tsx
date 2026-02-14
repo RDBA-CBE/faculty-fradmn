@@ -7,7 +7,8 @@ import Models from "@/imports/models.import";
 import IconLoader from "@/components/Icon/IconLoader";
 import IconDownload from "@/components/Icon/IconDownload";
 import IconArrowBackward from "@/components/Icon/IconArrowBackward";
-import { Mail, Phone, Briefcase, Calendar, MapPin, Building, GraduationCap } from "lucide-react";
+import { Mail, Phone, Briefcase, Calendar, MapPin, Building, GraduationCap, UserLock, UserCog } from "lucide-react";
+import { FRONTEND_URL } from "@/utils/constant.utils";
 
 const ApplicationDetail = () => {
   const dispatch = useDispatch();
@@ -38,8 +39,8 @@ const ApplicationDetail = () => {
   };
 
   const handleDownloadResume = () => {
-    if (state.application?.resume_url) {
-      window.open(state.application.resume_url, "_blank");
+    if (state.application?.resume) {
+      window.open(state.application.resume, "_blank");
     }
   };
 
@@ -79,7 +80,7 @@ const ApplicationDetail = () => {
             <IconArrowBackward className="h-4 w-4" />
             Back
           </button>
-          {app?.resume_url && (
+          {app?.resume && (
             <button
               onClick={handleDownloadResume}
               className="flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-2 text-white shadow-lg transition-all hover:bg-blue-700 hover:shadow-xl"
@@ -144,6 +145,14 @@ const ApplicationDetail = () => {
                     </p>
                   </div>
                 </div>
+
+                <div className="flex items-start gap-3">
+                  <UserCog className="mt-1 h-5 w-5 text-purple-600" />
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Profile</p>
+                    <a href={`${FRONTEND_URL}faculty/profile/${app?.id}`} target="_blank" rel="noopener noreferrer"><p className="text-sm font-medium text-gray-900 dark:text-white">View Profile</p></a>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -166,7 +175,9 @@ const ApplicationDetail = () => {
                     <MapPin className="h-5 w-5 text-red-600" />
                     <div>
                       <p className="text-xs text-gray-500 dark:text-gray-400">Location</p>
-                      <p className="font-medium text-gray-900 dark:text-white">{job?.location}</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{job?.locations?.map((item) => (
+                        <span key={item?.id}>{item?.city}</span>
+                      ))}</p>
                     </div>
                   </div>
                 </div>
@@ -175,7 +186,7 @@ const ApplicationDetail = () => {
                     <Briefcase className="h-5 w-5 text-purple-600" />
                     <div>
                       <p className="text-xs text-gray-500 dark:text-gray-400">Experience Required</p>
-                      <p className="font-medium text-gray-900 dark:text-white">{job?.experience_required}</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{job?.experiences}</p>
                     </div>
                   </div>
                 </div>

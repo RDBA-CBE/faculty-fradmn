@@ -94,6 +94,7 @@ export default function Newjob() {
     categoryList(1);
     skillList(1);
     tagList(1);
+    fetchExperience(1);
   }, []);
 
   useEffect(() => {
@@ -178,7 +179,10 @@ export default function Newjob() {
           endDate: moment(res?.last_date).format("YYYY-MM-DD") || "",
           numberOfOpenings: res?.number_of_openings || "",
           qualification: res?.qualification || "",
-          experience: { value: res?.experiences, label: res?.experiences },
+          experience: {
+          value: res?.experiences?.id,
+          label: res?.experiences?.name,
+        },
           responsibilityData: res?.responsibility || null,
           images: res?.company_logo ? [res?.company_logo] : [],
           tags:
@@ -377,6 +381,24 @@ export default function Newjob() {
     }
   };
 
+  const fetchExperience = async (page = 1) => {
+    try {
+      const res: any = await Models.master.experience_list(null,page);
+      const options = res?.results?.map((item: any) => ({
+        value: item.id,
+        label: item.name,
+      }));
+      setState({
+        experienceList:
+          page === 1 ? options : [...state.experienceList, ...options],
+        experiencePage: page,
+        experienceHasMore: !!res?.next,
+      });
+    } catch (error) {
+      console.error("Error fetching experiences:", error);
+    }
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       const section1 = section1Ref.current?.getBoundingClientRect();
@@ -503,12 +525,11 @@ export default function Newjob() {
 
     const valid: any = {
       title: state.title,
-      company: state.company,
+
       location: state.location?.value,
-      address: state.address,
-      jobType: state.jobType,
+
       salary: state.salary,
-      category: state.category,
+
       priority: state.priority,
       deadline: state.deadline,
       startDate: state.startDate,
@@ -518,8 +539,8 @@ export default function Newjob() {
       qualification: state.qualification,
       responsibility: keyResponsibilityData,
       // professionalSkills: professionalSkillsData,
-      skills: state.skills,
-      tags: state.tags,
+      // skills: state.skills,
+
       jobDescription: state.description,
     };
 
@@ -547,56 +568,49 @@ export default function Newjob() {
       await CreateNewJob.validate(
         {
           title: state.title,
-          company: state.company,
+
           location: state.location,
-          address: state.address,
+
           institution: state.institution,
           college: state.college,
           department: state.department,
-          jobType: state.jobType?.value,
+
           salary: state.salary?.value,
-          category: state.category,
+
           priority: state.priority?.value,
           deadline: state.deadline,
           startDate: state.startDate,
           endDate: state.endDate,
-          numberOfOpenings: state.numberOfOpenings,
+
           experience: state.experience?.value,
           qualification: state.qualification,
           keyResponsibility: keyResponsibilityData,
-          skills: state.skills,
-          company_detail: state.company_detail,
-          // job_status: state.job_status?.value,
+
           description: state.description,
         },
-        { abortEarly: false }
+        { abortEarly: false },
       );
 
       const body: any = {
         job_title: state.title,
         job_description: state.description,
-        company: state.company,
+
         job_type_id: state.jobType?.value,
         experiences: state.experience?.value,
         qualification: state.qualification,
         salary_range_id: state.salary?.value,
         location_ids: state.location?.map((item) => item?.value),
-        company_detail: state.company_detail,
+
         number_of_openings: Number(state.numberOfOpenings),
         last_date: moment(state.endDate).format("YYYY-MM-DD"),
         // job_status_id: state.job_status?.value,
         deadline: moment(state.deadline).format("YYYY-MM-DD"),
         start_date: moment(state.startDate).format("YYYY-MM-DD"),
         responsibility: keyResponsibilityData,
-        skill_ids: state.skills?.map((item) => item?.value),
-        tag_ids: state.tags?.map((item) => item?.value),
+
         is_approved: state.profile?.role == ROLES.HR ? true : false,
         priority_id: state.priority?.value,
-        category_ids: state.category?.map((item) => item?.value),
       };
-      if (state.newImages?.length > 0 && state.images?.length === 0) {
-        body.company_logo = state.newImages[0];
-      }
 
       if (state.profile?.role == ROLES.SUPER_ADMIN) {
         body.institution = state.institution?.value;
@@ -810,7 +824,8 @@ export default function Newjob() {
                 </p>
               </div>
             </div>
-            <div
+            
+            {/* <div
               className={`mx-2 h-1 flex-1 ${
                 state.activeStep >= 5 ? "bg-purple-600" : "bg-gray-200"
               }`}
@@ -838,7 +853,7 @@ export default function Newjob() {
                   Skills
                 </p>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
@@ -869,26 +884,15 @@ export default function Newjob() {
               </h2>
             </div>
             <div className="space-y-5 p-6">
-              <TextInput
-                name="title"
-                type="text"
-                title="Job Title"
-                placeholder="e.g., Senior Software Engineer"
-                value={state.title}
-                onChange={(e) => handleFieldChange("title", e.target.value)}
-                error={state.error?.title}
-                required
-              />
-
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                 <TextInput
-                  name="company"
+                  name="title"
                   type="text"
-                  title="Company"
-                  placeholder="Company name"
-                  value={state.company}
-                  onChange={(e) => handleFieldChange("company", e.target.value)}
-                  error={state.error?.company}
+                  title="Job Title"
+                  placeholder="e.g., Senior Software Engineer"
+                  value={state.title}
+                  onChange={(e) => handleFieldChange("title", e.target.value)}
+                  error={state.error?.title}
                   required
                 />
 
@@ -906,35 +910,7 @@ export default function Newjob() {
                 />
               </div>
 
-              <TextArea
-                name="address"
-                title="Company Details"
-                placeholder="Company Details"
-                value={state.company_detail}
-                onChange={(e) =>
-                  handleFieldChange("company_detail", e.target.value)
-                }
-                error={state.error?.company_detail}
-                rows={3}
-                required
-              />
-
-              <div className="mt-5">
-                <UpdatePropertyImagePreview
-                  existingImages={state.images}
-                  onImagesChange={(newImages) => setState({ newImages })}
-                  onDeleteImage={(imageUrl) => {
-                    setState({
-                      images: state.images.filter((img) => img !== imageUrl),
-                    });
-                  }}
-                  maxFiles={1}
-                  title="Company Logo"
-                  description="Upload company logo (JPEG or PNG)"
-                  validateDimensions={false}
-                  isSingleImage={true}
-                />
-              </div>
+              
             </div>
           </div>
 
@@ -994,7 +970,7 @@ export default function Newjob() {
                         state.collegeHasMore &&
                         fetchColleges(
                           state.institution?.value,
-                          state.collegePage + 1
+                          state.collegePage + 1,
                         )
                       }
                       required
@@ -1013,7 +989,7 @@ export default function Newjob() {
                         state.departmentHasMore &&
                         fetchDepartments(
                           state.college?.value,
-                          state.departmentPage + 1
+                          state.departmentPage + 1,
                         )
                       }
                       required
@@ -1044,7 +1020,7 @@ export default function Newjob() {
                         state.collegeHasMore &&
                         fetchColleges(
                           state.institution?.value,
-                          state.collegePage + 1
+                          state.collegePage + 1,
                         )
                       }
                       required
@@ -1063,7 +1039,7 @@ export default function Newjob() {
                         state.departmentHasMore &&
                         fetchDepartments(
                           state.college?.value,
-                          state.departmentPage + 1
+                          state.departmentPage + 1,
                         )
                       }
                       required
@@ -1100,7 +1076,7 @@ export default function Newjob() {
                         state.departmentHasMore &&
                         fetchDepartments(
                           state.college?.value,
-                          state.departmentPage + 1
+                          state.departmentPage + 1,
                         )
                       }
                       required
@@ -1142,15 +1118,7 @@ export default function Newjob() {
                   error={state.error?.priority}
                   required
                 />
-                <CustomSelect
-                  options={state.typeList}
-                  value={state.jobType}
-                  onChange={(option) => handleFieldChange("jobType", option)}
-                  placeholder="Select job type"
-                  error={state.error?.jobType}
-                  required
-                  title="Job Type"
-                />
+                
                 <CustomSelect
                   options={state.salaryRangeList}
                   title="Salary Range"
@@ -1233,18 +1201,7 @@ export default function Newjob() {
                   required
                 />
 
-                <CustomSelect
-                  options={state.categoryList}
-                  value={state.category}
-                  onChange={(option) => handleFieldChange("category", option)}
-                  placeholder="Select category"
-                  title="Select category"
-                  required
-                  isClearable={true}
-                  error={state.error?.category}
-                  loading={state.categoryLoading}
-                  isMulti={true}
-                />
+                
 
                 {/* <TextInput
                   name="experience"
@@ -1261,7 +1218,7 @@ export default function Newjob() {
 
                 <CustomSelect
                   title="Experience"
-                  options={EXPERIENCE}
+                  options={state.experienceList}
                   value={state.experience}
                   onChange={(option) => handleFieldChange("experience", option)}
                   placeholder="Select Experience"
@@ -1361,7 +1318,7 @@ export default function Newjob() {
             </div>
           </div>
 
-          {/* Card 4: Professional Skills */}
+          {/* Card 4: Professional Skills
           <div
             ref={section4Ref}
             className="scroll-mt-32 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
@@ -1399,10 +1356,10 @@ export default function Newjob() {
                 }
               />
             </div>
-          </div>
+          </div> */}
 
           {/* Card 5: Skills */}
-          <div className="scroll-mt-32 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+          {/* <div className="scroll-mt-32 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md">
             <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 px-6 py-4">
               <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
                 <svg
@@ -1434,12 +1391,12 @@ export default function Newjob() {
                 loadMore={() => state.tagHasMore && tagList(state.tagPage + 1)}
               />
             </div>
-          </div>
+          </div> */}
 
           {/* Action Buttons */}
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
             <button
-            onClick={() => router.back()}
+              onClick={() => router.back()}
               type="button"
               className="w-full rounded-lg border-2 border-gray-300 px-6 py-3 font-semibold text-gray-700 transition-all hover:bg-gray-50 sm:w-auto"
             >

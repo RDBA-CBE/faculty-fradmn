@@ -1408,7 +1408,7 @@ const Users = () => {
       return "Institution Admin";
     if (state.activeTab === "hr") return "HR";
     if (state.activeTab === "hod") return "HOD";
-    return "Applicant";
+    return "Faculty";
   };
 
   return (

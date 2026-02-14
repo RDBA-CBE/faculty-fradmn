@@ -151,7 +151,7 @@ const Application = () => {
     }
   }, [
     debounceSearch,
-    state.statusFilter,
+    state.selectedStatus,
     state.sortBy,
     state.institutionFilter,
     state.collegeFilter,
@@ -280,8 +280,8 @@ const Application = () => {
     if (state.salaryFilter?.value) {
       body.salary_range = state.salaryFilter.value;
     }
-    if (state.statusFilter?.value) {
-      body.status = state.statusFilter.value;
+    if (state.selectedStatus?.value) {
+      body.status = state.selectedStatus.value;
     }
     if (state.sortBy) {
       body.ordering =
@@ -963,7 +963,7 @@ console.log('✌️res --->', res);
                 showTimeSelect={false}
               />
             </div>
-            <div className="group relative">
+            {/* <div className="group relative">
               <CustomSelect
                 options={state.locationList}
                 value={state.locationFilter}
@@ -972,9 +972,9 @@ console.log('✌️res --->', res);
                 isClearable={true}
                 loading={state.locationLoading}
               />
-            </div>
+            </div> */}
 
-            <div className="group relative">
+            {/* <div className="group relative">
               <CustomSelect
                 options={state.categoryList}
                 value={state.categoryFilter}
@@ -983,18 +983,18 @@ console.log('✌️res --->', res);
                 isClearable={true}
                 loading={state.categoryLoading}
               />
-            </div>
+            </div> */}
 
             <div className="group relative">
-              <CustomSelect
-                options={state.jobStatusList}
-                value={state.statusFilter}
-                onChange={(e) => setState({ statusFilter: e })}
-                placeholder="Filter by status"
-                isClearable={true}
+            <CustomSelect
+                options={state.applicationStatusList}
+                value={state.selectedStatus}
+                onChange={(e) => setState({ selectedStatus: e })}
+                placeholder="Select status"
+                loading={state.applicationStatusLoading}
               />
             </div>
-            <div className="group relative">
+            {/* <div className="group relative">
               <CustomSelect
                 options={state.salaryRangeList}
                 value={state.salaryFilter}
@@ -1002,8 +1002,8 @@ console.log('✌️res --->', res);
                 placeholder="Select salary range"
                 isClearable={true}
               />
-            </div>
-            <div className="group relative">
+            </div> */}
+            {/* <div className="group relative">
               <CustomSelect
                 options={state.typeList}
                 value={state.typeFilter}
@@ -1011,9 +1011,9 @@ console.log('✌️res --->', res);
                 placeholder="Select job type"
                 isClearable={true}
               />
-            </div>
+            </div> */}
 
-            <div className="group relative">
+            {/* <div className="group relative">
               <CustomSelect
                 options={state.priorityList}
                 value={state.priorityFilter}
@@ -1021,7 +1021,7 @@ console.log('✌️res --->', res);
                 placeholder="Filter by priority"
                 isClearable={true}
               />
-            </div>
+            </div> */}
           </>
         </div>
       </div>

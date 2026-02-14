@@ -292,7 +292,7 @@ export default function Newjob() {
 
   const fetchExperience = async (page = 1) => {
     try {
-      const res: any = await Models.master.experience_list(page);
+      const res: any = await Models.master.experience_list(null , page);
       const options = res?.results?.map((item: any) => ({
         value: item.id,
         label: item.name,
@@ -736,13 +736,13 @@ export default function Newjob() {
                 </p>
               </div>
             </div>
-            <div
+            {/* <div
               className={`mx-2 h-1 flex-1 ${
                 state.activeStep >= 5 ? "bg-purple-600" : "bg-gray-200"
               }`}
-            ></div>
+            ></div> */}
 
-            <div
+            {/* <div
               className="flex flex-1 cursor-pointer items-center"
               onClick={() => scrollToSection(section5Ref)}
             >
@@ -764,7 +764,7 @@ export default function Newjob() {
                   Skills
                 </p>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
@@ -1132,7 +1132,7 @@ export default function Newjob() {
 
                 <CustomSelect
                   title="Experience"
-                  options={EXPERIENCE}
+                  options={state?.experienceList}
                   value={state.experience}
                   onChange={(option) => handleFieldChange("experience", option)}
                   placeholder="Select Experience"

@@ -312,12 +312,47 @@ const master = {
     return promise;
   },
 
-  experience_list: (page: any = 1) => {
+  experience_list: (body, page) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `experiences/?page=${page}`;
+      let url = `master-experiences/`;
+      if (body?.search) url += `?search=${encodeURIComponent(body.search)}`;
+      if (body?.ordering)
+        url += `${body.search ? "&" : "?"}ordering=${encodeURIComponent(
+          body.ordering,
+        )}`;
 
       instance()
         .get(url)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+
+   create_experience: (data: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .post("master-experiences/", data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+
+  update_experience: (data: any, id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .put(`master-experiences/${id}/`, data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+
+  delete_experience: (id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .delete(`master-experiences/${id}/`)
         .then((res) => resolve(res.data))
         .catch((error) => reject(error.response || error));
     });
