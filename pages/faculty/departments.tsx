@@ -131,6 +131,8 @@ const CollegeAndDepartment = () => {
   const profile = async () => {
     try {
       const res: any = await Models.auth.profile();
+      console.log("profile res", res);
+      
       profileRef.current = res;
       setState({ profile: res });
       deptList(1);
@@ -212,6 +214,10 @@ const CollegeAndDepartment = () => {
       setState({ loading: true });
       const body = collegeBodyData();
       body.college = profileRef.current?.college?.college_id;
+      body.institution = profileRef.current?.institution?.institution_id;
+
+      console.log("body", body);
+      
       const res: any = await Models.department.list(page, body);
       console.log("deptList --->", res);
 
@@ -568,7 +574,7 @@ const CollegeAndDepartment = () => {
 
       const body: any = {
         department_name: state.department_name,
-        department_code: state.department_code,
+        // department_code: state.department_code,
         college: state.college?.value,
         institution: state?.profile_institution?.institution?.id,
       };
@@ -578,7 +584,7 @@ const CollegeAndDepartment = () => {
       const validationBody = {
         college: state.college?.value,
         department_name: state.department_name,
-        department_code: state.department_code,
+        // department_code: state.department_code,
       };
 
       const errors: any = {};
@@ -590,9 +596,9 @@ const CollegeAndDepartment = () => {
       if (!validationBody.department_name) {
         errors.department_name = "Department name is required";
       }
-      if (!validationBody.department_code) {
-        errors.department_code = "Department code is required";
-      }
+      // if (!validationBody.department_code) {
+      //   errors.department_code = "Department code is required";
+      // }
       console.log("✌️errors --->", errors);
 
       // If any validation errors, show all at once
@@ -632,16 +638,16 @@ const CollegeAndDepartment = () => {
   };
 
   const departmentColumns = [
-    {
-      accessor: "department_code",
-      title: "Department Code",
-      sortable: true,
-      render: ({ department_code }) => (
-        <span className="inline-flex items-center justify-center rounded-full bg-purple-100 px-4 py-2 text-sm font-medium text-purple-800 dark:bg-purple-900 dark:text-purple-200">
-          {department_code}
-        </span>
-      ),
-    },
+    // {
+    //   accessor: "department_code",
+    //   title: "Department Code",
+    //   sortable: true,
+    //   render: ({ department_code }) => (
+    //     <span className="inline-flex items-center justify-center rounded-full bg-purple-100 px-4 py-2 text-sm font-medium text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+    //       {department_code}
+    //     </span>
+    //   ),
+    // },
     {
       accessor: "department_name",
       title: "Department Name",
@@ -964,7 +970,7 @@ const CollegeAndDepartment = () => {
                     error={state.errors.department_name}
                     required
                   />
-                  <TextInput
+                  {/* <TextInput
                     title="Department Code"
                     placeholder="Enter department code"
                     value={state.department_code}
@@ -973,7 +979,7 @@ const CollegeAndDepartment = () => {
                     }
                     error={state.errors.department_code}
                     required
-                  />
+                  /> */}
                 </div>
               </div>
             </div>

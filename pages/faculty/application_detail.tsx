@@ -186,7 +186,7 @@ const ApplicationDetail = () => {
                     <Briefcase className="h-5 w-5 text-purple-600" />
                     <div>
                       <p className="text-xs text-gray-500 dark:text-gray-400">Experience Required</p>
-                      <p className="font-medium text-gray-900 dark:text-white">{job?.experiences}</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{job?.experiences?.name}</p>
                     </div>
                   </div>
                 </div>
