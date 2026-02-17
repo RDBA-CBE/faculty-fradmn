@@ -150,7 +150,7 @@ const ApplicationDetail = () => {
                   <UserCog className="mt-1 h-5 w-5 text-purple-600" />
                   <div>
                     <p className="text-xs text-gray-500 dark:text-gray-400">Profile</p>
-                    <a href={`${FRONTEND_URL}faculty/profile/${app?.id}`} target="_blank" rel="noopener noreferrer"><p className="text-sm font-medium text-gray-900 dark:text-white">View Profile</p></a>
+                    <a href={`${FRONTEND_URL}profile/${app?.id}`} target="_blank" rel="noopener noreferrer"><p className="text-sm font-medium text-gray-900 dark:text-white">View Profile</p></a>
                   </div>
                 </div>
               </div>
