@@ -192,6 +192,10 @@ export const menuConfig = {
       label: "Master",
       key: "master",
       children: [
+        {
+          label: "Experience",
+          href: "/faculty/master/experience",
+        },
       
         {
           label: "Category",
@@ -268,6 +272,10 @@ export const menuConfig = {
       label: "Master",
       key: "master",
       children: [
+        {
+          label: "Experience",
+          href: "/faculty/master/experience",
+        },
       
         {
           label: "Category",
