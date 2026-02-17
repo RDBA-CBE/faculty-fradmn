@@ -175,7 +175,7 @@ const Job = () => {
         jobList(1, res?.institution?.institution_id, "", "", res?.id);
       } else if (res?.role == ROLES.HR) {
         departmentDropdownList(1, "", false, res?.college?.college_id, res?.id);
-        jobList(1, "", res?.college?.college_id, "", res?.id);
+        jobList(1, "", res?.college?.map((item) => item.college_id ) , "", res?.id);
         userDropdownList(1, "", false, "hod", res?.college?.college_id);
       } else if (res?.role == ROLES.HOD) {
         jobList(1, "", "", res?.department?.id, res?.id);

@@ -178,7 +178,7 @@ const Application = () => {
         applicationList(1, res?.institution?.institution_id, null, null, res?.id);
       } else if (res?.role == ROLES.HR) {
         departmentDropdownList(1, "", false, res?.college?.college_id, res.id);
-        applicationList(1, null, res?.college?.college_id, null, res?.id);
+        applicationList(1, null, res?.college?.map((item)=>item?.college_id), null, res?.id);
       } else if (res?.role == ROLES.HOD) {
         applicationList(1, null, null, res?.department?.department_id, res?.id);
       }

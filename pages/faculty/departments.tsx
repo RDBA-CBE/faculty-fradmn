@@ -213,7 +213,7 @@ const CollegeAndDepartment = () => {
     try {
       setState({ loading: true });
       const body = collegeBodyData();
-      body.college = profileRef.current?.college?.college_id;
+      body.college = profileRef.current?.college?.map((item) => item.college_id );
       body.institution = profileRef.current?.institution?.institution_id;
 
       console.log("body", body);
