@@ -96,12 +96,12 @@ export const menuConfig = {
       label: "Applications",
       href: "/faculty/application",
     },
-    {
-      type: "link",
-      icon: "IconMenuCharts",
-      label: "Reports",
-      href: "/",
-    },
+    // {
+    //   type: "link",
+    //   icon: "IconMenuCharts",
+    //   label: "Reports",
+    //   href: "/",
+    // },
     {
       type: "submenu",
       icon: "IconMenuCharts",
@@ -180,12 +180,12 @@ export const menuConfig = {
       label: "Applications",
       href: "/faculty/application",
     },
-    {
-      type: "link",
-      icon: "IconMenuCharts",
-      label: "Reports",
-      href: "/",
-    },
+    // {
+    //   type: "link",
+    //   icon: "IconMenuCharts",
+    //   label: "Reports",
+    //   href: "/",
+    // },
     {
       type: "submenu",
       icon: "IconMenuCharts",
@@ -260,12 +260,12 @@ export const menuConfig = {
       label: "Applications",
       href: "/faculty/application",
     },
-    {
-      type: "link",
-      icon: "IconMenuCharts",
-      label: "Reports",
-      href: "/",
-    },
+    // {
+    //   type: "link",
+    //   icon: "IconMenuCharts",
+    //   label: "Reports",
+    //   href: "/",
+    // },
     {
       type: "submenu",
       icon: "IconMenuCharts",
@@ -386,12 +386,12 @@ export const OwnmenuConfig = {
       label: "Applications",
       href: "/faculty/my_application",
     },
-    {
-      type: "link",
-      icon: "IconMenuCharts",
-      label: "Reports",
-      href: "/",
-    },
+    // {
+    //   type: "link",
+    //   icon: "IconMenuCharts",
+    //   label: "Reports",
+    //   href: "/",
+    // },
   ],
 
   institution_admin: [
@@ -428,12 +428,12 @@ export const OwnmenuConfig = {
       label: "Applications",
       href: "/faculty/my_application",
     },
-    {
-      type: "link",
-      icon: "IconMenuCharts",
-      label: "Reports",
-      href: "/",
-    },
+    // {
+    //   type: "link",
+    //   icon: "IconMenuCharts",
+    //   label: "Reports",
+    //   href: "/",
+    // },
   ],
 
   hr: [
@@ -470,12 +470,12 @@ export const OwnmenuConfig = {
       label: "Applications",
       href: "/faculty/my_application",
     },
-    {
-      type: "link",
-      icon: "IconMenuCharts",
-      label: "Reports",
-      href: "/",
-    },
+    // {
+    //   type: "link",
+    //   icon: "IconMenuCharts",
+    //   label: "Reports",
+    //   href: "/",
+    // },
   ],
 
   hod: [
@@ -511,12 +511,12 @@ export const OwnmenuConfig = {
       label: "Applications",
       href: "/faculty/my_application",
     },
-    {
-      type: "link",
-      icon: "IconMenuCharts",
-      label: "Reports",
-      href: "/",
-    },
+    // {
+    //   type: "link",
+    //   icon: "IconMenuCharts",
+    //   label: "Reports",
+    //   href: "/",
+    // },
     {
       type: "submenu",
       icon: "IconMenuCharts",
