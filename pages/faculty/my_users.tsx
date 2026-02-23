@@ -122,8 +122,6 @@ const Users = () => {
     hrInstitutionList(1);
     hodInstitutionList(1);
     profile();
-
-    departmentList(1);
   }, [dispatch]);
 
   useEffect(() => {
@@ -201,6 +199,15 @@ const Users = () => {
         if (isTabChange) {
           setState({ activeTab: ROLES.HR });
         }
+      }
+
+      if (res?.role === ROLES.HR) {
+        if (res?.college?.length > 0) {
+        } else {
+          departmentList(1, "", false, res?.college?.college_id);
+        }
+      } else {
+        departmentList(1, "", false, "");
       }
 
       if (res?.role === ROLES.HR) {
@@ -312,7 +319,7 @@ const Users = () => {
 
     if (state.profile?.role === ROLES.INSTITUTION_ADMIN) {
       if (
-        state.activeTab == "hr" ||
+        // state.activeTab == "hr" ||
         state.activeTab == "hod" ||
         state.activeTab == "applicant"
       ) {
@@ -323,16 +330,19 @@ const Users = () => {
         if (state.superAdminDepartmentFilter?.value) {
           body.department_id = state.superAdminDepartmentFilter.value;
         }
-
-        if (state.ownRecord) {
+      if (state.ownRecord) {
           body.created_by = userId;
           body.team = "No";
         } else {
           body.team = "Yes";
           body.institution_id = state.profile?.institution?.institution_id;
         }
+      }else{
+        body.created_by = userId;
+        body.team = "No";
       }
     }
+    console.log('✌️bodyDATATA --->', body);
 
     if (state.profile?.role === ROLES.HR) {
       if (state.activeTab == "hod" || state.activeTab == "applicant") {
@@ -584,9 +594,7 @@ const Users = () => {
   };
 
   console.log("state.collegeList", state.collegeList);
-  console.log("state.college",state.college);
-  
-  
+  console.log("state.college", state.college);
 
   const hodInstitutionList = async (page, search = "", loadMore = false) => {
     try {
@@ -669,10 +677,19 @@ const Users = () => {
     }
   };
 
-  const departmentList = async (page, search = "", loadMore = false) => {
+  const departmentList = async (
+    page,
+    search = "",
+    loadMore = false,
+    collegeId=null
+  ) => {
     try {
       setState({ departmentLoading: true });
-      const body = { search };
+      const body: any = { search };
+      if (collegeId) {
+        body.college = collegeId;
+      }
+      console.log("✌️body --->", body);
 
       const res: any = await Models.department.list(page, body);
       const dropdown = Dropdown(res?.results, "department_name");
@@ -739,7 +756,7 @@ const Users = () => {
 
   const handleEdit = (row) => {
     console.log("row", row);
-    
+
     setState({
       editId: row.id,
       showModal: true,
@@ -863,9 +880,7 @@ const Users = () => {
         body.experience = state.experience;
       }
 
-
       console.log("body", body);
-      
 
       const formData = buildFormData(body);
 
@@ -1172,14 +1187,41 @@ const Users = () => {
             />
           )}
           {state.profile?.role == ROLES.HR ? (
-            <TextInput
-              title="College"
-              placeholder="College"
-              value={state.profile?.college?.college_name}
-              onChange={(e) => {}}
-              required
-              disabled
-            />
+            state.profile?.college?.length > 0 ? (
+              <CustomSelect
+                options={state.profile?.college?.map((c) => ({
+                  value: c?.college_id,
+                  label: c?.college_name,
+                }))}
+                value={state.college}
+                onChange={(selectedOption) => {
+                  setState({
+                    college: selectedOption,
+                    errors: { ...state.errors, college: "" },
+                    department: null,
+                  });
+                  if (selectedOption) {
+                    departmentList(1, "", false, selectedOption?.value);
+                  }
+                }}
+                placeholder="Select College"
+                isClearable={true}
+                isMulti={false}
+                title="Select College"
+                error={state.errors.college}
+                required
+                position="top"
+              />
+            ) : (
+              <TextInput
+                title="College"
+                placeholder="College"
+                value={state.profile?.college?.college_name}
+                onChange={(e) => {}}
+                required
+                disabled
+              />
+            )
           ) : (
             <CustomSelect
               options={state.hodCollegeList}
@@ -1222,37 +1264,74 @@ const Users = () => {
               disabled={!state.selectedHODInstitution}
             />
           )}
-
-          <CustomSelect
-            options={state.departmentList}
-            value={state.department}
-            onChange={(selectedOption) =>
-              setState({
-                department: selectedOption,
-                errors: { ...state.errors, department: "" },
-              })
-            }
-            onSearch={(searchTerm) =>
-              hodDepartmentList(1, searchTerm, false, state.selectedHODCollege)
-            }
-            placeholder="Select Department"
-            isClearable={true}
-            loadMore={() =>
-              state.departmentNext &&
-              hodDepartmentList(
-                state.departmentPage + 1,
-                "",
-                true,
-                state.selectedHODCollege
-              )
-            }
-            loading={state.departmentLoading}
-            title="Select Department"
-            error={state.errors.department}
-            required
-            position="top"
-            disabled={!state.selectedHODCollege}
-          />
+          {state.profile?.college?.length > 0 ? (
+            <CustomSelect
+              options={state.departmentList}
+              value={state.department}
+              onChange={(selectedOption) =>
+                setState({
+                  department: selectedOption,
+                  errors: { ...state.errors, department: "" },
+                })
+              }
+              onSearch={(searchTerm) =>
+                departmentList(1, searchTerm, false, state.college?.value)
+              }
+              placeholder="Select Department"
+              isClearable={true}
+              loadMore={() =>
+                state.departmentNext &&
+                departmentList(
+                  state.departmentPage + 1,
+                  "",
+                  true,
+                  state.college?.value
+                )
+              }
+              loading={state.departmentLoading}
+              title="Select Department"
+              error={state.errors.department}
+              required
+              position="top"
+              disabled={!state.college}
+            />
+          ) : (
+            <CustomSelect
+              options={state.departmentList}
+              value={state.department}
+              onChange={(selectedOption) =>
+                setState({
+                  department: selectedOption,
+                  errors: { ...state.errors, department: "" },
+                })
+              }
+              onSearch={(searchTerm) =>
+                hodDepartmentList(
+                  1,
+                  searchTerm,
+                  false,
+                  state.selectedHODCollege
+                )
+              }
+              placeholder="Select Department"
+              isClearable={true}
+              loadMore={() =>
+                state.departmentNext &&
+                hodDepartmentList(
+                  state.departmentPage + 1,
+                  "",
+                  true,
+                  state.selectedHODCollege
+                )
+              }
+              loading={state.departmentLoading}
+              title="Select Department"
+              error={state.errors.department}
+              required
+              position="top"
+              disabled={!state.selectedHODCollege}
+            />
+          )}
         </>
       )}
 
@@ -1425,14 +1504,14 @@ const Users = () => {
             </p>
           </div>
           {/* {state.activeTab !== ROLES.APPLICANT && ( */}
-            <button
-              onClick={() => setState({ showModal: true })}
-              className="group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
-              <IconPlus className="relative z-10 h-5 w-5" />
-              <span className="relative z-10">Add {getTabLabel()}</span>
-            </button>
+          <button
+            onClick={() => setState({ showModal: true })}
+            className="group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+            <IconPlus className="relative z-10 h-5 w-5" />
+            <span className="relative z-10">Add {getTabLabel()}</span>
+          </button>
           {/* )} */}
         </div>
       </div>

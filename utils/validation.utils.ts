@@ -158,10 +158,17 @@ export const CreateNewJob = Yup.object().shape({
   location: Yup.array()
     .min(1, "At least one location is required")
     .required("Location is required"),
-  institution: Yup.object().nullable().required("Institution is required"),
-  college: Yup.object().nullable().required("College is required"),
-  department: Yup.object().nullable().required("Department is required"),
+    institution: Yup.mixed()
+    .required("Institution is required")
+    .nullable(false),
   
+  college: Yup.mixed()
+    .required("College is required")
+    .nullable(false),
+  
+  department: Yup.mixed()
+    .required("Department is required")
+    .nullable(false),
   salary: Yup.string().required("Salary range is required"),
   
   priority: Yup.string().required("Priority is required"),

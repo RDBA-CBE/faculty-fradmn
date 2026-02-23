@@ -121,14 +121,14 @@ export default function Newjob() {
       } else if (res?.role == ROLES.HR) {
         setState({
           profile: res,
-          institution: {
-            value: res?.institution?.institution_id,
-            label: res?.institution?.institution_name,
-          },
-          college: {
-            value: res?.college?.college_id,
-            label: res?.college?.college_name,
-          },
+          // institution: {
+          //   value: res?.institution?.id,
+          //   label: res?.institution?.name,
+          // },
+          // college: {
+          //   value: res?.college?.college_id,
+          //   label: res?.college?.college_name,
+          // },
         });
         fetchDepartments(res?.college?.college_id, 1);
       }
@@ -137,6 +137,7 @@ export default function Newjob() {
       console.error("Error fetching institutions:", error);
     }
   };
+  console.log("college --->", state.college);
 
   const getJobDetails = async (profileResponse) => {
     try {
@@ -180,9 +181,9 @@ export default function Newjob() {
           numberOfOpenings: res?.number_of_openings || "",
           qualification: res?.qualification || "",
           experience: {
-          value: res?.experiences?.id,
-          label: res?.experiences?.name,
-        },
+            value: res?.experiences?.id,
+            label: res?.experiences?.name,
+          },
           responsibilityData: res?.responsibility || null,
           images: res?.company_logo ? [res?.company_logo] : [],
           tags:
@@ -383,7 +384,7 @@ export default function Newjob() {
 
   const fetchExperience = async (page = 1) => {
     try {
-      const res: any = await Models.master.experience_list(null,page);
+      const res: any = await Models.master.experience_list(null, page);
       const options = res?.results?.map((item: any) => ({
         value: item.id,
         label: item.name,
@@ -588,7 +589,7 @@ export default function Newjob() {
 
           description: state.description,
         },
-        { abortEarly: false },
+        { abortEarly: false }
       );
 
       const body: any = {
@@ -824,7 +825,7 @@ export default function Newjob() {
                 </p>
               </div>
             </div>
-            
+
             {/* <div
               className={`mx-2 h-1 flex-1 ${
                 state.activeStep >= 5 ? "bg-purple-600" : "bg-gray-200"
@@ -909,8 +910,6 @@ export default function Newjob() {
                   isMulti={true}
                 />
               </div>
-
-              
             </div>
           </div>
 
@@ -970,7 +969,7 @@ export default function Newjob() {
                         state.collegeHasMore &&
                         fetchColleges(
                           state.institution?.value,
-                          state.collegePage + 1,
+                          state.collegePage + 1
                         )
                       }
                       required
@@ -989,7 +988,7 @@ export default function Newjob() {
                         state.departmentHasMore &&
                         fetchDepartments(
                           state.college?.value,
-                          state.departmentPage + 1,
+                          state.departmentPage + 1
                         )
                       }
                       required
@@ -1020,7 +1019,7 @@ export default function Newjob() {
                         state.collegeHasMore &&
                         fetchColleges(
                           state.institution?.value,
-                          state.collegePage + 1,
+                          state.collegePage + 1
                         )
                       }
                       required
@@ -1039,7 +1038,7 @@ export default function Newjob() {
                         state.departmentHasMore &&
                         fetchDepartments(
                           state.college?.value,
-                          state.departmentPage + 1,
+                          state.departmentPage + 1
                         )
                       }
                       required
@@ -1051,17 +1050,50 @@ export default function Newjob() {
                     <TextInput
                       title="Institution"
                       placeholder="Institution"
-                      value={state.profile?.institution?.institution_name}
+                      value={state.profile?.institution?.name}
                       onChange={(e) => {}}
                       disabled
                     />
-                    <TextInput
+
+                    {state.profile?.college?.length > 0 ? (
+                      <CustomSelect
+                        title="College"
+                        options={state.profile?.college?.map((item: any) => ({
+                          value: item.college_id,
+                          label: item.college_name,
+                        }))}
+                        value={state.college}
+                        onChange={(option) =>
+                          handleFieldChange("college", option)
+                        }
+                        placeholder="Select college"
+                        error={state.error?.college}
+                        disabled={!state.institution}
+                        loadMore={() =>
+                          state.collegeHasMore &&
+                          fetchColleges(
+                            state.institution?.value,
+                            state.collegePage + 1
+                          )
+                        }
+                        required
+                      />
+                    ) : (
+                      <TextInput
+                        title="College"
+                        placeholder="College"
+                        value={state.profile?.college?.college_name}
+                        onChange={(e) => {}}
+                        disabled
+                      />
+                    )}
+                    {/* <TextInput
                       title="College"
                       placeholder="College"
                       value={state.profile?.college?.college_name}
                       onChange={(e) => {}}
                       disabled
-                    />
+                    /> */}
                     <CustomSelect
                       title="Department"
                       options={state.departmentList}
@@ -1076,7 +1108,7 @@ export default function Newjob() {
                         state.departmentHasMore &&
                         fetchDepartments(
                           state.college?.value,
-                          state.departmentPage + 1,
+                          state.departmentPage + 1
                         )
                       }
                       required
@@ -1095,7 +1127,7 @@ export default function Newjob() {
                     <TextInput
                       title="College"
                       placeholder="College"
-                      value={state.profile?.college?.college_name}
+                      value={state?.college?.label}
                       onChange={(e) => {}}
                       disabled
                     />
@@ -1118,7 +1150,7 @@ export default function Newjob() {
                   error={state.error?.priority}
                   required
                 />
-                
+
                 <CustomSelect
                   options={state.salaryRangeList}
                   title="Salary Range"
@@ -1200,8 +1232,6 @@ export default function Newjob() {
                   error={state.error?.numberOfOpenings}
                   required
                 />
-
-                
 
                 {/* <TextInput
                   name="experience"
