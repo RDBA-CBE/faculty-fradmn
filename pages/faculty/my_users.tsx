@@ -681,7 +681,7 @@ const Users = () => {
     page,
     search = "",
     loadMore = false,
-    collegeId: ""
+    collegeId=null
   ) => {
     try {
       setState({ departmentLoading: true });
