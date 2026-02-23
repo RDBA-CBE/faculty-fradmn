@@ -64,6 +64,7 @@ const CollegeAndDepartment = () => {
   const profile = async () => {
     try {
       const res: any = await Models.auth.profile();
+      console.log("✌️res --->", res);
       setState({
         profile: res,
         profile_institution: res?.institution,
@@ -144,6 +145,34 @@ const CollegeAndDepartment = () => {
     }
   };
 
+  const collegeDropdownList = async (page, search = "", loadMore = false) => {
+    try {
+      setState({ collegeLoading: true });
+      const body: any = { search };
+      if (state.profile?.institution) {
+        body.institution = state.profile?.institution?.id;
+      }
+
+      // body.created_by = state.profile?.id;
+      // body.team = "No";
+
+      const res: any = await Models.college.list(page, body);
+      const dropdown = Dropdown(res?.results, "college_name");
+
+      setState({
+        collegeLoading: false,
+        collegePage: page,
+        collegeDropdownList: loadMore
+          ? [...state.collegeDropdownList, ...dropdown]
+          : dropdown,
+        collegeNext: res?.next,
+      });
+    } catch (error) {
+      console.error("Error fetching colleges:", error);
+      setState({ collegeLoading: false });
+    }
+  };
+
   const handlePageChange = (pageNumber) => {
     setState({ page: pageNumber });
     deptList(pageNumber);
@@ -176,7 +205,7 @@ const CollegeAndDepartment = () => {
     if (state.search) {
       body.search = state.search;
     }
-  
+
     if (userId) {
       body.created_by = userId;
     }
@@ -284,6 +313,12 @@ const CollegeAndDepartment = () => {
         institution: state?.profile_institution?.id,
       };
 
+      if(state.profile?.college?.length > 0){
+        body.college = state.college?.value;
+      }else{
+        body.college = state.profile_college?.college_id;
+      }
+
       // Validate all department fields at once
       const validationBody = {
         college: state.profile_college?.college_id,
@@ -291,6 +326,11 @@ const CollegeAndDepartment = () => {
         // department_code: state.department_code,
       };
 
+      if(state.profile?.college?.length > 0){
+        validationBody.college = state.college?.value;
+      }else{
+        validationBody.college = state.profile_college?.college_id;
+      }
       const errors: any = {};
 
       // Check all required fields
@@ -312,7 +352,6 @@ const CollegeAndDepartment = () => {
 
       // Clear errors if validation passes
       setState({ errors: {} });
-
 
       console.log("✌️department body --->", body);
 
@@ -356,14 +395,42 @@ const CollegeAndDepartment = () => {
           onChange={(e) => {}}
           disabled
         />
-
-        <TextInput
-          title="Select College"
-          placeholder="College"
-          value={state.profile_college?.college_name}
-          onChange={(e) => {}}
-          disabled
-        />
+        {state.profile?.college?.length > 0 ? (
+          <CustomSelect
+            options={
+              state.profile?.college?.map((col) => ({
+                value: col?.college_id,
+                label: col?.college_name,
+              })) || []
+            }
+            value={state.college}
+            onChange={(selectedOption) =>
+              setState({
+                college: selectedOption,
+                errors: { ...state.errors, college: "" },
+              })
+            }
+            // onSearch={(searchTerm) => collegeDropdownList(1, searchTerm)}
+            placeholder="Select College"
+            isClearable={true}
+            // loadMore={() =>
+            //   state.collegeNext &&
+            //   collegeDropdownList(state.collegePage + 1, "", true)
+            // }
+            // loading={state.collegeLoading}
+            title="Select College"
+            error={state.errors.college}
+            required
+          />
+        ) : (
+          <TextInput
+            title="Select College"
+            placeholder="College"
+            value={state.profile_college?.college_name}
+            onChange={(e) => {}}
+            disabled
+          />
+        )}
         {/* <CustomSelect
           options={state.collegeDropdownList}
           value={state.college}
