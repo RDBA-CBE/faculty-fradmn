@@ -113,10 +113,10 @@ export const menuConfig = {
           href: "/faculty/master/experience",
         },
       
-        {
-          label: "Category",
-          href: "/faculty/master/category",
-        },
+        // {
+        //   label: "Category",
+        //   href: "/faculty/master/category",
+        // },
         {
           label: "Job Type",
           href: "/faculty/master/job_type",
@@ -197,10 +197,10 @@ export const menuConfig = {
           href: "/faculty/master/experience",
         },
       
-        {
-          label: "Category",
-          href: "/faculty/master/category",
-        },
+        // {
+        //   label: "Category",
+        //   href: "/faculty/master/category",
+        // },
         {
           label: "Job Type",
           href: "/faculty/master/job_type",
@@ -277,10 +277,10 @@ export const menuConfig = {
           href: "/faculty/master/experience",
         },
       
-        {
-          label: "Category",
-          href: "/faculty/master/category",
-        },
+        // {
+        //   label: "Category",
+        //   href: "/faculty/master/category",
+        // },
         {
           label: "Job Type",
           href: "/faculty/master/job_type",
@@ -523,11 +523,15 @@ export const OwnmenuConfig = {
       label: "Master",
       key: "master",
       children: [
-      
         {
-          label: "Category",
-          href: "/faculty/master/category",
+          label: "Experience",
+          href: "/faculty/master/experience",
         },
+      
+        // {
+        //   label: "Category",
+        //   href: "/faculty/master/category",
+        // },
         {
           label: "Job Type",
           href: "/faculty/master/job_type",

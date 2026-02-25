@@ -295,7 +295,7 @@ const Category = () => {
                 )}
               </div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {state.editId ? "Update" : "Add New"} Category
+                {state.editId ? "Update" : "Add New"} Experience
               </h2>
             </div>
 
