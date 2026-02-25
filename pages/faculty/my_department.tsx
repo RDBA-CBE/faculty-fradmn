@@ -543,7 +543,7 @@ const CollegeAndDepartment = () => {
           >
             <IconEdit className="h-4 w-4" />
           </button>
-          <button
+          {/* <button
             onClick={() => handleToggleStatus(row)}
             className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-200 ${
               row.status === "active"
@@ -557,7 +557,7 @@ const CollegeAndDepartment = () => {
             ) : (
               <IconEyeOff className="h-4 w-4" />
             )}
-          </button>
+          </button> */}
           <button
             onClick={() => handleDelete(row)}
             className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600 transition-all duration-200 hover:bg-red-200"

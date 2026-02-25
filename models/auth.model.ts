@@ -41,7 +41,7 @@ const auth = {
 
   change_password: (body: any) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `register/`;
+      let url = `auth/change-password/`;
       instance()
         .post(url, body)
         .then((res) => {

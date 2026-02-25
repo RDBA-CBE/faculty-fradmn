@@ -157,6 +157,7 @@ const Job = () => {
   const profile = async () => {
     try {
       const res: any = await Models.auth.profile();
+console.log('✌️res --->', res);
       setState({ profile: res });
       if (res?.role == ROLES.SUPER_ADMIN) {
         institutionDropdownList(1, "", false, res?.id);
@@ -178,6 +179,7 @@ const Job = () => {
         jobList(
           1,
           "",
+          // res?.college?.college_id,
           res?.college?.map((item) => item.college_id),
           "",
           res?.id
@@ -198,6 +200,8 @@ const Job = () => {
     deptId = null,
     createdBy = null
   ) => {
+console.log('✌️collegeId --->', collegeId);
+
     try {
       setState({ loading: true });
 
@@ -1045,7 +1049,7 @@ const Job = () => {
               />
             </div> */}
 
-            <div className="group relative">
+            {/* <div className="group relative">
               <CustomSelect
                 options={state.priorityList}
                 value={state.priorityFilter}
@@ -1053,7 +1057,7 @@ const Job = () => {
                 placeholder="Filter by priority"
                 isClearable={true}
               />
-            </div>
+            </div> */}
           </>
         </div>
       </div>
