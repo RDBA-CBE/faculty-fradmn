@@ -871,7 +871,7 @@ console.log('✌️collegeId --->', collegeId);
                         1,
                         searchTerm,
                         false,
-                        state.roleFilter?.value,
+                        state.roleFilter?.value?state.roleFilter?.value:state.profile?.role == ROLES.HR?ROLES.HOD:null,
                         state.collegeFilter?.value
                       )
                     }
@@ -881,7 +881,8 @@ console.log('✌️collegeId --->', collegeId);
                         state.userPage + 1,
                         "",
                         true,
-                        state.roleFilter?.value,
+                        state.roleFilter?.value?state.roleFilter?.value:state.profile?.role == ROLES.HR?ROLES.HOD:null,
+
                         state.collegeFilter?.value
                       )
                     }

@@ -2,10 +2,13 @@
 
 import PrimaryButton from "@/components/FormFields/PrimaryButton.component";
 import TextInput from "@/components/FormFields/TextInput.component";
+import IconEdit from "@/components/Icon/IconEdit";
 import IconEye from "@/components/Icon/IconEye";
 import IconEyeOff from "@/components/Icon/IconEyeOff";
 import IconLockDots from "@/components/Icon/IconLockDots";
 import IconMail from "@/components/Icon/IconMail";
+import IconUser from "@/components/Icon/IconUser";
+import Modal from "@/components/modal/modal.component";
 import Models from "@/imports/models.import";
 import Utils from "@/imports/utils.import";
 import {
@@ -15,6 +18,7 @@ import {
   useSetState,
 } from "@/utils/function.utils";
 import { error } from "console";
+import { UserCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import * as Yup from "yup";
 
@@ -26,6 +30,9 @@ export default function Profile() {
     password: "",
     error: "",
     showCurrentPassword: false,
+    isOpen: false,
+    username: "",
+    email: "",
   });
 
   useEffect(() => {
@@ -36,7 +43,7 @@ export default function Profile() {
     try {
       const res: any = await Models.auth.profile();
       console.log("✌️res --->", res);
-      setState({ profile: res });
+      setState({ profile: res, username: res.username, email: res.email });
     } catch (error) {
       console.error("Error fetching institutions:", error);
     }
@@ -82,6 +89,44 @@ export default function Profile() {
     }
   };
 
+  const updateProfile = async () => {
+    try {
+      const userString = localStorage.getItem("userId");
+      console.log("✌️userString --->", userString);
+      if (userString) {
+        const body = {
+          username: state.username,
+          email: state.email,
+        };
+        await Utils.Validation.update_profile.validate(body, {
+          abortEarly: false,
+        });
+        await Models.auth.updateUser(userString, body);
+        Success("Profile updated successfully");
+        setState({
+          isOpen: false,
+          error: "",
+        });
+        profile()
+      }
+    } catch (error) {
+      if (error instanceof Yup.ValidationError) {
+        const validationErrors = {};
+        error.inner.forEach((err) => {
+          validationErrors[err.path] = err?.message;
+        });
+        console.log("✌️validationErrors --->", validationErrors);
+
+        setState({ error: validationErrors, btnLoading: false });
+      } else {
+        Failure(error?.error);
+        setState({ btnLoading: false });
+      }
+
+      console.log("✌️error --->", error);
+    }
+  };
+
   return (
     <div className="p-6">
       <div className="overflow-hidden rounded-2xl border bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
@@ -121,48 +166,55 @@ export default function Profile() {
           <div className="flex-1 p-8">
             {activeTab === "profile" && (
               <div>
-                <h3 className="mb-6 text-xl font-semibold">
-                  Profile Information
-                </h3>
+                <div className="mb-6 flex items-center justify-between">
+                  <h3 className=" text-xl font-semibold">
+                    Profile Information
+                  </h3>
 
+                  <div
+                    onClick={() => setState({ isOpen: true })}
+                    className="cursor-pointer rounded-full p-2 text-gray-500 hover:bg-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+                  >
+                    <IconEdit />
+                  </div>
+                </div>
                 <div className="grid gap-6 md:grid-cols-2">
                   <InfoCard
                     label="Username"
                     value={capitalizeFLetter(state.profile?.username)}
                   />
-                  <InfoCard
-                    label="Email"
-                    value={(state.profile?.email)}
-                  />
+                  <InfoCard label="Email" value={state.profile?.email} />
                   <InfoCard
                     label="Role"
                     value={state.profile?.role.toUpperCase()}
                   />
                   {/* <InfoCard label="Status" value={state.profile?.status} /> */}
-                  {state.profile?.institution?.name &&
-                  <InfoCard
-                    label="Institution"
-                    value={capitalizeFLetter(state.profile?.institution?.name)}
-                  />
-                }
-                {state.profile?.department?.department_name &&
-                  <InfoCard
-                    label="Department"
-                    value={capitalizeFLetter(
-                      state.profile?.department?.department_name
-                    )}
-                  />
-                }
-                {state.profile?.college?.length > 0 &&
-                  <InfoCard
-                    label="College"
-                    value={
-                      state.profile?.college
-                        ?.map((c) => capitalizeFLetter(c.college_name))
-                        .join(", ") || "-"
-                    }
-                  />
-                }
+                  {state.profile?.institution?.name && (
+                    <InfoCard
+                      label="Institution"
+                      value={capitalizeFLetter(
+                        state.profile?.institution?.name
+                      )}
+                    />
+                  )}
+                  {state.profile?.department?.department_name && (
+                    <InfoCard
+                      label="Department"
+                      value={capitalizeFLetter(
+                        state.profile?.department?.department_name
+                      )}
+                    />
+                  )}
+                  {state.profile?.college?.length > 0 && (
+                    <InfoCard
+                      label="College"
+                      value={
+                        state.profile?.college
+                          ?.map((c) => capitalizeFLetter(c.college_name))
+                          .join(", ") || "-"
+                      }
+                    />
+                  )}
                 </div>
               </div>
             )}
@@ -244,6 +296,72 @@ export default function Profile() {
           </div>
         </div>
       </div>
+
+      <Modal
+        open={state.isOpen}
+        close={() =>
+          setState({
+            isOpen: false,
+            first_name: "",
+            last_name: "",
+            email: "",
+          })
+        }
+        renderComponent={() => (
+          <div className="p-6">
+            <div className="mb-6 text-center">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900 dark:to-blue-900">
+                <UserCheck className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Update Profile
+              </h2>
+            </div>
+            <div className="mb-5 space-y-5">
+              <TextInput
+                title="User Name"
+                placeholder="Enter User Name"
+                className="form-input ps-10 placeholder:text-white-dark"
+                onChange={(e) => setState({ username: e.target.value })}
+                value={state.username}
+                error={state.error?.username}
+                icon={<IconUser fill={true} />}
+                required
+              />
+
+              <TextInput
+                title="Email"
+                placeholder="Enter Email"
+                className="form-input ps-10 placeholder:text-white-dark"
+                onChange={(e) => setState({ email: e.target.value })}
+                value={state.email}
+                error={state.error?.email}
+                icon={<IconMail fill={true} />}
+                required
+              />
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() =>
+                  setState({
+                    isOpen: false,
+                 
+                  })
+                }
+                className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => updateProfile()}
+                className="flex-1 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 text-white hover:shadow-lg"
+              >
+                Update
+              </button>
+            </div>
+          </div>
+        )}
+      />
     </div>
   );
 }

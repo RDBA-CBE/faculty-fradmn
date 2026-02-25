@@ -55,12 +55,12 @@ export const DROPDOWN_INSTITUTION_ADMIN = [
 // menuConfig.ts
 export const menuConfig = {
   super_admin: [
-    {
-      type: "link",
-      icon: "IconMenuDashboard",
-      label: "dashboard",
-      href: "/",
-    },
+    // {
+    //   type: "link",
+    //   icon: "IconMenuDashboard",
+    //   label: "dashboard",
+    //   href: "/",
+    // },
 
     {
       type: "link",
@@ -146,12 +146,12 @@ export const menuConfig = {
   ],
 
   institution_admin: [
-    {
-      type: "link",
-      icon: "IconMenuDashboard",
-      label: "dashboard",
-      href: "/",
-    },
+    // {
+    //   type: "link",
+    //   icon: "IconMenuDashboard",
+    //   label: "dashboard",
+    //   href: "/",
+    // },
 
     {
       type: "link",
@@ -226,12 +226,12 @@ export const menuConfig = {
   ],
 
   hr: [
-    {
-      type: "link",
-      icon: "IconMenuDashboard",
-      label: "dashboard",
-      href: "/",
-    },
+    // {
+    //   type: "link",
+    //   icon: "IconMenuDashboard",
+    //   label: "dashboard",
+    //   href: "/",
+    // },
 
     {
       type: "link",
@@ -339,12 +339,12 @@ export const menuConfig = {
 
 export const OwnmenuConfig = {
   super_admin: [
-    {
-      type: "link",
-      icon: "IconMenuDashboard",
-      label: "dashboard",
-      href: "/",
-    },
+    // {
+    //   type: "link",
+    //   icon: "IconMenuDashboard",
+    //   label: "dashboard",
+    //   href: "/",
+    // },
 
     {
       type: "link",
@@ -395,12 +395,12 @@ export const OwnmenuConfig = {
   ],
 
   institution_admin: [
-    {
-      type: "link",
-      icon: "IconMenuDashboard",
-      label: "dashboard",
-      href: "/",
-    },
+    // {
+    //   type: "link",
+    //   icon: "IconMenuDashboard",
+    //   label: "dashboard",
+    //   href: "/",
+    // },
 
     {
       type: "link",
@@ -437,12 +437,12 @@ export const OwnmenuConfig = {
   ],
 
   hr: [
-    {
-      type: "link",
-      icon: "IconMenuDashboard",
-      label: "dashboard",
-      href: "/",
-    },
+    // {
+    //   type: "link",
+    //   icon: "IconMenuDashboard",
+    //   label: "dashboard",
+    //   href: "/",
+    // },
 
     {
       type: "link",
@@ -479,12 +479,12 @@ export const OwnmenuConfig = {
   ],
 
   hod: [
-    {
-      type: "link",
-      icon: "IconMenuDashboard",
-      label: "dashboard",
-      href: "/",
-    },
+    // {
+    //   type: "link",
+    //   icon: "IconMenuDashboard",
+    //   label: "dashboard",
+    //   href: "/",
+    // },
     //   {
     //   type: "link",
     //   icon: "IconMenuNotes",

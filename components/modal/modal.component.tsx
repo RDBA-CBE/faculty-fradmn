@@ -71,6 +71,7 @@ export default function Modal(props: any) {
                 </div> */}
 
                 {/* SUBTITLE */}
+                {subTitle || closeIcon &&
                 <div className="flex items-center justify-between border-b border-gray-200 bg-[#fbfbfb] px-5 py-2 dark:border-gray-700 dark:bg-[#121c2c]">
                   {subTitle && (
                     <div className="">
@@ -84,6 +85,8 @@ export default function Modal(props: any) {
                     </div>
                   )}
                 </div>
+                  }
+
                 {/* CONTENT */}
                 <div className={`${padding ? padding : "p-5"}`}>
                   {renderComponent()}

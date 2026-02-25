@@ -21,6 +21,11 @@ export const change_password = Yup.object().shape({
     .required("Current Password is required"),
 });
 
+export const update_profile = Yup.object().shape({
+  email: Yup.string().required("Email is required"),
+  username: Yup.string().required("Username is required"),
+});
+
 export const signin = Yup.object().shape({
   password: Yup.string().required("Password is required"),
   user_type: Yup.string().required("Role is required"),
