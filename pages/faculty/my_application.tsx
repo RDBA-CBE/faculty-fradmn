@@ -281,6 +281,8 @@ const Application = () => {
         applicationList: tableData,
         next: res?.next,
         prev: res?.previous,
+        applications_by_status: res?.applications_by_status,
+
       });
     } catch (error) {
       console.error("Error fetching applications:", error);
@@ -827,12 +829,11 @@ const Application = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Pending
+                Applied
               </p>
               <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
-                {state.applicationList?.filter(
-                  (app) => app.status === "Pending"
-                )?.length || 0}
+              {state.applications_by_status?.applied || 0}
+
               </p>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-yellow-100 dark:bg-yellow-900">
@@ -845,12 +846,11 @@ const Application = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Accepted
+                Selected
               </p>
               <p className="text-3xl font-bold text-green-600 dark:text-green-400">
-                {state.applicationList?.filter(
-                  (app) => app.status === "Accepted"
-                )?.length || 0}
+              {state.applications_by_status?.Selected || 0}
+
               </p>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 dark:bg-green-900">
@@ -863,12 +863,11 @@ const Application = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Rejected
+              Interview Scheduled
               </p>
               <p className="text-3xl font-bold text-red-600 dark:text-red-400">
-                {state.applicationList?.filter(
-                  (app) => app.status === "Rejected"
-                )?.length || 0}
+              {state.applications_by_status?.["Interview Scheduled "] || 0}
+
               </p>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100 dark:bg-red-900">

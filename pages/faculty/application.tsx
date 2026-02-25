@@ -278,6 +278,7 @@ const Application = () => {
         applicationList: tableData,
         next: res?.next,
         prev: res?.previous,
+        applications_by_status: res?.applications_by_status,
       });
     } catch (error) {
       console.error("Error fetching applications:", error);
@@ -810,9 +811,7 @@ const Application = () => {
                 Applied
               </p>
               <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
-                {state.applicationList?.filter(
-                  (app) => app.status === "Applied"
-                )?.length || 0}
+                {state.applications_by_status?.Applied || 0}
               </p>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-yellow-100 dark:bg-yellow-900">
@@ -828,9 +827,9 @@ const Application = () => {
                 Selected
               </p>
               <p className="text-3xl font-bold text-green-600 dark:text-green-400">
-                {state.applicationList?.filter(
-                  (app) => app.status === "Selected"
-                )?.length || 0}
+              {state.applications_by_status?.Selected || 0}
+
+            
               </p>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 dark:bg-green-900">
@@ -846,9 +845,8 @@ const Application = () => {
                 Interview Sheduled
               </p>
               <p className="text-3xl font-bold text-red-600 dark:text-red-400">
-                {state.applicationList?.filter(
-                  (app) => app.status === "Interview Sheduled"
-                )?.length || 0}
+              {state.applications_by_status?.["Interview Scheduled "] || 0}
+
               </p>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100 dark:bg-red-900">
