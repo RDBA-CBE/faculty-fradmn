@@ -132,23 +132,28 @@ export default function Profile() {
                   />
                   <InfoCard
                     label="Email"
-                    value={capitalizeFLetter(state.profile?.email)}
+                    value={(state.profile?.email)}
                   />
                   <InfoCard
                     label="Role"
                     value={state.profile?.role.toUpperCase()}
                   />
                   {/* <InfoCard label="Status" value={state.profile?.status} /> */}
+                  {state.profile?.institution?.name &&
                   <InfoCard
                     label="Institution"
                     value={capitalizeFLetter(state.profile?.institution?.name)}
                   />
+                }
+                {state.profile?.department?.department_name &&
                   <InfoCard
                     label="Department"
                     value={capitalizeFLetter(
                       state.profile?.department?.department_name
                     )}
                   />
+                }
+                {state.profile?.college?.length > 0 &&
                   <InfoCard
                     label="College"
                     value={
@@ -157,6 +162,7 @@ export default function Profile() {
                         .join(", ") || "-"
                     }
                   />
+                }
                 </div>
               </div>
             )}
