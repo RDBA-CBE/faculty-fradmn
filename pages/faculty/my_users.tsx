@@ -26,7 +26,7 @@ import { Success, Failure } from "@/utils/function.utils";
 import useDebounce from "@/hook/useDebounce";
 import { CreateUser } from "@/utils/validation.utils";
 import Swal from "sweetalert2";
-import { GENDER_OPTION, ROLES } from "@/utils/constant.utils";
+import { FRONTEND_URL, GENDER_OPTION, ROLES } from "@/utils/constant.utils";
 import CheckboxInput from "@/components/FormFields/CheckBoxInput.component";
 
 const Users = () => {
@@ -330,19 +330,19 @@ const Users = () => {
         if (state.superAdminDepartmentFilter?.value) {
           body.department_id = state.superAdminDepartmentFilter.value;
         }
-      if (state.ownRecord) {
+        if (state.ownRecord) {
           body.created_by = userId;
           body.team = "No";
         } else {
           body.team = "Yes";
           body.institution_id = state.profile?.institution?.institution_id;
         }
-      }else{
+      } else {
         body.created_by = userId;
         body.team = "No";
       }
     }
-    console.log('✌️bodyDATATA --->', body);
+    console.log("✌️bodyDATATA --->", body);
 
     if (state.profile?.role === ROLES.HR) {
       if (state.activeTab == "hod" || state.activeTab == "applicant") {
@@ -681,7 +681,7 @@ const Users = () => {
     page,
     search = "",
     loadMore = false,
-    collegeId=null
+    collegeId = null
   ) => {
     try {
       setState({ departmentLoading: true });
@@ -1443,6 +1443,22 @@ const Users = () => {
       title: "Actions",
       render: (row) => (
         <div className="flex items-center justify-center gap-2">
+          {state.activeTab == "applicant" && (
+            <a
+              href={`${FRONTEND_URL}profile/${row?.id}`}
+              target="_blank"
+              className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-200 ${
+                row.status === "active"
+                  ? "bg-green-100 text-green-600 hover:bg-green-200"
+                  : "bg-red-100 text-red-600 hover:bg-red-200"
+              }`}
+              title={"View"}
+            >
+              <IconEye className="h-4 w-4" />
+            </a>
+          )}
+          {state.activeTab !== "applicant" && (
+<>
           <button
             onClick={() => handleEdit(row)}
             className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 transition-all duration-200 hover:bg-blue-200"
@@ -1450,7 +1466,8 @@ const Users = () => {
           >
             <IconEdit className="h-4 w-4" />
           </button>
-          <button
+
+          {/* <button
             onClick={() => handleToggleStatus(row)}
             className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-200 ${
               row.status === "active"
@@ -1464,7 +1481,9 @@ const Users = () => {
             ) : (
               <IconEyeOff className="h-4 w-4" />
             )}
-          </button>
+          </button> */}
+            </>
+          )}
           <button
             onClick={() => handleDelete(row)}
             className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600 transition-all duration-200 hover:bg-red-200"
@@ -1472,6 +1491,7 @@ const Users = () => {
           >
             <IconTrash className="h-4 w-4" />
           </button>
+        
         </div>
       ),
     });

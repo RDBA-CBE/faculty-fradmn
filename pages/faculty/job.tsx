@@ -169,13 +169,19 @@ const Job = () => {
           "",
           false,
           res?.institution?.institution_id,
-          res?.id,
+          res?.id
         );
         departmentDropdownList(1, "", false, "", res?.id);
         jobList(1, res?.institution?.institution_id, "", "", res?.id);
       } else if (res?.role == ROLES.HR) {
         departmentDropdownList(1, "", false, res?.college?.college_id, res?.id);
-        jobList(1, "", res?.college?.map((item) => item.college_id ) , "", res?.id);
+        jobList(
+          1,
+          "",
+          res?.college?.map((item) => item.college_id),
+          "",
+          res?.id
+        );
         userDropdownList(1, "", false, "hod", res?.college?.college_id);
       } else if (res?.role == ROLES.HOD) {
         jobList(1, "", "", res?.department?.id, res?.id);
@@ -190,7 +196,7 @@ const Job = () => {
     institutionId = null,
     collegeId = null,
     deptId = null,
-    createdBy = null,
+    createdBy = null
   ) => {
     try {
       setState({ loading: true });
@@ -264,7 +270,7 @@ const Job = () => {
     search = "",
     loadMore = false,
     institutionId = null,
-    createdBy = null,
+    createdBy = null
   ) => {
     try {
       setState({ collegeLoading: true });
@@ -346,7 +352,7 @@ const Job = () => {
       state.instiutionFilter,
       state.collegeFilter,
       state.departmentFilter,
-      state?.profile?.id,
+      state?.profile?.id
     );
   };
 
@@ -371,7 +377,7 @@ const Job = () => {
     search = "",
     loadMore = false,
     role = null,
-    collegeId = null,
+    collegeId = null
   ) => {
     try {
       setState({ userLoading: true });
@@ -402,7 +408,7 @@ const Job = () => {
     page = 1,
     search = "",
     loadMore = false,
-    createdBy = null,
+    createdBy = null
   ) => {
     try {
       setState({ institutionLoading: true });
@@ -432,7 +438,7 @@ const Job = () => {
     search = "",
     loadMore = false,
     collegeId = null,
-    createdBy = null,
+    createdBy = null
   ) => {
     try {
       setState({ departmentLoading: true });
@@ -534,7 +540,7 @@ const Job = () => {
         "",
         false,
         selectedOption?.value,
-        state?.profile?.id,
+        state?.profile?.id
       );
     }
   };
@@ -551,7 +557,7 @@ const Job = () => {
         "",
         false,
         selectedOption?.value,
-        state?.profile?.id,
+        state?.profile?.id
       );
     }
   };
@@ -581,7 +587,7 @@ const Job = () => {
 
   const handleToggleStatus = async (row: any) => {
     console.log("row", row);
-    
+
     try {
       const newStatus = row?.job_status === "active" ? "inactive" : "active";
       await Models.job.update({ job_status: newStatus }, row?.id);
@@ -591,7 +597,7 @@ const Job = () => {
         state.instiutionFilter,
         state.collegeFilter,
         state.departmentFilter,
-        state?.profile?.id,
+        state?.profile?.id
       );
     } catch (error) {
       Failure("Failed to update status");
@@ -602,7 +608,7 @@ const Job = () => {
     showDeleteAlert(
       () => deleteRecord(row?.id),
       () => Swal.fire("Cancelled", "Record is safe", "info"),
-      "Are you sure you want to delete this job?",
+      "Are you sure you want to delete this job?"
     );
   };
 
@@ -615,7 +621,7 @@ const Job = () => {
         state.instiutionFilter,
         state.collegeFilter,
         state.departmentFilter,
-        state?.profile?.id,
+        state?.profile?.id
       );
     } catch (error) {
       Failure("Failed to delete job");
@@ -626,7 +632,7 @@ const Job = () => {
     showDeleteAlert(
       () => bulkDeleteRecords(),
       () => Swal.fire("Cancelled", "Your Records are safe :)", "info"),
-      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`,
+      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`
     );
   };
 
@@ -642,7 +648,7 @@ const Job = () => {
         state.instiutionFilter,
         state.collegeFilter,
         state.departmentFilter,
-        state?.profile?.id,
+        state?.profile?.id
       );
     } catch (error) {
       Failure("Failed to delete jobs. Please try again.");
@@ -671,12 +677,12 @@ const Job = () => {
         Success(
           row.is_approved
             ? "Job unapproved successfully!"
-            : "Job approved successfully!",
+            : "Job approved successfully!"
         );
         jobList(state.page);
       } catch (error) {
         Failure(
-          row.is_approved ? "Failed to unapprove job" : "Failed to approve job",
+          row.is_approved ? "Failed to unapprove job" : "Failed to approve job"
         );
       }
     }
@@ -862,7 +868,7 @@ const Job = () => {
                         searchTerm,
                         false,
                         state.roleFilter?.value,
-                        state.collegeFilter?.value,
+                        state.collegeFilter?.value
                       )
                     }
                     loadMore={() =>
@@ -872,7 +878,7 @@ const Job = () => {
                         "",
                         true,
                         state.roleFilter?.value,
-                        state.collegeFilter?.value,
+                        state.collegeFilter?.value
                       )
                     }
                   />
@@ -895,7 +901,7 @@ const Job = () => {
                         1,
                         searchTerm,
                         false,
-                        state.profile?.id,
+                        state.profile?.id
                       )
                     }
                     loadMore={() =>
@@ -904,7 +910,7 @@ const Job = () => {
                         state.institutionPage + 1,
                         "",
                         true,
-                        state.profile?.id,
+                        state.profile?.id
                       )
                     }
                     loading={state.institutionLoading}
@@ -923,7 +929,7 @@ const Job = () => {
                         searchTerm,
                         false,
                         state.institutionFilter?.value,
-                        state.profile?.id,
+                        state.profile?.id
                       )
                     }
                     loadMore={() =>
@@ -933,7 +939,7 @@ const Job = () => {
                         "",
                         true,
                         state.institutionFilter?.value,
-                        state.profile?.id,
+                        state.profile?.id
                       )
                     }
                     loading={state.collegeLoading}
@@ -955,7 +961,7 @@ const Job = () => {
                       searchTerm,
                       false,
                       state.collegeFilter?.value,
-                      state.profile?.id,
+                      state.profile?.id
                     )
                   }
                   loadMore={() =>
@@ -965,7 +971,7 @@ const Job = () => {
                       "",
                       true,
                       state.collegeFilter?.value,
-                      state.profile?.id,
+                      state.profile?.id
                     )
                   }
                   loading={state.departmentLoading}
@@ -1084,7 +1090,7 @@ const Job = () => {
             records={state.jobList}
             fetching={state.loading}
             selectedRecords={state.jobList?.filter((record) =>
-              state.selectedRecords.includes(record.id),
+              state.selectedRecords.includes(record.id)
             )}
             onSelectedRecordsChange={(records) =>
               setState({ selectedRecords: records.map((r: any) => r.id) })
@@ -1180,7 +1186,7 @@ const Job = () => {
                       <Clock className="h-3 w-3" />
                     )}
                     {capitalizeFLetter(
-                      (row as any)?.is_approved ? "Approved" : "Pending",
+                      (row as any)?.is_approved ? "Approved" : "Pending"
                     ) || "-"}
                   </span>
                 ),
@@ -1300,7 +1306,7 @@ const Job = () => {
                 state.instiutionFilter,
                 state.collegeFilter,
                 state.departmentFilter,
-                state?.profile?.id,
+                state?.profile?.id
               );
             }}
             minHeight={200}
@@ -1316,6 +1322,8 @@ const Job = () => {
           />
         </div>
         <Modal
+          subTitle="Job Logs"
+          closeIcon={() => setState({ isOpen: false })}
           open={state.isOpen}
           close={() => setState({ isOpen: false })}
           padding="px-2"
@@ -1323,7 +1331,6 @@ const Job = () => {
             <>
               <LogCard
                 data={state.logData}
-                title="Job Logs"
                 onClose={() => setState({ isOpen: false })}
                 onSendMessage={(e) => createJobLog(e)}
               />

@@ -238,6 +238,7 @@ const Application = () => {
         id: item?.id,
         applied_date: item?.created_at,
         job_title: item?.job_detail?.job_title,
+        resume: item?.resume,
         application_status:{value: item?.application_status?.id, label: item?.application_status?.name}
       }));
       setState({
@@ -682,6 +683,14 @@ const Application = () => {
       setState({ submitting: false });
     }
   };
+
+  const handleDownloadResume = (row) => {
+    console.log("✌️row --->", row);
+    if (row?.resume) {
+      window.open(row.resume, "_blank");
+    }
+  };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-3 dark:from-gray-900 dark:to-gray-800">
@@ -1150,10 +1159,17 @@ const Application = () => {
                 textAlignment: "center",
                 render: (row: any) => (
                   <div className="flex items-center justify-center gap-2">
+                      <button
+                      onClick={() => handleDownloadResume(row)}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 transition-all duration-200 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-400"
+                      title="Resume"
+                    >
+                      <FileText className="h-4 w-4" />
+                    </button>
                     <button
                       onClick={() => handleEdit(row)}
                       className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-100 text-green-600 transition-all duration-200 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-400"
-                      title="Edit"
+                      title="View"
                     >
                       <IconEye className="h-4 w-4" />
                     </button>

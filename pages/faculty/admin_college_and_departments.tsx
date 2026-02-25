@@ -69,7 +69,7 @@ const CollegeAndDepartment = () => {
     college_phone: "",
     college_address: "",
     institution: null,
-     images: [],
+    images: [],
     newImages: [],
 
     // Institution filter data
@@ -177,7 +177,7 @@ const CollegeAndDepartment = () => {
   const loadCollegeFilterForInstitution = async (
     profileData,
     page = 1,
-    loadMore = false,
+    loadMore = false
   ) => {
     try {
       setState({ collegeFilterLoading: true });
@@ -210,7 +210,7 @@ const CollegeAndDepartment = () => {
       loadCollegeFilterForInstitution(
         state.profile,
         state.collegeFilterPage + 1,
-        true,
+        true
       );
     }
   };
@@ -290,7 +290,7 @@ const CollegeAndDepartment = () => {
     page,
     search = "",
     loadMore = false,
-    seletedInstitution = null,
+    seletedInstitution = null
   ) => {
     try {
       setState({ collegeLoading: true });
@@ -319,7 +319,7 @@ const CollegeAndDepartment = () => {
   const institutionDropdownList = async (
     page,
     search = "",
-    loadMore = false,
+    loadMore = false
   ) => {
     try {
       setState({ institutionLoading: true });
@@ -440,7 +440,7 @@ const CollegeAndDepartment = () => {
   const loadInstitutionFilterOptions = async (
     page,
     search = "",
-    loadMore = false,
+    loadMore = false
   ) => {
     try {
       setState({ institutionFilterLoading: true });
@@ -702,7 +702,7 @@ const CollegeAndDepartment = () => {
     showDeleteAlert(
       () => deleteRecord(row.id),
       () => Swal.fire("Cancelled", "Record is safe", "info"),
-      "Are you sure you want to delete this record?",
+      "Are you sure you want to delete this record?"
     );
   };
 
@@ -714,7 +714,7 @@ const CollegeAndDepartment = () => {
       () => {
         Swal.fire("Cancelled", "Your Records are safe :)", "info");
       },
-      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`,
+      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`
     );
   };
 
@@ -731,7 +731,7 @@ const CollegeAndDepartment = () => {
       }
     } catch (error) {
       Failure(
-        `Failed to delete ${state.activeTab.slice(0, -1)}. Please try again.`,
+        `Failed to delete ${state.activeTab.slice(0, -1)}. Please try again.`
       );
     }
   };
@@ -746,7 +746,7 @@ const CollegeAndDepartment = () => {
         }
       }
       Success(
-        `${state.selectedRecords.length} ${state.activeTab} deleted successfully!`,
+        `${state.selectedRecords.length} ${state.activeTab} deleted successfully!`
       );
       setState({ selectedRecords: [] });
       if (state.activeTab === "colleges") {
@@ -781,7 +781,7 @@ const CollegeAndDepartment = () => {
     } catch (rollbackError) {
       console.error("Rollback error:", rollbackError);
       Failure(
-        "Failed to cleanup created records. Please contact administrator.",
+        "Failed to cleanup created records. Please contact administrator."
       );
     }
   };
@@ -984,7 +984,7 @@ const CollegeAndDepartment = () => {
           >
             <IconEdit className="h-4 w-4" />
           </button>
-          <button
+          {/* <button
             onClick={() => handleToggleStatus(row)}
             className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-200 ${
               row.status === "active"
@@ -998,7 +998,7 @@ const CollegeAndDepartment = () => {
             ) : (
               <IconEyeOff className="h-4 w-4" />
             )}
-          </button>
+          </button> */}
           <button
             onClick={() => handleDelete(row)}
             className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600 transition-all duration-200 hover:bg-red-200"
@@ -1073,7 +1073,7 @@ const CollegeAndDepartment = () => {
           >
             <IconEdit className="h-4 w-4" />
           </button>
-          <button
+          {/* <button
             onClick={() => handleToggleStatus(row)}
             className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-200 ${
               row.status === "active"
@@ -1087,7 +1087,7 @@ const CollegeAndDepartment = () => {
             ) : (
               <IconEyeOff className="h-4 w-4" />
             )}
-          </button>
+          </button> */}
           <button
             onClick={() => handleDelete(row)}
             className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600 transition-all duration-200 hover:bg-red-200"
@@ -1341,9 +1341,10 @@ const CollegeAndDepartment = () => {
 
       {/* Modal */}
       <Modal
+        closeIcon={() => handleCloseModal()}
         open={state.showModal}
         close={handleCloseModal}
-        addHeader={"Update Department Info"}
+        subTitle={"Update Department Info"}
         renderComponent={() => (
           <div className="w-full max-w-4xl">
             <style jsx>{`
@@ -1406,7 +1407,7 @@ const CollegeAndDepartment = () => {
                       state.collegePage + 1,
                       "",
                       true,
-                      state.seletedInstitution,
+                      state.seletedInstitution
                     )
                   }
                   loading={state.collegeLoading}
@@ -1521,7 +1522,9 @@ const CollegeAndDepartment = () => {
                   onImagesChange={(newImages) => setState({ newImages })}
                   onDeleteImage={(imageUrl) => {
                     setState({
-                      college_logo: state.college_logo.filter((img) => img !== imageUrl),
+                      college_logo: state.college_logo.filter(
+                        (img) => img !== imageUrl
+                      ),
                     });
                   }}
                   maxFiles={1}

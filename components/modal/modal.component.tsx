@@ -1,6 +1,7 @@
 import { Dialog, Transition } from "@headlessui/react";
 import React, { Fragment } from "react";
 import IconX from "../Icon/IconX";
+import { X } from "lucide-react";
 
 export default function Modal(props: any) {
   const {
@@ -13,7 +14,8 @@ export default function Modal(props: any) {
     subTitle,
     isFullWidth,
     maxWidth = "max-w-xl",
-    padding
+    padding,
+    closeIcon,
   } = props;
 
   return (
@@ -69,14 +71,23 @@ export default function Modal(props: any) {
                 </div> */}
 
                 {/* SUBTITLE */}
-                {subTitle && (
-                  <div className="bg-[#fbfbfb] dark:bg-[#121c2c] px-5 py-2 border-b border-gray-200 dark:border-gray-700">
-                    <p className="text-sm font-medium">{subTitle}</p>
-                  </div>
-                )}
+                <div className="flex items-center justify-between border-b border-gray-200 bg-[#fbfbfb] px-5 py-2 dark:border-gray-700 dark:bg-[#121c2c]">
+                  {subTitle && (
+                    <div className="">
+                      <p className="text-lg font-medium">{subTitle}</p>
+                    </div>
+                  )}
 
+                  {closeIcon && (
+                    <div className="cursor-pointer" onClick={() => close()}>
+                      <X />
+                    </div>
+                  )}
+                </div>
                 {/* CONTENT */}
-                <div className={`${padding ? padding : "p-5"}`}>{renderComponent()}</div>
+                <div className={`${padding ? padding : "p-5"}`}>
+                  {renderComponent()}
+                </div>
               </Dialog.Panel>
             </Transition.Child>
           </div>

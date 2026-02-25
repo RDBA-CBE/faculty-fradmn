@@ -38,7 +38,7 @@ import {
 } from "@/utils/validation.utils";
 import PrivateRouter from "@/hook/privateRouter";
 import IconEdit from "@/components/Icon/IconEdit";
-import UpdatePropertyImagePreview from "@/components/ImageUploadWithPreview/UpdatePropertyImagePreview.component";
+import UpdatePropertyImagePreview from "@/components/ImageUploadWithPreview/ImageUploadWithPreview.component";
 
 const CollegeAndDepartment = () => {
   const dispatch = useDispatch();
@@ -255,7 +255,7 @@ const CollegeAndDepartment = () => {
     page,
     search = "",
     loadMore = false,
-    seletedInstitution = null,
+    seletedInstitution = null
   ) => {
     try {
       setState({ collegeLoading: true });
@@ -284,7 +284,7 @@ const CollegeAndDepartment = () => {
   const institutionDropdownList = async (
     page,
     search = "",
-    loadMore = false,
+    loadMore = false
   ) => {
     try {
       setState({ institutionLoading: true });
@@ -400,7 +400,7 @@ const CollegeAndDepartment = () => {
   const loadInstitutionOptions = async (
     page,
     search = "",
-    loadMore = false,
+    loadMore = false
   ) => {
     try {
       setState({ institutionLoading: true });
@@ -448,7 +448,7 @@ const CollegeAndDepartment = () => {
     page,
     search = "",
     loadMore = false,
-    institutionOption = null,
+    institutionOption = null
   ) => {
     try {
       setState({ collegeFilterLoading: true });
@@ -497,7 +497,7 @@ const CollegeAndDepartment = () => {
 
   const handleCloseModal = () => {
     console.log("hellor");
-    
+
     setState({
       showModal: false,
       showEditModal: false,
@@ -566,7 +566,6 @@ const CollegeAndDepartment = () => {
 
   const handleEdit = (row) => {
     if (state.activeTab === "colleges") {
-     
       setState({
         editId: row.id,
         showModal: false,
@@ -630,7 +629,7 @@ const CollegeAndDepartment = () => {
     showDeleteAlert(
       () => deleteRecord(row.id),
       () => Swal.fire("Cancelled", "Record is safe", "info"),
-      "Are you sure you want to delete this record?",
+      "Are you sure you want to delete this record?"
     );
   };
 
@@ -642,7 +641,7 @@ const CollegeAndDepartment = () => {
       () => {
         Swal.fire("Cancelled", "Your Records are safe :)", "info");
       },
-      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`,
+      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`
     );
   };
 
@@ -659,7 +658,7 @@ const CollegeAndDepartment = () => {
       }
     } catch (error) {
       Failure(
-        `Failed to delete ${state.activeTab.slice(0, -1)}. Please try again.`,
+        `Failed to delete ${state.activeTab.slice(0, -1)}. Please try again.`
       );
     }
   };
@@ -674,7 +673,7 @@ const CollegeAndDepartment = () => {
         }
       }
       Success(
-        `${state.selectedRecords.length} ${state.activeTab} deleted successfully!`,
+        `${state.selectedRecords.length} ${state.activeTab} deleted successfully!`
       );
       setState({ selectedRecords: [] });
       if (state.activeTab === "colleges") {
@@ -701,7 +700,7 @@ const CollegeAndDepartment = () => {
     } catch (rollbackError) {
       console.error("Rollback error:", rollbackError);
       Failure(
-        "Failed to cleanup created records. Please contact administrator.",
+        "Failed to cleanup created records. Please contact administrator."
       );
     }
   };
@@ -712,7 +711,7 @@ const CollegeAndDepartment = () => {
 
       if (state.currentStep === 1) {
         // Step 1: Create College only
-        const collegeBody:any = {
+        const collegeBody: any = {
           college_name: state.college_name,
           college_code: state.college_code,
           college_email: state.college_email,
@@ -734,7 +733,7 @@ const CollegeAndDepartment = () => {
         collegeTableList(state.page);
       } else if (state.currentStep === 2) {
         // Step 2: Create College and Department
-        const collegeBody :any = {
+        const collegeBody: any = {
           college_name: state.college_name,
           college_code: state.college_code,
           college_email: state.college_email,
@@ -779,7 +778,7 @@ const CollegeAndDepartment = () => {
           // Show step-specific error message
           if (createdRecords.collegeId && !createdRecords.departmentId) {
             Failure(
-              "Step 2.2 failed: Department creation failed. College was created but removed due to error.",
+              "Step 2.2 failed: Department creation failed. College was created but removed due to error."
             );
           } else {
             Failure("Step 2.1 failed: College creation failed.");
@@ -817,7 +816,7 @@ const CollegeAndDepartment = () => {
           Failure(
             `Step ${state.currentStep} failed: ${
               error?.message || "Creation failed. Please try again."
-            }`,
+            }`
           );
         }
       }
@@ -826,7 +825,8 @@ const CollegeAndDepartment = () => {
     }
   };
 
-  console.log("state.images", state.images);
+  console.log('✌️newImages --->', state.newImages);
+
 
   const handleSubmit = async () => {
     try {
@@ -889,7 +889,7 @@ const CollegeAndDepartment = () => {
 
       // College wizard flow
       if (state.currentStep === 1) {
-        const body:any = {
+        const body: any = {
           college_name: state.college_name,
           college_code: state.college_code,
           college_email: state.college_email,
@@ -934,7 +934,7 @@ const CollegeAndDepartment = () => {
         }
       } else if (state.currentStep === 2) {
         // Validate department details and move to step 3
-        if (!state.department_name ) {
+        if (!state.department_name) {
           setState({
             errors: {
               department_name: "Department name is required",
@@ -981,7 +981,7 @@ const CollegeAndDepartment = () => {
 
         try {
           // Step 3.1: Create college first
-          const collegeBody:any = {
+          const collegeBody: any = {
             college_name: state.college_name,
             college_code: state.college_code,
             college_email: state.college_email,
@@ -1056,7 +1056,7 @@ const CollegeAndDepartment = () => {
               });
 
               throw new Error(
-                `Hod  creation failed:\n${errorMessages.join("\n")}`,
+                `Hod  creation failed:\n${errorMessages.join("\n")}`
               );
             }
             throw new Error(`hod  creation failed: ${error?.message}`);
@@ -1076,7 +1076,7 @@ const CollegeAndDepartment = () => {
               });
 
               throw new Error(
-                `Department  creation failed:\n${errorMessages.join("\n")}`,
+                `Department  creation failed:\n${errorMessages.join("\n")}`
               );
             }
             throw new Error(`Department  creation failed: ${error?.message}`);
@@ -1124,7 +1124,7 @@ const CollegeAndDepartment = () => {
 
   const updateCollege = async () => {
     try {
-      const body:any = {
+      const body: any = {
         college_name: state.college_name,
         college_code: state.college_code,
         college_email: state.college_email,
@@ -1315,7 +1315,7 @@ const CollegeAndDepartment = () => {
                 state.collegePage + 1,
                 "",
                 true,
-                state.seletedInstitution,
+                state.seletedInstitution
               )
             }
             loading={state.collegeLoading}
@@ -1528,7 +1528,7 @@ const CollegeAndDepartment = () => {
           >
             <IconEdit className="h-4 w-4" />
           </button>
-          <button
+          {/* <button
             onClick={() => handleToggleStatus(row)}
             className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-200 ${
               row.status === "active"
@@ -1542,7 +1542,7 @@ const CollegeAndDepartment = () => {
             ) : (
               <ToggleRight className="h-4 w-4" />
             )}
-          </button>
+          </button> */}
           <button
             onClick={() => handleDelete(row)}
             className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600 transition-all duration-200 hover:bg-red-200"
@@ -1556,7 +1556,6 @@ const CollegeAndDepartment = () => {
   ];
 
   const departmentColumns = [
-    
     {
       accessor: "department_name",
       title: "Department Name",
@@ -1608,7 +1607,7 @@ const CollegeAndDepartment = () => {
           >
             <IconEdit className="h-4 w-4" />
           </button>
-          <button
+          {/* <button
             onClick={() => handleToggleStatus(row)}
             className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-200 ${
               row.status === "active"
@@ -1622,7 +1621,7 @@ const CollegeAndDepartment = () => {
             ) : (
               <ToggleRight className="h-4 w-4" />
             )}
-          </button>
+          </button> */}
           <button
             onClick={() => handleDelete(row)}
             className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600 transition-all duration-200 hover:bg-red-200"
@@ -1831,9 +1830,10 @@ const CollegeAndDepartment = () => {
 
       {/* Modal */}
       <Modal
+      closeIcon={true}
         open={state.showModal}
         close={handleCloseModal}
-        addHeader={
+        subTitle={
           state.activeTab === "colleges"
             ? "College & Department Setup"
             : "Add Department"

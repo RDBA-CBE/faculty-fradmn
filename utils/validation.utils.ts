@@ -98,7 +98,7 @@ export const CreateInstitutionAdmin = Yup.object().shape({
     .email("Please enter a valid email address")
     .required("Email is required"),
   password: Yup.string()
-    .min(6, "Password must be at least 6 characters")
+    .min(8, "Password must be at least 8 characters")
     .required("Password is required"),
    
     password_confirm: Yup.string()
@@ -117,7 +117,7 @@ export const CreateHR = Yup.object().shape({
     .email("Please enter a valid email address")
     .required("Email is required"),
   hr_password: Yup.string()
-    .min(6, "Password must be at least 6 characters")
+    .min(8, "Password must be at least 8 characters")
     .required("Password is required"),
   hr_password_confirm: Yup.string()
     .oneOf([Yup.ref('hr_password')], "Passwords must match")
@@ -135,7 +135,7 @@ export const CreateHOD = Yup.object().shape({
     .email("Please enter a valid email address")
     .required("Email is required"),
   hod_password: Yup.string()
-    .min(6, "Password must be at least 6 characters")
+    .min(8, "Password must be at least 8 characters")
     .required("Password is required"),
   hod_confirm_password: Yup.string()
     .oneOf([Yup.ref('hod_password')], "Passwords must match")
