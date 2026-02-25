@@ -12,6 +12,7 @@ import Modal from "@/components/modal/modal.component";
 import Models from "@/imports/models.import";
 import Utils from "@/imports/utils.import";
 import {
+  buildFormData,
   capitalizeFLetter,
   Failure,
   Success,
@@ -98,10 +99,11 @@ export default function Profile() {
           username: state.username,
           email: state.email,
         };
+        const formData=buildFormData(body)
         await Utils.Validation.update_profile.validate(body, {
           abortEarly: false,
         });
-        await Models.auth.updateUser(userString, body);
+        await Models.auth.updateUser(userString, formData);
         Success("Profile updated successfully");
         setState({
           isOpen: false,
