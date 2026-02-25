@@ -48,6 +48,7 @@ import useDebounce from "@/hook/useDebounce";
 import Swal from "sweetalert2";
 import { GENDER_OPTION } from "@/utils/constant.utils";
 import PrivateRouter from "@/hook/privateRouter";
+import UpdatePropertyImagePreview from "@/components/ImageUploadWithPreview/ImageUploadWithPreview.component";
 
 const Institution = () => {
   const dispatch = useDispatch();
@@ -316,7 +317,7 @@ const Institution = () => {
     };
 
     try {
-      setState({ submitting: true });
+      setState({ submitting1: true });
 
       // Get steps up to current step (including current step)
       const stepsToProcess = [];
@@ -495,8 +496,9 @@ const Institution = () => {
           } catch (error: any) {
             console.log("✌️error --->", error);
             if (error?.response?.data?.error) {
-              throw new Error(`HR creation failed: ${error.response.data.error}`);
-
+              throw new Error(
+                `HR creation failed: ${error.response.data.error}`
+              );
             } else {
               throw new Error(`HR creation failed: ${error?.message}`);
             }
@@ -506,7 +508,7 @@ const Institution = () => {
         // Step 4: Create College
         if (stepsToProcess.includes(4)) {
           try {
-            const collegeBody = {
+            const collegeBody:any = {
               college_name: state.college_name,
               college_code: state.college_code,
               college_email: state.college_email,
@@ -514,6 +516,9 @@ const Institution = () => {
               college_address: state.college_address,
               institution: createdRecords.institutionId,
             };
+            if (state.newImages?.length > 0) {
+              collegeBody.college_logo = state.newImages[0];
+            }
             const collegeRes: any = await Models.college.create(collegeBody);
             createdRecords.collegeId = collegeRes?.id;
           } catch (error: any) {
@@ -639,7 +644,7 @@ const Institution = () => {
         );
       }
     } finally {
-      setState({ submitting: false });
+      setState({ submitting1: false });
     }
   };
 
@@ -1757,6 +1762,22 @@ const Institution = () => {
                 <div className="space-y-6">
                   <h3 className="text-lg font-semibold">Create College</h3>
                   <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                    <UpdatePropertyImagePreview
+                      existingImages={state.college_logo}
+                      onImagesChange={(newImages) => setState({ newImages })}
+                      onDeleteImage={(imageUrl) => {
+                        setState({
+                          college_logo: state.college_logo.filter(
+                            (img) => img !== imageUrl
+                          ),
+                        });
+                      }}
+                      maxFiles={1}
+                      title="College Logo"
+                      description="Upload college logo (JPEG or PNG)"
+                      validateDimensions={false}
+                      isSingleImage={true}
+                    />
                     <TextInput
                       title="College Name"
                       placeholder="Enter college name"
@@ -1973,9 +1994,10 @@ const Institution = () => {
               <div className="flex gap-2">
                 <button
                   onClick={handleFinalSubmit}
+                  disabled={state.submitting1}
                   className="rounded-lg bg-green-500 px-6 py-2 text-white hover:bg-green-600"
                 >
-                  Submit
+                  {state.submitting1 ? "Creating..." : "Submit"}
                 </button>
                 {state.currentStep < steps.length ? (
                   <button
@@ -2001,7 +2023,6 @@ const Institution = () => {
       <Modal
         open={state.showEditModal}
         close={handleCloseModal}
-        addHeader="Update Institution"
         renderComponent={() => (
           <div className="w-full max-w-4xl">
             {/* Progress Header */}
