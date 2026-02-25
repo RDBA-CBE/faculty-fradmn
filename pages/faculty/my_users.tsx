@@ -244,7 +244,11 @@ const Users = () => {
 
       const tableData = res?.results?.map((item) => ({
         id: item?.id,
-        username: item?.username,
+        // username: item?.username,
+        username:
+          item?.first_name && item?.last_name
+            ? `${item.first_name} ${item.last_name}`
+            : item?.username || "",
         email: item?.email,
         phone: item?.phone,
         department: item?.department?.name,
@@ -1458,16 +1462,16 @@ const Users = () => {
             </a>
           )}
           {state.activeTab !== "applicant" && (
-<>
-          <button
-            onClick={() => handleEdit(row)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 transition-all duration-200 hover:bg-blue-200"
-            title="Edit"
-          >
-            <IconEdit className="h-4 w-4" />
-          </button>
+            <>
+              <button
+                onClick={() => handleEdit(row)}
+                className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 transition-all duration-200 hover:bg-blue-200"
+                title="Edit"
+              >
+                <IconEdit className="h-4 w-4" />
+              </button>
 
-          {/* <button
+              {/* <button
             onClick={() => handleToggleStatus(row)}
             className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-200 ${
               row.status === "active"
@@ -1491,7 +1495,6 @@ const Users = () => {
           >
             <IconTrash className="h-4 w-4" />
           </button>
-        
         </div>
       ),
     });

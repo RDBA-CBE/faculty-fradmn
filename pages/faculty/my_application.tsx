@@ -29,7 +29,7 @@ import { FileText, Clock, CheckCircle, XCircle, UserCheck } from "lucide-react";
 import CustomeDatePicker from "@/components/datePicker";
 import PrivateRouter from "@/hook/privateRouter";
 import moment from "moment";
-import { ROLES } from "@/utils/constant.utils";
+import { ROLES, STATUS_COLOR } from "@/utils/constant.utils";
 
 const Application = () => {
   const dispatch = useDispatch();
@@ -109,7 +109,7 @@ const Application = () => {
     jobStatusLoading: false,
 
     profile: null,
-    showStatusModal:false
+    showStatusModal: false,
   });
 
   const debounceSearch = useDebounce(state.search, 500);
@@ -129,7 +129,6 @@ const Application = () => {
     jobStatusList();
     categoryList(1);
     applicationStatusList();
-
   }, []);
 
   useEffect(() => {
@@ -138,11 +137,29 @@ const Application = () => {
       if (role === ROLES.SUPER_ADMIN) {
         applicationList(1, null, null, null, state.profile?.id);
       } else if (role === ROLES.INSTITUTION_ADMIN) {
-        applicationList(1, state.profile?.institution?.institution_id, null, null, state.profile?.id);
+        applicationList(
+          1,
+          state.profile?.institution?.institution_id,
+          null,
+          null,
+          state.profile?.id
+        );
       } else if (role === ROLES.HR) {
-        applicationList(1, null, state.profile?.college?.college_id, null, state.profile?.id);
+        applicationList(
+          1,
+          null,
+          state.profile?.college?.college_id,
+          null,
+          state.profile?.id
+        );
       } else if (role === ROLES.HOD) {
-        applicationList(1, null, null, state.profile?.department?.department_id, state.profile?.id);
+        applicationList(
+          1,
+          null,
+          null,
+          state.profile?.department?.department_id,
+          state.profile?.id
+        );
       }
     }
   }, [
@@ -170,8 +187,20 @@ const Application = () => {
         collegeDropdownList(1, "", false, "", res.id);
         applicationList(1, null, null, null, res?.id);
       } else if (res?.role == ROLES.INSTITUTION_ADMIN) {
-        collegeDropdownList(1, "", false, res?.institution?.institution_id, res.id);
-        applicationList(1, res?.institution?.institution_id, null, null, res?.id);
+        collegeDropdownList(
+          1,
+          "",
+          false,
+          res?.institution?.institution_id,
+          res.id
+        );
+        applicationList(
+          1,
+          res?.institution?.institution_id,
+          null,
+          null,
+          res?.id
+        );
       } else if (res?.role == ROLES.HR) {
         departmentDropdownList(1, "", false, res?.college?.college_id, res.id);
         applicationList(1, null, res?.college?.college_id, null, res?.id);
@@ -184,20 +213,21 @@ const Application = () => {
   };
 
   const applicationStatusList = async () => {
-    console.log('✌️applicationStatusList --->', );
-        try {
-          setState({ applicationStatusLoading: true });
-          const res: any = await Models.master.application_status_list();
-    console.log('✌️res --->', res);
-          const dropdown = res?.map((item) => ({
-            value: item.id,
-            label: item.name,
-          }));
-          setState({ applicationStatusLoading: false, applicationStatusList: dropdown });
-        } catch (error) {
-          setState({ applicationStatusLoading: false });
-        }
-      };
+    try {
+      setState({ applicationStatusLoading: true });
+      const res: any = await Models.master.application_status_list();
+      const dropdown = res?.map((item) => ({
+        value: item.id,
+        label: item.name,
+      }));
+      setState({
+        applicationStatusLoading: false,
+        applicationStatusList: dropdown,
+      });
+    } catch (error) {
+      setState({ applicationStatusLoading: false });
+    }
+  };
 
   const applicationList = async (
     page,
@@ -239,7 +269,10 @@ const Application = () => {
         applied_date: item?.created_at,
         job_title: item?.job_detail?.job_title,
         resume: item?.resume,
-        application_status:{value: item?.application_status?.id, label: item?.application_status?.name}
+        application_status: {
+          value: item?.application_status?.id,
+          label: item?.application_status?.name,
+        },
       }));
       setState({
         loading: false,
@@ -268,7 +301,7 @@ const Application = () => {
       body.institution = state.institutionFilter.value;
     }
     if (state.collegeFilter?.value) {
-      body.college= state.collegeFilter.value;
+      body.college = state.collegeFilter.value;
     }
     if (state.departmentFilter?.value) {
       body.department = state.departmentFilter.value;
@@ -310,11 +343,29 @@ const Application = () => {
     if (role === ROLES.SUPER_ADMIN) {
       applicationList(pageNumber, null, null, null, state.profile?.id);
     } else if (role === ROLES.INSTITUTION_ADMIN) {
-      applicationList(pageNumber, state.profile?.institution?.institution_id, null, null, state.profile?.id);
+      applicationList(
+        pageNumber,
+        state.profile?.institution?.institution_id,
+        null,
+        null,
+        state.profile?.id
+      );
     } else if (role === ROLES.HR) {
-      applicationList(pageNumber, null, state.profile?.college?.college_id, null, state.profile?.id);
+      applicationList(
+        pageNumber,
+        null,
+        state.profile?.college?.college_id,
+        null,
+        state.profile?.id
+      );
     } else if (role === ROLES.HOD) {
-      applicationList(pageNumber, null, null, state.profile?.department?.department_id, state.profile?.id);
+      applicationList(
+        pageNumber,
+        null,
+        null,
+        state.profile?.department?.department_id,
+        state.profile?.id
+      );
     }
   };
 
@@ -358,22 +409,43 @@ const Application = () => {
       };
       await Models.application.update(body, state.selectedApplication?.id);
       Success("Application status updated successfully!");
-      setState({ showStatusModal: false, selectedApplication: null, selectedStatus: null });
+      setState({
+        showStatusModal: false,
+        selectedApplication: null,
+        selectedStatus: null,
+      });
       const role = state.profile?.role;
       if (role === ROLES.SUPER_ADMIN) {
         applicationList(state.page, null, null, null, state.profile?.id);
       } else if (role === ROLES.INSTITUTION_ADMIN) {
-        applicationList(state.page, state.profile?.institution?.institution_id, null, null, state.profile?.id);
+        applicationList(
+          state.page,
+          state.profile?.institution?.institution_id,
+          null,
+          null,
+          state.profile?.id
+        );
       } else if (role === ROLES.HR) {
-        applicationList(state.page, null, state.profile?.college?.college_id, null, state.profile?.id);
+        applicationList(
+          state.page,
+          null,
+          state.profile?.college?.college_id,
+          null,
+          state.profile?.id
+        );
       } else if (role === ROLES.HOD) {
-        applicationList(state.page, null, null, state.profile?.department?.department_id, state.profile?.id);
+        applicationList(
+          state.page,
+          null,
+          null,
+          state.profile?.department?.department_id,
+          state.profile?.id
+        );
       }
     } catch (error) {
       Failure("Failed to update status. Please try again.");
     }
   };
-
 
   const handleEdit = (row) => {
     router.push(`/faculty/application_detail?id=${row?.id}`);
@@ -390,11 +462,29 @@ const Application = () => {
       if (role === ROLES.SUPER_ADMIN) {
         applicationList(state.page, null, null, null, state.profile?.id);
       } else if (role === ROLES.INSTITUTION_ADMIN) {
-        applicationList(state.page, state.profile?.institution?.institution_id, null, null, state.profile?.id);
+        applicationList(
+          state.page,
+          state.profile?.institution?.institution_id,
+          null,
+          null,
+          state.profile?.id
+        );
       } else if (role === ROLES.HR) {
-        applicationList(state.page, null, state.profile?.college?.college_id, null, state.profile?.id);
+        applicationList(
+          state.page,
+          null,
+          state.profile?.college?.college_id,
+          null,
+          state.profile?.id
+        );
       } else if (role === ROLES.HOD) {
-        applicationList(state.page, null, null, state.profile?.department?.department_id, state.profile?.id);
+        applicationList(
+          state.page,
+          null,
+          null,
+          state.profile?.department?.department_id,
+          state.profile?.id
+        );
       }
     } catch (error) {
       Failure("Failed to update status. Please try again.");
@@ -690,7 +780,6 @@ const Application = () => {
       window.open(row.resume, "_blank");
     }
   };
-
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-3 dark:from-gray-900 dark:to-gray-800">
@@ -1011,7 +1100,7 @@ const Application = () => {
             </div> */}
 
             <div className="group relative">
-               <CustomSelect
+              <CustomSelect
                 options={state.applicationStatusList}
                 value={state.selectedStatus}
                 onChange={(e) => setState({ selectedStatus: e })}
@@ -1139,16 +1228,10 @@ const Application = () => {
                 render: ({ status }) => (
                   <span
                     className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-                      status === "Pending"
-                        ? "bg-yellow-100 text-yellow-800"
-                        : status === "Reviewed"
-                        ? "bg-blue-100 text-blue-800"
-                        : status === "Accepted"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
+                      STATUS_COLOR[status] || "bg-slate-100 text-slate-800"
                     }`}
                   >
-                    {status}
+                    {capitalizeFLetter(status)}
                   </span>
                 ),
                 sortable: true,
@@ -1159,7 +1242,7 @@ const Application = () => {
                 textAlignment: "center",
                 render: (row: any) => (
                   <div className="flex items-center justify-center gap-2">
-                      <button
+                    <button
                       onClick={() => handleDownloadResume(row)}
                       className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 transition-all duration-200 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-400"
                       title="Resume"
@@ -1173,17 +1256,22 @@ const Application = () => {
                     >
                       <IconEye className="h-4 w-4" />
                     </button>
-                    <button
-                      onClick={() => {console.log(row)
-                        setState({showStatusModal: true, selectedApplication: row,
-                        selectedStatus: row.application_status
-                       } 
-                       )}} 
-                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 text-purple-600 transition-all duration-200 hover:bg-purple-200 dark:bg-purple-900 dark:text-purple-400"
-                      title="Update Status"
-                    >
-                      <UserCheck className="h-4 w-4" />
-                    </button>
+                    {state.profile?.role == ROLES.HR && (
+                      <button
+                        onClick={() => {
+                          console.log(row);
+                          setState({
+                            showStatusModal: true,
+                            selectedApplication: row,
+                            selectedStatus: row.application_status,
+                          });
+                        }}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 text-purple-600 transition-all duration-200 hover:bg-purple-200 dark:bg-purple-900 dark:text-purple-400"
+                        title="Update Status"
+                      >
+                        <UserCheck className="h-4 w-4" />
+                      </button>
+                    )}
                     <button
                       onClick={() => handleDelete(row)}
                       className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600 transition-all duration-200 hover:bg-red-200 dark:bg-red-900 dark:text-red-400"
@@ -1388,9 +1476,15 @@ const Application = () => {
         )}
       />
 
-<Modal
+      <Modal
         open={state.showStatusModal}
-        close={() => setState({ showStatusModal: false, selectedApplication: null, selectedStatus: null })}
+        close={() =>
+          setState({
+            showStatusModal: false,
+            selectedApplication: null,
+            selectedStatus: null,
+          })
+        }
         renderComponent={() => (
           <div className="p-6">
             <div className="mb-6 text-center">
@@ -1417,7 +1511,13 @@ const Application = () => {
 
             <div className="flex gap-3">
               <button
-                onClick={() => setState({ showStatusModal: false, selectedApplication: null, selectedStatus: null })}
+                onClick={() =>
+                  setState({
+                    showStatusModal: false,
+                    selectedApplication: null,
+                    selectedStatus: null,
+                  })
+                }
                 className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
               >
                 Cancel

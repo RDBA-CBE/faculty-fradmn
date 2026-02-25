@@ -1026,7 +1026,7 @@ const Job = () => {
                 sortable: true,
                 render: ({ job_title }) => (
                   <div className="font-medium text-gray-900 dark:text-white">
-                    {job_title}
+                    {capitalizeFLetter(job_title)}
                   </div>
                 ),
               },
@@ -1036,7 +1036,7 @@ const Job = () => {
                 sortable: true,
                 render: ({ department_name }) => (
                   <span className="text-gray-600 dark:text-gray-400">
-                    {department_name || "-"}
+                    {capitalizeFLetter(department_name || "-")}
                   </span>
                 ),
               },
@@ -1046,7 +1046,7 @@ const Job = () => {
                 sortable: true,
                 render: ({ college_name }) => (
                   <span className="text-gray-600 dark:text-gray-400">
-                    {college_name || "-"}
+                    {capitalizeFLetter(college_name || "-")}
                   </span>
                 ),
               },
@@ -1065,7 +1065,7 @@ const Job = () => {
                 title: "Experience",
                 render: ({ experiences }) => (
                   <span className="text-gray-600 dark:text-gray-400">
-                    {experiences?.label || "-"}
+                    {capitalizeFLetter(experiences?.label || "-")}
                   </span>
                 ),
               },

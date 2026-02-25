@@ -36,7 +36,7 @@ import {
 import CustomeDatePicker from "@/components/datePicker";
 import PrivateRouter from "@/hook/privateRouter";
 import moment from "moment";
-import { FRONTEND_URL, ROLES } from "@/utils/constant.utils";
+import { FRONTEND_URL, ROLES, STATUS_COLOR } from "@/utils/constant.utils";
 
 const Application = () => {
   const dispatch = useDispatch();
@@ -1201,20 +1201,13 @@ const Application = () => {
                 ),
                 sortable: true,
               },
-
               {
                 accessor: "status",
                 title: "Status",
                 render: ({ status }) => (
                   <span
                     className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-                      status === "Pending"
-                        ? "bg-yellow-100 text-yellow-800"
-                        : status === "Reviewed"
-                        ? "bg-blue-100 text-blue-800"
-                        : status === "Accepted"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
+                      STATUS_COLOR[status] || "bg-slate-100 text-slate-800"
                     }`}
                   >
                     {capitalizeFLetter(status)}
@@ -1242,13 +1235,15 @@ const Application = () => {
                     >
                       <IconEye className="h-4 w-4" />
                     </button>
-                    <button
-                      onClick={() => handleUpdateStatus(row, "")}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 text-purple-600 transition-all duration-200 hover:bg-purple-200 dark:bg-purple-900 dark:text-purple-400"
-                      title="Update Status"
-                    >
-                      <UserCheck className="h-4 w-4" />
-                    </button>
+                    {state.profile?.role == ROLES.HR && (
+                      <button
+                        onClick={() => handleUpdateStatus(row, "")}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 text-purple-600 transition-all duration-200 hover:bg-purple-200 dark:bg-purple-900 dark:text-purple-400"
+                        title="Update Status"
+                      >
+                        <UserCheck className="h-4 w-4" />
+                      </button>
+                    )}
                     <button
                       onClick={() => handleDelete(row)}
                       className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600 transition-all duration-200 hover:bg-red-200 dark:bg-red-900 dark:text-red-400"
