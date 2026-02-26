@@ -203,7 +203,7 @@ const Users = () => {
 
       // if (res?.role === ROLES.HR) {
       //   if (res?.college?.length > 0) {
-          
+
       //   } else {
       //     departmentList(1, "", false, res?.college?.college_id);
       //   }
@@ -761,8 +761,8 @@ const Users = () => {
     });
   };
 
+
   const handleEdit = (row) => {
-    console.log("row", row);
 
     setState({
       editId: row.id,
@@ -782,12 +782,29 @@ const Users = () => {
         setState({ selectedHODInstitution: row?.institutionData });
       }
       if (row?.collegeData) {
-        setState({ selectedHODCollege: row?.collegeData });
+        setState({
+          selectedHODCollege:
+            row?.collegeData?.length > 0
+              ? row?.collegeData[0]
+              : null,
+        });
+
+        setState({
+         college:
+            row?.collegeData?.length > 0
+              ? row?.collegeData[0]
+              : null,
+        });
         hodCollegeList(1, "", false, row?.institutionData);
       }
       if (row?.collegeData) {
         setState({ department: row?.deptData });
-        hodDepartmentList(1, "", false, row?.collegeData);
+        hodDepartmentList(
+          1,
+          "",
+          false,
+          row?.collegeData?.length > 0 ? row?.collegeData[0] : null
+        );
       }
     }
 
@@ -796,8 +813,20 @@ const Users = () => {
         setState({ selectedHRInstitution: row?.institutionData });
       }
       if (row?.collegeData) {
-        setState({ college: row?.collegeData });
-        hrCollegeList(1, "", false, row?.collegeData);
+        setState({
+          college:
+            row?.collegeData?.length > 0
+              ? row?.collegeData[0]
+              : null,
+        });
+        hrCollegeList(
+          1,
+          "",
+          false,
+          row?.collegeData?.length > 0
+            ? row?.collegeData[0]
+            : null
+        );
       }
     }
   };
