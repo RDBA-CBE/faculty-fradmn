@@ -186,11 +186,12 @@ export const CreateNewJob = Yup.object().shape({
   institution: Yup.mixed().required("Institution is required").nullable(false),
 
   college: Yup.mixed().required("College is required").nullable(false),
-
-  department: Yup.mixed().required("Department is required").nullable(false),
+  department: Yup.array()
+  .min(1, "At least one Department is required")
+  .required("Department is required").nullable(true),
   salary: Yup.string().required("Salary range is required"),
 
-  priority: Yup.string().required("Priority is required"),
+  priority: Yup.string().required("Joining Availability is required"),
   deadline: Yup.string().required("Deadline is required"),
   startDate: Yup.string().required("Start date is required"),
   endDate: Yup.string().required("End date is required"),
@@ -227,4 +228,32 @@ export const CreateNewJob = Yup.object().shape({
     .required("Key responsibilities are required"),
 
   description: Yup.string().required("Job description is required"),
+
+  applyType: Yup.string().required("Apply type is required"),
+
+  isCollegeEmail: Yup.boolean(),
+
+  applyLink: Yup.string()
+    .when("applyType", {
+      is: "external",
+      then: (schema) =>
+        schema
+          .required("Apply link is required")
+          .url("Enter a valid URL"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+
+  alternativeEmail: Yup.string().when(
+    ["applyType", "isCollegeEmail"],
+    {
+      is: (applyType: string, isCollegeEmail: boolean) =>
+        applyType === "internal" && isCollegeEmail === false,
+      then: (schema) =>
+        schema
+          .required("Alternative email is required")
+          .email("Enter a valid email"),
+      otherwise: (schema) => schema.notRequired(),
+    }
+  ),
+
 });

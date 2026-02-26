@@ -201,27 +201,28 @@ const Users = () => {
         }
       }
 
-      if (res?.role === ROLES.HR) {
-        if (res?.college?.length > 0) {
-        } else {
-          departmentList(1, "", false, res?.college?.college_id);
-        }
-      } else {
-        departmentList(1, "", false, "");
-      }
+      // if (res?.role === ROLES.HR) {
+      //   if (res?.college?.length > 0) {
+          
+      //   } else {
+      //     departmentList(1, "", false, res?.college?.college_id);
+      //   }
+      // } else {
+      //   departmentList(1, "", false, "");
+      // }
 
       if (res?.role === ROLES.HR) {
         if (isTabChange) {
           setState({ activeTab: ROLES.HOD });
         }
         setState({
-          profile_institution: res?.institution?.institution_name,
+          profile_institution: res?.institution?.name,
           selectedHODCollege: {
             value: res?.college?.college_id,
             label: res?.college?.college_name,
           },
         });
-        superAdminDepartmentList(1, "", false, res?.college?.college_id);
+        // superAdminDepartmentList(1, "", false, res?.college?.college_id);
       }
 
       if (res?.role === ROLES.HOD) {
@@ -350,13 +351,9 @@ const Users = () => {
 
     if (state.profile?.role === ROLES.HR) {
       if (state.activeTab == "hod" || state.activeTab == "applicant") {
-        if (state.ownRecord) {
-          body.created_by = userId;
-          body.team = "No";
-        } else {
-          body.team = "Yes";
-          body.college_id = state.profile?.college?.college_id;
-        }
+        body.created_by = userId;
+        body.team = "No";
+        // body.college_id = state.profile?.college?.map((item)=> item?.college_id);
       }
     }
 
@@ -378,6 +375,7 @@ const Users = () => {
       body.ordering =
         state.sortOrder === "desc" ? `-${state.sortBy}` : state.sortBy;
     }
+    console.log("✌️body --->", body);
 
     return body;
   };
@@ -693,6 +691,11 @@ const Users = () => {
       if (collegeId) {
         body.college = collegeId;
       }
+      // if(state.profile?.role == ROLES.HR){
+      //   body.created_by= state.profile?.id;
+      //   body.team="No"
+      // }
+
       console.log("✌️body --->", body);
 
       const res: any = await Models.department.list(page, body);
@@ -1389,14 +1392,27 @@ const Users = () => {
           <div className="text-gray-600 dark:text-gray-400">{phone}</div>
         ),
       },
-      {
+
+      // {
+      //   accessor: "institution",
+      //   title: "Institution",
+      //   render: ({ institution }) => (
+      //     <div className="text-gray-600 dark:text-gray-400">{institution}</div>
+      //   ),
+      // },
+    ];
+    if (state.activeTab !== "applicant") {
+      baseColumns.push({
         accessor: "institution",
         title: "Institution",
-        render: ({ institution }) => (
-          <div className="text-gray-600 dark:text-gray-400">{institution}</div>
+        render: (row: any) => (
+          <div className="text-gray-600 dark:text-gray-400">
+            {row?.institution}
+          </div>
         ),
-      },
-    ];
+      });
+    }
+
     if (state.activeTab === "hr") {
       baseColumns.splice(3, 0, {
         accessor: "college",

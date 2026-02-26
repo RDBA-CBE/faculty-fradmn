@@ -164,14 +164,15 @@ const SidebarDynamic = () => {
         <div className="h-full bg-white dark:bg-black">
           {/* Logo */}
           <div className="flex items-center justify-between px-4 py-3">
-            <Link href="/" className="main-logo flex shrink-0 items-center">
+            <Link href="/" className="main-logo flex shrink-0 items-center ">
+            <div></div>
               <img
                 className="ml-[5px] w-8 flex-none"
-                src="/assets/images/logo.svg"
+                src="/assets/images/Logo.png"
                 alt="logo"
               />
               <span className="align-middle text-2xl font-semibold dark:text-white-light lg:inline ltr:ml-1.5 rtl:mr-1.5">
-                {t("REPUTE")}
+                {t("Faculty Pro")}
               </span>
             </Link>
             <button

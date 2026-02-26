@@ -48,7 +48,6 @@ const LoginBoxed = () => {
 
       await Utils.Validation.login.validate(body, { abortEarly: false });
       const res: any = await Models.auth.login(body);
-console.log('✌️res --->', res);
       Success("Login Successfully");
       localStorage.setItem("token", res.access);
       localStorage.setItem("refresh", res.refresh);

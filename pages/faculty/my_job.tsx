@@ -181,7 +181,11 @@ const Job = () => {
         job_description: item.job_description,
 
         college_name: item?.college?.name,
-        department_name: item?.department?.name || "-",
+        department_name:
+          item?.department?.length > 0
+            ? item?.department?.map((item) => item?.name).join(", ")
+            : "-",
+        // department_name:)  item?.department?.name || "-",
 
         job_type: item?.job_type,
         experiences: {
