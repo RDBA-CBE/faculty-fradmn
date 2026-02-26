@@ -1250,6 +1250,24 @@ console.log('✌️collegeId --->', collegeId);
                     >
                       <IconEye className="h-4 w-4" />
                     </button>
+                    {state.profile?.role == ROLES.HR && (
+                      <button
+                        onClick={() => {
+                          if (state.profile?.role == ROLES.HR) {
+                            handleApprove(row);
+                          }
+                        }}
+                        // onClick={() => handleToggleStatus(row)}
+                        className={`flex h-8 w-8 items-center justify-center rounded-lg ${
+                          row?.job_status === "published"
+                            ? "bg-red-100 text-red-600 hover:bg-red-200"
+                            : "bg-green-100 text-green-600 hover:bg-green-200"
+                        }`}
+                        title={"Job Status"}
+                      >
+                        <CheckCircle className="h-4 w-4" />
+                      </button>
+                    )}
                     <button
                       onClick={() => handleLog(row)}
                       className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 text-purple-600 hover:bg-purple-200"
