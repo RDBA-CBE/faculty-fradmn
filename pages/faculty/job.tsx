@@ -1026,7 +1026,7 @@ console.log('✌️collegeId --->', collegeId);
               />
             </div> */}
 
-            <div className="group relative">
+            {/* <div className="group relative">
               <CustomSelect
                 options={state.jobStatusList}
                 value={state.statusFilter}
@@ -1034,7 +1034,7 @@ console.log('✌️collegeId --->', collegeId);
                 placeholder="Filter by status"
                 isClearable={true}
               />
-            </div>
+            </div> */}
             <div className="group relative">
               <CustomSelect
                 options={state.salaryRangeList}

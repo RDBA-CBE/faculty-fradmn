@@ -227,6 +227,10 @@ export default function Newjob() {
           setState({
             newImages: [res?.job_image],
           });
+        }else{
+          setState({
+            newImages: [],
+          });
         }
 
         if (profileResponse?.role == ROLES.SUPER_ADMIN) {
@@ -629,11 +633,10 @@ export default function Newjob() {
       }
       if (state.newImages?.length > 0) {
         body.job_image = state.newImages?.[0];
-      }else{
-        body.job_image = [];
-
+      } else {
+        body.job_image = null;
       }
-console.log('✌️body --->', body);
+      console.log("✌️body --->", body);
 
       if (state.applyType?.value == "internal") {
         if (state.isCollegeEmail) {
@@ -652,7 +655,14 @@ console.log('✌️body --->', body);
       }
 
       console.log("✌️body --->", body);
-      const formData = buildFormData(body);
+      const formData: any = buildFormData(body);
+
+      if (state.newImages?.length > 0) {
+        formData.append("job_image", state.newImages?.[0]);
+      } else {
+        formData.append("job_image", null);
+
+      }
 
       const res = await Models.job.update(formData, id);
       console.log("✌️res --->", res);
@@ -674,8 +684,7 @@ console.log('✌️body --->', body);
       setState({ btnLoading: false });
     }
   };
-console.log('✌️state.newImages --->', state.newImages);
-
+  console.log("✌️state.newImages --->", state.newImages);
 
   const handleFieldChange = (field: string, value: any) => {
     setState({
