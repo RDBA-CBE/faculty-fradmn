@@ -257,6 +257,7 @@ const CollegeAndDepartment = () => {
     loadMore = false,
     seletedInstitution = null
   ) => {
+
     try {
       setState({ collegeLoading: true });
       const body: any = { search };
@@ -454,6 +455,10 @@ const CollegeAndDepartment = () => {
       setState({ collegeFilterLoading: true });
       const body: any = { search };
       const selectedInstitution = institutionOption || state.institutionFilter;
+      // const userId = localStorage.getItem("userId");
+      // body.created_by = userId;
+      // body.team = "No";
+
       if (selectedInstitution) {
         body.institution = selectedInstitution.value;
       }
@@ -584,6 +589,7 @@ const CollegeAndDepartment = () => {
         },
         college_logo: row.college_logo ? [row.college_logo] : [],
         showEditModal: true,
+
       });
     } else {
       setState({
@@ -717,12 +723,16 @@ const CollegeAndDepartment = () => {
           college_email: state.college_email,
           college_phone: state.college_phone,
           college_address: state.college_address,
-          college_hr: state.college_hr?.value,
+          // college_hr: state.college_hr?.value,
           institution: state?.institution?.value,
         };
 
         if (state.newImages?.length > 0 && state.images?.length === 0) {
           collegeBody.college_logo = state.newImages[0];
+        }
+        if(state.college_hr?.value){
+          collegeBody.college_hr=state.college_hr?.value
+
         }
         await CreateCollege.validate(collegeBody, { abortEarly: false });
 
@@ -824,8 +834,6 @@ const CollegeAndDepartment = () => {
       setState({ submitting: false });
     }
   };
-
-  console.log('✌️newImages --->', state.newImages);
 
 
   const handleSubmit = async () => {
@@ -1193,7 +1201,7 @@ const CollegeAndDepartment = () => {
       />
 
       <UpdatePropertyImagePreview
-        existingImages={state.college_logo}
+        existingImages={state.college_logo?.length>0?state.college_logo:[]}
         onImagesChange={(newImages) => setState({ newImages })}
         onDeleteImage={(imageUrl) => {
           setState({
@@ -1250,7 +1258,6 @@ const CollegeAndDepartment = () => {
           loadMore={() => state.hrNext && HRList(state.hrPage + 1, "", true)}
           loading={state.hrLoading}
           title="Assign HR"
-          required
         />
       </div>
       <TextArea
@@ -1274,18 +1281,19 @@ const CollegeAndDepartment = () => {
             value={state.institution}
             onChange={(selectedOption) => {
               if (selectedOption) {
+                console.log("selectedOption: ", selectedOption);
                 setState({
                   institution: selectedOption,
                   errors: { ...state.errors, institution: "" },
                   seletedInstitution: selectedOption,
                   college: null,
                 });
-                collegeList(1, selectedOption);
+                collegeDropdownList(1, "",false,selectedOption)
+
               }
             }}
             onSearch={(searchTerm) => institutionDropdownList(1, searchTerm)}
             placeholder="Select Institution"
-            isClearable={true}
             loadMore={() =>
               state.institutionNext &&
               institutionDropdownList(state.instituitonPage + 1, "", true)
@@ -1305,7 +1313,7 @@ const CollegeAndDepartment = () => {
               })
             }
             onSearch={(searchTerm) =>
-              collegeDropdownList(1, searchTerm, state.seletedInstitution)
+              collegeDropdownList(1, searchTerm,false, state.seletedInstitution)
             }
             placeholder="Select College"
             isClearable={true}
@@ -1322,6 +1330,7 @@ const CollegeAndDepartment = () => {
             title="Select College"
             error={state.errors.college}
             required
+            disabled={!state.institution}
           />
         </>
       )}
@@ -1830,14 +1839,14 @@ const CollegeAndDepartment = () => {
 
       {/* Modal */}
       <Modal
-      closeIcon={true}
+        // closeIcon={true}
         open={state.showModal}
         close={handleCloseModal}
-        subTitle={
-          state.activeTab === "colleges"
-            ? "College & Department Setup"
-            : "Add Department"
-        }
+        // subTitle={
+        //   state.activeTab === "colleges"
+        //     ? "College & Department Setup"
+        //     : "Add Department"
+        // }
         renderComponent={() => (
           <div className="w-full max-w-4xl">
             <style jsx>{`
