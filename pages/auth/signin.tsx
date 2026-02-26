@@ -19,6 +19,7 @@ import * as Yup from "yup";
 import Models from "@/imports/models.import";
 import PrimaryButton from "@/components/FormFields/PrimaryButton.component";
 import { userData } from "@/store/userConfigSlice";
+import { ROLES } from "@/utils/constant.utils";
 
 const LoginBoxed = () => {
   const dispatch = useDispatch();
@@ -47,12 +48,23 @@ const LoginBoxed = () => {
 
       await Utils.Validation.login.validate(body, { abortEarly: false });
       const res: any = await Models.auth.login(body);
+console.log('✌️res --->', res);
       Success("Login Successfully");
       localStorage.setItem("token", res.access);
       localStorage.setItem("refresh", res.refresh);
       localStorage.setItem("userId", res.user?.id);
       localStorage.setItem("role", res.user?.role);
-      router.replace("/");
+      // router.replace("/");
+      if (res.user?.role == ROLES.SUPER_ADMIN) {
+        router.replace("/faculty/my_institution");
+      } else if (res.user?.role == ROLES.INSTITUTION_ADMIN) {
+        router.replace("/faculty/institute_college_and_department");
+      } else if (res.user?.role == ROLES.HR) {
+        router.replace("/faculty/my_department");
+      } else if (res.user?.role == ROLES.HOD) {
+        router.replace("/faculty/my_job");
+      }
+
       setState({ btnLoading: false });
     } catch (error) {
       if (error instanceof Yup.ValidationError) {
