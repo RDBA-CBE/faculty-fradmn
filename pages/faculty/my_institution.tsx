@@ -495,8 +495,9 @@ const Institution = () => {
           } catch (error: any) {
             console.log("✌️error --->", error);
             if (error?.response?.data?.error) {
-              throw new Error(`HR creation failed: ${error.response.data.error}`);
-
+              throw new Error(
+                `HR creation failed: ${error.response.data.error}`
+              );
             } else {
               throw new Error(`HR creation failed: ${error?.message}`);
             }
@@ -556,6 +557,14 @@ const Institution = () => {
             };
             const deptRes: any = await Models.department.create(deptBody);
             createdRecords.departmentId = deptRes?.id;
+            const bodys = {
+              department: deptRes?.id,
+            };
+            const formData = buildFormData(bodys);
+            const hodRes: any = await Models.auth.updateUser(
+              createdRecords.hodId,
+              formData
+            );
           } catch (error: any) {
             throw new Error(`Department creation failed: ${error?.message}`);
           }
