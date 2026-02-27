@@ -508,7 +508,7 @@ const Institution = () => {
         // Step 4: Create College
         if (stepsToProcess.includes(4)) {
           try {
-            const collegeBody:any = {
+            const collegeBody: any = {
               college_name: state.college_name,
               college_code: state.college_code,
               college_email: state.college_email,
@@ -667,7 +667,6 @@ const Institution = () => {
         address: state.address,
       };
       const res = await Models.institution.update(body, state.editId);
-      console.log("✌️res --->", res);
       instutionList(state.page);
       handleCloseModal();
       setState({ btnLoading: false });
@@ -831,7 +830,7 @@ const Institution = () => {
             }
 
             // Step 6: Create HOD
-            if (state.completedSteps.includes(6)) {
+            // if (state.completedSteps.includes(6)) {
               try {
                 const hodBody = {
                   username: state.hod_username,
@@ -849,10 +848,16 @@ const Institution = () => {
 
                 const hodRes: any = await Models.auth.createUser(formData);
                 createdRecords.hodId = hodRes?.id;
+
+                const updateData = {
+                  hod_id: hodRes?.id,
+                }
+              const deptRes: any = await Models.department.update(updateData,  createdRecords.departmentId);
+
               } catch (error: any) {
                 throw new Error(`HOD creation failed: ${error?.message}`);
               }
-            }
+            // }
           }
         }
       }
@@ -879,6 +884,7 @@ const Institution = () => {
 
       Success(successMessage);
       handleCloseModal();
+      
     } catch (error: any) {
       console.log("✌️error --->", error);
       // Rollback created records
@@ -943,7 +949,6 @@ const Institution = () => {
       const body = bodyData();
 
       const res: any = await Models.institution.list(page, body);
-      console.log("✌️res --->", res);
 
       const tableData = res?.results?.map((item) => ({
         institution_name: item?.institution_name,
@@ -957,7 +962,6 @@ const Institution = () => {
         total_departments: item?.total_departments,
         total_jobs: item?.total_jobs,
       }));
-      console.log("✌️tableData --->", tableData);
 
       setState({
         loading: false,
@@ -981,7 +985,6 @@ const Institution = () => {
       body.ordering =
         state.sortOrder === "desc" ? `-${state.sortBy}` : state.sortBy;
     }
-    console.log("✌️body --->", body);
 
     return body;
   };
@@ -2000,13 +2003,15 @@ const Institution = () => {
               </button>
 
               <div className="flex gap-2">
-                <button
-                  onClick={handleFinalSubmit}
-                  disabled={state.submitting1}
-                  className="rounded-lg bg-green-500 px-6 py-2 text-white hover:bg-green-600"
-                >
-                  {state.submitting1 ? "Creating..." : "Submit"}
-                </button>
+                {state.currentStep < steps.length && (
+                  <button
+                    onClick={handleFinalSubmit}
+                    disabled={state.submitting1}
+                    className="rounded-lg bg-green-500 px-6 py-2 text-white hover:bg-green-600"
+                  >
+                    {state.submitting1 ? "Creating..." : "Submit"}
+                  </button>
+                )}
                 {state.currentStep < steps.length ? (
                   <button
                     onClick={() => handleStepComplete(state.currentStep)}
