@@ -844,6 +844,7 @@ const CollegeAndDepartment = () => {
         }
       }
     } catch (error: any) {
+console.log('✌️error --->', error);
       if (error?.inner) {
         const errors = {};
         error.inner.forEach((err) => {
@@ -866,12 +867,12 @@ const CollegeAndDepartment = () => {
           return;
         }
 
-        if (error?.response?.data?.non_field_errors?.length > 0) {
+        if (error?.data?.non_field_errors?.length > 0) {
           Failure(error?.response?.data?.non_field_errors?.[0]);
         } else {
           Failure(
             `Step ${state.currentStep} failed: ${
-              error?.message || "Creation failed. Please try again."
+              error?.data?.error || error?.message || "Creation failed. Please try again."
             }`
           );
         }
