@@ -1178,12 +1178,12 @@ const Application = () => {
                     {capitalizeFLetter(job_title)}
                   </div>
                 ),
-                sortable: true,
+               
               },
               {
                 accessor: "applicant_name",
                 title: "Applicant Name",
-                sortable: true,
+               
                 render: ({ applicant_name }) => (
                   <div className="font-medium text-gray-900 dark:text-white">
                     {applicant_name}
@@ -1193,7 +1193,7 @@ const Application = () => {
               {
                 accessor: "applicant_email",
                 title: "Email",
-                sortable: true,
+               
                 render: ({ applicant_email }) => (
                   <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-200">
                     {applicant_email}
@@ -1208,7 +1208,7 @@ const Application = () => {
                     {applicant_phone}
                   </div>
                 ),
-                sortable: true,
+               
               },
               {
                 accessor: "experience",
@@ -1218,7 +1218,7 @@ const Application = () => {
                     {experience}
                   </div>
                 ),
-                sortable: true,
+               
               },
 
               {
@@ -1233,7 +1233,7 @@ const Application = () => {
                     {capitalizeFLetter(status)}
                   </span>
                 ),
-                sortable: true,
+               
               },
               {
                 accessor: "actions",

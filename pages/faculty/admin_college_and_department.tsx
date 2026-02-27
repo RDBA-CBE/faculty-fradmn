@@ -22,6 +22,7 @@ import {
 import Pagination from "@/components/pagination/pagination";
 import {
   buildFormData,
+  capitalizeFLetter,
   Dropdown,
   showDeleteAlert,
   useSetState,
@@ -765,11 +766,11 @@ const CollegeAndDepartment = () => {
       if (state.currentStep === 1) {
         // Step 1: Create College only
         const collegeBody: any = {
-          college_name: state.college_name,
-          college_code: state.college_code,
+          college_name: capitalizeFLetter(state.college_name),
+          college_code: capitalizeFLetter(state.college_code),
           college_email: state.college_email,
           college_phone: state.college_phone,
-          college_address: state.college_address,
+          college_address: capitalizeFLetter(state.college_address),
           // college_hr: state.college_hr?.value,
           institution: state?.institution?.value,
         };
@@ -790,11 +791,11 @@ const CollegeAndDepartment = () => {
       } else if (state.currentStep === 2) {
         // Step 2: Create College and Department
         const collegeBody: any = {
-          college_name: state.college_name,
-          college_code: state.college_code,
+          college_name: capitalizeFLetter(state.college_name),
+          college_code: capitalizeFLetter(state.college_code),
           college_email: state.college_email,
           college_phone: state.college_phone,
-          college_address: state.college_address,
+          college_address: capitalizeFLetter(state.college_address),
           institution: state?.institution?.value,
           college_hr: state.college_hr?.value,
         };
@@ -889,7 +890,7 @@ console.log('✌️error --->', error);
       // If activeTab is departments, show single step department form
       if (state.activeTab === "departments") {
         const body: any = {
-          department_name: state.department_name,
+          department_name: capitalizeFLetter(state.department_name),
           // department_code: state.department_code,
           college: state.college?.value,
         };
@@ -954,11 +955,11 @@ console.log('✌️error --->', error);
       // College wizard flow
       if (state.currentStep === 1) {
         const body: any = {
-          college_name: state.college_name,
-          college_code: state.college_code,
+          college_name: capitalizeFLetter(state.college_name),
+          college_code: capitalizeFLetter(state.college_code),
           college_email: state.college_email,
           college_phone: state.college_phone,
-          college_address: state.college_address,
+          college_address: capitalizeFLetter(state.college_address),
           institution: state?.institution?.value,
           college_hr: state?.college_hr?.value,
         };
@@ -1017,13 +1018,13 @@ console.log('✌️error --->', error);
       } else if (state.currentStep === 3) {
         // Validate HOD details and create all entities
         const hodBody = {
-          hod_username: state.hod_username,
+          hod_username: capitalizeFLetter(state.hod_username),
           hod_email: state.hod_email,
           hod_password: state.hod_password,
           hod_confirm_password: state.hod_confirm_password,
           hod_phone: state.hod_phone,
           hod_gender: state.hod_gender?.value,
-          hod_qualification: state.hod_qualification,
+          hod_qualification: capitalizeFLetter(state.hod_qualification),
         };
 
         try {
@@ -1046,11 +1047,11 @@ console.log('✌️error --->', error);
         try {
           // Step 3.1: Create college first
           const collegeBody: any = {
-            college_name: state.college_name,
-            college_code: state.college_code,
+            college_name: capitalizeFLetter(state.college_name),
+            college_code: capitalizeFLetter(state.college_code),
             college_email: state.college_email,
             college_phone: state.college_phone,
-            college_address: state.college_address,
+            college_address: capitalizeFLetter(state.college_address),
             institution: state?.institution?.value,
             college_hr: state?.college_hr?.value,
           };
@@ -1066,7 +1067,7 @@ console.log('✌️error --->', error);
 
           // Step 3.2: Create department with the created college ID
           const deptBody = {
-            department_name: state.department_name,
+            department_name:capitalizeFLetter (state.department_name),
             // department_code: state.department_code,
             college: collegeRes?.id,
             institution: state?.institution?.value,
@@ -1077,7 +1078,7 @@ console.log('✌️error --->', error);
 
           // Step 3.3: Create HOD with the created department ID
           const finalHodBody = {
-            username: state.hod_username,
+            username: capitalizeFLetter(state.hod_username),
             email: state.hod_email,
             password: state.hod_password,
             password_confirm: state.hod_confirm_password,
@@ -1085,7 +1086,7 @@ console.log('✌️error --->', error);
             role: "hod",
             status: "active",
             gender: state.hod_gender?.value,
-            education_qualification: state.hod_qualification,
+            education_qualification: capitalizeFLetter(state.hod_qualification),
             department: deptRes?.id,
           };
           const formData = buildFormData(finalHodBody);
@@ -1189,11 +1190,11 @@ console.log('✌️error --->', error);
   const updateCollege = async () => {
     try {
       const body: any = {
-        college_name: state.college_name,
-        college_code: state.college_code,
+        college_name: capitalizeFLetter(state.college_name),
+        college_code: capitalizeFLetter(state.college_code),
         college_email: state.college_email,
         college_phone: state.college_phone,
-        college_address: state.college_address,
+        college_address: capitalizeFLetter(state.college_address),
         institution: state?.institution?.value,
         college_hr: state?.college_hr?.value,
       };

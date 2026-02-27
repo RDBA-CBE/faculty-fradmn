@@ -886,7 +886,7 @@ const Users = () => {
       setState({ submitting: true });
 
       const body: any = {
-        username: state.username,
+        username: capitalizeFLetter(state.username),
         email: state.email,
         password: state.password,
         password_confirm: state.password_confirm,
@@ -894,7 +894,7 @@ const Users = () => {
         role: state.activeTab,
         status: "active",
         gender: state.gender?.value,
-        education_qualification: state.education_qualification,
+        education_qualification: capitalizeFLetter(state.education_qualification),
       };
 
       if (state.activeTab === "institution_admin") {
@@ -912,7 +912,7 @@ const Users = () => {
 
       // Add qualification and experience for hod and applicant
       if (state.activeTab === "hod" || state.activeTab === "applicant") {
-        body.qualification = state.education_qualification;
+        body.qualification = capitalizeFLetter(state.education_qualification);
         body.experience = state.experience;
       }
 
@@ -1207,9 +1207,8 @@ const Users = () => {
                 hodInstitutionList(state.hodInstitutionPage + 1, "", true)
               }
               loading={state.hodInstitutionLoading}
-              title="Select Institution"
+              title="Select Institutions"
               error={state.errors.institution}
-              required
             />
           ) : (
             <TextInput
@@ -1245,7 +1244,6 @@ const Users = () => {
                 isMulti={false}
                 title="Select College"
                 error={state.errors.college}
-                required
                 position="top"
               />
             ) : (

@@ -132,7 +132,7 @@ const CollegeAndDepartment = () => {
     try {
       const res: any = await Models.auth.profile();
       console.log("profile res", res);
-      
+
       profileRef.current = res;
       setState({ profile: res });
       deptList(1);
@@ -213,11 +213,13 @@ const CollegeAndDepartment = () => {
     try {
       setState({ loading: true });
       const body = collegeBodyData();
-      body.college = profileRef.current?.college?.map((item) => item.college_id );
+      body.college = profileRef.current?.college?.map(
+        (item) => item.college_id
+      );
       body.institution = profileRef.current?.institution?.institution_id;
 
       console.log("body", body);
-      
+
       const res: any = await Models.department.list(page, body);
       console.log("deptList --->", res);
 
@@ -233,6 +235,8 @@ const CollegeAndDepartment = () => {
         total_jobs: item?.total_jobs,
         institution_name: item?.college_name,
         institution_id: item?.college,
+        department_head: item?.hod?.name,
+        hod_id: item?.hod?.id,
       }));
 
       setState({
@@ -343,6 +347,44 @@ const CollegeAndDepartment = () => {
         label: row.college_name,
       },
     });
+    if (row?.hod_id) {
+      setState({
+        deptHod: { value: row?.hod_id, label: row.department_head },
+      });
+    }
+    if (row?.college_id) {
+      deptHodDropdownList(1, "", false, row?.college_id);
+    }
+  };
+
+  const deptHodDropdownList = async (
+    page,
+    search = "",
+    loadMore = false,
+    selectedCollege = null
+  ) => {
+    try {
+      setState({ deptHodLoading: true });
+      const body: any = { search };
+      if (selectedCollege) {
+        body.college_id = selectedCollege;
+      }
+
+      const res: any = await Models.auth.userList(page, body);
+      const dropdown = Dropdown(res?.results, "username");
+
+      setState({
+        deptHodLoading: false,
+        deptHodPage: page,
+        deptHodDropdownList: loadMore
+          ? [...state.deptHodDropdownList, ...dropdown]
+          : dropdown,
+        deptHodNext: res?.next,
+      });
+    } catch (error) {
+      console.error("Error fetching colleges:", error);
+      setState({ deptHodLoading: false });
+    }
   };
 
   const handleToggleStatus = async (row) => {
@@ -611,6 +653,12 @@ const CollegeAndDepartment = () => {
       // Clear errors if validation passes
       setState({ errors: {} });
 
+      if (state.deptHod?.value) {
+        body.hod_id = state.deptHod?.value;
+      } else {
+        body.hod_id = null;
+      }
+
       if (state.editId) {
         const res = await Models.department.update(body, state.editId);
         Success("Department updated successfully!");
@@ -659,6 +707,25 @@ const CollegeAndDepartment = () => {
       ),
     },
     {
+      accessor: "department_head",
+      title: "Department Head",
+      render: ({ department_head }) => (
+        <div className="text-gray-600 dark:text-gray-400">
+          {department_head}
+        </div>
+      ),
+    },
+    {
+      accessor: "institution_name",
+      title: "Institution ",
+      sortable: true,
+      render: ({ institution_name }) => (
+        <div className="font-medium text-gray-900 dark:text-white">
+          {institution_name}
+        </div>
+      ),
+    },
+    {
       accessor: "college_name",
       title: "College ",
       sortable: true,
@@ -677,15 +744,7 @@ const CollegeAndDepartment = () => {
         <span className="text-gray-600 dark:text-gray-400">{total_jobs}</span>
       ),
     },
-    {
-      accessor: "department_head",
-      title: "Department Head",
-      render: ({ department_head }) => (
-        <div className="text-gray-600 dark:text-gray-400">
-          {department_head}
-        </div>
-      ),
-    },
+
     {
       accessor: "actions",
       title: "Actions",
@@ -929,12 +988,28 @@ const CollegeAndDepartment = () => {
                   <CustomSelect
                     options={state.collegeDropdownList}
                     value={state.college}
-                    onChange={(selectedOption) =>
+                    onChange={(selectedOption) => {
+                      if (selectedOption) {
+                        deptHodDropdownList(
+                          1,
+                          "",
+                          false,
+                          selectedOption?.value
+                        );
+                        setState({
+                          deptHod: null,
+                        });
+                      } else {
+                        setState({
+                          deptHod: null,
+                          errors: { ...state.errors, deptHod: "" },
+                        });
+                      }
                       setState({
                         college: selectedOption,
                         errors: { ...state.errors, college: "" },
-                      })
-                    }
+                      });
+                    }}
                     onSearch={(searchTerm) =>
                       collegeDropdownList(
                         1,
@@ -957,6 +1032,38 @@ const CollegeAndDepartment = () => {
                     title="Select College"
                     error={state.errors.college}
                     required
+                  />
+                  <CustomSelect
+                    options={state.deptHodDropdownList}
+                    value={state.deptHod}
+                    onChange={(selectedOption) =>
+                      setState({
+                        deptHod: selectedOption,
+                        errors: { ...state.errors, deptHod: "" },
+                      })
+                    }
+                    onSearch={(searchTerm) =>
+                      deptHodDropdownList(
+                        1,
+                        searchTerm,
+                        false,
+                        state.college?.value
+                      )
+                    }
+                    placeholder="Select HOD"
+                    isClearable={true}
+                    loadMore={() =>
+                      state.collegeNext &&
+                      deptHodDropdownList(
+                        state.deptHodPage + 1,
+                        "",
+                        true,
+                        state.college?.value
+                      )
+                    }
+                    loading={state.deptHodLoading}
+                    title="Select HOD"
+                    error={state.errors.deptHod}
                   />
                 </>
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">

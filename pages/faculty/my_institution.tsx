@@ -29,6 +29,7 @@ import Pagination from "@/components/pagination/pagination";
 import PrimaryButton from "@/components/FormFields/PrimaryButton.component";
 import {
   buildFormData,
+  capitalizeFLetter,
   showDeleteAlert,
   useSetState,
 } from "@/utils/function.utils";
@@ -407,11 +408,11 @@ const Institution = () => {
       if (stepsToProcess.includes(1)) {
         try {
           const institutionBody = {
-            institution_name: state.institution_name,
-            institution_code: state.institution_code,
+            institution_name: capitalizeFLetter(state.institution_name),
+            institution_code: capitalizeFLetter(state.institution_code),
             institution_email: state.institution_email,
             institution_phone: state.institution_phone,
-            address: state.address,
+            address: capitalizeFLetter(state.address),
           };
 
           const institutionRes: any = await Models.institution.create(
@@ -439,7 +440,7 @@ const Institution = () => {
         if (stepsToProcess.includes(2)) {
           try {
             const adminBody = {
-              username: state.admin_username,
+              username: capitalizeFLetter(state.admin_username),
               email: state.admin_email,
               password: state.admin_password,
               password_confirm: state.admin_confirm_password,
@@ -447,7 +448,7 @@ const Institution = () => {
               role: "institution_admin",
               status: "active",
               gender: state.admin_gender?.value,
-              education_qualification: state.admin_education_qualification,
+              education_qualification: capitalizeFLetter(state.admin_education_qualification),
               institution: createdRecords.institutionId,
             };
             const formData = buildFormData(adminBody);
@@ -478,7 +479,7 @@ const Institution = () => {
         if (stepsToProcess.includes(3)) {
           try {
             const hrBody = {
-              username: state.hr_username,
+              username: capitalizeFLetter(state.hr_username),
               email: state.hr_email,
               password: state.hr_password,
               password_confirm: state.hr_confirm_password,
@@ -486,7 +487,7 @@ const Institution = () => {
               role: "hr",
               status: "active",
               gender: state.hr_gender?.value,
-              education_qualification: state.hr_qualification,
+              education_qualification: capitalizeFLetter(state.hr_qualification),
               institution: createdRecords.institutionId,
             };
             const formData = buildFormData(hrBody);
@@ -509,11 +510,11 @@ const Institution = () => {
         if (stepsToProcess.includes(4)) {
           try {
             const collegeBody: any = {
-              college_name: state.college_name,
-              college_code: state.college_code,
+              college_name: capitalizeFLetter(state.college_name),
+              college_code: capitalizeFLetter(state.college_code),
               college_email: state.college_email,
               college_phone: state.college_phone,
-              college_address: state.college_address,
+              college_address: capitalizeFLetter(state.college_address),
               institution: createdRecords.institutionId,
             };
             if (state.newImages?.length > 0) {
@@ -530,7 +531,7 @@ const Institution = () => {
         if (stepsToProcess.includes(5)) {
           try {
             const hodBody = {
-              username: state.hod_username,
+              username: capitalizeFLetter(state.hod_username),
               email: state.hod_email,
               password: state.hod_password,
               password_confirm: state.hod_confirm_password,
@@ -538,7 +539,7 @@ const Institution = () => {
               role: "hod",
               status: "active",
               gender: state.hod_gender?.value,
-              education_qualification: state.hod_qualification,
+              education_qualification: capitalizeFLetter(state.hod_qualification),
               college: createdRecords.collegeId,
             };
             const formData = buildFormData(hodBody);
@@ -554,7 +555,7 @@ const Institution = () => {
         if (stepsToProcess.includes(6)) {
           try {
             const deptBody = {
-              department_name: state.department_name,
+              department_name: capitalizeFLetter(state.department_name),
               // department_code: state.department_code,
               college: createdRecords.collegeId,
               institution: createdRecords.institutionId,
@@ -660,8 +661,8 @@ const Institution = () => {
     try {
       setState({ btnLoading: true });
       const body = {
-        institution_name: state.institution_name,
-        institution_code: state.institution_code,
+        institution_name: capitalizeFLetter(state.institution_name),
+        institution_code: capitalizeFLetter(state.institution_code),
         institution_email: state.institution_email,
         institution_phone: state.institution_phone,
         address: state.address,
@@ -692,8 +693,8 @@ const Institution = () => {
       if (state.completedSteps.includes(1)) {
         try {
           const institutionBody = {
-            institution_name: state.institution_name,
-            institution_code: state.institution_code,
+            institution_name: capitalizeFLetter(state.institution_name),
+            institution_code: capitalizeFLetter(state.institution_code),
             institution_email: state.institution_email,
             institution_phone: state.institution_phone,
             address: state.address,
@@ -712,7 +713,7 @@ const Institution = () => {
         if (state.completedSteps.includes(2)) {
           try {
             const adminBody = {
-              username: state.admin_username,
+              username: capitalizeFLetter(state.admin_username),
               email: state.admin_email,
               password: state.admin_password,
               password_confirm: state.admin_confirm_password,
@@ -720,7 +721,7 @@ const Institution = () => {
               role: "institution_admin",
               status: "active",
               gender: state.admin_gender?.value,
-              education_qualification: state.admin_education_qualification,
+              education_qualification:capitalizeFLetter( state.admin_education_qualification),
               institution: createdRecords.institutionId,
             };
             const formData = buildFormData(adminBody);
@@ -759,11 +760,11 @@ const Institution = () => {
         if (state.completedSteps.includes(3)) {
           try {
             const collegeBody = {
-              college_name: state.college_name,
-              college_code: state.college_code,
+              college_name: capitalizeFLetter(state.college_name),
+              college_code: capitalizeFLetter(state.college_code),
               college_email: state.college_email,
               college_phone: state.college_phone,
-              college_address: state.college_address,
+              college_address: capitalizeFLetter(state.college_address),
               institution: createdRecords.institutionId,
             };
             const collegeRes: any = await Models.college.create(collegeBody);
@@ -776,7 +777,7 @@ const Institution = () => {
           if (state.completedSteps.includes(4)) {
             try {
               const hrBody = {
-                username: state.hr_username,
+                username: capitalizeFLetter(state.hr_username),
                 email: state.hr_email,
                 password: state.hr_password,
                 password_confirm: state.hr_confirm_password,
@@ -784,7 +785,7 @@ const Institution = () => {
                 role: "hr",
                 status: "active",
                 gender: state.hr_gender?.value,
-                education_qualification: state.hr_qualification,
+                education_qualification: capitalizeFLetter(state.hr_qualification),
                 college: createdRecords.collegeId,
               };
               const formData = buildFormData(hrBody);
@@ -818,7 +819,7 @@ const Institution = () => {
           if (state.completedSteps.includes(5)) {
             try {
               const deptBody = {
-                department_name: state.department_name,
+                department_name: capitalizeFLetter(state.department_name),
                 // department_code: state.department_code,
                 college: createdRecords.collegeId,
                 institution: createdRecords.institutionId,
@@ -833,7 +834,7 @@ const Institution = () => {
             // if (state.completedSteps.includes(6)) {
               try {
                 const hodBody = {
-                  username: state.hod_username,
+                  username: capitalizeFLetter(state.hod_username),
                   email: state.hod_email,
                   password: state.hod_password,
                   password_confirm: state.hod_confirm_password,
@@ -841,7 +842,7 @@ const Institution = () => {
                   role: "hod",
                   status: "active",
                   gender: state.hod_gender?.value,
-                  education_qualification: state.hod_qualification,
+                  education_qualification: capitalizeFLetter(state.hod_qualification),
                   department: createdRecords.departmentId,
                 };
                 const formData = buildFormData(hodBody);
