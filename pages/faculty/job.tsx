@@ -175,7 +175,13 @@ const Job = () => {
         departmentDropdownList(1, "", false, "", res?.id);
         jobList(1, res?.institution?.institution_id, "", "", res?.id);
       } else if (res?.role == ROLES.HR) {
-        departmentDropdownList(1, "", false, res?.college?.college_id, res?.id);
+        departmentDropdownList(
+          1,
+          "",
+          false,
+          res?.college?.map((item) => item.college_id),
+          res?.id
+        );
         jobList(
           1,
           "",
@@ -184,7 +190,14 @@ const Job = () => {
           "",
           res?.id
         );
-        userDropdownList(1, "", false, "hod", res?.college?.college_id);
+        userDropdownList(
+          1,
+          "",
+          false,
+          "hod",
+          res?.college?.map((item) => item.college_id),
+          res?.id
+        );
       } else if (res?.role == ROLES.HOD) {
         jobList(1, "", "", res?.department?.id, res?.id);
       }
@@ -385,7 +398,8 @@ const Job = () => {
     search = "",
     loadMore = false,
     role = null,
-    collegeId = null
+    collegeId = null,
+    created_by = null
   ) => {
     try {
       setState({ userLoading: true });
@@ -395,6 +409,9 @@ const Job = () => {
       }
       if (collegeId) {
         body.college_id = collegeId;
+      }
+      if (created_by) {
+        body.created_by = created_by;
       }
       const res: any = await Models.auth.userList(page, body);
       const dropdown = res?.results?.map((item) => ({
@@ -884,7 +901,11 @@ const Job = () => {
                           : state.profile?.role == ROLES.HR
                           ? ROLES.HOD
                           : null,
-                        state.collegeFilter?.value
+                        state.profile?.role == ROLES.HR
+                          ? state.profile?.college?.map(
+                              (item) => item.college_id
+                            )
+                          : state.collegeFilter?.value
                       )
                     }
                     loadMore={() =>
@@ -898,8 +919,11 @@ const Job = () => {
                           : state.profile?.role == ROLES.HR
                           ? ROLES.HOD
                           : null,
-
-                        state.collegeFilter?.value
+                        state.profile?.role == ROLES.HR
+                          ? state.profile?.college?.map(
+                              (item) => item.college_id
+                            )
+                          : state.collegeFilter?.value
                       )
                     }
                   />
@@ -981,7 +1005,9 @@ const Job = () => {
                       1,
                       searchTerm,
                       false,
-                      state.collegeFilter?.value,
+                      state.profile?.role == ROLES.HR
+                        ? state.profile?.college?.map((item) => item.college_id)
+                        : state.collegeFilter?.value,
                       state.profile?.id
                     )
                   }
@@ -991,7 +1017,9 @@ const Job = () => {
                       state.departmentPage + 1,
                       "",
                       true,
-                      state.collegeFilter?.value,
+                      state.profile?.role == ROLES.HR
+                      ? state.profile?.college?.map((item) => item.college_id)
+                      : state.collegeFilter?.value,
                       state.profile?.id
                     )
                   }
