@@ -291,7 +291,7 @@ const CollegeAndDepartment = () => {
       setState({ deptHodLoading: true });
       const body: any = { search };
       if (selectedCollege) {
-        body.college_id = selectedCollege
+        body.college_id = selectedCollege;
       }
 
       const res: any = await Models.auth.userList(page, body);
@@ -303,7 +303,7 @@ const CollegeAndDepartment = () => {
         deptHodDropdownList: loadMore
           ? [...state.deptHodDropdownList, ...dropdown]
           : dropdown,
-          deptHodNext: res?.next,
+        deptHodNext: res?.next,
       });
     } catch (error) {
       console.error("Error fetching colleges:", error);
@@ -637,11 +637,9 @@ const CollegeAndDepartment = () => {
           label: row.college_name,
         },
       });
-      if(row?.college_id){
-
-      deptHodDropdownList(1, "", false, row?.college_id)
-    }
-
+      if (row?.college_id) {
+        deptHodDropdownList(1, "", false, row?.college_id);
+      }
     }
   };
 
@@ -883,7 +881,7 @@ const CollegeAndDepartment = () => {
         const validationBody = {
           college: state.college?.value,
           department_name: state.department_name,
-          deptHod: state.deptHod,
+          // deptHod: state.deptHod,
           // department_code: state.department_code,
         };
 
@@ -897,9 +895,9 @@ const CollegeAndDepartment = () => {
           errors.department_name = "Department name is required";
         }
 
-        if (!validationBody.deptHod) {
-          errors.deptHod = "Department hod is required";
-        }
+        // if (!validationBody.deptHod) {
+        //   errors.deptHod = "Department hod is required";
+        // }
         // if (!validationBody.department_code) {
         //   errors.department_code = "Department code is required";
         // }
@@ -917,8 +915,12 @@ const CollegeAndDepartment = () => {
           const res: any = await Models.college.details(state.college?.value);
           body.institution = res?.institution;
         }
+        if (state.deptHod?.value) {
+          body.hod_id = state.deptHod?.value;
+        }else{
+          body.hod_id = null;
+        }
 
-        body.hod_id=state.deptHod?.value
         if (state.editId) {
           const res = await Models.department.update(body, state.editId);
           Success("Department updated successfully!");
@@ -1410,7 +1412,6 @@ const CollegeAndDepartment = () => {
             loading={state.deptHodLoading}
             title="Select HOD"
             error={state.errors.deptHod}
-            required
             disabled={!state.college}
           />
         </>
