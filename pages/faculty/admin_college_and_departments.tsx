@@ -293,6 +293,8 @@ const CollegeAndDepartment = () => {
     seletedInstitution = null
   ) => {
     try {
+      console.log("✌️seletedInstitution --->", seletedInstitution);
+
       setState({ collegeLoading: true });
       const body: any = { search };
       if (seletedInstitution) {
@@ -401,7 +403,9 @@ const CollegeAndDepartment = () => {
         college_id: item?.college,
         total_jobs: item?.total_jobs,
         institution_name: item?.college_name,
-        institution_id: item?.college,
+        institution_id: item?.institution,
+        department_head: item?.hod?.name,
+        hod_id: item?.hod?.id,
       }));
 
       setState({
@@ -579,6 +583,7 @@ const CollegeAndDepartment = () => {
       showHODConfirmPassword: false,
       errors: {},
       editId: null,
+      submitting: false,
     });
   };
 
@@ -676,6 +681,47 @@ const CollegeAndDepartment = () => {
           label: row.college_name,
         },
       });
+
+      if (row?.institution_id) {
+        collegeDropdownList(1, "", false, {
+          value: row?.institution_id,
+          label: row.institution_name,
+        });
+      }
+
+      if (row?.college_id) {
+        deptHodDropdownList(1, "", false, row?.college_id);
+      }
+    }
+  };
+
+  const deptHodDropdownList = async (
+    page,
+    search = "",
+    loadMore = false,
+    selectedCollege = null
+  ) => {
+    try {
+      setState({ deptHodLoading: true });
+      const body: any = { search };
+      if (selectedCollege) {
+        body.college_id = selectedCollege;
+      }
+
+      const res: any = await Models.auth.userList(page, body);
+      const dropdown = Dropdown(res?.results, "username");
+
+      setState({
+        deptHodLoading: false,
+        deptHodPage: page,
+        deptHodDropdownList: loadMore
+          ? [...state.deptHodDropdownList, ...dropdown]
+          : dropdown,
+        deptHodNext: res?.next,
+      });
+    } catch (error) {
+      console.error("Error fetching colleges:", error);
+      setState({ deptHodLoading: false });
     }
   };
 
@@ -825,6 +871,11 @@ const CollegeAndDepartment = () => {
         if (state.college?.value) {
           const res: any = await Models.college.details(state.college?.value);
           body.institution = res?.institution;
+        }
+        if (state.deptHod?.value) {
+          body.hod_id = state.deptHod?.value;
+        } else {
+          body.hod_id = null;
         }
 
         console.log("✌️department body --->", body);
@@ -1033,6 +1084,25 @@ const CollegeAndDepartment = () => {
       ),
     },
     {
+      accessor: "department_head",
+      title: "Department Head",
+      render: ({ department_head }) => (
+        <div className="text-gray-600 dark:text-gray-400">
+          {department_head}
+        </div>
+      ),
+    },
+    {
+      accessor: "institution_name",
+      title: "Institution ",
+      sortable: true,
+      render: ({ institution_name }) => (
+        <div className="font-medium text-gray-900 dark:text-white">
+          {institution_name}
+        </div>
+      ),
+    },
+    {
       accessor: "college_name",
       title: "College ",
       sortable: true,
@@ -1051,15 +1121,7 @@ const CollegeAndDepartment = () => {
         <span className="text-gray-600 dark:text-gray-400">{total_jobs}</span>
       ),
     },
-    {
-      accessor: "department_head",
-      title: "Department Head",
-      render: ({ department_head }) => (
-        <div className="text-gray-600 dark:text-gray-400">
-          {department_head}
-        </div>
-      ),
-    },
+
     {
       accessor: "actions",
       title: "Actions",
@@ -1341,10 +1403,10 @@ const CollegeAndDepartment = () => {
 
       {/* Modal */}
       <Modal
-        closeIcon={() => handleCloseModal()}
+        // closeIcon={() => handleCloseModal()}
         open={state.showModal}
         close={handleCloseModal}
-        subTitle={"Update Department Info"}
+        // subTitle={"Update Department Info"}
         renderComponent={() => (
           <div className="w-full max-w-4xl">
             <style jsx>{`
@@ -1363,21 +1425,23 @@ const CollegeAndDepartment = () => {
                 <CustomSelect
                   options={state.institutionList}
                   value={state.institution}
+                  isClearable={true}
                   onChange={(selectedOption) => {
                     if (selectedOption) {
                       setState({
                         institution: selectedOption,
                         errors: { ...state.errors, institution: "" },
                         seletedInstitution: selectedOption,
+                        college: null,
+                        deptHod: null,
                       });
-                      collegeList(1, selectedOption);
+                      collegeDropdownList(1, "", false, selectedOption);
                     }
                   }}
                   onSearch={(searchTerm) =>
                     institutionDropdownList(1, searchTerm)
                   }
                   placeholder="Select Institution"
-                  isClearable={true}
                   loadMore={() =>
                     state.institutionNext &&
                     institutionDropdownList(state.instituitonPage + 1, "", true)
@@ -1390,14 +1454,30 @@ const CollegeAndDepartment = () => {
                 <CustomSelect
                   options={state.collegeDropdownList}
                   value={state.college}
-                  onChange={(selectedOption) =>
+                  onChange={(selectedOption) => {
+                    if (selectedOption) {
+                      deptHodDropdownList(1, "", false, selectedOption?.value);
+                      setState({
+                        deptHod: null,
+                      });
+                    } else {
+                      setState({
+                        deptHod: null,
+                        errors: { ...state.errors, deptHod: "" },
+                      });
+                    }
                     setState({
                       college: selectedOption,
                       errors: { ...state.errors, college: "" },
-                    })
-                  }
+                    });
+                  }}
                   onSearch={(searchTerm) =>
-                    collegeDropdownList(1, searchTerm, state.seletedInstitution)
+                    collegeDropdownList(
+                      1,
+                      searchTerm,
+                      false,
+                      state.seletedInstitution
+                    )
                   }
                   placeholder="Select College"
                   isClearable={true}
@@ -1414,6 +1494,40 @@ const CollegeAndDepartment = () => {
                   title="Select College"
                   error={state.errors.college}
                   required
+                />
+
+                <CustomSelect
+                  options={state.deptHodDropdownList}
+                  value={state.deptHod}
+                  onChange={(selectedOption) =>
+                    setState({
+                      deptHod: selectedOption,
+                      errors: { ...state.errors, deptHod: "" },
+                    })
+                  }
+                  onSearch={(searchTerm) =>
+                    deptHodDropdownList(
+                      1,
+                      searchTerm,
+                      false,
+                      state.college?.value
+                    )
+                  }
+                  placeholder="Select HOD"
+                  isClearable={true}
+                  loadMore={() =>
+                    state.collegeNext &&
+                    deptHodDropdownList(
+                      state.deptHodPage + 1,
+                      "",
+                      true,
+                      state.college?.value
+                    )
+                  }
+                  loading={state.deptHodLoading}
+                  title="Select HOD"
+                  error={state.errors.deptHod}
+                  disabled={!state.college}
                 />
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                   <TextInput
@@ -1451,7 +1565,7 @@ const CollegeAndDepartment = () => {
                   Cancel
                 </button>
                 <button
-                  onClick={handleSubmit}
+                  onClick={() => handleSubmit()}
                   disabled={state.submitting}
                   className="rounded-lg bg-blue-500 px-6 py-2 text-white hover:bg-blue-600 disabled:opacity-50"
                 >

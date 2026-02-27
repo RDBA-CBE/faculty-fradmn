@@ -389,8 +389,9 @@ const CollegeAndDepartment = () => {
         college_id: item?.college,
         total_jobs: item?.total_jobs,
         institution_name: item?.college_name,
-        institution_id: item?.college,
+        institution_id: item?.institution,
         department_head: item?.hod?.name,
+        hod_id: item?.hod?.id,
       }));
 
       setState({
@@ -564,6 +565,7 @@ const CollegeAndDepartment = () => {
       showHODConfirmPassword: false,
       errors: {},
       editId: null,
+      submitting:false
     });
   };
 
@@ -599,6 +601,7 @@ const CollegeAndDepartment = () => {
   };
 
   const handleEdit = (row) => {
+    console.log("✌️row --->", row);
     if (state.activeTab === "colleges") {
       setState({
         editId: row.id,
@@ -637,6 +640,19 @@ const CollegeAndDepartment = () => {
           label: row.college_name,
         },
       });
+      if (row?.hod_id) {
+        setState({
+          deptHod: { value: row?.hod_id, label: row.department_head },
+        });
+      }
+
+      if (row?.institution_id) {
+        collegeDropdownList(1, "", false, {
+          value: row?.institution_id,
+          label: row.institution_name,
+        });
+      }
+
       if (row?.college_id) {
         deptHodDropdownList(1, "", false, row?.college_id);
       }
@@ -917,7 +933,7 @@ const CollegeAndDepartment = () => {
         }
         if (state.deptHod?.value) {
           body.hod_id = state.deptHod?.value;
-        }else{
+        } else {
           body.hod_id = null;
         }
 
@@ -1328,6 +1344,7 @@ const CollegeAndDepartment = () => {
                   errors: { ...state.errors, institution: "" },
                   seletedInstitution: selectedOption,
                   college: null,
+                  depdHod:null
                 });
                 collegeDropdownList(1, "", false, selectedOption);
               }
@@ -1349,6 +1366,9 @@ const CollegeAndDepartment = () => {
             onChange={(selectedOption) => {
               if (selectedOption) {
                 deptHodDropdownList(1, "", false, selectedOption?.value);
+                setState({
+                  deptHod: null,
+                });
               } else {
                 setState({
                   deptHod: null,
@@ -2031,7 +2051,7 @@ const CollegeAndDepartment = () => {
                     className="rounded-lg bg-blue-500 px-6 py-2 text-white hover:bg-blue-600 disabled:opacity-50"
                   >
                     {state.submitting
-                      ? "Creating..."
+                      ? "Loading..."
                       : state.editId
                       ? "Update Department"
                       : "Create Department"}
