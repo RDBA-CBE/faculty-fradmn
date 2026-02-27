@@ -358,6 +358,59 @@ const master = {
     });
     return promise;
   },
+
+
+  job_priority: () => {
+      let promise = new Promise((resolve, reject) => {
+        let url = `job-priorities/`;
+        instance()
+          .get(url)
+          .then((res) => {
+            resolve(res.data);
+          })
+          .catch((error) => {
+            if (error.response) {
+              reject(error.response.message);
+            } else {
+              reject(error);
+            }
+          });
+      });
+  
+      return promise;
+    },
+
+
+   create_priority: (data: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .post("job-priorities/", data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+
+  update_priority: (data: any, id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .put(`job-priorities/${id}/`, data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+
+  delete_priority: (id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .delete(`job-priorities/${id}/`)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+
 };
 
 export default master;

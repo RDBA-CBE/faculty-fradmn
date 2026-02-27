@@ -40,7 +40,7 @@ const UpdatePropertyImagePreview: React.FC<ImageUploadProps> = ({
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const existingImageItems = existingImages.map((url) => ({
+    const existingImageItems = existingImages?.map((url) => ({
       preview: url,
       isExisting: true,
     }));
@@ -219,9 +219,9 @@ const UpdatePropertyImagePreview: React.FC<ImageUploadProps> = ({
         </div>
       )}
 
-      {images.length > 0 && (
+      {images?.length > 0 && (
         <div className={`mt-6 ${isSingleImage ? '' : 'relative'}`}>
-          {!isSingleImage && images.length > 3 && (
+          {!isSingleImage && images?.length > 3 && (
             <button
               type="button"
               onClick={(e) => {

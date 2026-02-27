@@ -111,16 +111,16 @@ export const menuConfig = {
         {
           label: "Experience",
           href: "/faculty/master/experience",
+        },   {
+          label: "Job Urgency",
+          href: "/faculty/master/job_urgency",
         },
       
         // {
         //   label: "Category",
         //   href: "/faculty/master/category",
         // },
-        {
-          label: "Job Type",
-          href: "/faculty/master/job_type",
-        },
+       
         {
           label: "Location",
           href: "/faculty/master/location",
@@ -195,16 +195,19 @@ export const menuConfig = {
         {
           label: "Experience",
           href: "/faculty/master/experience",
+        },   {
+          label: "Job Urgency",
+          href: "/faculty/master/job_urgency",
+        },   {
+          label: "Job Urgency",
+          href: "/faculty/master/job_urgency",
         },
       
         // {
         //   label: "Category",
         //   href: "/faculty/master/category",
         // },
-        {
-          label: "Job Type",
-          href: "/faculty/master/job_type",
-        },
+       
         {
           label: "Location",
           href: "/faculty/master/location",
@@ -275,16 +278,16 @@ export const menuConfig = {
         {
           label: "Experience",
           href: "/faculty/master/experience",
+        },   {
+          label: "Job Urgency",
+          href: "/faculty/master/job_urgency",
         },
       
         // {
         //   label: "Category",
         //   href: "/faculty/master/category",
         // },
-        {
-          label: "Job Type",
-          href: "/faculty/master/job_type",
-        },
+       
         {
           label: "Location",
           href: "/faculty/master/location",
@@ -526,16 +529,16 @@ export const OwnmenuConfig = {
         {
           label: "Experience",
           href: "/faculty/master/experience",
+        },   {
+          label: "Job Urgency",
+          href: "/faculty/master/job_urgency",
         },
       
         // {
         //   label: "Category",
         //   href: "/faculty/master/category",
         // },
-        {
-          label: "Job Type",
-          href: "/faculty/master/job_type",
-        },
+       
         {
           label: "Location",
           href: "/faculty/master/location",

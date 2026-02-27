@@ -1697,7 +1697,7 @@ const CollegeAndDepartment = () => {
                     }
                     loading={state.hrLoading}
                     title="Assign HR"
-                    required
+                    
                   />
                 </div>
                 <TextArea
