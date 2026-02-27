@@ -157,7 +157,7 @@ const Job = () => {
   const profile = async () => {
     try {
       const res: any = await Models.auth.profile();
-console.log('✌️res --->', res);
+      console.log("✌️res --->", res);
       setState({ profile: res });
       if (res?.role == ROLES.SUPER_ADMIN) {
         institutionDropdownList(1, "", false, res?.id);
@@ -200,7 +200,7 @@ console.log('✌️res --->', res);
     deptId = null,
     createdBy = null
   ) => {
-console.log('✌️collegeId --->', collegeId);
+    console.log("✌️collegeId --->", collegeId);
 
     try {
       setState({ loading: true });
@@ -235,9 +235,9 @@ console.log('✌️collegeId --->', collegeId);
         college_name: item?.college?.name,
         // department_name: item?.department?.name || "-",
         department_name:
-        item?.department?.length > 0
-          ? item?.department?.map((item) => item?.name)?.join(", ")
-          : "-",
+          item?.department?.length > 0
+            ? item?.department?.map((item) => item?.name)?.join(", ")
+            : "-",
 
         job_type: item?.job_type,
         experiences: {
@@ -863,7 +863,11 @@ console.log('✌️collegeId --->', collegeId);
                       setState({ userFilter: selectedOption, page: 1 })
                     }
                     placeholder={`Select ${
-                      state.roleFilter ? state.roleFilter.label : "user"
+                      state.roleFilter
+                        ? state.roleFilter.label
+                        : state.profile?.role == ROLES.HR
+                        ? "hod"
+                        : "user"
                     }`}
                     isClearable={true}
                     loading={state.userLoading}
@@ -875,7 +879,11 @@ console.log('✌️collegeId --->', collegeId);
                         1,
                         searchTerm,
                         false,
-                        state.roleFilter?.value?state.roleFilter?.value:state.profile?.role == ROLES.HR?ROLES.HOD:null,
+                        state.roleFilter?.value
+                          ? state.roleFilter?.value
+                          : state.profile?.role == ROLES.HR
+                          ? ROLES.HOD
+                          : null,
                         state.collegeFilter?.value
                       )
                     }
@@ -885,7 +893,11 @@ console.log('✌️collegeId --->', collegeId);
                         state.userPage + 1,
                         "",
                         true,
-                        state.roleFilter?.value?state.roleFilter?.value:state.profile?.role == ROLES.HR?ROLES.HOD:null,
+                        state.roleFilter?.value
+                          ? state.roleFilter?.value
+                          : state.profile?.role == ROLES.HR
+                          ? ROLES.HOD
+                          : null,
 
                         state.collegeFilter?.value
                       )
