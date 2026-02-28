@@ -7,6 +7,14 @@ export const login = Yup.object().shape({
   password: Yup.string().required("Password is required"),
 });
 
+
+export const forgotPassword = Yup.object().shape({
+  email: Yup.string()
+  .email("Enter a valid email address")
+  .required("Email is required"),
+});
+
+
 export const change_password = Yup.object().shape({
   new_password: Yup.string()
     .min(8, "Password must be at least 8 characters")

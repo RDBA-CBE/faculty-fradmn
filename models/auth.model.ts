@@ -60,7 +60,8 @@ const auth = {
 
   forget_password: (body: any) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `register/`;
+      let url = `auth/forgot-password/`;
+
       instance()
         .post(url, body)
         .then((res) => {
@@ -113,7 +114,6 @@ const auth = {
         url = url + `&department_id=${body.department_id}`;
       }
 
-
       if (body?.institution_id) {
         url = url + `&institution_id=${body.institution_id}`;
       }
@@ -129,7 +129,6 @@ const auth = {
       if (body.team == "Yes") {
         url = url + `&team=${true}`;
       }
-
 
       instance()
         .get(url)
