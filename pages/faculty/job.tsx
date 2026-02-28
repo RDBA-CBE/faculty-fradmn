@@ -136,7 +136,7 @@ const Job = () => {
 
   useEffect(() => {
     if (state?.profile?.id) {
-      jobList(1, "", "", "", state?.profile?.id);
+      jobList(1, "", state?.profile?.college?.map((item)=>item?.college_id), "", state?.profile?.id);
     }
   }, [
     debounceSearch,

@@ -71,21 +71,29 @@ export default function Modal(props: any) {
                 </div> */}
 
                 {/* SUBTITLE */}
-                {subTitle || closeIcon &&
-                <div className="flex items-center justify-between border-b border-gray-200 bg-[#fbfbfb] px-5 py-2 dark:border-gray-700 dark:bg-[#121c2c]">
-                  {subTitle && (
-                    <div className="">
-                      <p className="text-lg font-medium">{subTitle}</p>
+                {subTitle || closeIcon ? (
+                  <div className="flex items-center justify-between border-b border-gray-200 bg-[#fbfbfb] px-5 py-3 dark:border-gray-700 dark:bg-[#121c2c]">
+                    {/* Left Side Title */}
+                    <div className="flex-1">
+                      {subTitle && (
+                        <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+                          {subTitle}
+                        </h3>
+                      )}
                     </div>
-                  )}
 
-                  {closeIcon && (
-                    <div className="cursor-pointer" onClick={() => close()}>
-                      <X />
-                    </div>
-                  )}
-                </div>
-                  }
+                    {/* Right Side Close Icon */}
+                    {closeIcon && (
+                      <button
+                        type="button"
+                        onClick={() => close()}
+                        className="ml-4 rounded-md p-1 transition hover:bg-gray-200 dark:hover:bg-gray-700"
+                      >
+                        <X className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                      </button>
+                    )}
+                  </div>
+                ) : null}
 
                 {/* CONTENT */}
                 <div className={`${padding ? padding : "p-5"}`}>
