@@ -34,6 +34,7 @@ import {
   Clock,
   ToggleLeft,
   ToggleRight,
+  CheckCheckIcon,
 } from "lucide-react";
 import moment from "moment";
 import { useRouter } from "next/navigation";
@@ -785,15 +786,30 @@ const Job = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Active Jobs
+                Approved Jobs
               </p>
               <p className="text-3xl font-bold text-green-600 dark:text-green-400">
-                {state.jobList?.filter((job) => job.status === "active")
-                  ?.length || 0}
+                {state.jobList?.filter((job) => job.is_approved)?.length || 0}
               </p>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 dark:bg-green-900">
-              <Users className="h-6 w-6 text-green-600 dark:text-green-400" />
+              <CheckCheckIcon className="h-6 w-6 text-green-600 dark:text-green-400" />
+            </div>
+          </div>
+        </div>
+
+        <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-sm transition-all duration-200 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                Pending Jobs
+              </p>
+              <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+                {state.jobList?.filter((job) => !job.is_approved)?.length || 0}
+              </p>
+            </div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 dark:bg-purple-900">
+              <Building2 className="h-6 w-6 text-purple-600 dark:text-purple-400" />
             </div>
           </div>
         </div>
@@ -805,29 +821,12 @@ const Job = () => {
                 Urgent Priority
               </p>
               <p className="text-3xl font-bold text-red-600 dark:text-red-400">
-                {state.jobList?.filter((job) => job.priority === "urgent")
+                {state.jobList?.filter((job) => job.priority == "0 - 30 Days")
                   ?.length || 0}
               </p>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100 dark:bg-red-900">
               <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
-            </div>
-          </div>
-        </div>
-
-        <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-sm transition-all duration-200 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Full Time
-              </p>
-              <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
-                {state.jobList?.filter((job) => job.job_type === "full_time")
-                  ?.length || 0}
-              </p>
-            </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 dark:bg-purple-900">
-              <Building2 className="h-6 w-6 text-purple-600 dark:text-purple-400" />
             </div>
           </div>
         </div>
