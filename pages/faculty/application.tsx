@@ -811,7 +811,7 @@ const Application = () => {
                 Applied
               </p>
               <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
-                {state.applications_by_status?.Applied || 0}
+                {state.applications_by_status?.Applied  || state.applications_by_status?.applied || 0}
               </p>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-yellow-100 dark:bg-yellow-900">
