@@ -11,7 +11,7 @@ import IconEye from "@/components/Icon/IconEye";
 import IconEyeOff from "@/components/Icon/IconEyeOff";
 import IconLoader from "@/components/Icon/IconLoader";
 import Pagination from "@/components/pagination/pagination";
-import { Dropdown, showDeleteAlert, useSetState } from "@/utils/function.utils";
+import { capitalizeFLetter, Dropdown, showDeleteAlert, useSetState } from "@/utils/function.utils";
 import Modal from "@/components/modal/modal.component";
 import { Success, Failure } from "@/utils/function.utils";
 import useDebounce from "@/hook/useDebounce";
@@ -318,7 +318,7 @@ const CollegeAndDepartment = () => {
 
       // If activeTab is departments, show single step department form
       const body: any = {
-        department_name: state.department_name,
+        department_name: capitalizeFLetter(state.department_name),
         // department_code: state.department_code,
         college: state.profile_college?.college_id,
         institution: state?.profile_institution?.id,
