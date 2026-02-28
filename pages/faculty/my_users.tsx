@@ -1472,16 +1472,17 @@ const Users = () => {
               {row?.qualification}
             </div>
           ),
-        },
-        {
-          accessor: "experience",
-          title: "Experience",
-          render: (row: any) => (
-            <div className="text-gray-600 dark:text-gray-400">
-              {row?.experience}
-            </div>
-          ),
         }
+        
+        // {
+        //   accessor: "experience",
+        //   title: "Experience",
+        //   render: (row: any) => (
+        //     <div className="text-gray-600 dark:text-gray-400">
+        //       {row?.experience}
+        //     </div>
+        //   ),
+        // }
       );
     }
 
