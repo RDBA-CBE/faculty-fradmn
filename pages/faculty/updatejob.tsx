@@ -1178,8 +1178,8 @@ export default function Newjob() {
                   options={state.priorityList}
                   value={state.priority}
                   onChange={(option) => handleFieldChange("priority", option)}
-                  placeholder="Joining Availability"
-                  title="Joining Availability"
+                  placeholder="Job Urgency"
+                  title="Job Urgency"
                   isClearable={true}
                   error={state.error?.priority}
                   required
