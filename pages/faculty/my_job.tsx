@@ -933,7 +933,7 @@ const Job = () => {
               />
             </div> */}
 
-            <div className="group relative">
+            {/* <div className="group relative">
               <CustomSelect
                 options={state.jobStatusList}
                 value={state.statusFilter}
@@ -941,7 +941,7 @@ const Job = () => {
                 placeholder="Filter by status"
                 isClearable={true}
               />
-            </div>
+            </div> */}
             <div className="group relative">
               <CustomSelect
                 options={state.salaryRangeList}
