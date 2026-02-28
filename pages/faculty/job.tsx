@@ -818,7 +818,7 @@ const Job = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Urgent Priority
+                Urgent job
               </p>
               <p className="text-3xl font-bold text-red-600 dark:text-red-400">
                 {state.jobList?.filter((job) => job.priority == "0 - 30 Days")
@@ -1017,8 +1017,8 @@ const Job = () => {
                       "",
                       true,
                       state.profile?.role == ROLES.HR
-                      ? state.profile?.college?.map((item) => item.college_id)
-                      : state.collegeFilter?.value,
+                        ? state.profile?.college?.map((item) => item.college_id)
+                        : state.collegeFilter?.value,
                       state.profile?.id
                     )
                   }
@@ -1241,7 +1241,7 @@ const Job = () => {
               },
               {
                 accessor: "priority",
-                title: "Priority",
+                title: "Job Urgency",
                 render: ({ priority }) => (
                   <span
                     className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
