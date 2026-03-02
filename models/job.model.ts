@@ -236,9 +236,12 @@ const job = {
     });
     return promise;
   },
-  job_priority: () => {
+  job_priority: (body = null) => {
     let promise = new Promise((resolve, reject) => {
       let url = `job-priorities/`;
+      if (body?.search) {
+        url += `?search=${encodeURIComponent(body.search)}`;
+      }
       instance()
         .get(url)
         .then((res) => {

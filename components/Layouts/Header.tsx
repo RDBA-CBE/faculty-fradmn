@@ -126,7 +126,10 @@ const Header = () => {
         const res: any = await Models.auth.profile();
         console.log("getUserRole --->", res);
         setState({
-          name: `${capitalizeFLetter(res?.first_name)} ${res?.last_name}`,
+          name:
+            res?.first_name && res?.last_name
+              ? `${capitalizeFLetter(res?.first_name)} ${res?.last_name}`
+              : capitalizeFLetter(res?.username),
           user_type: capitalizeFLetter(res?.role_display),
           email: res?.email,
         });
@@ -259,11 +262,11 @@ const Header = () => {
             <Link href="/" className="main-logo flex shrink-0 items-center">
               <img
                 className="inline w-8 ltr:-ml-1 rtl:-mr-1"
-                src="/assets/images/logo.svg"
+                src="/assets/images/Logo.png"
                 alt="logo"
               />
               <span className="hidden align-middle text-2xl  font-semibold  transition-all duration-300 dark:text-white-light md:inline ltr:ml-1.5 rtl:mr-1.5">
-                REPUTE
+                Faculty Pro
               </span>
             </Link>
             <button
@@ -340,7 +343,7 @@ const Header = () => {
                 <IconSearch className="mx-auto h-4.5 w-4.5 dark:text-[#d0d2d6]" />
               </button> */}
             </div>
-            <div>
+            {/* <div>
               {themeConfig.theme === "light" ? (
                 <button
                   className={`${
@@ -376,7 +379,7 @@ const Header = () => {
                   <IconLaptop />
                 </button>
               )}
-            </div>
+            </div> */}
             {/* <div className="dropdown shrink-0">
               <Dropdown
                 offset={[0, 8]}
@@ -500,7 +503,7 @@ const Header = () => {
                 </ul>
               </Dropdown>
             </div> */}
-            <div className="dropdown shrink-0">
+            {/* <div className="dropdown shrink-0">
               <Dropdown
                 offset={[0, 8]}
                 placement={`${isRtl ? "bottom-start" : "bottom-end"}`}
@@ -599,7 +602,7 @@ const Header = () => {
                   )}
                 </ul>
               </Dropdown>
-            </div>
+            </div> */}
             <div className="dropdown flex shrink-0">
               <Dropdown
                 offset={[0, 8]}
@@ -665,7 +668,7 @@ const Header = () => {
                     </Link>
                   </li> */}
 
-                  <li className="border-t border-white-light dark:border-white-light/10">
+                  {/* <li className="border-t border-white-light dark:border-white-light/10">
                     <Link
                       href="/auth/change-password.tsx"
                       className="dark:hover:text-white"
@@ -673,7 +676,7 @@ const Header = () => {
                       <IconLockDots className="h-4.5 w-4.5 shrink-0 ltr:mr-2 rtl:ml-2" />
                       Change Password
                     </Link>
-                  </li>
+                  </li> */}
                   {state.token ? (
                     <li className="border-t border-white-light dark:border-white-light/10">
                       <button

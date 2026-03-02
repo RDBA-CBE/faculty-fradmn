@@ -16,7 +16,9 @@ import { Models } from "@/imports/models.import";
 import { EXPERIENCE, JOB_TYPE, ROLES } from "@/utils/constant.utils";
 import moment from "moment";
 import { useRouter } from "next/router";
-import UpdatePropertyImagePreview from "@/components/ImageUploadWithPreview/UpdatePropertyImagePreview.component";
+import UpdatePropertyImagePreview from "@/components/ImageUploadWithPreview/ImageUploadWithPreview.component";
+import CheckboxInput from "@/components/FormFields/CheckBoxInput.component";
+import IconLoader from "@/components/Icon/IconLoader";
 
 export default function Newjob() {
   const router = useRouter();
@@ -82,6 +84,10 @@ export default function Newjob() {
       version: "2.19.0",
     },
     error: {},
+    applyType: { value: "internal", label: "Internal" },
+    isCollegeEmail: true,
+    alternativeEmail: "",
+    applyLink: "",
   });
 
   useEffect(() => {
@@ -106,7 +112,6 @@ export default function Newjob() {
   const profile = async () => {
     try {
       const res: any = await Models.auth.profile();
-      console.log("✌️res --->", res);
       setState({ profile: res });
 
       if (res?.role == ROLES.INSTITUTION_ADMIN) {
@@ -137,7 +142,6 @@ export default function Newjob() {
       console.error("Error fetching institutions:", error);
     }
   };
-  console.log("college --->", state.college);
 
   const getJobDetails = async (profileResponse) => {
     try {
@@ -171,10 +175,14 @@ export default function Newjob() {
             label: res?.institution?.name,
           },
           college: { value: res?.college?.id, label: res?.college?.name },
-          department: {
-            value: res?.department?.id,
-            label: res?.department?.name,
-          },
+          department:
+            res?.department?.length > 0
+              ? res?.department?.map((dept: any) => ({
+                  value: dept?.id,
+                  label: dept?.name,
+                }))
+              : [],
+
           deadline: moment(res?.deadline).format("YYYY-MM-DD") || "",
           startDate: moment(res?.start_date).format("YYYY-MM-DD") || "",
           endDate: moment(res?.last_date).format("YYYY-MM-DD") || "",
@@ -215,9 +223,42 @@ export default function Newjob() {
                 }))
               : [],
         });
+        if (res?.job_image) {
+          setState({
+            newImages: [res?.job_image],
+          });
+        }else{
+          setState({
+            newImages: [],
+          });
+        }
+
         if (profileResponse?.role == ROLES.SUPER_ADMIN) {
           fetchColleges(res?.institution?.id, 1);
           fetchDepartments(res?.college?.id, 1);
+        }
+        if (res.apply_link) {
+          console.log("✌️ if  --->");
+          setState({
+            isCollegeEmail: false,
+            alternativeEmail: "",
+            applyLink: res.apply_link,
+            applyType: {
+              value: "external",
+              label: "External",
+            },
+          });
+        } else {
+          console.log("✌️ else  --->");
+
+          if (res?.user_collage_email) {
+            setState({ isCollegeEmail: true, alternativeEmail: "" });
+          } else {
+            setState({
+              isCollegeEmail: false,
+              alternativeEmail: res?.alternative_email || "",
+            });
+          }
         }
       }
     } catch (error) {
@@ -294,7 +335,6 @@ export default function Newjob() {
     try {
       setState({ skillLoading: true });
       const res: any = await Models.job.job_skills(page);
-      console.log("✌️res --->", res);
       const dropdown = Dropdown(res?.results, "name");
       setState({
         skillLoading: false,
@@ -342,7 +382,6 @@ export default function Newjob() {
   };
 
   const fetchColleges = async (institutionId: number, page = 1) => {
-    console.log("✌️fetchColleges --->");
     try {
       const res: any = await Models.college.list(page, {
         institution: institutionId,
@@ -362,7 +401,6 @@ export default function Newjob() {
   };
 
   const fetchDepartments = async (collegeId: number, page = 1) => {
-    console.log("✌️collegeId --->", collegeId);
     try {
       const res: any = await Models.department.list(page, {
         college: collegeId,
@@ -522,75 +560,35 @@ export default function Newjob() {
     setState({ btnLoading: true });
     const keyResponsibilityData =
       await state.keyResponsibilityEditorInstance?.save();
-    console.log("✌️keyResponsibilityData --->", keyResponsibilityData);
-
-    const valid: any = {
-      title: state.title,
-
-      // location: state.location?.value,
-
-      salary: state.salary,
-
-      priority: state.priority,
-      deadline: state.deadline,
-      startDate: state.startDate,
-      endDate: state.endDate,
-      numberOfOpenings: state.numberOfOpenings,
-      experience: state.experience?.value,
-      qualification: state.qualification,
-      responsibility: keyResponsibilityData,
-      // professionalSkills: professionalSkillsData,
-      // skills: state.skills,
-
-      jobDescription: state.description,
-    };
-
-    if (state.profile?.role == ROLES.SUPER_ADMIN) {
-      valid.institution = state.institution?.value;
-      valid.college = state.college?.value;
-      valid.department = state.department?.value;
-    } else if (state.profile?.role == ROLES.INSTITUTION_ADMIN) {
-      valid.institution = state.profile?.institution?.institution_id;
-      valid.college = state.college?.value;
-      valid.department = state.department?.value;
-    } else if (state.profile?.role == ROLES.HR) {
-      valid.institution = state.profile?.institution?.institution_id;
-      valid.college = state.profile?.college?.college_id;
-      valid.department = state.department?.value;
-    } else {
-      valid.institution = state.profile?.institution?.institution_id;
-      valid.college = state.profile?.college?.college_id;
-      valid.department = state.profile?.department?.department_id;
-    }
-
-    console.log("✌️valid --->", valid);
 
     try {
-      await CreateNewJob.validate(
-        {
-          title: state.title,
+      const validation = {
+        title: state.title,
 
-          // location: state.location,
+        // location: state.location,
 
-          institution: state.institution,
-          college: state.college,
-          department: state.department,
+        institution: state.institution,
+        college: state.college,
+        department: state.department,
 
-          salary: state.salary?.value,
+        salary: state.salary?.value,
 
-          priority: state.priority?.value,
-          deadline: state.deadline,
-          startDate: state.startDate,
-          endDate: state.endDate,
+        priority: state.priority?.value,
+        deadline: state.deadline,
+        startDate: state.startDate,
+        endDate: state.endDate,
 
-          experience: state.experience?.value,
-          qualification: state.qualification,
-          keyResponsibility: keyResponsibilityData,
+        experience: state.experience?.value,
+        qualification: state.qualification,
+        keyResponsibility: keyResponsibilityData,
 
-          description: state.description,
-        },
-        { abortEarly: false }
-      );
+        description: state.description,
+        applyType: state.applyType?.value,
+        isCollegeEmail: state.isCollegeEmail,
+        alternativeEmail: state.alternativeEmail,
+        applyLink: state.applyLink,
+      };
+      await CreateNewJob.validate(validation, { abortEarly: false });
 
       const body: any = {
         job_title: state.title,
@@ -616,23 +614,55 @@ export default function Newjob() {
       if (state.profile?.role == ROLES.SUPER_ADMIN) {
         body.institution = state.institution?.value;
         body.college = state.college?.value;
-        body.department = state.department?.value;
+        // body.department = state.department?.value;
+        body.department = state.department?.map((dept: any) => dept.value);
       } else if (state.profile?.role == ROLES.INSTITUTION_ADMIN) {
         body.institution = state.profile?.institution?.institution_id;
         body.college = state.college?.value;
-        body.department = state.department?.value;
+        // body.department = state.department?.value;
+        body.department = state.department?.map((dept: any) => dept.value);
       } else if (state.profile?.role == ROLES.HR) {
         body.institution = state.profile?.institution?.institution_id;
         body.college = state.profile?.college?.college_id;
-        body.department = state.department?.value;
+        // body.department = state.department?.value;
+        body.department = state.department?.map((dept: any) => dept.value);
       } else {
         body.institution = state.profile?.institution?.institution_id;
         body.college = state.profile?.college?.college_id;
         body.department = state.profile?.department?.department_id;
       }
+      if (state.newImages?.length > 0) {
+        body.job_image = state.newImages?.[0];
+      } else {
+        body.job_image = null;
+      }
+      console.log("✌️body --->", body);
+
+      if (state.applyType?.value == "internal") {
+        if (state.isCollegeEmail) {
+          body.alternative_email = "";
+          body.user_collage_email = state.isCollegeEmail;
+          body.apply_link = "";
+        } else {
+          body.alternative_email = state.alternativeEmail;
+          body.user_collage_email = false;
+          body.apply_link = "";
+        }
+      } else {
+        body.user_collage_email = false;
+        body.apply_link = state.applyLink;
+        body.alternative_email = "";
+      }
 
       console.log("✌️body --->", body);
-      const formData = buildFormData(body);
+      const formData: any = buildFormData(body);
+
+      if (state.newImages?.length > 0) {
+        formData.append("job_image", state.newImages?.[0]);
+      } else {
+        formData.append("job_image", null);
+
+      }
 
       const res = await Models.job.update(formData, id);
       console.log("✌️res --->", res);
@@ -654,6 +684,7 @@ export default function Newjob() {
       setState({ btnLoading: false });
     }
   };
+  console.log("✌️state.newImages --->", state.newImages);
 
   const handleFieldChange = (field: string, value: any) => {
     setState({
@@ -981,6 +1012,7 @@ export default function Newjob() {
                       onChange={(option) =>
                         handleFieldChange("department", option)
                       }
+                      isMulti={true}
                       placeholder="Select department"
                       error={state.error?.department}
                       disabled={!state.college || !state.institution}
@@ -1031,6 +1063,7 @@ export default function Newjob() {
                       onChange={(option) =>
                         handleFieldChange("department", option)
                       }
+                      isMulti={true}
                       placeholder="Select department"
                       error={state.error?.department}
                       disabled={!state.college || !state.institution}
@@ -1101,6 +1134,7 @@ export default function Newjob() {
                       onChange={(option) =>
                         handleFieldChange("department", option)
                       }
+                      isMulti={true}
                       placeholder="Select department"
                       error={state.error?.department}
                       disabled={!state.college || !state.institution}
@@ -1144,8 +1178,8 @@ export default function Newjob() {
                   options={state.priorityList}
                   value={state.priority}
                   onChange={(option) => handleFieldChange("priority", option)}
-                  placeholder="Select Priority"
-                  title="Select Priority"
+                  placeholder="Job Urgency"
+                  title="Job Urgency"
                   isClearable={true}
                   error={state.error?.priority}
                   required
@@ -1270,8 +1304,88 @@ export default function Newjob() {
                   required
                 />
               </div>
+              <div className="mt-5">
+                <CustomSelect
+                  title="Apply Type"
+                  options={[
+                    { value: "internal", label: "Internal" },
+                    { value: "external", label: "External" },
+                  ]}
+                  value={state.applyType}
+                  onChange={(option) => {
+                    handleFieldChange("applyType", option);
+                    setState({ isCollegeEmail: true });
+                  }}
+                  placeholder="Apply Type"
+                  error={state.error?.applyType}
+                  isClearable={false}
+                />
+                {state.applyType?.value == "internal" ? (
+                  <>
+                    <div className="mt-5">
+                      <CheckboxInput
+                        label="Use College Email"
+                        checked={state.isCollegeEmail}
+                        labelStyle="font-bold text-md"
+                        onChange={(e) =>
+                          setState({
+                            isCollegeEmail: e,
+                          })
+                        }
+                      />
+                    </div>
+
+                    {!state.isCollegeEmail && (
+                      <div className="mt-5">
+                        <TextInput
+                          name="Alternative Email"
+                          title="Alternative Email"
+                          placeholder="Alternative Email"
+                          value={state.alternativeEmail}
+                          onChange={(e) =>
+                            handleFieldChange(
+                              "alternativeEmail",
+                              e.target.value
+                            )
+                          }
+                          error={state.error?.alternativeEmail}
+                          required
+                        />
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="mt-5">
+                    <TextInput
+                      name="Apply Link"
+                      title="Apply Link"
+                      placeholder="Apply Link"
+                      value={state.applyLink}
+                      onChange={(e) =>
+                        handleFieldChange("applyLink", e.target.value)
+                      }
+                      error={state.error?.applyLink}
+                      required
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
+          <UpdatePropertyImagePreview
+            existingImages={state.newImages}
+            onImagesChange={(newImages) => setState({ newImages })}
+            onDeleteImage={(imageUrl) => {
+              setState({
+                newImages: state.newImages.filter((img) => img !== imageUrl),
+              });
+            }}
+            maxFiles={1}
+            title="Job Image"
+            description="Upload job logo (JPEG or PNG)"
+            validateDimensions={false}
+            isSingleImage={true}
+          />
           <div
             ref={section5Ref}
             className="scroll-mt-32 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
@@ -1436,8 +1550,13 @@ export default function Newjob() {
               type="button"
               className="w-full rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 px-8 py-3 font-semibold text-white shadow-lg transition-all hover:from-purple-700 hover:to-blue-700 hover:shadow-xl sm:w-auto"
               onClick={() => handleSubmit()}
+              disabled={state.btnLoading}
             >
-              Update Job
+              {state.btnLoading ? (
+                <IconLoader className="animate-spin" />
+              ) : (
+                " Update Job"
+              )}
             </button>
           </div>
         </div>

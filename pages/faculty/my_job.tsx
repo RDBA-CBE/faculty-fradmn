@@ -39,6 +39,8 @@ import {
   CheckCircle,
   Clock,
   CheckCheckIcon,
+  Repeat,
+  RefreshCw,
 } from "lucide-react";
 import moment from "moment";
 import { useRouter } from "next/navigation";
@@ -156,7 +158,7 @@ const Job = () => {
           "",
           false,
           res?.institution?.institution_id,
-          res.id,
+          res.id
         );
       } else if (res?.role == ROLES.HR) {
         departmentDropdownList(1, "", false, res?.college?.college_id, res.id);
@@ -179,7 +181,11 @@ const Job = () => {
         job_description: item.job_description,
 
         college_name: item?.college?.name,
-        department_name: item?.department?.name || "-",
+        department_name:
+          item?.department?.length > 0
+            ? item?.department?.map((item) => item?.name).join(", ")
+            : "-",
+        // department_name:)  item?.department?.name || "-",
 
         job_type: item?.job_type,
         experiences: {
@@ -282,7 +288,7 @@ const Job = () => {
   const institutionDropdownList = async (
     page,
     search = "",
-    loadMore = false,
+    loadMore = false
   ) => {
     try {
       setState({ institutionLoading: true });
@@ -308,7 +314,7 @@ const Job = () => {
     search = "",
     loadMore = false,
     institutionId = null,
-    createdBy = null,
+    createdBy = null
   ) => {
     try {
       setState({ collegeLoading: true });
@@ -344,7 +350,7 @@ const Job = () => {
     search = "",
     loadMore = false,
     collegeId = null,
-    createdBy = null,
+    createdBy = null
   ) => {
     try {
       setState({ departmentLoading: true });
@@ -443,7 +449,7 @@ const Job = () => {
         "",
         false,
         selectedOption.value,
-        state.profile?.id,
+        state.profile?.id
       );
     }
   };
@@ -493,7 +499,7 @@ const Job = () => {
         "",
         false,
         selectedOption.value,
-        state.profile?.id,
+        state.profile?.id
       );
     }
   };
@@ -547,12 +553,12 @@ const Job = () => {
         Success(
           row.is_approved
             ? "Job unapproved successfully!"
-            : "Job approved successfully!",
+            : "Job approved successfully!"
         );
         jobList(state.page);
       } catch (error) {
         Failure(
-          row.is_approved ? "Failed to unapprove job" : "Failed to approve job",
+          row.is_approved ? "Failed to unapprove job" : "Failed to approve job"
         );
       }
     }
@@ -574,7 +580,7 @@ const Job = () => {
     showDeleteAlert(
       () => deleteRecord(row?.id),
       () => Swal.fire("Cancelled", "Record is safe", "info"),
-      "Are you sure you want to delete this job?",
+      "Are you sure you want to delete this job?"
     );
   };
 
@@ -592,7 +598,7 @@ const Job = () => {
     showDeleteAlert(
       () => bulkDeleteRecords(),
       () => Swal.fire("Cancelled", "Your Records are safe :)", "info"),
-      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`,
+      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`
     );
   };
 
@@ -663,8 +669,7 @@ const Job = () => {
                 Approved Jobs
               </p>
               <p className="text-3xl font-bold text-green-600 dark:text-green-400">
-                {state.jobList?.filter((job) => job.status === "active")
-                  ?.length || 0}
+                {state.jobList?.filter((job) => job.is_approved)?.length || 0}
               </p>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 dark:bg-green-900">
@@ -680,8 +685,7 @@ const Job = () => {
                 Pending Jobs
               </p>
               <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
-                {state.jobList?.filter((job) => job.job_type === "full_time")
-                  ?.length || 0}
+                {state.jobList?.filter((job) => !job.is_approved)?.length || 0}
               </p>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 dark:bg-purple-900">
@@ -694,10 +698,10 @@ const Job = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Urgent Priority
+                Urgent Job
               </p>
               <p className="text-3xl font-bold text-red-600 dark:text-red-400">
-                {state.jobList?.filter((job) => job.priority === "urgent")
+                {state.jobList?.filter((job) => job.priority == "0 - 30 Days")
                   ?.length || 0}
               </p>
             </div>
@@ -743,7 +747,7 @@ const Job = () => {
                       institutionDropdownList(
                         state.institutionPage + 1,
                         "",
-                        true,
+                        true
                       )
                     }
                     loading={state.institutionLoading}
@@ -765,7 +769,7 @@ const Job = () => {
                       searchTerm,
                       false,
                       institutionId,
-                      state.profile?.id,
+                      state.profile?.id
                     );
                   }}
                   loadMore={() => {
@@ -779,7 +783,7 @@ const Job = () => {
                         "",
                         true,
                         institutionId,
-                        state.profile?.id,
+                        state.profile?.id
                       );
                   }}
                   loading={state.collegeLoading}
@@ -799,7 +803,7 @@ const Job = () => {
                         searchTerm,
                         false,
                         collegeId,
-                        state.profile?.id,
+                        state.profile?.id
                       );
                   }}
                   loadMore={() => {
@@ -811,7 +815,7 @@ const Job = () => {
                         "",
                         true,
                         collegeId,
-                        state.profile?.id,
+                        state.profile?.id
                       );
                   }}
                   loading={state.departmentLoading}
@@ -871,7 +875,7 @@ const Job = () => {
                         searchTerm,
                         false,
                         collegeId,
-                        state.profile?.id,
+                        state.profile?.id
                       );
                   }}
                   loadMore={() => {
@@ -883,7 +887,7 @@ const Job = () => {
                         "",
                         true,
                         collegeId,
-                        state.profile?.id,
+                        state.profile?.id
                       );
                   }}
                   loading={state.departmentLoading}
@@ -929,7 +933,7 @@ const Job = () => {
               />
             </div> */}
 
-            <div className="group relative">
+            {/* <div className="group relative">
               <CustomSelect
                 options={state.jobStatusList}
                 value={state.statusFilter}
@@ -937,7 +941,7 @@ const Job = () => {
                 placeholder="Filter by status"
                 isClearable={true}
               />
-            </div>
+            </div> */}
             <div className="group relative">
               <CustomSelect
                 options={state.salaryRangeList}
@@ -957,7 +961,7 @@ const Job = () => {
               />
             </div> */}
 
-            <div className="group relative">
+            {/* <div className="group relative">
               <CustomSelect
                 options={state.priorityList}
                 value={state.priorityFilter}
@@ -965,7 +969,7 @@ const Job = () => {
                 placeholder="Filter by priority"
                 isClearable={true}
               />
-            </div>
+            </div> */}
           </>
         </div>
       </div>
@@ -1002,7 +1006,7 @@ const Job = () => {
             records={state.jobList}
             fetching={state.loading}
             selectedRecords={state.jobList?.filter((record) =>
-              state.selectedRecords.includes(record.id),
+              state.selectedRecords.includes(record.id)
             )}
             onSelectedRecordsChange={(records) =>
               setState({ selectedRecords: records.map((r: any) => r.id) })
@@ -1024,7 +1028,7 @@ const Job = () => {
                 sortable: true,
                 render: ({ job_title }) => (
                   <div className="font-medium text-gray-900 dark:text-white">
-                    {job_title}
+                    {capitalizeFLetter(job_title)}
                   </div>
                 ),
               },
@@ -1034,7 +1038,7 @@ const Job = () => {
                 sortable: true,
                 render: ({ department_name }) => (
                   <span className="text-gray-600 dark:text-gray-400">
-                    {department_name || "-"}
+                    {capitalizeFLetter(department_name || "-")}
                   </span>
                 ),
               },
@@ -1044,7 +1048,7 @@ const Job = () => {
                 sortable: true,
                 render: ({ college_name }) => (
                   <span className="text-gray-600 dark:text-gray-400">
-                    {college_name || "-"}
+                    {capitalizeFLetter(college_name || "-")}
                   </span>
                 ),
               },
@@ -1063,7 +1067,7 @@ const Job = () => {
                 title: "Experience",
                 render: ({ experiences }) => (
                   <span className="text-gray-600 dark:text-gray-400">
-                    {experiences?.label || "-"}
+                    {capitalizeFLetter(experiences?.label || "-")}
                   </span>
                 ),
               },
@@ -1081,11 +1085,6 @@ const Job = () => {
                 title: "Status",
                 render: (row) => (
                   <span
-                    onClick={() => {
-                      if (state.profile?.role == ROLES.HR) {
-                        handleApprove(row);
-                      }
-                    }}
                     className={`inline-flex cursor-pointer items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${
                       (row as any).is_approved
                         ? "bg-green-100 text-green-800 hover:bg-green-200"
@@ -1098,14 +1097,14 @@ const Job = () => {
                       <Clock className="h-3 w-3" />
                     )}
                     {capitalizeFLetter(
-                      (row as any).is_approved ? "Approved" : "Pending",
+                      (row as any).is_approved ? "Approved" : "Pending"
                     ) || "-"}
                   </span>
                 ),
               },
               {
                 accessor: "priority",
-                title: "Priority",
+                title: "Job Urgency",
                 render: ({ priority }) => (
                   <span
                     className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
@@ -1157,6 +1156,24 @@ const Job = () => {
                     >
                       <IconEye className="h-4 w-4" />
                     </button>
+                    {state.profile?.role == ROLES.HR && (
+                      <button
+                        onClick={() => {
+                          if (state.profile?.role == ROLES.HR) {
+                            handleApprove(row);
+                          }
+                        }}
+                        // onClick={() => handleToggleStatus(row)}
+                        className={`flex h-8 w-8 items-center justify-center rounded-lg ${
+                          row?.job_status === "published"
+                            ? "bg-red-100 text-red-600 hover:bg-red-200"
+                            : "bg-green-100 text-green-600 hover:bg-green-200"
+                        }`}
+                        title={"Job Status"}
+                      >
+                        <CheckCircle className="h-4 w-4" />
+                      </button>
+                    )}
                     <button
                       onClick={() => handleLog(row)}
                       className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 text-purple-600 hover:bg-purple-200"
@@ -1164,25 +1181,7 @@ const Job = () => {
                     >
                       <IconHistory className="h-4 w-4" />
                     </button>
-                    <button
-                      onClick={() => handleToggleStatus(row)}
-                      className={`flex h-8 w-8 items-center justify-center rounded-lg ${
-                        row?.job_status === "published"
-                          ? "bg-red-100 text-red-600 hover:bg-red-200"
-                          : "bg-green-100 text-green-600 hover:bg-green-200"
-                      }`}
-                      title={
-                        row?.job_status === "published"
-                          ? "Unpublish"
-                          : "Publish"
-                      }
-                    >
-                      {row?.job_status === "published" ? (
-                        <ToggleLeft className="h-4 w-4" />
-                      ) : (
-                        <ToggleRight className="h-4 w-4" />
-                      )}
-                    </button>
+
                     <button
                       onClick={() => handleEdit(row)}
                       className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200"

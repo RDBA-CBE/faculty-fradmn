@@ -36,7 +36,7 @@ const LogCard = (props: any) => {
 
   return (
     <div className="flex h-[600px] flex-col p-5">
-      {title && (
+      {/* {title && (
         <div className="mb-4 flex items-center justify-between border-b pb-3">
           <h2 className="text-xl font-bold text-gray-800 dark:text-white">
             {title}
@@ -62,7 +62,7 @@ const LogCard = (props: any) => {
             </button>
           )}
         </div>
-      )}
+      )} */}
       <div ref={scrollRef} className="mb-5 flex-1 overflow-y-auto">
         {data == null || data?.length === 0 ? (
           <div className="flex h-full items-center justify-center">

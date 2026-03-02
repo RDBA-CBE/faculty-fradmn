@@ -22,6 +22,7 @@ import {
 import Pagination from "@/components/pagination/pagination";
 import {
   buildFormData,
+  capitalizeFLetter,
   Dropdown,
   showDeleteAlert,
   useSetState,
@@ -38,7 +39,7 @@ import {
 } from "@/utils/validation.utils";
 import PrivateRouter from "@/hook/privateRouter";
 import IconEdit from "@/components/Icon/IconEdit";
-import UpdatePropertyImagePreview from "@/components/ImageUploadWithPreview/UpdatePropertyImagePreview.component";
+import UpdatePropertyImagePreview from "@/components/ImageUploadWithPreview/ImageUploadWithPreview.component";
 
 const CollegeAndDepartment = () => {
   const dispatch = useDispatch();
@@ -255,7 +256,7 @@ const CollegeAndDepartment = () => {
     page,
     search = "",
     loadMore = false,
-    seletedInstitution = null,
+    seletedInstitution = null
   ) => {
     try {
       setState({ collegeLoading: true });
@@ -281,10 +282,40 @@ const CollegeAndDepartment = () => {
     }
   };
 
-  const institutionDropdownList = async (
+  const deptHodDropdownList = async (
     page,
     search = "",
     loadMore = false,
+    selectedCollege = null
+  ) => {
+    try {
+      setState({ deptHodLoading: true });
+      const body: any = { search };
+      if (selectedCollege) {
+        body.college_id = selectedCollege;
+      }
+
+      const res: any = await Models.auth.userList(page, body);
+      const dropdown = Dropdown(res?.results, "username");
+
+      setState({
+        deptHodLoading: false,
+        deptHodPage: page,
+        deptHodDropdownList: loadMore
+          ? [...state.deptHodDropdownList, ...dropdown]
+          : dropdown,
+        deptHodNext: res?.next,
+      });
+    } catch (error) {
+      console.error("Error fetching colleges:", error);
+      setState({ deptHodLoading: false });
+    }
+  };
+
+  const institutionDropdownList = async (
+    page,
+    search = "",
+    loadMore = false
   ) => {
     try {
       setState({ institutionLoading: true });
@@ -359,8 +390,9 @@ const CollegeAndDepartment = () => {
         college_id: item?.college,
         total_jobs: item?.total_jobs,
         institution_name: item?.college_name,
-        institution_id: item?.college,
+        institution_id: item?.institution,
         department_head: item?.hod?.name,
+        hod_id: item?.hod?.id,
       }));
 
       setState({
@@ -400,7 +432,7 @@ const CollegeAndDepartment = () => {
   const loadInstitutionOptions = async (
     page,
     search = "",
-    loadMore = false,
+    loadMore = false
   ) => {
     try {
       setState({ institutionLoading: true });
@@ -448,12 +480,16 @@ const CollegeAndDepartment = () => {
     page,
     search = "",
     loadMore = false,
-    institutionOption = null,
+    institutionOption = null
   ) => {
     try {
       setState({ collegeFilterLoading: true });
       const body: any = { search };
       const selectedInstitution = institutionOption || state.institutionFilter;
+      // const userId = localStorage.getItem("userId");
+      // body.created_by = userId;
+      // body.team = "No";
+
       if (selectedInstitution) {
         body.institution = selectedInstitution.value;
       }
@@ -497,7 +533,7 @@ const CollegeAndDepartment = () => {
 
   const handleCloseModal = () => {
     console.log("hellor");
-    
+
     setState({
       showModal: false,
       showEditModal: false,
@@ -530,6 +566,7 @@ const CollegeAndDepartment = () => {
       showHODConfirmPassword: false,
       errors: {},
       editId: null,
+      submitting:false
     });
   };
 
@@ -565,8 +602,8 @@ const CollegeAndDepartment = () => {
   };
 
   const handleEdit = (row) => {
+    console.log("✌️row --->", row);
     if (state.activeTab === "colleges") {
-     
       setState({
         editId: row.id,
         showModal: false,
@@ -604,6 +641,22 @@ const CollegeAndDepartment = () => {
           label: row.college_name,
         },
       });
+      if (row?.hod_id) {
+        setState({
+          deptHod: { value: row?.hod_id, label: row.department_head },
+        });
+      }
+
+      if (row?.institution_id) {
+        collegeDropdownList(1, "", false, {
+          value: row?.institution_id,
+          label: row.institution_name,
+        });
+      }
+
+      if (row?.college_id) {
+        deptHodDropdownList(1, "", false, row?.college_id);
+      }
     }
   };
 
@@ -630,7 +683,7 @@ const CollegeAndDepartment = () => {
     showDeleteAlert(
       () => deleteRecord(row.id),
       () => Swal.fire("Cancelled", "Record is safe", "info"),
-      "Are you sure you want to delete this record?",
+      "Are you sure you want to delete this record?"
     );
   };
 
@@ -642,7 +695,7 @@ const CollegeAndDepartment = () => {
       () => {
         Swal.fire("Cancelled", "Your Records are safe :)", "info");
       },
-      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`,
+      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`
     );
   };
 
@@ -659,7 +712,7 @@ const CollegeAndDepartment = () => {
       }
     } catch (error) {
       Failure(
-        `Failed to delete ${state.activeTab.slice(0, -1)}. Please try again.`,
+        `Failed to delete ${state.activeTab.slice(0, -1)}. Please try again.`
       );
     }
   };
@@ -674,7 +727,7 @@ const CollegeAndDepartment = () => {
         }
       }
       Success(
-        `${state.selectedRecords.length} ${state.activeTab} deleted successfully!`,
+        `${state.selectedRecords.length} ${state.activeTab} deleted successfully!`
       );
       setState({ selectedRecords: [] });
       if (state.activeTab === "colleges") {
@@ -701,7 +754,7 @@ const CollegeAndDepartment = () => {
     } catch (rollbackError) {
       console.error("Rollback error:", rollbackError);
       Failure(
-        "Failed to cleanup created records. Please contact administrator.",
+        "Failed to cleanup created records. Please contact administrator."
       );
     }
   };
@@ -712,18 +765,21 @@ const CollegeAndDepartment = () => {
 
       if (state.currentStep === 1) {
         // Step 1: Create College only
-        const collegeBody:any = {
-          college_name: state.college_name,
-          college_code: state.college_code,
+        const collegeBody: any = {
+          college_name: capitalizeFLetter(state.college_name),
+          college_code: capitalizeFLetter(state.college_code),
           college_email: state.college_email,
           college_phone: state.college_phone,
-          college_address: state.college_address,
-          college_hr: state.college_hr?.value,
+          college_address: capitalizeFLetter(state.college_address),
+          // college_hr: state.college_hr?.value,
           institution: state?.institution?.value,
         };
 
         if (state.newImages?.length > 0 && state.images?.length === 0) {
           collegeBody.college_logo = state.newImages[0];
+        }
+        if (state.college_hr?.value) {
+          collegeBody.college_hr = state.college_hr?.value;
         }
         await CreateCollege.validate(collegeBody, { abortEarly: false });
 
@@ -734,12 +790,12 @@ const CollegeAndDepartment = () => {
         collegeTableList(state.page);
       } else if (state.currentStep === 2) {
         // Step 2: Create College and Department
-        const collegeBody :any = {
-          college_name: state.college_name,
-          college_code: state.college_code,
+        const collegeBody: any = {
+          college_name: capitalizeFLetter(state.college_name),
+          college_code: capitalizeFLetter(state.college_code),
           college_email: state.college_email,
           college_phone: state.college_phone,
-          college_address: state.college_address,
+          college_address: capitalizeFLetter(state.college_address),
           institution: state?.institution?.value,
           college_hr: state.college_hr?.value,
         };
@@ -779,7 +835,7 @@ const CollegeAndDepartment = () => {
           // Show step-specific error message
           if (createdRecords.collegeId && !createdRecords.departmentId) {
             Failure(
-              "Step 2.2 failed: Department creation failed. College was created but removed due to error.",
+              "Step 2.2 failed: Department creation failed. College was created but removed due to error."
             );
           } else {
             Failure("Step 2.1 failed: College creation failed.");
@@ -789,6 +845,7 @@ const CollegeAndDepartment = () => {
         }
       }
     } catch (error: any) {
+console.log('✌️error --->', error);
       if (error?.inner) {
         const errors = {};
         error.inner.forEach((err) => {
@@ -811,13 +868,13 @@ const CollegeAndDepartment = () => {
           return;
         }
 
-        if (error?.response?.data?.non_field_errors?.length > 0) {
+        if (error?.data?.non_field_errors?.length > 0) {
           Failure(error?.response?.data?.non_field_errors?.[0]);
         } else {
           Failure(
             `Step ${state.currentStep} failed: ${
-              error?.message || "Creation failed. Please try again."
-            }`,
+              error?.data?.error || error?.message || "Creation failed. Please try again."
+            }`
           );
         }
       }
@@ -826,8 +883,6 @@ const CollegeAndDepartment = () => {
     }
   };
 
-  console.log("state.images", state.images);
-
   const handleSubmit = async () => {
     try {
       setState({ submitting: true });
@@ -835,7 +890,7 @@ const CollegeAndDepartment = () => {
       // If activeTab is departments, show single step department form
       if (state.activeTab === "departments") {
         const body: any = {
-          department_name: state.department_name,
+          department_name: capitalizeFLetter(state.department_name),
           // department_code: state.department_code,
           college: state.college?.value,
         };
@@ -844,6 +899,7 @@ const CollegeAndDepartment = () => {
         const validationBody = {
           college: state.college?.value,
           department_name: state.department_name,
+          // deptHod: state.deptHod,
           // department_code: state.department_code,
         };
 
@@ -856,6 +912,10 @@ const CollegeAndDepartment = () => {
         if (!validationBody.department_name) {
           errors.department_name = "Department name is required";
         }
+
+        // if (!validationBody.deptHod) {
+        //   errors.deptHod = "Department hod is required";
+        // }
         // if (!validationBody.department_code) {
         //   errors.department_code = "Department code is required";
         // }
@@ -873,6 +933,11 @@ const CollegeAndDepartment = () => {
           const res: any = await Models.college.details(state.college?.value);
           body.institution = res?.institution;
         }
+        if (state.deptHod?.value) {
+          body.hod_id = state.deptHod?.value;
+        } else {
+          body.hod_id = null;
+        }
 
         if (state.editId) {
           const res = await Models.department.update(body, state.editId);
@@ -889,12 +954,12 @@ const CollegeAndDepartment = () => {
 
       // College wizard flow
       if (state.currentStep === 1) {
-        const body:any = {
-          college_name: state.college_name,
-          college_code: state.college_code,
+        const body: any = {
+          college_name: capitalizeFLetter(state.college_name),
+          college_code: capitalizeFLetter(state.college_code),
           college_email: state.college_email,
           college_phone: state.college_phone,
-          college_address: state.college_address,
+          college_address: capitalizeFLetter(state.college_address),
           institution: state?.institution?.value,
           college_hr: state?.college_hr?.value,
         };
@@ -934,7 +999,7 @@ const CollegeAndDepartment = () => {
         }
       } else if (state.currentStep === 2) {
         // Validate department details and move to step 3
-        if (!state.department_name ) {
+        if (!state.department_name) {
           setState({
             errors: {
               department_name: "Department name is required",
@@ -953,13 +1018,13 @@ const CollegeAndDepartment = () => {
       } else if (state.currentStep === 3) {
         // Validate HOD details and create all entities
         const hodBody = {
-          hod_username: state.hod_username,
+          hod_username: capitalizeFLetter(state.hod_username),
           hod_email: state.hod_email,
           hod_password: state.hod_password,
           hod_confirm_password: state.hod_confirm_password,
           hod_phone: state.hod_phone,
           hod_gender: state.hod_gender?.value,
-          hod_qualification: state.hod_qualification,
+          hod_qualification: capitalizeFLetter(state.hod_qualification),
         };
 
         try {
@@ -981,12 +1046,12 @@ const CollegeAndDepartment = () => {
 
         try {
           // Step 3.1: Create college first
-          const collegeBody:any = {
-            college_name: state.college_name,
-            college_code: state.college_code,
+          const collegeBody: any = {
+            college_name: capitalizeFLetter(state.college_name),
+            college_code: capitalizeFLetter(state.college_code),
             college_email: state.college_email,
             college_phone: state.college_phone,
-            college_address: state.college_address,
+            college_address: capitalizeFLetter(state.college_address),
             institution: state?.institution?.value,
             college_hr: state?.college_hr?.value,
           };
@@ -1002,7 +1067,7 @@ const CollegeAndDepartment = () => {
 
           // Step 3.2: Create department with the created college ID
           const deptBody = {
-            department_name: state.department_name,
+            department_name:capitalizeFLetter (state.department_name),
             // department_code: state.department_code,
             college: collegeRes?.id,
             institution: state?.institution?.value,
@@ -1013,7 +1078,7 @@ const CollegeAndDepartment = () => {
 
           // Step 3.3: Create HOD with the created department ID
           const finalHodBody = {
-            username: state.hod_username,
+            username: capitalizeFLetter(state.hod_username),
             email: state.hod_email,
             password: state.hod_password,
             password_confirm: state.hod_confirm_password,
@@ -1021,7 +1086,7 @@ const CollegeAndDepartment = () => {
             role: "hod",
             status: "active",
             gender: state.hod_gender?.value,
-            education_qualification: state.hod_qualification,
+            education_qualification: capitalizeFLetter(state.hod_qualification),
             department: deptRes?.id,
           };
           const formData = buildFormData(finalHodBody);
@@ -1056,7 +1121,7 @@ const CollegeAndDepartment = () => {
               });
 
               throw new Error(
-                `Hod  creation failed:\n${errorMessages.join("\n")}`,
+                `Hod  creation failed:\n${errorMessages.join("\n")}`
               );
             }
             throw new Error(`hod  creation failed: ${error?.message}`);
@@ -1076,7 +1141,7 @@ const CollegeAndDepartment = () => {
               });
 
               throw new Error(
-                `Department  creation failed:\n${errorMessages.join("\n")}`,
+                `Department  creation failed:\n${errorMessages.join("\n")}`
               );
             }
             throw new Error(`Department  creation failed: ${error?.message}`);
@@ -1124,12 +1189,12 @@ const CollegeAndDepartment = () => {
 
   const updateCollege = async () => {
     try {
-      const body:any = {
-        college_name: state.college_name,
-        college_code: state.college_code,
+      const body: any = {
+        college_name: capitalizeFLetter(state.college_name),
+        college_code: capitalizeFLetter(state.college_code),
         college_email: state.college_email,
         college_phone: state.college_phone,
-        college_address: state.college_address,
+        college_address: capitalizeFLetter(state.college_address),
         institution: state?.institution?.value,
         college_hr: state?.college_hr?.value,
       };
@@ -1193,7 +1258,9 @@ const CollegeAndDepartment = () => {
       />
 
       <UpdatePropertyImagePreview
-        existingImages={state.college_logo}
+        existingImages={
+          state.college_logo?.length > 0 ? state.college_logo : []
+        }
         onImagesChange={(newImages) => setState({ newImages })}
         onDeleteImage={(imageUrl) => {
           setState({
@@ -1250,7 +1317,6 @@ const CollegeAndDepartment = () => {
           loadMore={() => state.hrNext && HRList(state.hrPage + 1, "", true)}
           loading={state.hrLoading}
           title="Assign HR"
-          required
         />
       </div>
       <TextArea
@@ -1274,18 +1340,19 @@ const CollegeAndDepartment = () => {
             value={state.institution}
             onChange={(selectedOption) => {
               if (selectedOption) {
+                console.log("selectedOption: ", selectedOption);
                 setState({
                   institution: selectedOption,
                   errors: { ...state.errors, institution: "" },
                   seletedInstitution: selectedOption,
                   college: null,
+                  depdHod:null
                 });
-                collegeList(1, selectedOption);
+                collegeDropdownList(1, "", false, selectedOption);
               }
             }}
             onSearch={(searchTerm) => institutionDropdownList(1, searchTerm)}
             placeholder="Select Institution"
-            isClearable={true}
             loadMore={() =>
               state.institutionNext &&
               institutionDropdownList(state.instituitonPage + 1, "", true)
@@ -1298,14 +1365,30 @@ const CollegeAndDepartment = () => {
           <CustomSelect
             options={state.collegeDropdownList}
             value={state.college}
-            onChange={(selectedOption) =>
+            onChange={(selectedOption) => {
+              if (selectedOption) {
+                deptHodDropdownList(1, "", false, selectedOption?.value);
+                setState({
+                  deptHod: null,
+                });
+              } else {
+                setState({
+                  deptHod: null,
+                  errors: { ...state.errors, deptHod: "" },
+                });
+              }
               setState({
                 college: selectedOption,
                 errors: { ...state.errors, college: "" },
-              })
-            }
+              });
+            }}
             onSearch={(searchTerm) =>
-              collegeDropdownList(1, searchTerm, state.seletedInstitution)
+              collegeDropdownList(
+                1,
+                searchTerm,
+                false,
+                state.seletedInstitution
+              )
             }
             placeholder="Select College"
             isClearable={true}
@@ -1315,13 +1398,43 @@ const CollegeAndDepartment = () => {
                 state.collegePage + 1,
                 "",
                 true,
-                state.seletedInstitution,
+                state.seletedInstitution
               )
             }
             loading={state.collegeLoading}
             title="Select College"
             error={state.errors.college}
             required
+            disabled={!state.institution}
+          />
+
+          <CustomSelect
+            options={state.deptHodDropdownList}
+            value={state.deptHod}
+            onChange={(selectedOption) =>
+              setState({
+                deptHod: selectedOption,
+                errors: { ...state.errors, deptHod: "" },
+              })
+            }
+            onSearch={(searchTerm) =>
+              deptHodDropdownList(1, searchTerm, false, state.college?.value)
+            }
+            placeholder="Select HOD"
+            isClearable={true}
+            loadMore={() =>
+              state.collegeNext &&
+              deptHodDropdownList(
+                state.deptHodPage + 1,
+                "",
+                true,
+                state.college?.value
+              )
+            }
+            loading={state.deptHodLoading}
+            title="Select HOD"
+            error={state.errors.deptHod}
+            disabled={!state.college}
           />
         </>
       )}
@@ -1528,7 +1641,7 @@ const CollegeAndDepartment = () => {
           >
             <IconEdit className="h-4 w-4" />
           </button>
-          <button
+          {/* <button
             onClick={() => handleToggleStatus(row)}
             className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-200 ${
               row.status === "active"
@@ -1542,7 +1655,7 @@ const CollegeAndDepartment = () => {
             ) : (
               <ToggleRight className="h-4 w-4" />
             )}
-          </button>
+          </button> */}
           <button
             onClick={() => handleDelete(row)}
             className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600 transition-all duration-200 hover:bg-red-200"
@@ -1556,7 +1669,6 @@ const CollegeAndDepartment = () => {
   ];
 
   const departmentColumns = [
-    
     {
       accessor: "department_name",
       title: "Department Name",
@@ -1564,6 +1676,25 @@ const CollegeAndDepartment = () => {
       render: ({ department_name }) => (
         <div className="font-medium text-gray-900 dark:text-white">
           {department_name}
+        </div>
+      ),
+    },
+    {
+      accessor: "department_head",
+      title: "Department Head",
+      render: ({ department_head }) => (
+        <div className="text-gray-600 dark:text-gray-400">
+          {department_head}
+        </div>
+      ),
+    },
+    {
+      accessor: "institution_name",
+      title: "Institution ",
+      sortable: true,
+      render: ({ institution_name }) => (
+        <div className="font-medium text-gray-900 dark:text-white">
+          {institution_name}
         </div>
       ),
     },
@@ -1586,15 +1717,7 @@ const CollegeAndDepartment = () => {
         <span className="text-gray-600 dark:text-gray-400">{total_jobs}</span>
       ),
     },
-    {
-      accessor: "department_head",
-      title: "Department Head",
-      render: ({ department_head }) => (
-        <div className="text-gray-600 dark:text-gray-400">
-          {department_head}
-        </div>
-      ),
-    },
+
     {
       accessor: "actions",
       title: "Actions",
@@ -1608,7 +1731,7 @@ const CollegeAndDepartment = () => {
           >
             <IconEdit className="h-4 w-4" />
           </button>
-          <button
+          {/* <button
             onClick={() => handleToggleStatus(row)}
             className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-200 ${
               row.status === "active"
@@ -1622,7 +1745,7 @@ const CollegeAndDepartment = () => {
             ) : (
               <ToggleRight className="h-4 w-4" />
             )}
-          </button>
+          </button> */}
           <button
             onClick={() => handleDelete(row)}
             className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600 transition-all duration-200 hover:bg-red-200"
@@ -1831,13 +1954,14 @@ const CollegeAndDepartment = () => {
 
       {/* Modal */}
       <Modal
+        // closeIcon={true}
         open={state.showModal}
         close={handleCloseModal}
-        addHeader={
-          state.activeTab === "colleges"
-            ? "College & Department Setup"
-            : "Add Department"
-        }
+        // subTitle={
+        //   state.activeTab === "colleges"
+        //     ? "College & Department Setup"
+        //     : "Add Department"
+        // }
         renderComponent={() => (
           <div className="w-full max-w-4xl">
             <style jsx>{`
@@ -1929,7 +2053,7 @@ const CollegeAndDepartment = () => {
                     className="rounded-lg bg-blue-500 px-6 py-2 text-white hover:bg-blue-600 disabled:opacity-50"
                   >
                     {state.submitting
-                      ? "Creating..."
+                      ? "Loading..."
                       : state.editId
                       ? "Update Department"
                       : "Create Department"}

@@ -75,6 +75,8 @@ const CustomeDatePicker: React.FC<CustomeDatePickerProps> = (props) => {
           required={required}
           minDate={minDate || undefined}
           wrapperClassName="w-full"
+             portalId="root-portal"
+          
           
           {...rest}
         />

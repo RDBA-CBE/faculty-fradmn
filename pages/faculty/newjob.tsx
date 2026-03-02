@@ -16,7 +16,8 @@ import { Models } from "@/imports/models.import";
 import { EXPERIENCE, JOB_TYPE, ROLES } from "@/utils/constant.utils";
 import moment from "moment";
 import { useRouter } from "next/router";
-import UpdatePropertyImagePreview from "@/components/ImageUploadWithPreview/UpdatePropertyImagePreview.component";
+import UpdatePropertyImagePreview from "@/components/ImageUploadWithPreview/ImageUploadWithPreview.component";
+import CheckboxInput from "@/components/FormFields/CheckBoxInput.component";
 
 export default function Newjob() {
   const router = useRouter();
@@ -82,6 +83,10 @@ export default function Newjob() {
     },
     error: {},
     location: [],
+    applyType: { value: "internal", label: "Internal" },
+    isCollegeEmail: true,
+    alternativeEmail: "",
+    applyLink: "",
   });
 
   useEffect(() => {
@@ -444,80 +449,40 @@ export default function Newjob() {
   const scrollToSection = (ref: any) => {
     ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
-  console.log("✌️state.college --->", state.college);
 
   const handleSubmit = async () => {
     setState({ btnLoading: true });
     const keyResponsibilityData =
       await state.keyResponsibilityEditorInstance?.save();
-    console.log("✌️keyResponsibilityData --->", keyResponsibilityData);
-
-    const valid: any = {
-      title: state.title,
-
-      // location: state.location?.value,
-      // address: state.address,
-
-      salary: state.salary,
-
-      priority: state.priority,
-      deadline: state.deadline,
-      startDate: state.startDate,
-      endDate: state.endDate,
-      numberOfOpenings: state.numberOfOpenings,
-      experience: state.experience?.value,
-      qualification: state.qualification,
-      responsibility: keyResponsibilityData,
-      // professionalSkills: professionalSkillsData,
-      // skills: state.skills,
-
-      jobDescription: state.description,
-    };
-
-    if (state.profile?.role == ROLES.SUPER_ADMIN) {
-      valid.institution = state.institution?.value;
-      valid.college = state.college?.value;
-      valid.department = state.department?.value;
-    } else if (state.profile?.role == ROLES.INSTITUTION_ADMIN) {
-      valid.institution = state.profile?.institution?.institution_id;
-      valid.college = state.college?.value;
-      valid.department = state.department?.value;
-    } else if (state.profile?.role == ROLES.HR) {
-      valid.institution = state.profile?.institution?.institution_id;
-      valid.college = state.profile?.college?.college_id;
-      valid.department = state.department?.value;
-    } else {
-      valid.institution = state.profile?.institution?.id;
-      valid.college = state.profile?.college?.id;
-      valid.department = state.profile?.department?.department_id;
-    }
 
     try {
-      await CreateNewJob.validate(
-        {
-          title: state.title,
+      const validation = {
+        title: state.title,
 
-          // location: state.location,
-          // address: state.address,
-          institution: state.institution,
-          college: state.college,
-          department: state.department,
+        // location: state.location,
+        // address: state.address,
+        institution: state.institution,
+        college: state.college,
+        department: state.department,
 
-          salary: state.salary?.value,
+        salary: state.salary?.value,
 
-          priority: state.priority?.value,
-          deadline: state.deadline,
-          startDate: state.startDate,
-          endDate: state.endDate,
+        priority: state.priority?.value,
+        deadline: state.deadline,
+        startDate: state.startDate,
+        endDate: state.endDate,
 
-          experience: state.experience?.value,
-          qualification: state.qualification,
-          keyResponsibility: keyResponsibilityData,
+        experience: state.experience?.value,
+        qualification: state.qualification,
+        keyResponsibility: keyResponsibilityData,
 
-          description: state.description,
-        },
-        { abortEarly: false }
-      );
+        description: state.description,
+        applyType: state.applyType?.value,
+        isCollegeEmail: state.isCollegeEmail,
+        alternativeEmail: state.alternativeEmail,
+        applyLink: state.applyLink,
+      };
+      await CreateNewJob.validate(validation, { abortEarly: false });
 
       const body: any = {
         job_title: state.title,
@@ -543,14 +508,15 @@ export default function Newjob() {
       if (state.profile?.role == ROLES.SUPER_ADMIN) {
         body.institution = state.institution?.value;
         body.college = state.college?.value;
-        body.department = state.department?.value;
+        body.department = state.department?.map((dept: any) => dept.value);
       } else if (state.profile?.role == ROLES.INSTITUTION_ADMIN) {
         body.institution = state.profile?.institution?.institution_id;
         body.college = state.college?.value;
-        body.department = state.department?.value;
+        body.department = state.department?.map((dept: any) => dept.value);
       } else if (state.profile?.role == ROLES.HR) {
         body.institution = state.profile?.institution?.id;
-        body.department = state.department?.value;
+        body.department = state.department?.map((dept: any) => dept.value);
+
         if (state.profile?.college?.length > 0) {
           body.college = state.college?.value;
         } else {
@@ -561,6 +527,24 @@ export default function Newjob() {
         body.college = state.profile?.college?.[0]?.college_id;
         body.department = state.profile?.department?.department_id;
       }
+      if (state.newImages?.length > 0) {
+        body.job_image = state.newImages?.[0];
+      }
+      if (state.applyType?.value == "internal") {
+        if (state.isCollegeEmail) {
+          body.alternative_email = state.alternativeEmail;
+          body.user_collage_email = state.isCollegeEmail;
+          body.apply_link = "";
+        } else {
+          body.alternative_email = "";
+          body.user_collage_email = false;
+          body.apply_link = "";
+        }
+      } else {
+        body.user_collage_email = false;
+        body.apply_link = state.applyLink;
+        body.alternative_email = "";
+      }
 
       console.log("✌️body --->", body);
       const formData = buildFormData(body);
@@ -569,9 +553,9 @@ export default function Newjob() {
       console.log("✌️res --->", res);
 
       setState({ error: {} });
-      setState({ btnLoading: false });
       Success("Job created successfully.");
       router.back();
+      setState({ btnLoading: false });
     } catch (err: any) {
       if (err?.inner) {
         const errors: any = {};
@@ -917,6 +901,7 @@ export default function Newjob() {
                       placeholder="Select department"
                       error={state.error?.department}
                       disabled={!state.college || !state.institution}
+                      isMulti={true}
                       loadMore={() =>
                         state.departmentHasMore &&
                         fetchDepartments(
@@ -964,6 +949,7 @@ export default function Newjob() {
                       onChange={(option) =>
                         handleFieldChange("department", option)
                       }
+                      isMulti={true}
                       placeholder="Select department"
                       error={state.error?.department}
                       disabled={!state.college || !state.institution}
@@ -1028,6 +1014,7 @@ export default function Newjob() {
                       }
                       placeholder="Select department"
                       error={state.error?.department}
+                      isMulti={true}
                       disabled={!state.college || !state.institution}
                       loadMore={() =>
                         state.departmentHasMore &&
@@ -1069,8 +1056,8 @@ export default function Newjob() {
                   options={state.priorityList}
                   value={state.priority}
                   onChange={(option) => handleFieldChange("priority", option)}
-                  placeholder="Select Priority"
-                  title="Select Priority"
+                  placeholder="Job Urgency"
+                  title="Job Urgency"
                   isClearable={true}
                   error={state.error?.priority}
                   required
@@ -1193,8 +1180,88 @@ export default function Newjob() {
                   required
                 />
               </div>
+              <div className="mt-5">
+                <CustomSelect
+                  title="Apply Type"
+                  options={[
+                    { value: "internal", label: "Internal" },
+                    { value: "external", label: "External" },
+                  ]}
+                  value={state.applyType}
+                  onChange={(option) => handleFieldChange("applyType", option)}
+                  placeholder="Apply Type"
+                  error={state.error?.applyType}
+                  isClearable={false}
+                />
+                {state.applyType?.value == "internal" ? (
+                  <>
+                    <div className="mt-5">
+                      <CheckboxInput
+                        label="Use College Email"
+                        checked={state.isCollegeEmail}
+                        labelStyle="font-bold text-md"
+                        onChange={(e) =>
+                          setState({
+                            isCollegeEmail: e,
+                          })
+                        }
+                      />
+                    </div>
+
+                    {!state.isCollegeEmail && (
+                      <div className="mt-5">
+                        <TextInput
+                          name="Alternative Email"
+                          title="Alternative Email"
+                          placeholder="Alternative Email"
+                          value={state.alternativeEmail}
+                          onChange={(e) =>
+                            handleFieldChange(
+                              "alternativeEmail",
+                              e.target.value
+                            )
+                          }
+                          error={state.error?.alternativeEmail}
+                          required
+                        />
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="mt-5">
+                    <TextInput
+                      name="Apply Link"
+                      title="Apply Link"
+                      placeholder="Apply Link"
+                      value={state.applyLink}
+                      onChange={(e) =>
+                        handleFieldChange("applyLink", e.target.value)
+                      }
+                      error={state.error?.applyLink}
+                      required
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
+
+          <UpdatePropertyImagePreview
+            existingImages={state.college_logo}
+            onImagesChange={(newImages) => setState({ newImages })}
+            onDeleteImage={(imageUrl) => {
+              setState({
+                college_logo: state.college_logo.filter(
+                  (img) => img !== imageUrl
+                ),
+              });
+            }}
+            maxFiles={1}
+            title="Job Image"
+            description="Upload job logo (JPEG or PNG)"
+            validateDimensions={false}
+            isSingleImage={true}
+          />
           <div
             ref={section5Ref}
             className="scroll-mt-32 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"

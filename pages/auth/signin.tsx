@@ -19,6 +19,7 @@ import * as Yup from "yup";
 import Models from "@/imports/models.import";
 import PrimaryButton from "@/components/FormFields/PrimaryButton.component";
 import { userData } from "@/store/userConfigSlice";
+import { ROLES } from "@/utils/constant.utils";
 
 const LoginBoxed = () => {
   const dispatch = useDispatch();
@@ -52,7 +53,17 @@ const LoginBoxed = () => {
       localStorage.setItem("refresh", res.refresh);
       localStorage.setItem("userId", res.user?.id);
       localStorage.setItem("role", res.user?.role);
-      router.replace("/");
+      // router.replace("/");
+      if (res.user?.role == ROLES.SUPER_ADMIN) {
+        router.replace("/faculty/my_institution");
+      } else if (res.user?.role == ROLES.INSTITUTION_ADMIN) {
+        router.replace("/faculty/institute_college_and_department");
+      } else if (res.user?.role == ROLES.HR) {
+        router.replace("/faculty/my_department");
+      } else if (res.user?.role == ROLES.HOD) {
+        router.replace("/faculty/my_job");
+      }
+
       setState({ btnLoading: false });
     } catch (error) {
       if (error instanceof Yup.ValidationError) {
@@ -138,7 +149,14 @@ const LoginBoxed = () => {
                     setState({ showPassword: !state.showPassword })
                   }
                 />
-
+                <div
+                  className="flex cursor-pointer justify-end"
+                  onClick={() => router.push("/auth/forget-password")}
+                >
+                  <p className="text-base font-medium leading-normal text-white-dark underline">
+                    Forget Password
+                  </p>
+                </div>
                 {/* <button
                   type="submit"
                   className="btn btn-gradient !mt-6 w-full border-0 uppercase shadow-[0_10px_20px_-10px_rgba(67,97,238,0.44)]"

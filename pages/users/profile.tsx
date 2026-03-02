@@ -1,407 +1,378 @@
-import Link from 'next/link';
-import { useDispatch, useSelector } from 'react-redux';
-import { IRootState } from '../../store';
-import Dropdown from '../../components/Dropdown';
-import { setPageTitle } from '../../store/themeConfigSlice';
-import { useEffect } from 'react';
-import IconPencilPaper from '@/components/Icon/IconPencilPaper';
-import IconCoffee from '@/components/Icon/IconCoffee';
-import IconCalendar from '@/components/Icon/IconCalendar';
-import IconMapPin from '@/components/Icon/IconMapPin';
-import IconMail from '@/components/Icon/IconMail';
-import IconPhone from '@/components/Icon/IconPhone';
-import IconTwitter from '@/components/Icon/IconTwitter';
-import IconDribbble from '@/components/Icon/IconDribbble';
-import IconGithub from '@/components/Icon/IconGithub';
-import IconShoppingBag from '@/components/Icon/IconShoppingBag';
-import IconTag from '@/components/Icon/IconTag';
-import IconCreditCard from '@/components/Icon/IconCreditCard';
-import IconClock from '@/components/Icon/IconClock';
-import IconHorizontalDots from '@/components/Icon/IconHorizontalDots';
+"use client";
 
-const Profile = () => {
-    const dispatch = useDispatch();
-    useEffect(() => {
-        dispatch(setPageTitle('Profile'));
-    });
-    const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl' ? true : false;
-    return (
-        <div>
-            <ul className="flex space-x-2 rtl:space-x-reverse">
-                <li>
-                    <Link href="#" className="text-primary hover:underline">
-                        Users
-                    </Link>
-                </li>
-                <li className="before:content-['/'] ltr:before:mr-2 rtl:before:ml-2">
-                    <span>Profile</span>
-                </li>
-            </ul>
-            <div className="pt-5">
-                <div className="mb-5 grid grid-cols-1 gap-5 lg:grid-cols-3 xl:grid-cols-4">
-                    <div className="panel">
-                        <div className="mb-5 flex items-center justify-between">
-                            <h5 className="text-lg font-semibold dark:text-white-light">Profile</h5>
-                            <Link href="/users/user-account-settings" className="btn btn-primary rounded-full p-2 ltr:ml-auto rtl:mr-auto">
-                                <IconPencilPaper />
-                            </Link>
-                        </div>
-                        <div className="mb-5">
-                            <div className="flex flex-col items-center justify-center">
-                                <img src="/assets/images/profile-34.jpeg" alt="img" className="mb-5 h-24 w-24 rounded-full  object-cover" />
-                                <p className="text-xl font-semibold text-primary">Jimmy Turner</p>
-                            </div>
-                            <ul className="m-auto mt-5 flex max-w-[160px] flex-col space-y-4 font-semibold text-white-dark">
-                                <li className="flex items-center gap-2">
-                                    <IconCoffee className="shrink-0" />{' '}
-                                    Web Developer
-                                </li>
-                                <li className="flex items-center gap-2">
-                                    <IconCalendar className="shrink-0" />
-                                    Jan 20, 1989
-                                </li>
-                                <li className="flex items-center gap-2">
-                                    <IconMapPin className="shrink-0" />
-                                    New York, USA
-                                </li>
-                                <li>
-                                    <button className="flex items-center gap-2">
-                                        <IconMail className="w-5 h-5 shrink-0" />
-                                        <span className="truncate text-primary">jimmy@gmail.com</span>
-                                    </button>
-                                </li>
-                                <li className="flex items-center gap-2">
-                                    <IconPhone />
-                                    <span className="whitespace-nowrap" dir="ltr">
-                                        +1 (530) 555-12121
-                                    </span>
-                                </li>
-                            </ul>
-                            <ul className="mt-7 flex items-center justify-center gap-2">
-                                <li>
-                                    <button className="btn btn-info flex h-10 w-10 items-center justify-center rounded-full p-0">
-                                        <IconTwitter className="w-5 h-5" />
-                                    </button>
-                                </li>
-                                <li>
-                                    <button className="btn btn-danger flex h-10 w-10 items-center justify-center rounded-full p-0">
-                                        <IconDribbble />
-                                    </button>
-                                </li>
-                                <li>
-                                    <button className="btn btn-dark flex h-10 w-10 items-center justify-center rounded-full p-0">
-                                        <IconGithub />
-                                    </button>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div className="panel lg:col-span-2 xl:col-span-3">
-                        <div className="mb-5">
-                            <h5 className="text-lg font-semibold dark:text-white-light">Task</h5>
-                        </div>
-                        <div className="mb-5">
-                            <div className="table-responsive font-semibold text-[#515365] dark:text-white-light">
-                                <table className="whitespace-nowrap">
-                                    <thead>
-                                        <tr>
-                                            <th>Projects</th>
-                                            <th>Progress</th>
-                                            <th>Task Done</th>
-                                            <th className="text-center">Time</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="dark:text-white-dark">
-                                        <tr>
-                                            <td>Figma Design</td>
-                                            <td>
-                                                <div className="flex h-1.5 w-full rounded-full bg-[#ebedf2] dark:bg-dark/40">
-                                                    <div className="w-[29.56%] rounded-full bg-danger"></div>
-                                                </div>
-                                            </td>
-                                            <td className="text-danger">29.56%</td>
-                                            <td className="text-center">2 mins ago</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Vue Migration</td>
-                                            <td>
-                                                <div className="flex h-1.5 w-full rounded-full bg-[#ebedf2] dark:bg-dark/40">
-                                                    <div className="w-1/2 rounded-full bg-info"></div>
-                                                </div>
-                                            </td>
-                                            <td className="text-success">50%</td>
-                                            <td className="text-center">4 hrs ago</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Flutter App</td>
-                                            <td>
-                                                <div className="flex h-1.5 w-full rounded-full bg-[#ebedf2] dark:bg-dark/40">
-                                                    <div className="w-[39%] rounded-full  bg-warning"></div>
-                                                </div>
-                                            </td>
-                                            <td className="text-danger">39%</td>
-                                            <td className="text-center">a min ago</td>
-                                        </tr>
-                                        <tr>
-                                            <td>API Integration</td>
-                                            <td>
-                                                <div className="flex h-1.5 w-full rounded-full bg-[#ebedf2] dark:bg-dark/40">
-                                                    <div className="w-[78.03%] rounded-full  bg-success"></div>
-                                                </div>
-                                            </td>
-                                            <td className="text-success">78.03%</td>
-                                            <td className="text-center">2 weeks ago</td>
-                                        </tr>
+import PrimaryButton from "@/components/FormFields/PrimaryButton.component";
+import TextInput from "@/components/FormFields/TextInput.component";
+import IconEdit from "@/components/Icon/IconEdit";
+import IconEye from "@/components/Icon/IconEye";
+import IconEyeOff from "@/components/Icon/IconEyeOff";
+import IconLockDots from "@/components/Icon/IconLockDots";
+import IconMail from "@/components/Icon/IconMail";
+import IconUser from "@/components/Icon/IconUser";
+import Modal from "@/components/modal/modal.component";
+import Models from "@/imports/models.import";
+import Utils from "@/imports/utils.import";
+import {
+  buildFormData,
+  capitalizeFLetter,
+  Failure,
+  Success,
+  useSetState,
+} from "@/utils/function.utils";
+import { error } from "console";
+import { UserCheck } from "lucide-react";
+import { useEffect, useState } from "react";
+import * as Yup from "yup";
 
-                                        <tr>
-                                            <td>Blog Update</td>
-                                            <td>
-                                                <div className="flex h-1.5 w-full rounded-full bg-[#ebedf2] dark:bg-dark/40">
-                                                    <div className="w-full  rounded-full  bg-secondary"></div>
-                                                </div>
-                                            </td>
-                                            <td className="text-success">100%</td>
-                                            <td className="text-center">18 hrs ago</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Landing Page</td>
-                                            <td>
-                                                <div className="flex h-1.5 w-full rounded-full bg-[#ebedf2] dark:bg-dark/40">
-                                                    <div className="w-[19.15%] rounded-full  bg-danger"></div>
-                                                </div>
-                                            </td>
-                                            <td className="text-danger">19.15%</td>
-                                            <td className="text-center">5 days ago</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Shopify Dev</td>
-                                            <td>
-                                                <div className="flex h-1.5 w-full rounded-full bg-[#ebedf2] dark:bg-dark/40">
-                                                    <div className="w-[60.55%] rounded-full bg-primary"></div>
-                                                </div>
-                                            </td>
-                                            <td className="text-success">60.55%</td>
-                                            <td className="text-center">8 days ago</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                    <div className="panel">
-                        <div className="mb-5">
-                            <h5 className="text-lg font-semibold dark:text-white-light">Summary</h5>
-                        </div>
-                        <div className="space-y-4">
-                            <div className="rounded border border-[#ebedf2] dark:border-0 dark:bg-[#1b2e4b]">
-                                <div className="flex items-center justify-between p-4 py-2">
-                                    <div className="grid h-9 w-9 place-content-center rounded-md bg-secondary-light text-secondary dark:bg-secondary dark:text-secondary-light">
-                                        <IconShoppingBag />
-                                    </div>
-                                    <div className="flex flex-auto items-start justify-between font-semibold ltr:ml-4 rtl:mr-4">
-                                        <h6 className="text-[13px] text-white-dark dark:text-white-dark">
-                                            Income
-                                            <span className="block text-base text-[#515365] dark:text-white-light">$92,600</span>
-                                        </h6>
-                                        <p className="text-secondary ltr:ml-auto rtl:mr-auto">90%</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="rounded border border-[#ebedf2] dark:border-0 dark:bg-[#1b2e4b]">
-                                <div className="flex items-center justify-between p-4 py-2">
-                                    <div className="grid h-9 w-9 place-content-center rounded-md bg-info-light text-info dark:bg-info dark:text-info-light">
-                                        <IconTag />
-                                    </div>
-                                    <div className="flex flex-auto items-start justify-between font-semibold ltr:ml-4 rtl:mr-4">
-                                        <h6 className="text-[13px] text-white-dark dark:text-white-dark">
-                                            Profit
-                                            <span className="block text-base text-[#515365] dark:text-white-light">$37,515</span>
-                                        </h6>
-                                        <p className="text-info ltr:ml-auto rtl:mr-auto">65%</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="rounded border border-[#ebedf2] dark:border-0 dark:bg-[#1b2e4b]">
-                                <div className="flex items-center justify-between p-4 py-2">
-                                    <div className="grid h-9 w-9 place-content-center rounded-md bg-warning-light text-warning dark:bg-warning dark:text-warning-light">
-                                        <IconCreditCard />
-                                    </div>
-                                    <div className="flex flex-auto items-start justify-between font-semibold ltr:ml-4 rtl:mr-4">
-                                        <h6 className="text-[13px] text-white-dark dark:text-white-dark">
-                                            Expenses
-                                            <span className="block text-base text-[#515365] dark:text-white-light">$55,085</span>
-                                        </h6>
-                                        <p className="text-warning ltr:ml-auto rtl:mr-auto">80%</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="panel">
-                        <div className="mb-10 flex items-center justify-between">
-                            <h5 className="text-lg font-semibold dark:text-white-light">Pro Plan</h5>
-                            <button className="btn btn-primary">Renew Now</button>
-                        </div>
-                        <div className="group">
-                            <ul className="mb-7 list-inside list-disc space-y-2 font-semibold text-white-dark">
-                                <li>10,000 Monthly Visitors</li>
-                                <li>Unlimited Reports</li>
-                                <li>2 Years Data Storage</li>
-                            </ul>
-                            <div className="mb-4 flex items-center justify-between font-semibold">
-                                <p className="flex items-center rounded-full bg-dark px-2 py-1 text-xs font-semibold text-white-light">
-                                    <IconClock className="w-3 h-3 ltr:mr-1 rtl:ml-1" />
-                                    5 Days Left
-                                </p>
-                                <p className="text-info">$25 / month</p>
-                            </div>
-                            <div className="mb-5 h-2.5 overflow-hidden rounded-full bg-dark-light p-0.5 dark:bg-dark-light/10">
-                                <div className="relative h-full w-full rounded-full bg-gradient-to-r from-[#f67062] to-[#fc5296]" style={{ width: '65%' }}></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="panel">
-                        <div className="mb-5 flex items-center justify-between">
-                            <h5 className="text-lg font-semibold dark:text-white-light">Payment History</h5>
-                        </div>
-                        <div>
-                            <div className="border-b border-[#ebedf2] dark:border-[#1b2e4b]">
-                                <div className="flex items-center justify-between py-2">
-                                    <h6 className="font-semibold text-[#515365] dark:text-white-dark">
-                                        March
-                                        <span className="block text-white-dark dark:text-white-light">Pro Membership</span>
-                                    </h6>
-                                    <div className="flex items-start justify-between ltr:ml-auto rtl:mr-auto">
-                                        <p className="font-semibold">90%</p>
-                                        <div className="dropdown ltr:ml-4 rtl:mr-4">
-                                            <Dropdown
-                                                offset={[0, 5]}
-                                                placement={`${isRtl ? 'bottom-start' : 'bottom-end'}`}
-                                                btnClassName="hover:text-primary"
-                                                button={<IconHorizontalDots className="opacity-80 hover:opacity-100" />}
-                                            >
-                                                <ul className="!min-w-[150px]">
-                                                    <li>
-                                                        <button type="button">View Invoice</button>
-                                                    </li>
-                                                    <li>
-                                                        <button type="button">Download Invoice</button>
-                                                    </li>
-                                                </ul>
-                                            </Dropdown>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="border-b border-[#ebedf2] dark:border-[#1b2e4b]">
-                                <div className="flex items-center justify-between py-2">
-                                    <h6 className="font-semibold text-[#515365] dark:text-white-dark">
-                                        February
-                                        <span className="block text-white-dark dark:text-white-light">Pro Membership</span>
-                                    </h6>
-                                    <div className="flex items-start justify-between ltr:ml-auto rtl:mr-auto">
-                                        <p className="font-semibold">90%</p>
-                                        <div className="dropdown ltr:ml-4 rtl:mr-4">
-                                            <Dropdown
-                                                offset={[0, 5]}
-                                                placement={`${isRtl ? 'bottom-start' : 'bottom-end'}`}
-                                                button={<IconHorizontalDots className="opacity-80 hover:opacity-100" />}
-                                            >
-                                                <ul className="!min-w-[150px]">
-                                                    <li>
-                                                        <button type="button">View Invoice</button>
-                                                    </li>
-                                                    <li>
-                                                        <button type="button">Download Invoice</button>
-                                                    </li>
-                                                </ul>
-                                            </Dropdown>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <div className="flex items-center justify-between py-2">
-                                    <h6 className="font-semibold text-[#515365] dark:text-white-dark">
-                                        January
-                                        <span className="block text-white-dark dark:text-white-light">Pro Membership</span>
-                                    </h6>
-                                    <div className="flex items-start justify-between ltr:ml-auto rtl:mr-auto">
-                                        <p className="font-semibold">90%</p>
-                                        <div className="dropdown ltr:ml-4 rtl:mr-4">
-                                            <Dropdown
-                                                offset={[0, 5]}
-                                                placement={`${isRtl ? 'bottom-start' : 'bottom-end'}`}
-                                                button={<IconHorizontalDots className="opacity-80 hover:opacity-100" />}
-                                            >
-                                                <ul className="!min-w-[150px]">
-                                                    <li>
-                                                        <button type="button">View Invoice</button>
-                                                    </li>
-                                                    <li>
-                                                        <button type="button">Download Invoice</button>
-                                                    </li>
-                                                </ul>
-                                            </Dropdown>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="panel">
-                        <div className="mb-5 flex items-center justify-between">
-                            <h5 className="text-lg font-semibold dark:text-white-light">Card Details</h5>
-                        </div>
-                        <div>
-                            <div className="border-b border-[#ebedf2] dark:border-[#1b2e4b]">
-                                <div className="flex items-center justify-between py-2">
-                                    <div className="flex-none">
-                                        <img src="/assets/images/card-americanexpress.svg" alt="img" />
-                                    </div>
-                                    <div className="flex flex-auto items-center justify-between ltr:ml-4 rtl:mr-4">
-                                        <h6 className="font-semibold text-[#515365] dark:text-white-dark">
-                                            American Express
-                                            <span className="block text-white-dark dark:text-white-light">Expires on 12/2025</span>
-                                        </h6>
-                                        <span className="badge bg-success ltr:ml-auto rtl:mr-auto">Primary</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="border-b border-[#ebedf2] dark:border-[#1b2e4b]">
-                                <div className="flex items-center justify-between py-2">
-                                    <div className="flex-none">
-                                        <img src="/assets/images/card-mastercard.svg" alt="img" />
-                                    </div>
-                                    <div className="flex flex-auto items-center justify-between ltr:ml-4 rtl:mr-4">
-                                        <h6 className="font-semibold text-[#515365] dark:text-white-dark">
-                                            Mastercard
-                                            <span className="block text-white-dark dark:text-white-light">Expires on 03/2025</span>
-                                        </h6>
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <div className="flex items-center justify-between py-2">
-                                    <div className="flex-none">
-                                        <img src="/assets/images/card-visa.svg" alt="img" />
-                                    </div>
-                                    <div className="flex flex-auto items-center justify-between ltr:ml-4 rtl:mr-4">
-                                        <h6 className="font-semibold text-[#515365] dark:text-white-dark">
-                                            Visa
-                                            <span className="block text-white-dark dark:text-white-light">Expires on 10/2025</span>
-                                        </h6>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+export default function Profile() {
+  const [activeTab, setActiveTab] = useState("profile");
+
+  const [state, setState] = useSetState({
+    confirm_password: "",
+    password: "",
+    error: "",
+    showCurrentPassword: false,
+    isOpen: false,
+    username: "",
+    email: "",
+  });
+
+  useEffect(() => {
+    profile();
+  }, []);
+
+  const profile = async () => {
+    try {
+      const res: any = await Models.auth.profile();
+      console.log("✌️res --->", res);
+      setState({ profile: res, username: res.username, email: res.email });
+    } catch (error) {
+      console.error("Error fetching institutions:", error);
+    }
+  };
+
+  const submitForm = async (e: any) => {
+    e.preventDefault();
+    try {
+      setState({ btnLoading: true });
+      const body = {
+        current_password: state.current_password,
+        new_password: state.new_password,
+        confirm_password: state.confirm_password,
+      };
+
+      await Utils.Validation.change_password.validate(body, {
+        abortEarly: false,
+      });
+
+      await Models.auth.change_password(body);
+      Success("Password updated successfully");
+
+      setState({
+        btnLoading: false,
+        current_password: "",
+        new_password: "",
+        confirm_password: "",
+        error: "",
+      });
+    } catch (error) {
+      if (error instanceof Yup.ValidationError) {
+        const validationErrors = {};
+        error.inner.forEach((err) => {
+          validationErrors[err.path] = err?.message;
+        });
+        console.log("✌️validationErrors --->", validationErrors);
+
+        setState({ error: validationErrors, btnLoading: false });
+      } else {
+        Failure(error?.error);
+        setState({ btnLoading: false });
+      }
+    }
+  };
+
+  const updateProfile = async () => {
+    try {
+      const userString = localStorage.getItem("userId");
+      console.log("✌️userString --->", userString);
+      if (userString) {
+        const body = {
+          username: state.username,
+          email: state.email,
+        };
+        const formData=buildFormData(body)
+        await Utils.Validation.update_profile.validate(body, {
+          abortEarly: false,
+        });
+        await Models.auth.updateUser(userString, formData);
+        Success("Profile updated successfully");
+        setState({
+          isOpen: false,
+          error: "",
+        });
+        profile()
+      }
+    } catch (error) {
+      if (error instanceof Yup.ValidationError) {
+        const validationErrors = {};
+        error.inner.forEach((err) => {
+          validationErrors[err.path] = err?.message;
+        });
+        console.log("✌️validationErrors --->", validationErrors);
+
+        setState({ error: validationErrors, btnLoading: false });
+      } else {
+        Failure(error?.error);
+        setState({ btnLoading: false });
+      }
+
+      console.log("✌️error --->", error);
+    }
+  };
+
+  return (
+    <div className="p-6">
+      <div className="overflow-hidden rounded-2xl border bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
+        <div className="flex min-h-[500px] flex-col md:flex-row">
+          {/* 🔹 Vertical Tabs */}
+          <div className="w-full border-r bg-gray-50 dark:border-gray-800 dark:bg-gray-950 md:w-64">
+            <div className="p-6">
+              <h2 className="text-lg font-semibold">Profile </h2>
             </div>
-        </div>
-    );
-};
 
-export default Profile;
+            <nav className="flex flex-col space-y-2 px-3 pb-6">
+              <button
+                onClick={() => setActiveTab("profile")}
+                className={`rounded-lg px-4 py-2 text-left transition ${
+                  activeTab === "profile"
+                    ? "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300"
+                    : "hover:bg-gray-200 dark:hover:bg-gray-800"
+                }`}
+              >
+                Profile Info
+              </button>
+
+              <button
+                onClick={() => setActiveTab("password")}
+                className={`rounded-lg px-4 py-2 text-left transition ${
+                  activeTab === "password"
+                    ? "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300"
+                    : "hover:bg-gray-200 dark:hover:bg-gray-800"
+                }`}
+              >
+                Change Password
+              </button>
+            </nav>
+          </div>
+
+          {/* 🔹 Content Area */}
+          <div className="flex-1 p-8">
+            {activeTab === "profile" && (
+              <div>
+                <div className="mb-6 flex items-center justify-between">
+                  <h3 className=" text-xl font-semibold">
+                    Profile Information
+                  </h3>
+
+                  <div
+                    onClick={() => setState({ isOpen: true })}
+                    className="cursor-pointer rounded-full p-2 text-gray-500 hover:bg-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+                  >
+                    <IconEdit />
+                  </div>
+                </div>
+                <div className="grid gap-6 md:grid-cols-2">
+                  <InfoCard
+                    label="Username"
+                    value={capitalizeFLetter(state.profile?.username)}
+                  />
+                  <InfoCard label="Email" value={state.profile?.email} />
+                  <InfoCard
+                    label="Role"
+                    value={state.profile?.role.toUpperCase()}
+                  />
+                  {/* <InfoCard label="Status" value={state.profile?.status} /> */}
+                  {state.profile?.institution?.name && (
+                    <InfoCard
+                      label="Institution"
+                      value={capitalizeFLetter(
+                        state.profile?.institution?.name
+                      )}
+                    />
+                  )}
+                  {state.profile?.department?.department_name && (
+                    <InfoCard
+                      label="Department"
+                      value={capitalizeFLetter(
+                        state.profile?.department?.department_name
+                      )}
+                    />
+                  )}
+                  {state.profile?.college?.length > 0 && (
+                    <InfoCard
+                      label="College"
+                      value={
+                        state.profile?.college
+                          ?.map((c) => capitalizeFLetter(c.college_name))
+                          .join(", ") || "-"
+                      }
+                    />
+                  )}
+                </div>
+              </div>
+            )}
+
+            {activeTab === "password" && (
+              <form className="space-y-5 dark:text-white" onSubmit={submitForm}>
+                <TextInput
+                  name="email"
+                  title="Current Password"
+                  placeholder="Current Password"
+                  type={state.showCurrentPassword ? "text" : "password"}
+                  value={state.current_password}
+                  onChange={(e) =>
+                    setState({ current_password: e.target.value })
+                  }
+                  error={state.error?.current_password}
+                  icon={<IconLockDots fill={true} />}
+                  rightIcon={
+                    state.showCurrentPassword ? <IconEyeOff /> : <IconEye />
+                  }
+                  rightIconOnlick={() =>
+                    setState({
+                      showCurrentPassword: !state.showCurrentPassword,
+                    })
+                  }
+                  required
+                />
+                <TextInput
+                  name="email"
+                  title="Password"
+                  placeholder="Password"
+                  type={state.showPassword ? "text" : "password"}
+                  value={state.new_password}
+                  onChange={(e) => setState({ new_password: e.target.value })}
+                  error={state.error?.new_password}
+                  icon={<IconLockDots fill={true} />}
+                  rightIcon={state.showPassword ? <IconEyeOff /> : <IconEye />}
+                  rightIconOnlick={() =>
+                    setState({ showPassword: !state.showPassword })
+                  }
+                  required
+                />
+                <TextInput
+                  id="Password"
+                  title="Confirm Password"
+                  type={state.showPassword1 ? "text" : "password"}
+                  placeholder="Enter Confirm Password"
+                  className="form-input ps-10 placeholder:text-white-dark"
+                  onChange={(e) =>
+                    setState({ confirm_password: e.target.value })
+                  }
+                  value={state.confirm_password}
+                  error={state.error?.confirm_password}
+                  icon={<IconLockDots fill={true} />}
+                  rightIcon={state.showPassword1 ? <IconEyeOff /> : <IconEye />}
+                  rightIconOnlick={() =>
+                    setState({ showPassword1: !state.showPassword1 })
+                  }
+                  required
+                />
+
+                {/* <button
+                 type="submit"
+                 className="btn btn-gradient !mt-6 w-full border-0 uppercase shadow-[0_10px_20px_-10px_rgba(67,97,238,0.44)]"
+               >
+                 Sign in
+               </button> */}
+                {/* <PrimaryButton text={"Sign In"} /> */}
+                <div className="flex justify-end">
+                  <PrimaryButton
+                    type="submit"
+                    text="Submit"
+                    className="btn btn-gradient !mt-6 border-0 px-6 py-2 uppercase shadow-[0_10px_20px_-10px_rgba(67,97,238,0.44)]"
+                    loading={state.btnLoading}
+                  />
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <Modal
+        open={state.isOpen}
+        close={() =>
+          setState({
+            isOpen: false,
+            first_name: "",
+            last_name: "",
+            email: "",
+          })
+        }
+        renderComponent={() => (
+          <div className="p-6">
+            <div className="mb-6 text-center">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900 dark:to-blue-900">
+                <UserCheck className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Update Profile
+              </h2>
+            </div>
+            <div className="mb-5 space-y-5">
+              <TextInput
+                title="User Name"
+                placeholder="Enter User Name"
+                className="form-input ps-10 placeholder:text-white-dark"
+                onChange={(e) => setState({ username: e.target.value })}
+                value={state.username}
+                error={state.error?.username}
+                icon={<IconUser fill={true} />}
+                required
+              />
+
+              <TextInput
+                title="Email"
+                placeholder="Enter Email"
+                className="form-input ps-10 placeholder:text-white-dark"
+                onChange={(e) => setState({ email: e.target.value })}
+                value={state.email}
+                error={state.error?.email}
+                icon={<IconMail fill={true} />}
+                required
+              />
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() =>
+                  setState({
+                    isOpen: false,
+                 
+                  })
+                }
+                className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => updateProfile()}
+                className="flex-1 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 text-white hover:shadow-lg"
+              >
+                Update
+              </button>
+            </div>
+          </div>
+        )}
+      />
+    </div>
+  );
+}
+
+function InfoCard({ label, value }: any) {
+  return (
+    <div className="rounded-xl border bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-800">
+      <p className="text-xs text-gray-500">{label}</p>
+      <p className="mt-1 text-sm font-medium">{value}</p>
+    </div>
+  );
+}

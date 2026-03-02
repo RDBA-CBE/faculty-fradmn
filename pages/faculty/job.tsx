@@ -34,6 +34,7 @@ import {
   Clock,
   ToggleLeft,
   ToggleRight,
+  CheckCheckIcon,
 } from "lucide-react";
 import moment from "moment";
 import { useRouter } from "next/navigation";
@@ -135,7 +136,7 @@ const Job = () => {
 
   useEffect(() => {
     if (state?.profile?.id) {
-      jobList(1, "", "", "", state?.profile?.id);
+      jobList(1, "", state?.profile?.college?.map((item)=>item?.college_id), "", state?.profile?.id);
     }
   }, [
     debounceSearch,
@@ -157,6 +158,7 @@ const Job = () => {
   const profile = async () => {
     try {
       const res: any = await Models.auth.profile();
+      console.log("✌️res --->", res);
       setState({ profile: res });
       if (res?.role == ROLES.SUPER_ADMIN) {
         institutionDropdownList(1, "", false, res?.id);
@@ -169,14 +171,34 @@ const Job = () => {
           "",
           false,
           res?.institution?.institution_id,
-          res?.id,
+          res?.id
         );
         departmentDropdownList(1, "", false, "", res?.id);
         jobList(1, res?.institution?.institution_id, "", "", res?.id);
       } else if (res?.role == ROLES.HR) {
-        departmentDropdownList(1, "", false, res?.college?.college_id, res?.id);
-        jobList(1, "", res?.college?.map((item) => item.college_id ) , "", res?.id);
-        userDropdownList(1, "", false, "hod", res?.college?.college_id);
+        departmentDropdownList(
+          1,
+          "",
+          false,
+          res?.college?.map((item) => item.college_id),
+          res?.id
+        );
+        jobList(
+          1,
+          "",
+          // res?.college?.college_id,
+          res?.college?.map((item) => item.college_id),
+          "",
+          res?.id
+        );
+        userDropdownList(
+          1,
+          "",
+          false,
+          "hod",
+          res?.college?.map((item) => item.college_id),
+          res?.id
+        );
       } else if (res?.role == ROLES.HOD) {
         jobList(1, "", "", res?.department?.id, res?.id);
       }
@@ -190,8 +212,10 @@ const Job = () => {
     institutionId = null,
     collegeId = null,
     deptId = null,
-    createdBy = null,
+    createdBy = null
   ) => {
+    console.log("✌️collegeId --->", collegeId);
+
     try {
       setState({ loading: true });
 
@@ -223,7 +247,11 @@ const Job = () => {
         job_description: item.job_description,
 
         college_name: item?.college?.name,
-        department_name: item?.department?.name || "-",
+        // department_name: item?.department?.name || "-",
+        department_name:
+          item?.department?.length > 0
+            ? item?.department?.map((item) => item?.name)?.join(", ")
+            : "-",
 
         job_type: item?.job_type,
         experiences: {
@@ -264,7 +292,7 @@ const Job = () => {
     search = "",
     loadMore = false,
     institutionId = null,
-    createdBy = null,
+    createdBy = null
   ) => {
     try {
       setState({ collegeLoading: true });
@@ -346,7 +374,7 @@ const Job = () => {
       state.instiutionFilter,
       state.collegeFilter,
       state.departmentFilter,
-      state?.profile?.id,
+      state?.profile?.id
     );
   };
 
@@ -372,6 +400,7 @@ const Job = () => {
     loadMore = false,
     role = null,
     collegeId = null,
+    created_by = null
   ) => {
     try {
       setState({ userLoading: true });
@@ -381,6 +410,9 @@ const Job = () => {
       }
       if (collegeId) {
         body.college_id = collegeId;
+      }
+      if (created_by) {
+        body.created_by = created_by;
       }
       const res: any = await Models.auth.userList(page, body);
       const dropdown = res?.results?.map((item) => ({
@@ -402,7 +434,7 @@ const Job = () => {
     page = 1,
     search = "",
     loadMore = false,
-    createdBy = null,
+    createdBy = null
   ) => {
     try {
       setState({ institutionLoading: true });
@@ -432,7 +464,7 @@ const Job = () => {
     search = "",
     loadMore = false,
     collegeId = null,
-    createdBy = null,
+    createdBy = null
   ) => {
     try {
       setState({ departmentLoading: true });
@@ -534,7 +566,7 @@ const Job = () => {
         "",
         false,
         selectedOption?.value,
-        state?.profile?.id,
+        state?.profile?.id
       );
     }
   };
@@ -551,7 +583,7 @@ const Job = () => {
         "",
         false,
         selectedOption?.value,
-        state?.profile?.id,
+        state?.profile?.id
       );
     }
   };
@@ -581,7 +613,7 @@ const Job = () => {
 
   const handleToggleStatus = async (row: any) => {
     console.log("row", row);
-    
+
     try {
       const newStatus = row?.job_status === "active" ? "inactive" : "active";
       await Models.job.update({ job_status: newStatus }, row?.id);
@@ -591,7 +623,7 @@ const Job = () => {
         state.instiutionFilter,
         state.collegeFilter,
         state.departmentFilter,
-        state?.profile?.id,
+        state?.profile?.id
       );
     } catch (error) {
       Failure("Failed to update status");
@@ -602,7 +634,7 @@ const Job = () => {
     showDeleteAlert(
       () => deleteRecord(row?.id),
       () => Swal.fire("Cancelled", "Record is safe", "info"),
-      "Are you sure you want to delete this job?",
+      "Are you sure you want to delete this job?"
     );
   };
 
@@ -615,7 +647,7 @@ const Job = () => {
         state.instiutionFilter,
         state.collegeFilter,
         state.departmentFilter,
-        state?.profile?.id,
+        state?.profile?.id
       );
     } catch (error) {
       Failure("Failed to delete job");
@@ -626,7 +658,7 @@ const Job = () => {
     showDeleteAlert(
       () => bulkDeleteRecords(),
       () => Swal.fire("Cancelled", "Your Records are safe :)", "info"),
-      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`,
+      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`
     );
   };
 
@@ -642,7 +674,7 @@ const Job = () => {
         state.instiutionFilter,
         state.collegeFilter,
         state.departmentFilter,
-        state?.profile?.id,
+        state?.profile?.id
       );
     } catch (error) {
       Failure("Failed to delete jobs. Please try again.");
@@ -671,12 +703,12 @@ const Job = () => {
         Success(
           row.is_approved
             ? "Job unapproved successfully!"
-            : "Job approved successfully!",
+            : "Job approved successfully!"
         );
         jobList(state.page);
       } catch (error) {
         Failure(
-          row.is_approved ? "Failed to unapprove job" : "Failed to approve job",
+          row.is_approved ? "Failed to unapprove job" : "Failed to approve job"
         );
       }
     }
@@ -754,15 +786,14 @@ const Job = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Active Jobs
+                Approved Jobs
               </p>
               <p className="text-3xl font-bold text-green-600 dark:text-green-400">
-                {state.jobList?.filter((job) => job.status === "active")
-                  ?.length || 0}
+                {state.jobList?.filter((job) => job.is_approved)?.length || 0}
               </p>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 dark:bg-green-900">
-              <Users className="h-6 w-6 text-green-600 dark:text-green-400" />
+              <CheckCheckIcon className="h-6 w-6 text-green-600 dark:text-green-400" />
             </div>
           </div>
         </div>
@@ -771,32 +802,31 @@ const Job = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Urgent Priority
+                Pending Jobs
+              </p>
+              <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+                {state.jobList?.filter((job) => !job.is_approved)?.length || 0}
+              </p>
+            </div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 dark:bg-purple-900">
+              <Building2 className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+            </div>
+          </div>
+        </div>
+
+        <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-sm transition-all duration-200 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                Urgent job
               </p>
               <p className="text-3xl font-bold text-red-600 dark:text-red-400">
-                {state.jobList?.filter((job) => job.priority === "urgent")
+                {state.jobList?.filter((job) => job.priority == "0 - 30 Days")
                   ?.length || 0}
               </p>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100 dark:bg-red-900">
               <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
-            </div>
-          </div>
-        </div>
-
-        <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-sm transition-all duration-200 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Full Time
-              </p>
-              <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
-                {state.jobList?.filter((job) => job.job_type === "full_time")
-                  ?.length || 0}
-              </p>
-            </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 dark:bg-purple-900">
-              <Building2 className="h-6 w-6 text-purple-600 dark:text-purple-400" />
             </div>
           </div>
         </div>
@@ -849,7 +879,11 @@ const Job = () => {
                       setState({ userFilter: selectedOption, page: 1 })
                     }
                     placeholder={`Select ${
-                      state.roleFilter ? state.roleFilter.label : "user"
+                      state.roleFilter
+                        ? state.roleFilter.label
+                        : state.profile?.role == ROLES.HR
+                        ? "hod"
+                        : "user"
                     }`}
                     isClearable={true}
                     loading={state.userLoading}
@@ -861,8 +895,16 @@ const Job = () => {
                         1,
                         searchTerm,
                         false,
-                        state.roleFilter?.value,
-                        state.collegeFilter?.value,
+                        state.roleFilter?.value
+                          ? state.roleFilter?.value
+                          : state.profile?.role == ROLES.HR
+                          ? ROLES.HOD
+                          : null,
+                        state.profile?.role == ROLES.HR
+                          ? state.profile?.college?.map(
+                              (item) => item.college_id
+                            )
+                          : state.collegeFilter?.value
                       )
                     }
                     loadMore={() =>
@@ -871,8 +913,16 @@ const Job = () => {
                         state.userPage + 1,
                         "",
                         true,
-                        state.roleFilter?.value,
-                        state.collegeFilter?.value,
+                        state.roleFilter?.value
+                          ? state.roleFilter?.value
+                          : state.profile?.role == ROLES.HR
+                          ? ROLES.HOD
+                          : null,
+                        state.profile?.role == ROLES.HR
+                          ? state.profile?.college?.map(
+                              (item) => item.college_id
+                            )
+                          : state.collegeFilter?.value
                       )
                     }
                   />
@@ -895,7 +945,7 @@ const Job = () => {
                         1,
                         searchTerm,
                         false,
-                        state.profile?.id,
+                        state.profile?.id
                       )
                     }
                     loadMore={() =>
@@ -904,7 +954,7 @@ const Job = () => {
                         state.institutionPage + 1,
                         "",
                         true,
-                        state.profile?.id,
+                        state.profile?.id
                       )
                     }
                     loading={state.institutionLoading}
@@ -923,7 +973,7 @@ const Job = () => {
                         searchTerm,
                         false,
                         state.institutionFilter?.value,
-                        state.profile?.id,
+                        state.profile?.id
                       )
                     }
                     loadMore={() =>
@@ -933,7 +983,7 @@ const Job = () => {
                         "",
                         true,
                         state.institutionFilter?.value,
-                        state.profile?.id,
+                        state.profile?.id
                       )
                     }
                     loading={state.collegeLoading}
@@ -954,8 +1004,10 @@ const Job = () => {
                       1,
                       searchTerm,
                       false,
-                      state.collegeFilter?.value,
-                      state.profile?.id,
+                      state.profile?.role == ROLES.HR
+                        ? state.profile?.college?.map((item) => item.college_id)
+                        : state.collegeFilter?.value,
+                      state.profile?.id
                     )
                   }
                   loadMore={() =>
@@ -964,8 +1016,10 @@ const Job = () => {
                       state.departmentPage + 1,
                       "",
                       true,
-                      state.collegeFilter?.value,
-                      state.profile?.id,
+                      state.profile?.role == ROLES.HR
+                        ? state.profile?.college?.map((item) => item.college_id)
+                        : state.collegeFilter?.value,
+                      state.profile?.id
                     )
                   }
                   loading={state.departmentLoading}
@@ -1011,7 +1065,7 @@ const Job = () => {
               />
             </div> */}
 
-            <div className="group relative">
+            {/* <div className="group relative">
               <CustomSelect
                 options={state.jobStatusList}
                 value={state.statusFilter}
@@ -1019,7 +1073,7 @@ const Job = () => {
                 placeholder="Filter by status"
                 isClearable={true}
               />
-            </div>
+            </div> */}
             <div className="group relative">
               <CustomSelect
                 options={state.salaryRangeList}
@@ -1039,7 +1093,7 @@ const Job = () => {
               />
             </div> */}
 
-            <div className="group relative">
+            {/* <div className="group relative">
               <CustomSelect
                 options={state.priorityList}
                 value={state.priorityFilter}
@@ -1047,7 +1101,7 @@ const Job = () => {
                 placeholder="Filter by priority"
                 isClearable={true}
               />
-            </div>
+            </div> */}
           </>
         </div>
       </div>
@@ -1084,7 +1138,7 @@ const Job = () => {
             records={state.jobList}
             fetching={state.loading}
             selectedRecords={state.jobList?.filter((record) =>
-              state.selectedRecords.includes(record.id),
+              state.selectedRecords.includes(record.id)
             )}
             onSelectedRecordsChange={(records) =>
               setState({ selectedRecords: records.map((r: any) => r.id) })
@@ -1180,14 +1234,14 @@ const Job = () => {
                       <Clock className="h-3 w-3" />
                     )}
                     {capitalizeFLetter(
-                      (row as any)?.is_approved ? "Approved" : "Pending",
+                      (row as any)?.is_approved ? "Approved" : "Pending"
                     ) || "-"}
                   </span>
                 ),
               },
               {
                 accessor: "priority",
-                title: "Priority",
+                title: "Job Urgency",
                 render: ({ priority }) => (
                   <span
                     className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
@@ -1239,6 +1293,24 @@ const Job = () => {
                     >
                       <IconEye className="h-4 w-4" />
                     </button>
+                    {state.profile?.role == ROLES.HR && (
+                      <button
+                        onClick={() => {
+                          if (state.profile?.role == ROLES.HR) {
+                            handleApprove(row);
+                          }
+                        }}
+                        // onClick={() => handleToggleStatus(row)}
+                        className={`flex h-8 w-8 items-center justify-center rounded-lg ${
+                          row?.job_status === "published"
+                            ? "bg-red-100 text-red-600 hover:bg-red-200"
+                            : "bg-green-100 text-green-600 hover:bg-green-200"
+                        }`}
+                        title={"Job Status"}
+                      >
+                        <CheckCircle className="h-4 w-4" />
+                      </button>
+                    )}
                     <button
                       onClick={() => handleLog(row)}
                       className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 text-purple-600 hover:bg-purple-200"
@@ -1300,7 +1372,7 @@ const Job = () => {
                 state.instiutionFilter,
                 state.collegeFilter,
                 state.departmentFilter,
-                state?.profile?.id,
+                state?.profile?.id
               );
             }}
             minHeight={200}
@@ -1316,6 +1388,8 @@ const Job = () => {
           />
         </div>
         <Modal
+          subTitle="Job Logs"
+          closeIcon={() => setState({ isOpen: false })}
           open={state.isOpen}
           close={() => setState({ isOpen: false })}
           padding="px-2"
@@ -1323,7 +1397,6 @@ const Job = () => {
             <>
               <LogCard
                 data={state.logData}
-                title="Job Logs"
                 onClose={() => setState({ isOpen: false })}
                 onSendMessage={(e) => createJobLog(e)}
               />

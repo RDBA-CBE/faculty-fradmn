@@ -9,7 +9,7 @@ import IconTrash from "@/components/Icon/IconTrash";
 import IconLoader from "@/components/Icon/IconLoader";
 import IconEdit from "@/components/Icon/IconEdit";
 import Pagination from "@/components/pagination/pagination";
-import { showDeleteAlert, useSetState } from "@/utils/function.utils";
+import { capitalizeFLetter, showDeleteAlert, useSetState } from "@/utils/function.utils";
 import Modal from "@/components/modal/modal.component";
 import { Models } from "@/imports/models.import";
 import { Success, Failure } from "@/utils/function.utils";
@@ -17,7 +17,7 @@ import useDebounce from "@/hook/useDebounce";
 import Swal from "sweetalert2";
 import PrivateRouter from "@/hook/privateRouter";
 
-const Category = () => {
+const Job_Urgency = () => {
   const dispatch = useDispatch();
   const [state, setState] = useSetState({
     page: 1,
@@ -38,7 +38,7 @@ const Category = () => {
   const debounceSearch = useDebounce(state.search, 500);
 
   useEffect(() => {
-    dispatch(setPageTitle("Experience Management"));
+    dispatch(setPageTitle("Job Urgency Management"));
     experienceList(1);
   }, [dispatch]);
 
@@ -54,8 +54,8 @@ const Category = () => {
       if (state.sortBy) {
         body.ordering = state.sortOrder === "desc" ? `-${state.sortBy}` : state.sortBy;
       }
+      const res: any = await Models.job.job_priority(body);
 
-      const res: any = await Models.master.experience_list(body, page);
       const tableData = res?.results?.map((item) => ({
         id: item?.id,
         name: item?.name,
@@ -107,30 +107,30 @@ const Category = () => {
 
   const deleteRecord = async (id: number) => {
     try {
-      await Models.master.delete_experience(id);
-      Success("Experience deleted successfully!");
+      await Models.master.delete_priority(id);
+      Success("Record deleted successfully!");
       experienceList(state.page);
     } catch (error) {
-      Failure("Failed to delete experience");
+      Failure("Failed to delete job urgency");
     }
   };
 
   const handleSubmit = async () => {
     try {
       setState({ submitting: true });
-      const body = { name: state.name };
+      const body = { name: capitalizeFLetter(state.name),value: capitalizeFLetter(state.name)};
 
       if (!state.name) {
-        setState({ errors: { name: "Experience name is required" } });
+        setState({ errors: { name: "Name is required" } });
         return;
       }
 
       if (state.editId) {
-        await Models.master.update_experience(body, state.editId);
-        Success("Experience updated successfully!");
+        await Models.master.update_priority(body, state.editId);
+        Success("Record updated successfully!");
       } else {
-        await Models.master.create_experience(body);
-        Success("Experience created successfully!");
+        await Models.master.create_priority(body);
+        Success("Record created successfully!");
       }
 
       experienceList(state.page);
@@ -158,10 +158,10 @@ const Category = () => {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
             <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-3xl font-bold text-transparent">
-              Experience Management
+              Job Urgency
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Manage job experiences
+              Manage job urgency
             </p>
           </div>
           <button
@@ -170,7 +170,7 @@ const Category = () => {
           >
             <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
             <IconPlus className="relative z-10 h-5 w-5" />
-            <span className="relative z-10">Add Experience</span>
+            <span className="relative z-10">Add Job Urgency</span>
           </button>
         </div>
       </div>
@@ -183,7 +183,7 @@ const Category = () => {
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <TextInput
-            placeholder="Search categories..."
+            placeholder="Search job urgency..."
             value={state.search}
             onChange={(e) => setState({ search: e.target.value })}
             icon={<IconSearch className="h-4 w-4" />}
@@ -195,7 +195,7 @@ const Category = () => {
         <div className="border-b border-gray-200 p-6 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-              Experiences List
+              Job Urgency List
             </h3>
             <div className="text-sm text-gray-500 dark:text-gray-400">
               {state.count} records found
@@ -223,7 +223,7 @@ const Category = () => {
             columns={[
               {
                 accessor: "name",
-                title: "Experience Name",
+                title: "Name",
                 sortable: true,
                 render: ({ name }) => (
                   <div className="font-medium text-gray-900 dark:text-white">
@@ -295,14 +295,14 @@ const Category = () => {
                 )}
               </div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {state.editId ? "Update" : "Add New"} Experience
+                {state.editId ? "Update" : "Add New"} Job Urgency
               </h2>
             </div>
 
             <div className="space-y-6">
               <TextInput
-                title="Experience Name"
-                placeholder="Enter experience name"
+                title=" Name"
+                placeholder="Enter name"
                 value={state.name}
                 onChange={(e) => setState({ name: e.target.value, errors: { ...state.errors, name: "" } })}
                 error={state.errors.name}
@@ -344,4 +344,4 @@ const Category = () => {
   );
 };
 
-export default PrivateRouter(Category);
+export default PrivateRouter(Job_Urgency);

@@ -55,12 +55,12 @@ export const DROPDOWN_INSTITUTION_ADMIN = [
 // menuConfig.ts
 export const menuConfig = {
   super_admin: [
-    {
-      type: "link",
-      icon: "IconMenuDashboard",
-      label: "dashboard",
-      href: "/",
-    },
+    // {
+    //   type: "link",
+    //   icon: "IconMenuDashboard",
+    //   label: "dashboard",
+    //   href: "/",
+    // },
 
     {
       type: "link",
@@ -111,16 +111,16 @@ export const menuConfig = {
         {
           label: "Experience",
           href: "/faculty/master/experience",
+        },   {
+          label: "Job Urgency",
+          href: "/faculty/master/job_urgency",
         },
       
-        {
-          label: "Category",
-          href: "/faculty/master/category",
-        },
-        {
-          label: "Job Type",
-          href: "/faculty/master/job_type",
-        },
+        // {
+        //   label: "Category",
+        //   href: "/faculty/master/category",
+        // },
+       
         {
           label: "Location",
           href: "/faculty/master/location",
@@ -146,12 +146,12 @@ export const menuConfig = {
   ],
 
   institution_admin: [
-    {
-      type: "link",
-      icon: "IconMenuDashboard",
-      label: "dashboard",
-      href: "/",
-    },
+    // {
+    //   type: "link",
+    //   icon: "IconMenuDashboard",
+    //   label: "dashboard",
+    //   href: "/",
+    // },
 
     {
       type: "link",
@@ -195,16 +195,19 @@ export const menuConfig = {
         {
           label: "Experience",
           href: "/faculty/master/experience",
+        },   {
+          label: "Job Urgency",
+          href: "/faculty/master/job_urgency",
+        },   {
+          label: "Job Urgency",
+          href: "/faculty/master/job_urgency",
         },
       
-        {
-          label: "Category",
-          href: "/faculty/master/category",
-        },
-        {
-          label: "Job Type",
-          href: "/faculty/master/job_type",
-        },
+        // {
+        //   label: "Category",
+        //   href: "/faculty/master/category",
+        // },
+       
         {
           label: "Location",
           href: "/faculty/master/location",
@@ -226,12 +229,12 @@ export const menuConfig = {
   ],
 
   hr: [
-    {
-      type: "link",
-      icon: "IconMenuDashboard",
-      label: "dashboard",
-      href: "/",
-    },
+    // {
+    //   type: "link",
+    //   icon: "IconMenuDashboard",
+    //   label: "dashboard",
+    //   href: "/",
+    // },
 
     {
       type: "link",
@@ -275,16 +278,16 @@ export const menuConfig = {
         {
           label: "Experience",
           href: "/faculty/master/experience",
+        },   {
+          label: "Job Urgency",
+          href: "/faculty/master/job_urgency",
         },
       
-        {
-          label: "Category",
-          href: "/faculty/master/category",
-        },
-        {
-          label: "Job Type",
-          href: "/faculty/master/job_type",
-        },
+        // {
+        //   label: "Category",
+        //   href: "/faculty/master/category",
+        // },
+       
         {
           label: "Location",
           href: "/faculty/master/location",
@@ -339,12 +342,12 @@ export const menuConfig = {
 
 export const OwnmenuConfig = {
   super_admin: [
-    {
-      type: "link",
-      icon: "IconMenuDashboard",
-      label: "dashboard",
-      href: "/",
-    },
+    // {
+    //   type: "link",
+    //   icon: "IconMenuDashboard",
+    //   label: "dashboard",
+    //   href: "/",
+    // },
 
     {
       type: "link",
@@ -395,12 +398,12 @@ export const OwnmenuConfig = {
   ],
 
   institution_admin: [
-    {
-      type: "link",
-      icon: "IconMenuDashboard",
-      label: "dashboard",
-      href: "/",
-    },
+    // {
+    //   type: "link",
+    //   icon: "IconMenuDashboard",
+    //   label: "dashboard",
+    //   href: "/",
+    // },
 
     {
       type: "link",
@@ -437,12 +440,12 @@ export const OwnmenuConfig = {
   ],
 
   hr: [
-    {
-      type: "link",
-      icon: "IconMenuDashboard",
-      label: "dashboard",
-      href: "/",
-    },
+    // {
+    //   type: "link",
+    //   icon: "IconMenuDashboard",
+    //   label: "dashboard",
+    //   href: "/",
+    // },
 
     {
       type: "link",
@@ -479,12 +482,12 @@ export const OwnmenuConfig = {
   ],
 
   hod: [
-    {
-      type: "link",
-      icon: "IconMenuDashboard",
-      label: "dashboard",
-      href: "/",
-    },
+    // {
+    //   type: "link",
+    //   icon: "IconMenuDashboard",
+    //   label: "dashboard",
+    //   href: "/",
+    // },
     //   {
     //   type: "link",
     //   icon: "IconMenuNotes",
@@ -523,15 +526,19 @@ export const OwnmenuConfig = {
       label: "Master",
       key: "master",
       children: [
+        {
+          label: "Experience",
+          href: "/faculty/master/experience",
+        },   {
+          label: "Job Urgency",
+          href: "/faculty/master/job_urgency",
+        },
       
-        {
-          label: "Category",
-          href: "/faculty/master/category",
-        },
-        {
-          label: "Job Type",
-          href: "/faculty/master/job_type",
-        },
+        // {
+        //   label: "Category",
+        //   href: "/faculty/master/category",
+        // },
+       
         {
           label: "Location",
           href: "/faculty/master/location",
@@ -733,3 +740,11 @@ export const JOB_TYPE = [
   { value: "Contract", label: "Contract" },
   { value: "Internship", label: "Internship" },
 ];
+
+export const STATUS_COLOR = {
+  Applied: "bg-gray-100 text-gray-800",
+  Shortlisted: "bg-indigo-100 text-indigo-800",
+  "Interview Scheduled ": "bg-blue-100 text-blue-800",
+  Selected: "bg-green-100 text-green-800",
+  Rejected: "bg-red-100 text-red-800",
+};

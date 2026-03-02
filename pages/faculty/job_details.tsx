@@ -513,7 +513,7 @@ const JobDetails = () => {
                         : "bg-gradient-to-r from-yellow-400 to-orange-400 text-white"
                     }`}
                   >
-                    {row?.status || "Pending"}
+                    {capitalizeFLetter(row?.status || "Pending")}
                   </span>
                 ),
               },

@@ -26,7 +26,7 @@ import { Success, Failure } from "@/utils/function.utils";
 import useDebounce from "@/hook/useDebounce";
 import { CreateUser } from "@/utils/validation.utils";
 import Swal from "sweetalert2";
-import { GENDER_OPTION, ROLES } from "@/utils/constant.utils";
+import { FRONTEND_URL, GENDER_OPTION, ROLES } from "@/utils/constant.utils";
 import CheckboxInput from "@/components/FormFields/CheckBoxInput.component";
 
 const Users = () => {
@@ -201,27 +201,28 @@ const Users = () => {
         }
       }
 
-      if (res?.role === ROLES.HR) {
-        if (res?.college?.length > 0) {
-        } else {
-          departmentList(1, "", false, res?.college?.college_id);
-        }
-      } else {
-        departmentList(1, "", false, "");
-      }
+      // if (res?.role === ROLES.HR) {
+      //   if (res?.college?.length > 0) {
+
+      //   } else {
+      //     departmentList(1, "", false, res?.college?.college_id);
+      //   }
+      // } else {
+      //   departmentList(1, "", false, "");
+      // }
 
       if (res?.role === ROLES.HR) {
         if (isTabChange) {
           setState({ activeTab: ROLES.HOD });
         }
         setState({
-          profile_institution: res?.institution?.institution_name,
+          profile_institution: res?.institution?.name,
           selectedHODCollege: {
             value: res?.college?.college_id,
             label: res?.college?.college_name,
           },
         });
-        superAdminDepartmentList(1, "", false, res?.college?.college_id);
+        // superAdminDepartmentList(1, "", false, res?.college?.college_id);
       }
 
       if (res?.role === ROLES.HOD) {
@@ -244,7 +245,11 @@ const Users = () => {
 
       const tableData = res?.results?.map((item) => ({
         id: item?.id,
-        username: item?.username,
+        // username: item?.username,
+        username:
+          item?.first_name && item?.last_name
+            ? `${item.first_name} ${item.last_name}`
+            : item?.username || "",
         email: item?.email,
         phone: item?.phone,
         department: item?.department?.name,
@@ -330,29 +335,25 @@ const Users = () => {
         if (state.superAdminDepartmentFilter?.value) {
           body.department_id = state.superAdminDepartmentFilter.value;
         }
-      if (state.ownRecord) {
+        if (state.ownRecord) {
           body.created_by = userId;
           body.team = "No";
         } else {
           body.team = "Yes";
           body.institution_id = state.profile?.institution?.institution_id;
         }
-      }else{
+      } else {
         body.created_by = userId;
         body.team = "No";
       }
     }
-    console.log('✌️bodyDATATA --->', body);
+    console.log("✌️bodyDATATA --->", body);
 
     if (state.profile?.role === ROLES.HR) {
       if (state.activeTab == "hod" || state.activeTab == "applicant") {
-        if (state.ownRecord) {
-          body.created_by = userId;
-          body.team = "No";
-        } else {
-          body.team = "Yes";
-          body.college_id = state.profile?.college?.college_id;
-        }
+        body.created_by = userId;
+        body.team = "No";
+        // body.college_id = state.profile?.college?.map((item)=> item?.college_id);
       }
     }
 
@@ -374,6 +375,7 @@ const Users = () => {
       body.ordering =
         state.sortOrder === "desc" ? `-${state.sortBy}` : state.sortBy;
     }
+    console.log("✌️body --->", body);
 
     return body;
   };
@@ -681,7 +683,7 @@ const Users = () => {
     page,
     search = "",
     loadMore = false,
-    collegeId=null
+    collegeId = null
   ) => {
     try {
       setState({ departmentLoading: true });
@@ -689,6 +691,11 @@ const Users = () => {
       if (collegeId) {
         body.college = collegeId;
       }
+      // if(state.profile?.role == ROLES.HR){
+      //   body.created_by= state.profile?.id;
+      //   body.team="No"
+      // }
+
       console.log("✌️body --->", body);
 
       const res: any = await Models.department.list(page, body);
@@ -754,8 +761,8 @@ const Users = () => {
     });
   };
 
+
   const handleEdit = (row) => {
-    console.log("row", row);
 
     setState({
       editId: row.id,
@@ -775,12 +782,29 @@ const Users = () => {
         setState({ selectedHODInstitution: row?.institutionData });
       }
       if (row?.collegeData) {
-        setState({ selectedHODCollege: row?.collegeData });
+        setState({
+          selectedHODCollege:
+            row?.collegeData?.length > 0
+              ? row?.collegeData[0]
+              : null,
+        });
+
+        setState({
+         college:
+            row?.collegeData?.length > 0
+              ? row?.collegeData[0]
+              : null,
+        });
         hodCollegeList(1, "", false, row?.institutionData);
       }
       if (row?.collegeData) {
         setState({ department: row?.deptData });
-        hodDepartmentList(1, "", false, row?.collegeData);
+        hodDepartmentList(
+          1,
+          "",
+          false,
+          row?.collegeData?.length > 0 ? row?.collegeData[0] : null
+        );
       }
     }
 
@@ -789,8 +813,20 @@ const Users = () => {
         setState({ selectedHRInstitution: row?.institutionData });
       }
       if (row?.collegeData) {
-        setState({ college: row?.collegeData });
-        hrCollegeList(1, "", false, row?.collegeData);
+        setState({
+          college:
+            row?.collegeData?.length > 0
+              ? row?.collegeData[0]
+              : null,
+        });
+        hrCollegeList(
+          1,
+          "",
+          false,
+          row?.collegeData?.length > 0
+            ? row?.collegeData[0]
+            : null
+        );
       }
     }
   };
@@ -850,7 +886,7 @@ const Users = () => {
       setState({ submitting: true });
 
       const body: any = {
-        username: state.username,
+        username: capitalizeFLetter(state.username),
         email: state.email,
         password: state.password,
         password_confirm: state.password_confirm,
@@ -858,7 +894,7 @@ const Users = () => {
         role: state.activeTab,
         status: "active",
         gender: state.gender?.value,
-        education_qualification: state.education_qualification,
+        education_qualification: capitalizeFLetter(state.education_qualification),
       };
 
       if (state.activeTab === "institution_admin") {
@@ -876,7 +912,7 @@ const Users = () => {
 
       // Add qualification and experience for hod and applicant
       if (state.activeTab === "hod" || state.activeTab === "applicant") {
-        body.qualification = state.education_qualification;
+        body.qualification = capitalizeFLetter(state.education_qualification);
         body.experience = state.experience;
       }
 
@@ -1171,9 +1207,8 @@ const Users = () => {
                 hodInstitutionList(state.hodInstitutionPage + 1, "", true)
               }
               loading={state.hodInstitutionLoading}
-              title="Select Institution"
+              title="Select Institutions"
               error={state.errors.institution}
-              required
             />
           ) : (
             <TextInput
@@ -1209,7 +1244,6 @@ const Users = () => {
                 isMulti={false}
                 title="Select College"
                 error={state.errors.college}
-                required
                 position="top"
               />
             ) : (
@@ -1385,14 +1419,27 @@ const Users = () => {
           <div className="text-gray-600 dark:text-gray-400">{phone}</div>
         ),
       },
-      {
+
+      // {
+      //   accessor: "institution",
+      //   title: "Institution",
+      //   render: ({ institution }) => (
+      //     <div className="text-gray-600 dark:text-gray-400">{institution}</div>
+      //   ),
+      // },
+    ];
+    if (state.activeTab !== "applicant") {
+      baseColumns.push({
         accessor: "institution",
         title: "Institution",
-        render: ({ institution }) => (
-          <div className="text-gray-600 dark:text-gray-400">{institution}</div>
+        render: (row: any) => (
+          <div className="text-gray-600 dark:text-gray-400">
+            {row?.institution}
+          </div>
         ),
-      },
-    ];
+      });
+    }
+
     if (state.activeTab === "hr") {
       baseColumns.splice(3, 0, {
         accessor: "college",
@@ -1425,16 +1472,17 @@ const Users = () => {
               {row?.qualification}
             </div>
           ),
-        },
-        {
-          accessor: "experience",
-          title: "Experience",
-          render: (row: any) => (
-            <div className="text-gray-600 dark:text-gray-400">
-              {row?.experience}
-            </div>
-          ),
         }
+        
+        // {
+        //   accessor: "experience",
+        //   title: "Experience",
+        //   render: (row: any) => (
+        //     <div className="text-gray-600 dark:text-gray-400">
+        //       {row?.experience}
+        //     </div>
+        //   ),
+        // }
       );
     }
 
@@ -1443,14 +1491,31 @@ const Users = () => {
       title: "Actions",
       render: (row) => (
         <div className="flex items-center justify-center gap-2">
-          <button
-            onClick={() => handleEdit(row)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 transition-all duration-200 hover:bg-blue-200"
-            title="Edit"
-          >
-            <IconEdit className="h-4 w-4" />
-          </button>
-          <button
+          {state.activeTab == "applicant" && (
+            <a
+              href={`${FRONTEND_URL}profile/${row?.id}`}
+              target="_blank"
+              className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-200 ${
+                row.status === "active"
+                  ? "bg-green-100 text-green-600 hover:bg-green-200"
+                  : "bg-red-100 text-red-600 hover:bg-red-200"
+              }`}
+              title={"View"}
+            >
+              <IconEye className="h-4 w-4" />
+            </a>
+          )}
+          {state.activeTab !== "applicant" && (
+            <>
+              <button
+                onClick={() => handleEdit(row)}
+                className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 transition-all duration-200 hover:bg-blue-200"
+                title="Edit"
+              >
+                <IconEdit className="h-4 w-4" />
+              </button>
+
+              {/* <button
             onClick={() => handleToggleStatus(row)}
             className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-200 ${
               row.status === "active"
@@ -1464,7 +1529,9 @@ const Users = () => {
             ) : (
               <IconEyeOff className="h-4 w-4" />
             )}
-          </button>
+          </button> */}
+            </>
+          )}
           <button
             onClick={() => handleDelete(row)}
             className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600 transition-all duration-200 hover:bg-red-200"

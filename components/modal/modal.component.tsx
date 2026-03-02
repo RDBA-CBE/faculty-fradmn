@@ -1,6 +1,7 @@
 import { Dialog, Transition } from "@headlessui/react";
 import React, { Fragment } from "react";
 import IconX from "../Icon/IconX";
+import { X } from "lucide-react";
 
 export default function Modal(props: any) {
   const {
@@ -13,7 +14,8 @@ export default function Modal(props: any) {
     subTitle,
     isFullWidth,
     maxWidth = "max-w-xl",
-    padding
+    padding,
+    closeIcon,
   } = props;
 
   return (
@@ -69,14 +71,34 @@ export default function Modal(props: any) {
                 </div> */}
 
                 {/* SUBTITLE */}
-                {subTitle && (
-                  <div className="bg-[#fbfbfb] dark:bg-[#121c2c] px-5 py-2 border-b border-gray-200 dark:border-gray-700">
-                    <p className="text-sm font-medium">{subTitle}</p>
+                {subTitle || closeIcon ? (
+                  <div className="flex items-center justify-between border-b border-gray-200 bg-[#fbfbfb] px-5 py-3 dark:border-gray-700 dark:bg-[#121c2c]">
+                    {/* Left Side Title */}
+                    <div className="flex-1">
+                      {subTitle && (
+                        <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+                          {subTitle}
+                        </h3>
+                      )}
+                    </div>
+
+                    {/* Right Side Close Icon */}
+                    {closeIcon && (
+                      <button
+                        type="button"
+                        onClick={() => close()}
+                        className="ml-4 rounded-md p-1 transition hover:bg-gray-200 dark:hover:bg-gray-700"
+                      >
+                        <X className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                      </button>
+                    )}
                   </div>
-                )}
+                ) : null}
 
                 {/* CONTENT */}
-                <div className={`${padding ? padding : "p-5"}`}>{renderComponent()}</div>
+                <div className={`${padding ? padding : "p-5"}`}>
+                  {renderComponent()}
+                </div>
               </Dialog.Panel>
             </Transition.Child>
           </div>
