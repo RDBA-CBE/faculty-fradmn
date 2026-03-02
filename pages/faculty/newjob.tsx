@@ -455,7 +455,7 @@ export default function Newjob() {
     const valid: any = {
       title: state.title,
 
-      location: state.location?.value,
+      // location: state.location?.value,
       // address: state.address,
 
       salary: state.salary,
@@ -497,7 +497,7 @@ export default function Newjob() {
         {
           title: state.title,
 
-          location: state.location,
+          // location: state.location,
           // address: state.address,
           institution: state.institution,
           college: state.college,
@@ -527,7 +527,7 @@ export default function Newjob() {
         experiences: state.experience?.value,
         qualification: state.qualification,
         salary_range_id: state.salary?.value,
-        location_ids: state.location?.map((item) => item?.value),
+        // location_ids: state.location?.map((item) => item?.value),
 
         number_of_openings: Number(state.numberOfOpenings),
         last_date: moment(state.endDate).format("YYYY-MM-DD"),
@@ -830,7 +830,7 @@ export default function Newjob() {
                   required
                 />
 
-                <CustomSelect
+                {/* <CustomSelect
                   options={state.locationList}
                   value={state.location}
                   onChange={(option) => handleFieldChange("location", option)}
@@ -841,7 +841,7 @@ export default function Newjob() {
                   error={state.error?.location}
                   loading={state.locationLoading}
                   isMulti={true}
-                />
+                /> */}
               </div>
             </div>
           </div>
