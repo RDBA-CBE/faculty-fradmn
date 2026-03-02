@@ -580,7 +580,7 @@ export default function Newjob() {
 
         experience: state.experience?.value,
         qualification: state.qualification,
-        keyResponsibility: keyResponsibilityData,
+        // keyResponsibility: keyResponsibilityData,
 
         description: state.description,
         applyType: state.applyType?.value,
