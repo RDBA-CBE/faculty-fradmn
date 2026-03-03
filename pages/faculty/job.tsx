@@ -223,9 +223,9 @@ const Job = () => {
       if (institutionId) {
         body.institution_id = institutionId;
       }
-      // if (collegeId) {
-      //   body.college_id = collegeId;
-      // }
+      if (collegeId) {
+        body.college_id = collegeId;
+      }
       if (deptId) {
         body.department_id = deptId;
       }
@@ -234,10 +234,10 @@ const Job = () => {
         body.created_by = state.userFilter?.value;
         body.team = "No";
       }
-      //  else {
-      //   body.created_by = createdBy;
-      //   body.team = "Yes";
-      // }
+       else {
+        body.created_by = createdBy;
+        body.team = "Yes";
+      }
       console.log("✌️body --->", body);
 
       const res: any = await Models.job.list(page, body);

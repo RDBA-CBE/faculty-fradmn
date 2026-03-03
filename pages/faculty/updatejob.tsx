@@ -1,5 +1,6 @@
 import {
   buildFormData,
+  capitalizeFLetter,
   Dropdown,
   Success,
   toISO,
@@ -591,12 +592,12 @@ export default function Newjob() {
       await CreateNewJob.validate(validation, { abortEarly: false });
 
       const body: any = {
-        job_title: state.title,
-        job_description: state.description,
+        job_title: capitalizeFLetter(state.title),
+        job_description: capitalizeFLetter(state.description),
 
         job_type_id: state.jobType?.value,
         experiences: state.experience?.value,
-        qualification: state.qualification,
+        qualification: capitalizeFLetter(state.qualification),
         salary_range_id: state.salary?.value,
         // location_ids: state.location?.map((item) => item?.value),
 

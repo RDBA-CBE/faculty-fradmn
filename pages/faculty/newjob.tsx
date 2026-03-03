@@ -1,5 +1,6 @@
 import {
   buildFormData,
+  capitalizeFLetter,
   Dropdown,
   Success,
   toISO,
@@ -115,11 +116,11 @@ export default function Newjob() {
         setState({
           profile: res,
           institution: {
-            value: res?.institution?.institution_id,
-            label: res?.institution?.institution_name,
+            value: res?.institution?.id,
+            label: res?.institution?.name,
           },
         });
-        fetchColleges(res?.institution?.institution_id, 1);
+        fetchColleges(res?.institution?.id, 1);
       } else if (res?.role == ROLES.HR) {
         setState({
           profile: res,
@@ -485,12 +486,12 @@ export default function Newjob() {
       await CreateNewJob.validate(validation, { abortEarly: false });
 
       const body: any = {
-        job_title: state.title,
-        job_description: state.description,
+        job_title: capitalizeFLetter(state.title),
+        job_description: capitalizeFLetter(state.description),
 
         job_type_id: state.jobType?.value,
         experiences: state.experience?.value,
-        qualification: state.qualification,
+        qualification: capitalizeFLetter(state.qualification),
         salary_range_id: state.salary?.value,
         // location_ids: state.location?.map((item) => item?.value),
 
@@ -510,7 +511,7 @@ export default function Newjob() {
         body.college = state.college?.value;
         body.department = state.department?.map((dept: any) => dept.value);
       } else if (state.profile?.role == ROLES.INSTITUTION_ADMIN) {
-        body.institution = state.profile?.institution?.institution_id;
+        body.institution = state.profile?.institution?.id;
         body.college = state.college?.value;
         body.department = state.department?.map((dept: any) => dept.value);
       } else if (state.profile?.role == ROLES.HR) {
@@ -919,7 +920,7 @@ export default function Newjob() {
                     <TextInput
                       title="Institution"
                       placeholder="Institution"
-                      value={state.profile?.institution?.institution_name}
+                      value={state.profile?.institution?.name}
                       onChange={(e) => {}}
                       disabled
                     />
