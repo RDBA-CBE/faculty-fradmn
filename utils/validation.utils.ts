@@ -188,10 +188,10 @@ export const CreateDepartment = Yup.object().shape({
 export const CreateNewJob = Yup.object().shape({
   title: Yup.string().required("Job title is required"),
 
-  // location: Yup.array()
-  //   .min(1, "At least one location is required")
-  //   .required("Location is required"),
-  // institution: Yup.mixed().required("Institution is required").nullable(false),
+  location: Yup.array()
+    .min(1, "At least one location is required")
+    .required("Location is required"),
+  institution: Yup.mixed().required("Institution is required").nullable(false),
 
   college: Yup.mixed().required("College is required").nullable(false),
   department: Yup.array()
