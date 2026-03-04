@@ -30,6 +30,8 @@ import PrivateRouter from "@/hook/privateRouter";
 import IconEdit from "@/components/Icon/IconEdit";
 import { ROLES } from "@/utils/constant.utils";
 import UpdatePropertyImagePreview from "@/components/ImageUploadWithPreview/UpdatePropertyImagePreview.component";
+import DynamicAchievementInput from "@/components/dynamicAchievementInput";
+import NumberInput from "@/components/FormFields/NumberInputs.component";
 
 const CollegeAndDepartment = () => {
   const dispatch = useDispatch();
@@ -92,6 +94,15 @@ const CollegeAndDepartment = () => {
 
     errors: {},
     editId: null,
+    college_type_list: [],
+    naac_accreditation_list: [],
+    college_type: null,
+    naac_accreditation: "",
+    nirf_band: "",
+    nirf_category: "",
+    intake_per_year: "",
+    total_strength: "",
+    recent_achievements: [],
   });
 
   const steps = [
@@ -115,6 +126,10 @@ const CollegeAndDepartment = () => {
     dispatch(setPageTitle("Colleges & Departments"));
     institutionList(1);
     profile();
+
+    college_type();
+    naac_accreditations();
+    nirf_band(), nirf_category();
   }, [dispatch]);
 
   useEffect(() => {
@@ -328,6 +343,76 @@ const CollegeAndDepartment = () => {
     } catch (error) {
       setState({ loading: false });
       Failure("Failed to fetch departments");
+    }
+  };
+
+  const college_type = async (page = 1, search = "", loadMore = false) => {
+    try {
+      const body: any = {};
+      if (search) {
+        body.search = search;
+      }
+      const res: any = await Models.master.college_type(page, body);
+      const dropdown = Dropdown(res?.results, "name");
+      setState({
+        college_type_list: dropdown,
+        college_type_count: res?.count,
+      });
+    } catch (error) {
+      console.log("✌️error --->", error);
+    }
+  };
+
+  const naac_accreditations = async (
+    page = 1,
+    search = "",
+    loadMore = false
+  ) => {
+    try {
+      const body: any = {};
+      if (search) {
+        body.search = search;
+      }
+      const res: any = await Models.master.NAAC_Accereditation(page, body);
+      const dropdown = Dropdown(res?.results, "grade");
+      setState({
+        naac_accreditation_list: dropdown,
+        college_type_count: res?.count,
+      });
+    } catch (error) {
+      console.log("✌️error --->", error);
+    }
+  };
+
+  const nirf_band = async (page = 1, search = "", loadMore = false) => {
+    try {
+      const body: any = {};
+      if (search) {
+        body.search = search;
+      }
+      const res: any = await Models.master.NIRF_Band(page, body);
+      const dropdown = Dropdown(res?.results, "band");
+      setState({
+        nirf_band_list: dropdown,
+      });
+    } catch (error) {
+      console.log("✌️error --->", error);
+    }
+  };
+
+  const nirf_category = async (page = 1, search = "", loadMore = false) => {
+    try {
+      const body: any = {};
+      if (search) {
+        body.search = search;
+      }
+      const res: any = await Models.master.NIRF_Category(page, body);
+      const dropdown = Dropdown(res?.results, "category");
+      setState({
+        nirf_category_list: dropdown,
+      });
+    } catch (error) {
+      console.log("✌️error --->", error);
     }
   };
 
@@ -844,7 +929,36 @@ const CollegeAndDepartment = () => {
           college_address: state.college_address,
           college_hr: state?.college_hr?.value,
           institution: state?.profile_institution?.id,
+          nirf_band_id: state.nirf_band?.value ?? "",
+          // nirf_category_id: state.nirf_category?.value ?? "",
+          intake_per_year: state.intake_per_year,
+          total_strength: state.total_strength,
         };
+
+        if (state.college_type?.length > 0) {
+          body.college_type_ids = state.college_type?.map(
+            (item) => item?.value
+          );
+        } else {
+          body.college_type_ids = [];
+        }
+
+        if (state.nirf_category?.length > 0) {
+          body.nirf_category_ids = state.nirf_category?.map(
+            (item) => item?.value
+          );
+        } else {
+          body.nirf_category_ids = [];
+        }
+
+        if (state.naac_accreditation?.length > 0) {
+          body.naac_accreditation_ids = state.naac_accreditation?.map(
+            (item) => item?.value
+          );
+        } else {
+          body.naac_accreditation_ids = [];
+        }
+
         if (state.newImages?.length > 0 && state.images?.length === 0) {
           body.college_logo = state.newImages[0];
         }
@@ -998,6 +1112,17 @@ const CollegeAndDepartment = () => {
         error={state.errors.college_name}
         required
       />
+      <CustomSelect
+        title="College Type"
+        options={state.college_type_list}
+        value={state.college_type}
+        onChange={(selectedOption) =>
+          handleFormChange("college_type", selectedOption)
+        }
+        isMulti={true}
+        placeholder="College Type"
+        error={state.errors.college_type}
+      />
       <UpdatePropertyImagePreview
         existingImages={state.college_logo}
         onImagesChange={(newImages) => setState({ newImages })}
@@ -1065,6 +1190,63 @@ const CollegeAndDepartment = () => {
         error={state.errors.college_address}
         rows={3}
         required
+      />
+      <CustomSelect
+        title="NAAC Accreditation"
+        options={state.naac_accreditation_list}
+        value={state.naac_accreditation}
+        onChange={(selectedOption) =>
+          handleFormChange("naac_accreditation", selectedOption)
+        }
+        isMulti={true}
+        placeholder="NAAC Accreditation"
+      />
+
+      <CustomSelect
+        title="NIRF Band"
+        options={state.nirf_band_list}
+        value={state.nirf_band}
+        onChange={(selectedOption) =>
+          handleFormChange("nirf_band", selectedOption)
+        }
+        placeholder="NIRF Band"
+      />
+
+      <CustomSelect
+        title="NIRF Category"
+        options={state.nirf_category_list}
+        value={state.nirf_category}
+        onChange={(selectedOption) =>
+          handleFormChange("nirf_category", selectedOption)
+        }
+        isMulti={true}
+        placeholder="NIRF Category"
+      />
+
+      <NumberInput
+        title="Intake Per Year"
+        value={state.intake_per_year}
+        onChange={(e) => handleFormChange("intake_per_year", e.target.value)}
+        placeholder="Intake Per Year"
+      />
+      <NumberInput
+        title="Total Strength"
+        value={state.total_strength}
+        onChange={(e) => handleFormChange("total_strength", e.target.value)}
+        placeholder="Total Strength"
+      />
+      <TextArea
+        title="Summary"
+        placeholder="Enter college summary"
+        value={state.summary}
+        onChange={(e) => handleFormChange("summary", e.target.value)}
+        rows={3}
+      />
+      <DynamicAchievementInput
+        title="Achivements"
+        placeholder="Enter achivessments"
+        defaultValue={state.recent_achievements}
+        onChange={(data: any) => setState({ recent_achievements: data })}
       />
     </div>
   );

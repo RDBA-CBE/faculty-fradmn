@@ -9,7 +9,7 @@ import IconTrash from "@/components/Icon/IconTrash";
 import IconLoader from "@/components/Icon/IconLoader";
 import IconEdit from "@/components/Icon/IconEdit";
 import Pagination from "@/components/pagination/pagination";
-import { showDeleteAlert, useSetState } from "@/utils/function.utils";
+import { capitalizeFLetter, showDeleteAlert, useSetState } from "@/utils/function.utils";
 import Modal from "@/components/modal/modal.component";
 import { Models } from "@/imports/models.import";
 import { Success, Failure } from "@/utils/function.utils";
@@ -17,7 +17,7 @@ import useDebounce from "@/hook/useDebounce";
 import Swal from "sweetalert2";
 import PrivateRouter from "@/hook/privateRouter";
 
-const ApplicationStatus = () => {
+const CollegeType = () => {
   const dispatch = useDispatch();
   const [state, setState] = useSetState({
     page: 1,
@@ -38,7 +38,7 @@ const ApplicationStatus = () => {
   const debounceSearch = useDebounce(state.search, 500);
 
   useEffect(() => {
-    dispatch(setPageTitle("Application Status Management"));
+    dispatch(setPageTitle("College Type Management"));
     statusList(1);
   }, [dispatch]);
 
@@ -56,8 +56,8 @@ const ApplicationStatus = () => {
           state.sortOrder === "desc" ? `-${state.sortBy}` : state.sortBy;
       }
 
-      const res: any = await Models.master.application_status_list(body);
-      const tableData = res?.map((item) => ({
+      const res: any = await Models.master.college_type(page,body);
+      const tableData = res.results?.map((item) => ({
         id: item?.id,
         name: item?.name,
       }));
@@ -69,7 +69,7 @@ const ApplicationStatus = () => {
       });
     } catch (error) {
       setState({ loading: false });
-      Failure("Failed to fetch application statuses");
+      // Failure("Failed to fetch college type");
     }
   };
 
@@ -99,36 +99,36 @@ const ApplicationStatus = () => {
     showDeleteAlert(
       () => deleteRecord(row.id),
       () => Swal.fire("Cancelled", "Record is safe", "info"),
-      "Are you sure you want to delete this application status?"
+      "Are you sure you want to delete this college type?"
     );
   };
 
   const deleteRecord = async (id: number) => {
     try {
-      await Models.master.delete_application_status(id);
-      Success("Application status deleted successfully!");
+      await Models.master.delete_college_type(id);
+      Success("College type deleted successfully!");
       statusList(state.page);
     } catch (error) {
-      Failure("Failed to delete application status");
+      Failure("Failed to delete college type");
     }
   };
 
   const handleSubmit = async () => {
     try {
       setState({ submitting: true });
-      const body = { name: state.name };
+      const body = { name: capitalizeFLetter(state.name) };
 
       if (!state.name) {
-        setState({ errors: { name: "Application status name is required" } });
+        setState({ errors: { name: "College type is required" } });
         return;
       }
 
       if (state.editId) {
-        await Models.master.update_application_status(body, state.editId);
-        Success("Application status updated successfully!");
+        await Models.master.update_college_type(body, state.editId);
+        Success("College type updated successfully!");
       } else {
-        await Models.master.create_application_status(body);
-        Success("Application status created successfully!");
+        await Models.master.create_college_type(body);
+        Success("College type created successfully!");
       }
 
       statusList(state.page);
@@ -156,10 +156,10 @@ const ApplicationStatus = () => {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
             <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-3xl font-bold text-transparent">
-              Application Status Management
+              College Types
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Manage application statuses
+              Manage college types
             </p>
           </div>
           <button
@@ -168,7 +168,7 @@ const ApplicationStatus = () => {
           >
             <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
             <IconPlus className="relative z-10 h-5 w-5" />
-            <span className="relative z-10">Add Status</span>
+            <span className="relative z-10">Add College Type</span>
           </button>
         </div>
       </div>
@@ -181,7 +181,7 @@ const ApplicationStatus = () => {
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <TextInput
-            placeholder="Search application statuses..."
+            placeholder="Search college type..."
             value={state.search}
             onChange={(e) => setState({ search: e.target.value })}
             icon={<IconSearch className="h-4 w-4" />}
@@ -193,7 +193,7 @@ const ApplicationStatus = () => {
         <div className="border-b border-gray-200 p-6 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-              Application Statuses List
+              College Type List
             </h3>
             <div className="text-sm text-gray-500 dark:text-gray-400">
               {state.statusList?.length} records found
@@ -203,7 +203,7 @@ const ApplicationStatus = () => {
 
         <div className="overflow-x-auto">
           <DataTable
-            noRecordsText="No application statuses found"
+            noRecordsText="No college types found"
             highlightOnHover
             className="table-hover whitespace-nowrap"
             records={state.statusList}
@@ -213,7 +213,7 @@ const ApplicationStatus = () => {
                 <div className="flex items-center gap-3">
                   <IconLoader className="h-6 w-6 animate-spin text-blue-600" />
                   <span className="text-gray-600 dark:text-gray-400">
-                    Loading application statuses...
+                    Loading college type...
                   </span>
                 </div>
               </div>
@@ -221,7 +221,7 @@ const ApplicationStatus = () => {
             columns={[
               {
                 accessor: "name",
-                title: "Status Name",
+                title: "Name",
                 sortable: true,
                 render: ({ name }) => (
                   <div className="font-medium text-gray-900 dark:text-white">
@@ -293,14 +293,14 @@ const ApplicationStatus = () => {
                 )}
               </div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {state.editId ? "Update" : "Add New"} Application Status
+                {state.editId ? "Update" : "Add New"} College Type
               </h2>
             </div>
 
             <div className="space-y-6">
               <TextInput
-                title="Status Name"
-                placeholder="Enter status name"
+                title="College Type"
+                placeholder="Enter college Type"
                 value={state.name}
                 onChange={(e) =>
                   setState({
@@ -351,4 +351,4 @@ const ApplicationStatus = () => {
   );
 };
 
-export default PrivateRouter(ApplicationStatus);
+export default PrivateRouter(CollegeType);

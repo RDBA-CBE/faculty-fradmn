@@ -30,6 +30,7 @@ import PrimaryButton from "@/components/FormFields/PrimaryButton.component";
 import {
   buildFormData,
   capitalizeFLetter,
+  Dropdown,
   showDeleteAlert,
   useSetState,
 } from "@/utils/function.utils";
@@ -50,6 +51,9 @@ import Swal from "sweetalert2";
 import { GENDER_OPTION } from "@/utils/constant.utils";
 import PrivateRouter from "@/hook/privateRouter";
 import UpdatePropertyImagePreview from "@/components/ImageUploadWithPreview/ImageUploadWithPreview.component";
+import NumberInput from "@/components/FormFields/NumberInputs.component";
+import DynamicAchievementInput from "@/components/dynamicAchievementInput";
+import CheckboxInput from "@/components/FormFields/CheckBoxInput.component";
 
 const Institution = () => {
   const dispatch = useDispatch();
@@ -153,7 +157,35 @@ const Institution = () => {
     next: null,
     prev: null,
     editId: null,
+    college_type_list: [],
+    naac_accreditation_list: [],
+    college_type: null,
+    naac_accreditation: "",
+    nirf_band: "",
+    nirf_category: "",
+    intake_per_year: "",
+    total_strength: "",
+    nirf_band_list: [],
+    nirf_category_list: [],
+    recent_achievements: [],
   });
+
+  const debounceSearch = useDebounce(state.search, 500);
+
+  useEffect(() => {
+    dispatch(setPageTitle("Institution"));
+  }, [dispatch]);
+
+  useEffect(() => {
+    instutionList(1);
+    college_type();
+    naac_accreditations();
+    nirf_band(), nirf_category();
+  }, []);
+
+  useEffect(() => {
+    instutionList(1);
+  }, [debounceSearch, state.statusFilter, state.typeFilter, state.sortBy]);
 
   const steps = [
     { id: 1, name: "Institution", icon: Building2, required: true },
@@ -162,17 +194,6 @@ const Institution = () => {
     { id: 4, name: "College", icon: GraduationCap, required: false },
     { id: 5, name: "Department HOD", icon: UserCheck, required: false },
     { id: 6, name: "Department", icon: BookOpen, required: false },
-  ];
-
-  const statusOptions = [
-    { value: "Active", label: "Active" },
-    { value: "Inactive", label: "Inactive" },
-  ];
-
-  const typeOptions = [
-    { value: "University", label: "University" },
-    { value: "Institute", label: "Institute" },
-    { value: "College", label: "College" },
   ];
 
   const genderOptions = [
@@ -448,7 +469,9 @@ const Institution = () => {
               role: "institution_admin",
               status: "active",
               gender: state.admin_gender?.value,
-              education_qualification: capitalizeFLetter(state.admin_education_qualification),
+              education_qualification: capitalizeFLetter(
+                state.admin_education_qualification
+              ),
               institution: createdRecords.institutionId,
             };
             const formData = buildFormData(adminBody);
@@ -487,7 +510,9 @@ const Institution = () => {
               role: "hr",
               status: "active",
               gender: state.hr_gender?.value,
-              education_qualification: capitalizeFLetter(state.hr_qualification),
+              education_qualification: capitalizeFLetter(
+                state.hr_qualification
+              ),
               institution: createdRecords.institutionId,
             };
             const formData = buildFormData(hrBody);
@@ -516,7 +541,37 @@ const Institution = () => {
               college_phone: state.college_phone,
               college_address: capitalizeFLetter(state.college_address),
               institution: createdRecords.institutionId,
+
+              nirf_band_id: state.nirf_band?.value ?? "",
+              // nirf_category_id: state.nirf_category?.value ?? "",
+              intake_per_year: Number(state.intake_per_year),
+              total_strength: Number(state.total_strength),
+              summary: capitalizeFLetter(state.summary),
+              recent_achievements: state.recent_achievements,
             };
+            if (state.college_type?.length > 0) {
+              collegeBody.college_type_ids = state.college_type?.map(
+                (item) => item?.value
+              );
+            } else {
+              collegeBody.college_type_ids = [];
+            }
+
+            if (state.nirf_category?.length > 0) {
+              collegeBody.nirf_category_ids = state.nirf_category?.map(
+                (item) => item?.value
+              );
+            } else {
+              collegeBody.nirf_category_ids = [];
+            }
+
+            if (state.naac_accreditation?.length > 0) {
+              collegeBody.naac_accreditation_ids =
+                state.naac_accreditation?.map((item) => item?.value);
+            } else {
+              collegeBody.naac_accreditation_ids = [];
+            }
+
             if (state.newImages?.length > 0) {
               collegeBody.college_logo = state.newImages[0];
             }
@@ -539,7 +594,9 @@ const Institution = () => {
               role: "hod",
               status: "active",
               gender: state.hod_gender?.value,
-              education_qualification: capitalizeFLetter(state.hod_qualification),
+              education_qualification: capitalizeFLetter(
+                state.hod_qualification
+              ),
               college: createdRecords.collegeId,
             };
             const formData = buildFormData(hodBody);
@@ -559,6 +616,10 @@ const Institution = () => {
               // department_code: state.department_code,
               college: createdRecords.collegeId,
               institution: createdRecords.institutionId,
+              intake_per_year: Number(state.dept_intake_per_year),
+              summary: capitalizeFLetter(state.dept_summary),
+              recent_achievements: state.recent_dept_achievements,
+              nba_accreditation: state.isNBAAccreditation,
             };
             const deptRes: any = await Models.department.create(deptBody);
             createdRecords.departmentId = deptRes?.id;
@@ -721,7 +782,9 @@ const Institution = () => {
               role: "institution_admin",
               status: "active",
               gender: state.admin_gender?.value,
-              education_qualification:capitalizeFLetter( state.admin_education_qualification),
+              education_qualification: capitalizeFLetter(
+                state.admin_education_qualification
+              ),
               institution: createdRecords.institutionId,
             };
             const formData = buildFormData(adminBody);
@@ -759,14 +822,42 @@ const Institution = () => {
         // Step 3: Create College
         if (state.completedSteps.includes(3)) {
           try {
-            const collegeBody = {
+            const collegeBody: any = {
               college_name: capitalizeFLetter(state.college_name),
               college_code: capitalizeFLetter(state.college_code),
               college_email: state.college_email,
               college_phone: state.college_phone,
               college_address: capitalizeFLetter(state.college_address),
               institution: createdRecords.institutionId,
+              nirf_band_id: state.nirf_band?.value ?? "",
+              intake_per_year: Number(state.intake_per_year),
+              total_strength: Number(state.total_strength),
+              summary: capitalizeFLetter(state.summary),
+              recent_achievements: state.recent_achievements,
             };
+            if (state.college_type?.length > 0) {
+              collegeBody.college_type_ids = state.college_type?.map(
+                (item) => item?.value
+              );
+            } else {
+              collegeBody.college_type_ids = [];
+            }
+
+            if (state.nirf_category?.length > 0) {
+              collegeBody.nirf_category_ids = state.nirf_category?.map(
+                (item) => item?.value
+              );
+            } else {
+              collegeBody.nirf_category_ids = [];
+            }
+
+            if (state.naac_accreditation?.length > 0) {
+              collegeBody.naac_accreditation_ids =
+                state.naac_accreditation?.map((item) => item?.value);
+            } else {
+              collegeBody.naac_accreditation_ids = [];
+            }
+
             const collegeRes: any = await Models.college.create(collegeBody);
             createdRecords.collegeId = collegeRes?.id;
           } catch (error: any) {
@@ -785,7 +876,9 @@ const Institution = () => {
                 role: "hr",
                 status: "active",
                 gender: state.hr_gender?.value,
-                education_qualification: capitalizeFLetter(state.hr_qualification),
+                education_qualification: capitalizeFLetter(
+                  state.hr_qualification
+                ),
                 college: createdRecords.collegeId,
               };
               const formData = buildFormData(hrBody);
@@ -823,6 +916,10 @@ const Institution = () => {
                 // department_code: state.department_code,
                 college: createdRecords.collegeId,
                 institution: createdRecords.institutionId,
+                intake_per_year: Number(state.dept_intake_per_year),
+                summary: capitalizeFLetter(state.dept_summary),
+                recent_achievements: state.recent_dept_achievements,
+                nba_accreditation: state.isNBAAccreditation,
               };
               const deptRes: any = await Models.department.create(deptBody);
               createdRecords.departmentId = deptRes?.id;
@@ -832,32 +929,36 @@ const Institution = () => {
 
             // Step 6: Create HOD
             // if (state.completedSteps.includes(6)) {
-              try {
-                const hodBody = {
-                  username: capitalizeFLetter(state.hod_username),
-                  email: state.hod_email,
-                  password: state.hod_password,
-                  password_confirm: state.hod_confirm_password,
-                  phone: state.hod_phone,
-                  role: "hod",
-                  status: "active",
-                  gender: state.hod_gender?.value,
-                  education_qualification: capitalizeFLetter(state.hod_qualification),
-                  department: createdRecords.departmentId,
-                };
-                const formData = buildFormData(hodBody);
+            try {
+              const hodBody = {
+                username: capitalizeFLetter(state.hod_username),
+                email: state.hod_email,
+                password: state.hod_password,
+                password_confirm: state.hod_confirm_password,
+                phone: state.hod_phone,
+                role: "hod",
+                status: "active",
+                gender: state.hod_gender?.value,
+                education_qualification: capitalizeFLetter(
+                  state.hod_qualification
+                ),
+                department: createdRecords.departmentId,
+              };
+              const formData = buildFormData(hodBody);
 
-                const hodRes: any = await Models.auth.createUser(formData);
-                createdRecords.hodId = hodRes?.id;
+              const hodRes: any = await Models.auth.createUser(formData);
+              createdRecords.hodId = hodRes?.id;
 
-                const updateData = {
-                  hod_id: hodRes?.id,
-                }
-              const deptRes: any = await Models.department.update(updateData,  createdRecords.departmentId);
-
-              } catch (error: any) {
-                throw new Error(`HOD creation failed: ${error?.message}`);
-              }
+              const updateData = {
+                hod_id: hodRes?.id,
+              };
+              const deptRes: any = await Models.department.update(
+                updateData,
+                createdRecords.departmentId
+              );
+            } catch (error: any) {
+              throw new Error(`HOD creation failed: ${error?.message}`);
+            }
             // }
           }
         }
@@ -885,7 +986,6 @@ const Institution = () => {
 
       Success(successMessage);
       handleCloseModal();
-      
     } catch (error: any) {
       console.log("✌️error --->", error);
       // Rollback created records
@@ -929,20 +1029,6 @@ const Institution = () => {
       console.error("Rollback error:", rollbackError);
     }
   };
-
-  const debounceSearch = useDebounce(state.search, 500);
-
-  useEffect(() => {
-    dispatch(setPageTitle("Institution"));
-  }, [dispatch]);
-
-  useEffect(() => {
-    instutionList(1);
-  }, []);
-
-  useEffect(() => {
-    instutionList(1);
-  }, [debounceSearch, state.statusFilter, state.typeFilter, state.sortBy]);
 
   const instutionList = async (page: number) => {
     try {
@@ -988,6 +1074,76 @@ const Institution = () => {
     }
 
     return body;
+  };
+
+  const college_type = async (page = 1, search = "", loadMore = false) => {
+    try {
+      const body: any = {};
+      if (search) {
+        body.search = search;
+      }
+      const res: any = await Models.master.college_type(page, body);
+      const dropdown = Dropdown(res?.results, "name");
+      setState({
+        college_type_list: dropdown,
+        college_type_count: res?.count,
+      });
+    } catch (error) {
+      console.log("✌️error --->", error);
+    }
+  };
+
+  const nirf_band = async (page = 1, search = "", loadMore = false) => {
+    try {
+      const body: any = {};
+      if (search) {
+        body.search = search;
+      }
+      const res: any = await Models.master.NIRF_Band(page, body);
+      const dropdown = Dropdown(res?.results, "band");
+      setState({
+        nirf_band_list: dropdown,
+      });
+    } catch (error) {
+      console.log("✌️error --->", error);
+    }
+  };
+
+  const nirf_category = async (page = 1, search = "", loadMore = false) => {
+    try {
+      const body: any = {};
+      if (search) {
+        body.search = search;
+      }
+      const res: any = await Models.master.NIRF_Category(page, body);
+      const dropdown = Dropdown(res?.results, "category");
+      setState({
+        nirf_category_list: dropdown,
+      });
+    } catch (error) {
+      console.log("✌️error --->", error);
+    }
+  };
+
+  const naac_accreditations = async (
+    page = 1,
+    search = "",
+    loadMore = false
+  ) => {
+    try {
+      const body: any = {};
+      if (search) {
+        body.search = search;
+      }
+      const res: any = await Models.master.NAAC_Accereditation(page, body);
+      const dropdown = Dropdown(res?.results, "grade");
+      setState({
+        naac_accreditation_list: dropdown,
+        college_type_count: res?.count,
+      });
+    } catch (error) {
+      console.log("✌️error --->", error);
+    }
   };
 
   const handlePageChange = (pageNumber: number) => {
@@ -1800,6 +1956,17 @@ const Institution = () => {
                       error={state.errors.college_name}
                       required
                     />
+                    <CustomSelect
+                      title="College Type"
+                      options={state.college_type_list}
+                      value={state.college_type}
+                      onChange={(selectedOption) =>
+                        handleFormChange("college_type", selectedOption)
+                      }
+                      isMulti={true}
+                      placeholder="College Type"
+                      error={state.errors.college_type}
+                    />
                     <TextInput
                       title="Email Address"
                       type="email"
@@ -1832,17 +1999,79 @@ const Institution = () => {
                       error={state.errors.college_phone}
                       required
                     />
+                    <TextArea
+                      title="Address"
+                      placeholder="Enter college address"
+                      value={state.college_address}
+                      onChange={(e) =>
+                        handleFormChange("college_address", e.target.value)
+                      }
+                      error={state.errors.college_address}
+                      rows={3}
+                      required
+                    />
+                    <CustomSelect
+                      title="NAAC Accreditation"
+                      options={state.naac_accreditation_list}
+                      value={state.naac_accreditation}
+                      onChange={(selectedOption) =>
+                        handleFormChange("naac_accreditation", selectedOption)
+                      }
+                      isMulti={true}
+                      placeholder="NAAC Accreditation"
+                    />
+
+                    <CustomSelect
+                      title="NIRF Band"
+                      options={state.nirf_band_list}
+                      value={state.nirf_band}
+                      onChange={(selectedOption) =>
+                        handleFormChange("nirf_band", selectedOption)
+                      }
+                      placeholder="NIRF Band"
+                    />
+
+                    <CustomSelect
+                      title="NIRF Category"
+                      options={state.nirf_category_list}
+                      value={state.nirf_category}
+                      onChange={(selectedOption) =>
+                        handleFormChange("nirf_category", selectedOption)
+                      }
+                      isMulti={true}
+                      placeholder="NIRF Category"
+                    />
+                    <NumberInput
+                      title="Intake Per Year"
+                      value={state.intake_per_year}
+                      onChange={(e) =>
+                        handleFormChange("intake_per_year", e.target.value)
+                      }
+                      placeholder="Intake Per Year"
+                    />
+                    <NumberInput
+                      title="Total Strength"
+                      value={state.total_strength}
+                      onChange={(e) =>
+                        handleFormChange("total_strength", e.target.value)
+                      }
+                      placeholder="Total Strength"
+                    />
                   </div>
+                  <DynamicAchievementInput
+                    title="Achivements"
+                    placeholder="Enter achivessments"
+                    defaultValue={state.recent_achievements}
+                    onChange={(data) => setState({ recent_achievements: data })}
+                  />
                   <TextArea
-                    title="Address"
-                    placeholder="Enter college address"
-                    value={state.college_address}
+                    title="Summary"
+                    placeholder="Enter college summary"
+                    value={state.summary}
                     onChange={(e) =>
-                      handleFormChange("college_address", e.target.value)
+                      handleFormChange("summary", e.target.value)
                     }
-                    error={state.errors.college_address}
                     rows={3}
-                    required
                   />
                 </div>
               )}
@@ -1964,6 +2193,43 @@ const Institution = () => {
                     }
                     error={state.errors.department_name}
                     required
+                  />
+
+                  <CheckboxInput
+                    checked={state.isNBAAccreditation}
+                    onChange={(e) =>
+                      setState({
+                        isNBAAccreditation: !state.isNBAAccreditation,
+                      })
+                    }
+                    label="NBA Accreditation"
+                  />
+
+                  <NumberInput
+                    title="Intake Per Year"
+                    value={state.dept_intake_per_year}
+                    onChange={(e) =>
+                      handleFormChange("dept_intake_per_year", e.target.value)
+                    }
+                    placeholder="Intake Per Year"
+                  />
+
+                  <DynamicAchievementInput
+                    title="Achivements"
+                    placeholder="Enter achivessments"
+                    defaultValue={state.recent_dept_achievements}
+                    onChange={(data: any) =>
+                      setState({ recent_dept_achievements: data })
+                    }
+                  />
+                  <TextArea
+                    title="Summary"
+                    placeholder="Enter department summary"
+                    value={state.dept_summary}
+                    onChange={(e) =>
+                      handleFormChange("dept_summary", e.target.value)
+                    }
+                    rows={3}
                   />
                   {/* <TextInput
                    // title='Department Code'

@@ -8,7 +8,7 @@ const master = {
       if (body?.search) url += `?search=${encodeURIComponent(body.search)}`;
       if (body?.ordering)
         url += `${body.search ? "&" : "?"}ordering=${encodeURIComponent(
-          body.ordering,
+          body.ordering
         )}`;
       instance()
         .get(url)
@@ -55,7 +55,7 @@ const master = {
       if (body?.search) url += `?search=${encodeURIComponent(body.search)}`;
       if (body?.ordering)
         url += `${body.search ? "&" : "?"}ordering=${encodeURIComponent(
-          body.ordering,
+          body.ordering
         )}`;
       instance()
         .get(url)
@@ -99,7 +99,7 @@ const master = {
       if (body?.search) url += `?search=${encodeURIComponent(body.search)}`;
       if (body?.ordering)
         url += `${body.search ? "&" : "?"}ordering=${encodeURIComponent(
-          body.ordering,
+          body.ordering
         )}`;
       instance()
         .get(url)
@@ -143,7 +143,7 @@ const master = {
       if (body?.search) url += `?search=${encodeURIComponent(body.search)}`;
       if (body?.ordering)
         url += `${body.search ? "&" : "?"}ordering=${encodeURIComponent(
-          body.ordering,
+          body.ordering
         )}`;
       instance()
         .get(url)
@@ -187,7 +187,7 @@ const master = {
       if (body?.search) url += `?search=${encodeURIComponent(body.search)}`;
       if (body?.ordering)
         url += `${body.search ? "&" : "?"}ordering=${encodeURIComponent(
-          body.ordering,
+          body.ordering
         )}`;
       instance()
         .get(url)
@@ -231,7 +231,7 @@ const master = {
       if (body?.search) url += `?search=${encodeURIComponent(body.search)}`;
       if (body?.ordering)
         url += `${body.search ? "&" : "?"}ordering=${encodeURIComponent(
-          body.ordering,
+          body.ordering
         )}`;
       instance()
         .get(url)
@@ -275,7 +275,7 @@ const master = {
       if (body?.search) url += `?search=${encodeURIComponent(body.search)}`;
       if (body?.ordering)
         url += `${body.search ? "&" : "?"}ordering=${encodeURIComponent(
-          body.ordering,
+          body.ordering
         )}`;
       instance()
         .get(url)
@@ -318,7 +318,7 @@ const master = {
       if (body?.search) url += `?search=${encodeURIComponent(body.search)}`;
       if (body?.ordering)
         url += `${body.search ? "&" : "?"}ordering=${encodeURIComponent(
-          body.ordering,
+          body.ordering
         )}`;
 
       instance()
@@ -329,7 +329,7 @@ const master = {
     return promise;
   },
 
-   create_experience: (data: any) => {
+  create_experience: (data: any) => {
     let promise = new Promise((resolve, reject) => {
       instance()
         .post("master-experiences/", data)
@@ -359,29 +359,27 @@ const master = {
     return promise;
   },
 
-
   job_priority: () => {
-      let promise = new Promise((resolve, reject) => {
-        let url = `job-priorities/`;
-        instance()
-          .get(url)
-          .then((res) => {
-            resolve(res.data);
-          })
-          .catch((error) => {
-            if (error.response) {
-              reject(error.response.message);
-            } else {
-              reject(error);
-            }
-          });
-      });
-  
-      return promise;
-    },
+    let promise = new Promise((resolve, reject) => {
+      let url = `job-priorities/`;
+      instance()
+        .get(url)
+        .then((res) => {
+          resolve(res.data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            reject(error.response.message);
+          } else {
+            reject(error);
+          }
+        });
+    });
 
+    return promise;
+  },
 
-   create_priority: (data: any) => {
+  create_priority: (data: any) => {
     let promise = new Promise((resolve, reject) => {
       instance()
         .post("job-priorities/", data)
@@ -411,6 +409,217 @@ const master = {
     return promise;
   },
 
+  // College Type
+
+  college_type: (page = 1, body) => {
+    let promise = new Promise((resolve, reject) => {
+      let url = `college-types/?page=${page}`;
+      if (body?.search) url += `&search=${encodeURIComponent(body.search)}`;
+      instance()
+        .get(url)
+        .then((res) => {
+          resolve(res.data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            reject(error.response.message);
+          } else {
+            reject(error);
+          }
+        });
+    });
+
+    return promise;
+  },
+
+  create_college_type: (data: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .post("college-types/", data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+
+  update_college_type: (data: any, id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .put(`college-types/${id}/`, data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+
+  delete_college_type: (id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .delete(`college-types/${id}/`)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+
+  // NAAC Accereditation
+
+  NAAC_Accereditation: (page = 1, body) => {
+    let promise = new Promise((resolve, reject) => {
+      let url = `naac-accreditations/?page=1`;
+      if (body?.search) url += `&search=${encodeURIComponent(body.search)}`;
+      instance()
+        .get(url)
+        .then((res) => {
+          resolve(res.data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            reject(error.response.message);
+          } else {
+            reject(error);
+          }
+        });
+    });
+
+    return promise;
+  },
+
+  create_NAAC_Accereditation: (data: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .post("naac-accreditations/", data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+
+  update_NAAC_Accereditation: (data: any, id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .put(`naac-accreditations/${id}/`, data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+
+  delete_NAAC_Accereditation: (id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .delete(`naac-accreditations/${id}/`)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+
+  // NIRF Band
+
+  NIRF_Band: (page = 1, body) => {
+    let promise = new Promise((resolve, reject) => {
+      let url = `nirf-bands/?page=1`;
+      if (body?.search) url += `&search=${encodeURIComponent(body.search)}`;
+      instance()
+        .get(url)
+        .then((res) => {
+          resolve(res.data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            reject(error.response.message);
+          } else {
+            reject(error);
+          }
+        });
+    });
+
+    return promise;
+  },
+
+  create_NIRF_Band: (data: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .post("nirf-bands/", data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+
+  update_NIRF_Band: (data: any, id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .put(`nirf-bands/${id}/`, data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+
+  delete_NIRF_Band: (id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .delete(`nirf-bands/${id}/`)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+
+  // NIRF Category
+
+  NIRF_Category: (page = 1, body) => {
+    let promise = new Promise((resolve, reject) => {
+      let url = `nirf-categories/?page=1`;
+      if (body?.search) url += `&search=${encodeURIComponent(body.search)}`;
+      instance()
+        .get(url)
+        .then((res) => {
+          resolve(res.data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            reject(error.response.message);
+          } else {
+            reject(error);
+          }
+        });
+    });
+
+    return promise;
+  },
+
+  create_NIRF_Category: (data: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .post("nirf-categories/", data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+
+  update_NIRF_Category: (data: any, id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .put(`nirf-categories/${id}/`, data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+
+  delete_NIRF_Category: (id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .delete(`nirf-categories/${id}/`)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
 };
 
 export default master;
