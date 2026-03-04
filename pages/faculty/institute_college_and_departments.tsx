@@ -1,5 +1,5 @@
 import { DataTable } from "mantine-datatable";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { setPageTitle } from "../../store/themeConfigSlice";
 import TextInput from "@/components/FormFields/TextInput.component";
@@ -14,7 +14,12 @@ import IconEyeOff from "@/components/Icon/IconEyeOff";
 import IconLoader from "@/components/Icon/IconLoader";
 import { GraduationCap, BookOpen, UserCheck } from "lucide-react";
 import Pagination from "@/components/pagination/pagination";
-import { buildFormData, Dropdown, showDeleteAlert, useSetState } from "@/utils/function.utils";
+import {
+  buildFormData,
+  Dropdown,
+  showDeleteAlert,
+  useSetState,
+} from "@/utils/function.utils";
 import Modal from "@/components/modal/modal.component";
 import { Success, Failure } from "@/utils/function.utils";
 import useDebounce from "@/hook/useDebounce";
@@ -30,6 +35,7 @@ import IconEdit from "@/components/Icon/IconEdit";
 
 const CollegeAndDepartment = () => {
   const dispatch = useDispatch();
+  const isInitialLoad = useRef(true);
   const [state, setState] = useSetState({
     // Wizard state
     currentStep: 1,
@@ -112,13 +118,16 @@ const CollegeAndDepartment = () => {
   useEffect(() => {
     dispatch(setPageTitle("Colleges & Departments"));
     institutionList(1);
-    profile()
-
+    collegeList(1,state.profile?.institution?.id).then(() => {
+      profile();
+      isInitialLoad.current = false;
+    });
   }, [dispatch]);
 
   useEffect(() => {
+    if (isInitialLoad.current) return;
     if (state.activeTab === "colleges") {
-      collegeList(1);
+      collegeList(1,state.profile?.institution?.id);
     } else {
       deptList(1);
       collegeDropdownList(1); // Load colleges for dropdown
@@ -127,26 +136,24 @@ const CollegeAndDepartment = () => {
 
   useEffect(() => {
     if (state.activeTab === "colleges") {
-      collegeList(1);
+      collegeList(1,state.profile?.institution?.id);
     } else {
       deptList(1);
     }
   }, [debounceSearch, state.statusFilter, state.sortBy]);
 
-   const profile = async (isTabChange = true) => {
-      try {
-        const res: any = await Models.auth.profile()
-        console.log('profile --->', res)
-        setState({ profile: res,profile_institution: res?.institution })
-        if(res?.institution){
-        
-          collegeDropdownList(1,"",false,res?.institution)
-  
-        }
-      } catch (error) {
-        console.error('Error fetching institutions:', error)
+  const profile = async (isTabChange = true) => {
+    try {
+      const res: any = await Models.auth.profile();
+      console.log("profile --->", res);
+      setState({ profile: res, profile_institution: res?.institution });
+      if (res?.institution) {
+        collegeDropdownList(1, "", false, res?.institution);
       }
+    } catch (error) {
+      console.error("Error fetching institutions:", error);
     }
+  };
 
   const institutionList = async (page, search = "", loadMore = false) => {
     try {
@@ -182,7 +189,6 @@ const CollegeAndDepartment = () => {
     seletedInstitution = null
   ) => {
     try {
-
       setState({ collegeLoading: true });
       const body: any = { search };
       if (seletedInstitution) {
@@ -233,12 +239,17 @@ const CollegeAndDepartment = () => {
   };
 
   const collegeList = async (page, institutionId = null) => {
+console.log('✌️institutionId --->', institutionId);
     try {
       setState({ loading: true });
       const body = collegeBodyData();
-console.log('✌️body --->', body);
+      console.log("✌️body --->", body);
       if (institutionId) {
         body.institution = institutionId?.value;
+      }
+
+      if (state.profile?.institution) {
+        body.institution = state.profile?.institution?.id;
       }
 
       const res: any = await Models.college.list(page, body);
@@ -373,15 +384,14 @@ console.log('✌️body --->', body);
 
   const collegeBodyData = () => {
     const body: any = {};
-    const userId=localStorage.getItem("userId")
+    const userId = localStorage.getItem("userId");
 
     if (state.search) {
       body.search = state.search;
     }
-    body.created_by=userId
+    body.created_by = userId;
 
     body.team = "Yes";
-
 
     if (state.sortBy) {
       body.ordering =
@@ -855,8 +865,8 @@ console.log('✌️body --->', body);
           };
 
           console.log("Step 3.3: Creating HOD...", finalHodBody);
-          const formData=buildFormData(finalHodBody)
-          
+          const formData = buildFormData(finalHodBody);
+
           const hodRes: any = await Models.auth.createUser(formData);
           createdRecords.hodId = hodRes?.id;
           console.log(
@@ -1460,7 +1470,6 @@ console.log('✌️body --->', body);
               Manage colleges and departments
             </p>
           </div>
-          
         </div>
       </div>
 
@@ -1517,15 +1526,15 @@ console.log('✌️body --->', body);
             />
           </div>
           {state.activeTab === "departments" && (
-           <div className="group relative z-50">
-            <CustomSelect
-              options={statusOptions}
-              value={state.statusFilter}
-              onChange={handleStatusChange}
-              placeholder="Select HOD"
-              isClearable={true}
-            />
-          </div>
+            <div className="group relative z-50">
+              <CustomSelect
+                options={statusOptions}
+                value={state.statusFilter}
+                onChange={handleStatusChange}
+                placeholder="Select HOD"
+                isClearable={true}
+              />
+            </div>
           )}
         </div>
       </div>
