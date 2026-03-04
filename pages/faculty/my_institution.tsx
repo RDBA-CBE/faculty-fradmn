@@ -52,7 +52,7 @@ import { GENDER_OPTION } from "@/utils/constant.utils";
 import PrivateRouter from "@/hook/privateRouter";
 import UpdatePropertyImagePreview from "@/components/ImageUploadWithPreview/ImageUploadWithPreview.component";
 import NumberInput from "@/components/FormFields/NumberInputs.component";
-import DynamicAchievementInput from "@/components/dynamicAchievementInput";
+import DynamicAchievementInput from "@/components/DynamicAchievementInput";
 import CheckboxInput from "@/components/FormFields/CheckBoxInput.component";
 
 const Institution = () => {

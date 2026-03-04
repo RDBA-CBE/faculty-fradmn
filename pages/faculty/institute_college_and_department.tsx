@@ -30,7 +30,7 @@ import PrivateRouter from "@/hook/privateRouter";
 import IconEdit from "@/components/Icon/IconEdit";
 import { ROLES } from "@/utils/constant.utils";
 import UpdatePropertyImagePreview from "@/components/ImageUploadWithPreview/UpdatePropertyImagePreview.component";
-import DynamicAchievementInput from "@/components/dynamicAchievementInput";
+import DynamicAchievementInput from "@/components/DynamicAchievementInput";
 import NumberInput from "@/components/FormFields/NumberInputs.component";
 
 const CollegeAndDepartment = () => {

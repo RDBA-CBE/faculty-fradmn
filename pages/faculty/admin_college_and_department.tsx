@@ -41,8 +41,8 @@ import PrivateRouter from "@/hook/privateRouter";
 import IconEdit from "@/components/Icon/IconEdit";
 import UpdatePropertyImagePreview from "@/components/ImageUploadWithPreview/ImageUploadWithPreview.component";
 import NumberInput from "@/components/FormFields/NumberInputs.component";
-import DynamicAchievementInput from "@/components/dynamicAchievementInput";
 import CheckboxInput from "@/components/FormFields/CheckBoxInput.component";
+import DynamicAchievementInput from "@/components/DynamicAchievementInput";
 
 const CollegeAndDepartment = () => {
   const dispatch = useDispatch();

@@ -36,7 +36,7 @@ import IconEdit from "@/components/Icon/IconEdit";
 import { DROPDOWN_ROLES, ROLES } from "@/utils/constant.utils";
 import UpdatePropertyImagePreview from "@/components/ImageUploadWithPreview/UpdatePropertyImagePreview.component";
 import NumberInput from "@/components/FormFields/NumberInputs.component";
-import DynamicAchievementInput from "@/components/dynamicAchievementInput";
+import DynamicAchievementInput from "@/components/DynamicAchievementInput";
 import CheckboxInput from "@/components/FormFields/CheckBoxInput.component";
 
 const CollegeAndDepartment = () => {
