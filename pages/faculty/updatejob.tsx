@@ -223,12 +223,13 @@ export default function Newjob() {
                   label: skills?.name,
                 }))
               : [],
+          is_approved: res?.is_approved,
         });
         if (res?.job_image) {
           setState({
             newImages: [res?.job_image],
           });
-        }else{
+        } else {
           setState({
             newImages: [],
           });
@@ -608,7 +609,8 @@ export default function Newjob() {
         start_date: moment(state.startDate).format("YYYY-MM-DD"),
         responsibility: keyResponsibilityData,
 
-        is_approved: state.profile?.role == ROLES.HR ? true : false,
+        is_approved:
+          state.is_approved ?? state.profile?.role == ROLES.HR ? true : false,
         priority_id: state.priority?.value,
       };
 
@@ -662,7 +664,6 @@ export default function Newjob() {
         formData.append("job_image", state.newImages?.[0]);
       } else {
         formData.append("job_image", null);
-
       }
 
       const res = await Models.job.update(formData, id);
