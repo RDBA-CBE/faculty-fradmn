@@ -14,7 +14,12 @@ import IconEyeOff from "@/components/Icon/IconEyeOff";
 import IconLoader from "@/components/Icon/IconLoader";
 import { GraduationCap, BookOpen, UserCheck } from "lucide-react";
 import Pagination from "@/components/pagination/pagination";
-import { Dropdown, showDeleteAlert, useSetState } from "@/utils/function.utils";
+import {
+  capitalizeFLetter,
+  Dropdown,
+  showDeleteAlert,
+  useSetState,
+} from "@/utils/function.utils";
 import Modal from "@/components/modal/modal.component";
 import { Success, Failure } from "@/utils/function.utils";
 import useDebounce from "@/hook/useDebounce";
@@ -28,6 +33,9 @@ import {
 import PrivateRouter from "@/hook/privateRouter";
 import IconEdit from "@/components/Icon/IconEdit";
 import { ROLES } from "@/utils/constant.utils";
+import DynamicAchievementInput from "@/components/DynamicAchievementInput";
+import CheckboxInput from "@/components/FormFields/CheckBoxInput.component";
+import NumberInput from "@/components/FormFields/NumberInputs.component";
 
 const CollegeAndDepartment = () => {
   const dispatch = useDispatch();
@@ -145,7 +153,7 @@ const CollegeAndDepartment = () => {
     page,
     search = "",
     loadMore = false,
-    seletedInstitution = null
+    seletedInstitution = null,
   ) => {
     try {
       setState({ collegeLoading: true });
@@ -237,6 +245,11 @@ const CollegeAndDepartment = () => {
         institution_id: item?.college,
         department_head: item?.hod?.name,
         hod_id: item?.hod?.id,
+
+        dept_intake_per_year: item?.intake_per_year,
+        dept_summary: item?.summary,
+        recent_dept_achievements: item?.recent_achievements,
+        isNBAAccreditation: item?.nba_accreditation,
       }));
 
       setState({
@@ -346,6 +359,10 @@ const CollegeAndDepartment = () => {
         value: row?.college_id,
         label: row.college_name,
       },
+      dept_intake_per_year: row?.dept_intake_per_year,
+      dept_summary: row?.dept_summary,
+      recent_dept_achievements: row?.recent_dept_achievements,
+      isNBAAccreditation: row?.isNBAAccreditation,
     });
     if (row?.hod_id) {
       setState({
@@ -410,7 +427,7 @@ const CollegeAndDepartment = () => {
     showDeleteAlert(
       () => deleteRecord(row.id),
       () => Swal.fire("Cancelled", "Record is safe", "info"),
-      "Are you sure you want to delete this record?"
+      "Are you sure you want to delete this record?",
     );
   };
 
@@ -439,7 +456,7 @@ const CollegeAndDepartment = () => {
       }
     } catch (error) {
       Failure(
-        `Failed to delete ${state.activeTab.slice(0, -1)}. Please try again.`
+        `Failed to delete ${state.activeTab.slice(0, -1)}. Please try again.`,
       );
     }
   };
@@ -531,7 +548,7 @@ const CollegeAndDepartment = () => {
           createdRecords.collegeId = collegeRes?.id;
           console.log(
             "Step 2.1: College created successfully with ID:",
-            createdRecords.collegeId
+            createdRecords.collegeId,
           );
 
           const deptBody = {
@@ -619,6 +636,10 @@ const CollegeAndDepartment = () => {
         // department_code: state.department_code,
         college: state.college?.value,
         institution: state?.profile_institution?.institution?.id,
+        intake_per_year: Number(state.dept_intake_per_year),
+        summary: capitalizeFLetter(state.dept_summary),
+        recent_achievements: state.recent_dept_achievements,
+        nba_accreditation: state.isNBAAccreditation,
       };
       console.log("✌️body --->", body);
 
@@ -1066,7 +1087,7 @@ const CollegeAndDepartment = () => {
                     error={state.errors.deptHod}
                   />
                 </>
-                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <div className="grid grid-cols-1 gap-6">
                   <TextInput
                     title="Department Name"
                     placeholder="Enter department name"
@@ -1087,6 +1108,42 @@ const CollegeAndDepartment = () => {
                     error={state.errors.department_code}
                     required
                   /> */}
+                  <CheckboxInput
+                    checked={state.isNBAAccreditation}
+                    onChange={(e) =>
+                      setState({
+                        isNBAAccreditation: !state.isNBAAccreditation,
+                      })
+                    }
+                    label="NBA Accreditation"
+                  />
+
+                  <NumberInput
+                    title="Intake Per Year"
+                    value={state.dept_intake_per_year}
+                    onChange={(e) =>
+                      handleFormChange("dept_intake_per_year", e.target.value)
+                    }
+                    placeholder="Intake Per Year"
+                  />
+
+                  <DynamicAchievementInput
+                    title="Achivements"
+                    placeholder="Enter achivessments"
+                    defaultValue={state.recent_dept_achievements}
+                    onChange={(data: any) =>
+                      setState({ recent_dept_achievements: data })
+                    }
+                  />
+                  <TextArea
+                    title="Summary"
+                    placeholder="Enter department summary"
+                    value={state.dept_summary}
+                    onChange={(e) =>
+                      handleFormChange("dept_summary", e.target.value)
+                    }
+                    rows={3}
+                  />
                 </div>
               </div>
             </div>

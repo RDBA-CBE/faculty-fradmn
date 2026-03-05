@@ -19,6 +19,10 @@ import Swal from "sweetalert2";
 import Models from "@/imports/models.import";
 import PrivateRouter from "@/hook/privateRouter";
 import IconEdit from "@/components/Icon/IconEdit";
+import DynamicAchievementInput from "@/components/DynamicAchievementInput";
+import CheckboxInput from "@/components/FormFields/CheckBoxInput.component";
+import NumberInput from "@/components/FormFields/NumberInputs.component";
+import TextArea from "@/components/FormFields/TextArea.component";
 
 const CollegeAndDepartment = () => {
   const dispatch = useDispatch();
@@ -132,6 +136,10 @@ const CollegeAndDepartment = () => {
         institution_id: item?.college,
         department_head: item?.hod?.name,
         hod_id: item?.hod?.id,
+        dept_intake_per_year: item?.intake_per_year,
+        dept_summary: item?.summary,
+        recent_dept_achievements: item?.recent_achievements,
+        isNBAAccreditation: item?.nba_accreditation,
       }));
 
       setState({
@@ -239,7 +247,11 @@ const CollegeAndDepartment = () => {
         value: row?.college_id,
         label: row.college_name,
       },
-
+     
+      intake_per_year: row.intake_per_year,
+      total_strength: row.total_strength,
+      summary: row.summary,
+      recent_achievements: row.recent_achievements,
     });
     if (row?.hod_id) {
       setState({
@@ -322,6 +334,10 @@ const CollegeAndDepartment = () => {
         // department_code: state.department_code,
         college: state.profile_college?.college_id,
         institution: state?.profile_institution?.id,
+        intake_per_year: Number(state.dept_intake_per_year),
+        summary: capitalizeFLetter(state.dept_summary),
+        recent_achievements: state.recent_dept_achievements,
+        nba_accreditation: state.isNBAAccreditation,
       };
 
       if (state.profile?.college?.length > 0) {
@@ -547,7 +563,7 @@ const CollegeAndDepartment = () => {
           error={state.errors.deptHod}
         />
       </>
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 ">
         <TextInput
           title="Department Name"
           placeholder="Enter department name"
@@ -564,6 +580,37 @@ const CollegeAndDepartment = () => {
           error={state.errors.department_code}
           required
         /> */}
+
+        <CheckboxInput
+          checked={state.isNBAAccreditation}
+          onChange={(e) =>
+            setState({ isNBAAccreditation: !state.isNBAAccreditation })
+          }
+          label="NBA Accreditation"
+        />
+
+        <NumberInput
+          title="Intake Per Year"
+          value={state.dept_intake_per_year}
+          onChange={(e) =>
+            handleFormChange("dept_intake_per_year", e.target.value)
+          }
+          placeholder="Intake Per Year"
+        />
+
+        <DynamicAchievementInput
+          title="Achivements"
+          placeholder="Enter achivessments"
+          defaultValue={state.recent_dept_achievements}
+          onChange={(data: any) => setState({ recent_dept_achievements: data })}
+        />
+        <TextArea
+          title="Summary"
+          placeholder="Enter department summary"
+          value={state.dept_summary}
+          onChange={(e) => handleFormChange("dept_summary", e.target.value)}
+          rows={3}
+        />
       </div>
     </div>
   );
