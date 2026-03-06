@@ -969,6 +969,9 @@ const CollegeAndDepartment = () => {
         }
         if (state.newImages?.length > 0 && state.images?.length === 0) {
           collegeBody.college_logo = state.newImages[0];
+        }else{
+          collegeBody.college_logo = null;
+
         }
         if (state.college_hr?.value) {
           collegeBody.college_hr = state.college_hr?.value;
@@ -1025,6 +1028,9 @@ const CollegeAndDepartment = () => {
 
         if (state.newImages?.length > 0 && state.images?.length === 0) {
           collegeBody.college_logo = state.newImages[0];
+        }else{
+          collegeBody.college_logo = null;
+
         }
 
         await CreateCollege.validate(collegeBody, { abortEarly: false });
@@ -1231,6 +1237,9 @@ const CollegeAndDepartment = () => {
 
         if (state.newImages?.length > 0 && state.images?.length === 0) {
           body.college_logo = state.newImages[0];
+        }else{
+         body.college_logo = null;
+
         }
 
         try {
@@ -1354,6 +1363,9 @@ const CollegeAndDepartment = () => {
 
           if (state.newImages?.length > 0 && state.images?.length === 0) {
             collegeBody.college_logo = state.newImages[0];
+          }else{
+            collegeBody.college_logo = null;
+  
           }
 
           const collegeformData = buildFormData(collegeBody);
@@ -1529,6 +1541,9 @@ const CollegeAndDepartment = () => {
 
       if (state.newImages?.length > 0 && state.images?.length === 0) {
         body.college_logo = state.newImages[0];
+      }else{
+        body.college_logo = null;
+
       }
 
       await CreateCollege.validate(body, { abortEarly: false });

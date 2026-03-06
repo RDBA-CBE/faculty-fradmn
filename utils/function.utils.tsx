@@ -382,26 +382,61 @@ export const extractZoomMeetingId = (url) => {
   }
 };
 
+// export const buildFormData = (data: Record<string, any>): FormData => {
+//   const formData = new FormData();
+
+//   Object.entries(data).forEach(([key, value]) => {
+//     if (value === null || value === undefined) return;
+
+//     // Arrays
+//     if (Array.isArray(value)) {
+//       if (value.length === 0) return;
+//       // For arrays, send as JSON string to maintain array format
+//       formData.append(key, JSON.stringify(value));
+//     }
+//     // Files / Blobs
+//     else if (value instanceof File || value instanceof Blob) {
+//       formData.append(key, value);
+//     }
+//     // Objects → stringify
+//     else if (typeof value === "object") {
+//       formData.append(key, JSON.stringify(value));
+//     }
+//     // Primitives
+//     else {
+//       formData.append(key, String(value));
+//     }
+//   });
+
+//   return formData;
+// };
+
+
 export const buildFormData = (data: Record<string, any>): FormData => {
   const formData = new FormData();
 
   Object.entries(data).forEach(([key, value]) => {
-    if (value === null || value === undefined) return;
+
+    // null or undefined → send as null
+    if (value === null || value === undefined) {
+      formData.append(key, "null");
+    }
 
     // Arrays
-    if (Array.isArray(value)) {
-      if (value.length === 0) return;
-      // For arrays, send as JSON string to maintain array format
-      formData.append(key, JSON.stringify(value));
+    else if (Array.isArray(value)) {
+      formData.append(key, JSON.stringify(value)); // [] or [1,2]
     }
+
     // Files / Blobs
     else if (value instanceof File || value instanceof Blob) {
       formData.append(key, value);
     }
-    // Objects → stringify
+
+    // Objects
     else if (typeof value === "object") {
       formData.append(key, JSON.stringify(value));
     }
+
     // Primitives
     else {
       formData.append(key, String(value));
@@ -410,6 +445,8 @@ export const buildFormData = (data: Record<string, any>): FormData => {
 
   return formData;
 };
+
+
 
 export const getTimeZone = (time) => {
   const tz = time.split(")")[1].trim();

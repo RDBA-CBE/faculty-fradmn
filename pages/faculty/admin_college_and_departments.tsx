@@ -1089,8 +1089,8 @@ const CollegeAndDepartment = () => {
         college_hr: state.college_hr?.value,
         nirf_band_id: state.nirf_band?.value ?? "",
         // nirf_category_id: state.nirf_category?.value ?? "",
-        intake_per_year: state.intake_per_year,
-        total_strength: state.total_strength,
+        intake_per_year: Number(state.intake_per_year),
+        total_strength: Number(state.total_strength),
         summary: state.summary,
         recent_achievements: state.recent_achievements,
       };
@@ -1119,14 +1119,13 @@ const CollegeAndDepartment = () => {
 
       if (state.newImages?.length > 0 && state.images?.length === 0) {
         body.college_logo = state.newImages[0];
-      }
+      }else{
+        body.college_logo = null;
 
-      if (state.newImages?.length > 0 && state.images?.length === 0) {
-        body.college_logo = state.newImages[0];
       }
-
       await CreateCollege.validate(body, { abortEarly: false });
       const formData = buildFormData(body);
+      
       const res = await Models.college.update(formData, state.editId);
       collegeList(1);
       handleCloseModal();

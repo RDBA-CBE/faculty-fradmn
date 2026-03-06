@@ -574,8 +574,15 @@ const Institution = () => {
 
             if (state.newImages?.length > 0) {
               collegeBody.college_logo = state.newImages[0];
+            }else{
+              collegeBody.college_logo = null;
+      
             }
-            const collegeRes: any = await Models.college.create(collegeBody);
+
+            const formData=buildFormData(collegeBody)
+
+
+            const collegeRes: any = await Models.college.create(formData);
             createdRecords.collegeId = collegeRes?.id;
           } catch (error: any) {
             throw new Error(`College creation failed: ${error?.message}`);
@@ -858,7 +865,16 @@ const Institution = () => {
               collegeBody.naac_accreditation_ids = [];
             }
 
-            const collegeRes: any = await Models.college.create(collegeBody);
+            if (state.newImages?.length > 0) {
+              collegeBody.college_logo = state.newImages[0];
+            }else{
+              collegeBody.college_logo = null;
+      
+            }
+            const formData=buildFormData(collegeBody)
+            console.log('✌️collegeBody --->', collegeBody);
+
+            const collegeRes: any = await Models.college.create(formData);
             createdRecords.collegeId = collegeRes?.id;
           } catch (error: any) {
             throw new Error(`College creation failed: ${error?.message}`);

@@ -174,8 +174,8 @@ export const menuConfig = {
     {
       type: "link",
       icon: "IconMenuNotes",
-      label: "Departments",
-      href: "/faculty/departments",
+      label: "Colleges & Departments",
+      href: "/faculty/institute_college_and_departments",
     },
 
     // {
