@@ -103,6 +103,10 @@ const CollegeAndDepartment = () => {
 
     errors: {},
     editId: null,
+    intake_per_year: "",
+    total_strength: "",
+    recent_achievements: [],
+    recent_dept_achievements: [],
   });
 
   const steps = [
@@ -201,6 +205,10 @@ const CollegeAndDepartment = () => {
         total_departments: item?.total_departments,
         total_jobs: item?.total_jobs,
         college_address: item?.college_address,
+        dept_intake_per_year: item?.intake_per_year,
+        dept_summary: item?.summary,
+        recent_dept_achievements: item?.recent_achievements,
+        isNBAAccreditation: item?.nba_accreditation,
       }));
 
       setState({
@@ -302,6 +310,10 @@ const CollegeAndDepartment = () => {
       errors: {},
       editId: null,
       institutionDept: null,
+      dept_intake_per_year: null,
+      dept_summary: "",
+      recent_dept_achievements: [],
+      isNBAAccreditation: false,
     });
   };
 

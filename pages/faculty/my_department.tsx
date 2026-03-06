@@ -56,6 +56,10 @@ const CollegeAndDepartment = () => {
     errors: {},
     editId: null,
     showEditModal: false,
+    intake_per_year: "",
+    total_strength: "",
+    recent_achievements: [],
+    recent_dept_achievements: [],
   });
 
   const debounceSearch = useDebounce(state.search, 500);
