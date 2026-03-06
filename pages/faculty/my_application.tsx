@@ -282,7 +282,6 @@ const Application = () => {
         next: res?.next,
         prev: res?.previous,
         applications_by_status: res?.applications_by_status,
-
       });
     } catch (error) {
       console.error("Error fetching applications:", error);
@@ -455,11 +454,6 @@ const Application = () => {
 
   const handleUpdateStatus = async (row: any, newStatus: string) => {
     try {
-      const body = {
-        status: newStatus,
-      };
-      await Models.application.update(body, row?.id);
-      Success(`Application ${newStatus.toLowerCase()} successfully!`);
       const role = state.profile?.role;
       if (role === ROLES.SUPER_ADMIN) {
         applicationList(state.page, null, null, null, state.profile?.id);
@@ -832,8 +826,7 @@ const Application = () => {
                 Applied
               </p>
               <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
-              {state.applications_by_status?.applied || 0}
-
+                {state.applications_by_status?.applied || 0}
               </p>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-yellow-100 dark:bg-yellow-900">
@@ -849,8 +842,7 @@ const Application = () => {
                 Selected
               </p>
               <p className="text-3xl font-bold text-green-600 dark:text-green-400">
-              {state.applications_by_status?.Selected || 0}
-
+                {state.applications_by_status?.Selected || 0}
               </p>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 dark:bg-green-900">
@@ -863,11 +855,10 @@ const Application = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-              Interview Scheduled
+                Interview Scheduled
               </p>
               <p className="text-3xl font-bold text-red-600 dark:text-red-400">
-              {state.applications_by_status?.["Interview Scheduled "] || 0}
-
+                {state.applications_by_status?.["Interview Scheduled "] || 0}
               </p>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100 dark:bg-red-900">
@@ -1171,19 +1162,19 @@ const Application = () => {
             }
             columns={[
               {
-                accessor: "Job Position",
+                accessor: "job_title",
                 title: "Job Position",
+                sortable: true,
                 render: ({ job_title }) => (
                   <div className="text-gray-600 dark:text-gray-400">
                     {capitalizeFLetter(job_title)}
                   </div>
                 ),
-               
               },
               {
                 accessor: "applicant_name",
                 title: "Applicant Name",
-               
+                sortable: true,
                 render: ({ applicant_name }) => (
                   <div className="font-medium text-gray-900 dark:text-white">
                     {applicant_name}
@@ -1193,7 +1184,8 @@ const Application = () => {
               {
                 accessor: "applicant_email",
                 title: "Email",
-               
+                sortable: true,
+
                 render: ({ applicant_email }) => (
                   <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-200">
                     {applicant_email}
@@ -1208,7 +1200,6 @@ const Application = () => {
                     {applicant_phone}
                   </div>
                 ),
-               
               },
               {
                 accessor: "experience",
@@ -1218,12 +1209,13 @@ const Application = () => {
                     {experience}
                   </div>
                 ),
-               
               },
 
               {
                 accessor: "status",
                 title: "Status",
+                sortable: true,
+
                 render: ({ status }) => (
                   <span
                     className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
@@ -1233,7 +1225,6 @@ const Application = () => {
                     {capitalizeFLetter(status)}
                   </span>
                 ),
-               
               },
               {
                 accessor: "actions",
@@ -1292,7 +1283,7 @@ const Application = () => {
                 sortOrder: direction,
                 page: 1,
               });
-              applicationList(1);
+              handleUpdateStatus(columnAccessor,direction)
             }}
             minHeight={200}
           />

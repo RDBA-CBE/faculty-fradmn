@@ -34,6 +34,7 @@ import UpdatePropertyImagePreview from "@/components/ImageUploadWithPreview/Upda
 import DynamicAchievementInput from "@/components/DynamicAchievementInput";
 import NumberInput from "@/components/FormFields/NumberInputs.component";
 import CheckboxInput from "@/components/FormFields/CheckBoxInput.component";
+import Sortable from "sortablejs";
 
 const CollegeAndDepartment = () => {
   const dispatch = useDispatch();
@@ -707,7 +708,7 @@ const CollegeAndDepartment = () => {
       if (selectedCollege) {
         body.college_id = selectedCollege;
       }
-      body.role="hod"
+      body.role = "hod";
 
       const res: any = await Models.auth.userList(page, body);
       const dropdown = Dropdown(res?.results, "username");
@@ -877,9 +878,8 @@ const CollegeAndDepartment = () => {
 
         if (state.newImages?.length > 0 && state.images?.length === 0) {
           collegeBody.college_logo = state.newImages[0];
-        }else{
+        } else {
           collegeBody.college_logo = null;
-
         }
 
         const formData = buildFormData(collegeBody);
@@ -1099,11 +1099,9 @@ const CollegeAndDepartment = () => {
         }
         if (state.newImages?.length > 0 && state.images?.length === 0) {
           body.college_logo = state.newImages[0];
-        }else{
+        } else {
           body.college_logo = null;
-
         }
-
 
         try {
           await CreateCollege.validate(body, { abortEarly: false });
@@ -1190,9 +1188,8 @@ const CollegeAndDepartment = () => {
           }
           if (state.newImages?.length > 0 && state.images?.length === 0) {
             collegeBody.college_logo = state.newImages[0];
-          }else{
+          } else {
             collegeBody.college_logo = null;
-  
           }
 
           console.log("Step 2.1: Creating college...", collegeBody);
@@ -1284,9 +1281,8 @@ const CollegeAndDepartment = () => {
 
       if (state.newImages?.length > 0 && state.images?.length === 0) {
         body.college_logo = state.newImages[0];
-      }else{
+      } else {
         body.college_logo = null;
-
       }
 
       console.log("✌️body --->", body);
@@ -1722,8 +1718,9 @@ const CollegeAndDepartment = () => {
       ),
     },
     {
-      accessor: "department_head",
+      accessor: "hod",
       title: "Department Head",
+      sortable: true,
       render: ({ department_head }) => (
         <div className="text-gray-600 dark:text-gray-400">
           {department_head}

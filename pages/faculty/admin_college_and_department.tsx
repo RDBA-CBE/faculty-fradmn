@@ -709,7 +709,6 @@ const CollegeAndDepartment = () => {
       body.ordering =
         state.sortOrder === "desc" ? `-${state.sortBy}` : state.sortBy;
     }
-
     return body;
   };
 
@@ -2122,8 +2121,9 @@ const CollegeAndDepartment = () => {
       ),
     },
     {
-      accessor: "department_head",
+      accessor: "hod",
       title: "Department Head",
+      sortable: true,
       render: ({ department_head }) => (
         <div className="text-gray-600 dark:text-gray-400">
           {department_head}
@@ -2362,7 +2362,7 @@ const CollegeAndDepartment = () => {
             }
             sortStatus={{
               columnAccessor: state.sortBy,
-              direction: state.sortOrder,
+              direction: state.sortOrder as "asc" | "desc",
             }}
             onSortStatusChange={({ columnAccessor, direction }) => {
               setState({
@@ -2371,7 +2371,7 @@ const CollegeAndDepartment = () => {
                 page: 1,
               });
               if (state.activeTab === "colleges") {
-                collegeList(1);
+                collegeTableList(1);
               } else {
                 deptList(1);
               }

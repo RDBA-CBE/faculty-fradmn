@@ -648,8 +648,9 @@ const CollegeAndDepartment = () => {
       ),
     },
     {
-      accessor: "department_head",
+      accessor: "hod",
       title: "Department Head",
+      sortable: true,
       render: ({ department_head }) => (
         <div className="text-gray-600 dark:text-gray-400">
           {department_head}
@@ -658,7 +659,7 @@ const CollegeAndDepartment = () => {
     },
     {
       accessor: "institution_name",
-      title: "Institution ",
+      title: "Institution",
       sortable: true,
       render: ({ institution_name }) => (
         <div className="font-medium text-gray-900 dark:text-white">

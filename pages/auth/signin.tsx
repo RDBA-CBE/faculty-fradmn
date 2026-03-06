@@ -171,12 +171,12 @@ const LoginBoxed = () => {
                   loading={state.btnLoading}
                 />
               </form>
-              <div className="relative my-7 text-center md:mb-9">
+              {/* <div className="relative my-7 text-center md:mb-9">
                 <span className="absolute inset-x-0 top-1/2 h-px w-full -translate-y-1/2 bg-white-light dark:bg-white-dark"></span>
                 <span className="relative bg-white px-2 font-bold uppercase text-white-dark dark:bg-dark dark:text-white-light">
                   or
                 </span>
-              </div>
+              </div> */}
               <div className="mb-10 md:mb-[60px]">
                 <ul className="flex justify-center gap-3.5 text-white">
                   {/* <li>
@@ -215,7 +215,7 @@ const LoginBoxed = () => {
                       <IconTwitter fill={true} />
                     </Link>
                   </li> */}
-                  <li>
+                  {/* <li>
                     <Link
                       href="#"
                       className="inline-flex h-8 w-8 items-center justify-center rounded-full p-0 transition hover:scale-110"
@@ -226,10 +226,10 @@ const LoginBoxed = () => {
                     >
                       <IconGoogle />
                     </Link>
-                  </li>
+                  </li> */}
                 </ul>
               </div>
-              <div className="text-center dark:text-white">
+              {/* <div className="text-center dark:text-white">
                 Don't have an account ?&nbsp;
                 <Link
                   href="/auth/signup"
@@ -237,7 +237,7 @@ const LoginBoxed = () => {
                 >
                   SIGN UP
                 </Link>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

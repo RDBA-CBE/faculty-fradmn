@@ -151,7 +151,7 @@ const Application = () => {
       } else if (role === ROLES.INSTITUTION_ADMIN) {
         applicationList(
           1,
-          state.profile?.institution?.institution_id,
+          state.profile?.institution?.id,
           null,
           null,
           state.profile?.id
@@ -203,12 +203,12 @@ const Application = () => {
           1,
           "",
           false,
-          res?.institution?.institution_id,
+          res?.institution?.institution?.id,
           res.id
         );
         applicationList(
           1,
-          res?.institution?.institution_id,
+          res?.institution?.institution?.id,
           null,
           null,
           res?.id
@@ -367,8 +367,39 @@ const Application = () => {
     }
   };
 
-  const handleStatusChange = (selectedOption: any) => {
-    setState({ statusFilter: selectedOption, page: 1 });
+  const handleUpdateSorting = async (row: any, newStatus: string) => {
+    try {
+      const role = state.profile?.role;
+      if (role === ROLES.SUPER_ADMIN) {
+        applicationList(state.page, null, null, null, state.profile?.id);
+      } else if (role === ROLES.INSTITUTION_ADMIN) {
+        applicationList(
+          state.page,
+          state.profile?.institution?.id,
+          null,
+          null,
+          state.profile?.id
+        );
+      } else if (role === ROLES.HR) {
+        applicationList(
+          state.page,
+          null,
+          state.profile?.college?.map((item)=>item?.college_id),
+          null,
+          state.profile?.id
+        );
+      } else if (role === ROLES.HOD) {
+        applicationList(
+          state.page,
+          null,
+          null,
+          state.profile?.department?.department_id,
+          state.profile?.id
+        );
+      }
+    } catch (error) {
+      Failure("Failed to update status. Please try again.");
+    }
   };
 
   const handleCloseModal = () => {
@@ -811,7 +842,9 @@ const Application = () => {
                 Applied
               </p>
               <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
-                {state.applications_by_status?.Applied  || state.applications_by_status?.applied || 0}
+                {state.applications_by_status?.Applied ||
+                  state.applications_by_status?.applied ||
+                  0}
               </p>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-yellow-100 dark:bg-yellow-900">
@@ -827,9 +860,7 @@ const Application = () => {
                 Selected
               </p>
               <p className="text-3xl font-bold text-green-600 dark:text-green-400">
-              {state.applications_by_status?.Selected || 0}
-
-            
+                {state.applications_by_status?.Selected || 0}
               </p>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 dark:bg-green-900">
@@ -845,8 +876,7 @@ const Application = () => {
                 Interview Sheduled
               </p>
               <p className="text-3xl font-bold text-red-600 dark:text-red-400">
-              {state.applications_by_status?.["Interview Scheduled "] || 0}
-
+                {state.applications_by_status?.["Interview Scheduled "] || 0}
               </p>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100 dark:bg-red-900">
@@ -1263,7 +1293,7 @@ const Application = () => {
                 sortOrder: direction,
                 page: 1,
               });
-              applicationList(1);
+              handleUpdateSorting(columnAccessor, direction);
             }}
             minHeight={200}
           />

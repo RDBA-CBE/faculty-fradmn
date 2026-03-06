@@ -146,17 +146,19 @@ const JobDetails = () => {
                   <Building2 className="h-5 w-5 text-indigo-600" />
                   <span className="font-medium">{job?.college?.name}</span>
                 </div>
-                {job?.department?.name && (
+                {/* {job?.department?.length > 0 && (
                   <div className="flex items-center gap-2 rounded-lg bg-white/60 px-3 py-2 backdrop-blur-sm dark:bg-gray-700/60">
                     <Briefcase className="h-5 w-5 text-purple-600" />
-                    <span className="font-medium">{job?.department?.name}</span>
+                    <span className="font-medium">
+                      {job.department.map((dept) => dept.name).join(", ")}
+                    </span>
                   </div>
-                )}
+                )} */}
                 {job?.locations?.[0] && (
                   <div className="flex items-center gap-2 rounded-lg bg-white/60 px-3 py-2 backdrop-blur-sm dark:bg-gray-700/60">
                     <MapPin className="h-5 w-5 text-pink-600" />
                     <span className="font-medium">
-                      {job?.locations[0]?.city}, {job?.locations[0]?.state}
+                      {job?.locations[0]?.city}
                     </span>
                   </div>
                 )}
@@ -175,7 +177,7 @@ const JobDetails = () => {
                 }`}
               >
                 <AlertCircle className="h-4 w-4" />
-                {capitalizeFLetter(job?.priority_display) || "N/A"} Priority
+                {capitalizeFLetter(job?.priority_display) || "N/A"}
               </span>
               {/* <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 px-5 py-2.5 text-sm font-bold text-white shadow-lg">
                 <Briefcase className="h-4 w-4" />
@@ -268,6 +270,32 @@ const JobDetails = () => {
                   {job.college?.company_detail}
                 </p>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Departments */}
+        {job?.department?.length > 0 && (
+          <div className="group rounded-3xl border border-white/20 bg-white/80 p-6 shadow-xl backdrop-blur-xl transition-all hover:shadow-2xl dark:border-gray-700/50 dark:bg-gray-800/80">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-pink-500">
+                <Briefcase className="h-5 w-5 text-white" />
+              </div>
+
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                Departments
+              </h2>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              {job.department.map((dept: any) => (
+                <div
+                  key={dept.id}
+                  className="rounded-xl bg-gradient-to-r from-purple-100 to-pink-100 px-4 py-2 text-sm font-semibold text-purple-700 shadow-sm dark:from-purple-900/30 dark:to-pink-900/30 dark:text-purple-300"
+                >
+                  {dept.name}
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -531,7 +559,6 @@ const JobDetails = () => {
                     >
                       <IconEye className="h-4 w-4" />
                     </button>
-                   
                   </div>
                 ),
               },

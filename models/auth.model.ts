@@ -130,6 +130,10 @@ const auth = {
         url = url + `&team=${true}`;
       }
 
+      if (body?.ordering) {
+        url += `&ordering=${encodeURIComponent(body.ordering)}`;
+      }
+
       instance()
         .get(url)
         .then((res) => {

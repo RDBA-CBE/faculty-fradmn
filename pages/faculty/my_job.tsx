@@ -181,10 +181,10 @@ const Job = () => {
         job_description: item.job_description,
 
         college_name: item?.college?.name,
-        department_name:
+        department:
           item?.department?.length > 0
-            ? item?.department?.map((item) => item?.name).join(", ")
-            : "-",
+            ? item?.department?.map((d) => d?.name)
+            : [],
         // department_name:)  item?.department?.name || "-",
 
         job_type: item?.job_type,
@@ -1036,11 +1036,57 @@ const Job = () => {
                 accessor: "department_name",
                 title: "Dept",
                 sortable: true,
-                render: ({ department_name }) => (
-                  <span className="text-gray-600 dark:text-gray-400">
-                    {capitalizeFLetter(department_name || "-")}
-                  </span>
-                ),
+                render: ({ department }) => {
+                  if (!department || department?.length === 0) {
+                    return <span className="text-gray-400">-</span>;
+                  }
+
+                  const firstDept = department?.[0];
+                  const otherDept = department?.slice(1);
+                  const maxShow = 3;
+                  const remaining = otherDept?.length - maxShow;
+                  const visibleDept = otherDept?.slice(0, maxShow);
+                  const hiddenDept = otherDept?.slice(maxShow);
+
+                  return (
+                    <div className="flex items-center gap-2">
+                      {/* First department text */}
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {firstDept}
+                      </span>
+
+                      {/* Avatars */}
+                      <div className="flex items-center -space-x-2">
+                        {visibleDept?.map((dept: string, index: number) => (
+                          <div key={index} className="group relative">
+                            <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-blue-500 text-xs font-semibold text-white dark:border-gray-900">
+                              {dept?.slice(0, 2)?.toUpperCase()}
+                            </div>
+
+                            {/* Tooltip */}
+                            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
+                              {capitalizeFLetter(dept)}
+                            </div>
+                          </div>
+                        ))}
+                        {remaining > 0 && (
+                          <div className="group relative">
+                            <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-gray-400 text-xs font-semibold text-white dark:border-gray-900">
+                              +{remaining}
+                            </div>
+
+                            {/* Remaining tooltip */}
+                            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
+                              {hiddenDept
+                                ?.map((d: string) => capitalizeFLetter(d))
+                                .join(", ")}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                },
               },
               {
                 accessor: "college_name",
@@ -1157,22 +1203,22 @@ const Job = () => {
                       <IconEye className="h-4 w-4" />
                     </button>
                     {/* {state.profile?.role == ROLES.HR && ( */}
-                      <button
-                        onClick={() => {
-                          // if (state.profile?.role == ROLES.HR) {
-                            handleApprove(row);
-                          // }
-                        }}
-                        // onClick={() => handleToggleStatus(row)}
-                        className={`flex h-8 w-8 items-center justify-center rounded-lg ${
-                          row?.job_status === "published"
-                            ? "bg-red-100 text-red-600 hover:bg-red-200"
-                            : "bg-green-100 text-green-600 hover:bg-green-200"
-                        }`}
-                        title={"Job Status"}
-                      >
-                        <CheckCircle className="h-4 w-4" />
-                      </button>
+                    <button
+                      onClick={() => {
+                        // if (state.profile?.role == ROLES.HR) {
+                        handleApprove(row);
+                        // }
+                      }}
+                      // onClick={() => handleToggleStatus(row)}
+                      className={`flex h-8 w-8 items-center justify-center rounded-lg ${
+                        row?.job_status === "published"
+                          ? "bg-red-100 text-red-600 hover:bg-red-200"
+                          : "bg-green-100 text-green-600 hover:bg-green-200"
+                      }`}
+                      title={"Job Status"}
+                    >
+                      <CheckCircle className="h-4 w-4" />
+                    </button>
                     {/* )} */}
                     <button
                       onClick={() => handleLog(row)}

@@ -761,9 +761,7 @@ const Users = () => {
     });
   };
 
-
   const handleEdit = (row) => {
-
     setState({
       editId: row.id,
       showModal: true,
@@ -784,16 +782,11 @@ const Users = () => {
       if (row?.collegeData) {
         setState({
           selectedHODCollege:
-            row?.collegeData?.length > 0
-              ? row?.collegeData[0]
-              : null,
+            row?.collegeData?.length > 0 ? row?.collegeData[0] : null,
         });
 
         setState({
-         college:
-            row?.collegeData?.length > 0
-              ? row?.collegeData[0]
-              : null,
+          college: row?.collegeData?.length > 0 ? row?.collegeData[0] : null,
         });
         hodCollegeList(1, "", false, row?.institutionData);
       }
@@ -814,18 +807,13 @@ const Users = () => {
       }
       if (row?.collegeData) {
         setState({
-          college:
-            row?.collegeData?.length > 0
-              ? row?.collegeData[0]
-              : null,
+          college: row?.collegeData?.length > 0 ? row?.collegeData[0] : null,
         });
         hrCollegeList(
           1,
           "",
           false,
-          row?.collegeData?.length > 0
-            ? row?.collegeData[0]
-            : null
+          row?.collegeData?.length > 0 ? row?.collegeData[0] : null
         );
       }
     }
@@ -894,7 +882,9 @@ const Users = () => {
         role: state.activeTab,
         status: "active",
         gender: state.gender?.value,
-        education_qualification: capitalizeFLetter(state.education_qualification),
+        education_qualification: capitalizeFLetter(
+          state.education_qualification
+        ),
       };
 
       if (state.activeTab === "institution_admin") {
@@ -1432,6 +1422,8 @@ const Users = () => {
       baseColumns.push({
         accessor: "institution",
         title: "Institution",
+        sortable: true,
+
         render: (row: any) => (
           <div className="text-gray-600 dark:text-gray-400">
             {row?.institution}
@@ -1444,6 +1436,8 @@ const Users = () => {
       baseColumns.splice(3, 0, {
         accessor: "college",
         title: "College",
+        sortable: true,
+
         render: (row: any) => (
           <div className="text-gray-600 dark:text-gray-400">{row?.college}</div>
         ),
@@ -1454,6 +1448,7 @@ const Users = () => {
       baseColumns.splice(3, 0, {
         accessor: "department",
         title: "Department",
+        sortable: true,
         render: (row: any) => (
           <div className="text-gray-600 dark:text-gray-400">
             {row?.department}
@@ -1467,13 +1462,15 @@ const Users = () => {
         {
           accessor: "qualification",
           title: "Qualification",
+          sortable: true,
+
           render: (row: any) => (
             <div className="text-gray-600 dark:text-gray-400">
               {row?.qualification}
             </div>
           ),
         }
-        
+
         // {
         //   accessor: "experience",
         //   title: "Experience",
