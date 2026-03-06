@@ -11,7 +11,12 @@ import IconEye from "@/components/Icon/IconEye";
 import IconEyeOff from "@/components/Icon/IconEyeOff";
 import IconLoader from "@/components/Icon/IconLoader";
 import Pagination from "@/components/pagination/pagination";
-import { capitalizeFLetter, Dropdown, showDeleteAlert, useSetState } from "@/utils/function.utils";
+import {
+  capitalizeFLetter,
+  Dropdown,
+  showDeleteAlert,
+  useSetState,
+} from "@/utils/function.utils";
 import Modal from "@/components/modal/modal.component";
 import { Success, Failure } from "@/utils/function.utils";
 import useDebounce from "@/hook/useDebounce";
@@ -195,6 +200,10 @@ const CollegeAndDepartment = () => {
       department_code: "",
       errors: {},
       editId: null,
+      dept_intake_per_year: null,
+      dept_summary: "",
+      recent_dept_achievements: [],
+      isNBAAccreditation: false,
     });
   };
 
@@ -247,11 +256,11 @@ const CollegeAndDepartment = () => {
         value: row?.college_id,
         label: row.college_name,
       },
-     
-      intake_per_year: row.intake_per_year,
-      total_strength: row.total_strength,
-      summary: row.summary,
-      recent_achievements: row.recent_achievements,
+
+      dept_intake_per_year: row?.dept_intake_per_year,
+      dept_summary: row?.dept_summary,
+      recent_dept_achievements: row?.recent_dept_achievements,
+      isNBAAccreditation: row?.isNBAAccreditation,
     });
     if (row?.hod_id) {
       setState({
@@ -466,7 +475,7 @@ const CollegeAndDepartment = () => {
               })) || []
             }
             value={state.college}
-            onChange={(selectedOption) =>{
+            onChange={(selectedOption) => {
               if (selectedOption) {
                 deptHodDropdownList(1, "", false, selectedOption?.value);
                 setState({
@@ -481,10 +490,8 @@ const CollegeAndDepartment = () => {
               setState({
                 college: selectedOption,
                 errors: { ...state.errors, college: "" },
-              })
-            }
-
-            }
+              });
+            }}
             // onSearch={(searchTerm) => collegeDropdownList(1, searchTerm)}
             placeholder="Select College"
             isClearable={true}
@@ -655,7 +662,7 @@ const CollegeAndDepartment = () => {
         </div>
       ),
     },
-    
+
     {
       accessor: "college_name",
       title: "College ",
@@ -675,7 +682,7 @@ const CollegeAndDepartment = () => {
         <span className="text-gray-600 dark:text-gray-400">{total_jobs}</span>
       ),
     },
-  
+
     {
       accessor: "actions",
       title: "Actions",
