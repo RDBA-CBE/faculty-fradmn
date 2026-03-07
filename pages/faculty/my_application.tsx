@@ -273,6 +273,8 @@ const Application = () => {
           value: item?.application_status?.id,
           label: item?.application_status?.name,
         },
+        department_name: item?.department?.department_name,
+
       }));
       setState({
         loading: false,
@@ -1172,12 +1174,22 @@ const Application = () => {
                 ),
               },
               {
+                accessor: "department_name",
+                title: "Department",
+                render: ({ department_name }) => (
+                  <div className="text-gray-600 dark:text-gray-400">
+                    {capitalizeFLetter(department_name)}
+                  </div>
+                ),
+                sortable: true,
+              },
+              {
                 accessor: "applicant_name",
                 title: "Applicant Name",
                 sortable: true,
                 render: ({ applicant_name }) => (
                   <div className="font-medium text-gray-900 dark:text-white">
-                    {applicant_name}
+                    {capitalizeFLetter(applicant_name)}
                   </div>
                 ),
               },

@@ -127,10 +127,6 @@ const Application = () => {
   const debounceSearch = useDebounce(state.search, 500);
 
   useEffect(() => {
-    profile();
-  }, [dispatch]);
-
-  useEffect(() => {
     dispatch(setPageTitle("Applications"));
     profile();
     institutionDropdownList(1);
@@ -160,7 +156,7 @@ const Application = () => {
         applicationList(
           1,
           null,
-          state.profile?.college?.college_id,
+          state?.profile?.college?.map((item) => item?.college_id),
           null,
           state.profile?.id
         );
@@ -203,18 +199,18 @@ const Application = () => {
           1,
           "",
           false,
-          res?.institution?.institution?.id,
+          res?.institution?.id,
           res.id
         );
         applicationList(
           1,
-          res?.institution?.institution?.id,
+          res?.institution?.id,
           null,
           null,
           res?.id
         );
       } else if (res?.role == ROLES.HR) {
-        departmentDropdownList(1, "", false, res?.college?.college_id, res.id);
+        departmentDropdownList(1, "", false, res?.college?.map((item) => item?.college_id), res.id);
         applicationList(
           1,
           null,
@@ -237,6 +233,7 @@ const Application = () => {
     deptId = null,
     profileId = null
   ) => {
+
     try {
       setState({ loading: true });
       const body = bodyData();
@@ -270,6 +267,7 @@ const Application = () => {
         job_title: item?.job_detail?.job_title,
         status: item?.status,
         resume: item?.resume,
+        department_name: item?.department?.department_name,
       }));
       setState({
         loading: false,
@@ -352,7 +350,7 @@ const Application = () => {
       applicationList(
         pageNumber,
         null,
-        state.profile?.college?.college_id,
+        state.profile?.college?.map((item) => item?.college_id),
         null,
         state.profile?.id
       );
@@ -384,7 +382,7 @@ const Application = () => {
         applicationList(
           state.page,
           null,
-          state.profile?.college?.map((item)=>item?.college_id),
+          state.profile?.college?.map((item) => item?.college_id),
           null,
           state.profile?.id
         );
@@ -466,7 +464,7 @@ const Application = () => {
         applicationList(
           state.page,
           null,
-          state.profile?.college?.college_id,
+          state.profile?.college?.map((item) => item?.college_id),
           null,
           state.profile?.id
         );
@@ -1189,13 +1187,25 @@ const Application = () => {
                 ),
                 sortable: true,
               },
+
+              {
+                accessor: "department_name",
+                title: "Department",
+                render: ({ department_name }) => (
+                  <div className="text-gray-600 dark:text-gray-400">
+                    {capitalizeFLetter(department_name)}
+                  </div>
+                ),
+                sortable: true,
+              },
+
               {
                 accessor: "applicant_name",
                 title: "Applicant Name",
                 sortable: true,
                 render: ({ applicant_name }) => (
                   <div className="font-medium text-gray-900 dark:text-white">
-                    {applicant_name}
+                    {capitalizeFLetter(applicant_name)}
                   </div>
                 ),
               },
