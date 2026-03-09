@@ -107,7 +107,11 @@ export const menuConfig = {
       icon: "IconMenuCharts",
       label: "Master",
       key: "master",
-      children: [
+       children: [
+        {
+          label: "Panel Management",
+          href: "/faculty/master/panel",
+        },
         {
           label: "Experience",
           href: "/faculty/master/experience",
@@ -209,7 +213,11 @@ export const menuConfig = {
       icon: "IconMenuCharts",
       label: "Master",
       key: "master",
-      children: [
+       children: [
+        {
+          label: "Panel Management",
+          href: "/faculty/master/panel",
+        },
         {
           label: "Experience",
           href: "/faculty/master/experience",
@@ -311,7 +319,11 @@ export const menuConfig = {
       icon: "IconMenuCharts",
       label: "Master",
       key: "master",
-      children: [
+       children: [
+        {
+          label: "Panel Management",
+          href: "/faculty/master/panel",
+        },
         {
           label: "Experience",
           href: "/faculty/master/experience",
@@ -581,7 +593,11 @@ export const OwnmenuConfig = {
       icon: "IconMenuCharts",
       label: "Master",
       key: "master",
-      children: [
+       children: [
+        {
+          label: "Panel Management",
+          href: "/faculty/master/panel",
+        },
         {
           label: "Experience",
           href: "/faculty/master/experience",

@@ -13,8 +13,9 @@ interface CustomeDatePickerProps {
   error?: string;
   placeholder?: string;
   minDate?: Date;
-  showTimeSelect?:boolean
+  showTimeSelect?: boolean;
   [key: string]: any;
+  usePortal?: boolean;
 }
 
 const CustomeDatePicker: React.FC<CustomeDatePickerProps> = (props) => {
@@ -29,6 +30,7 @@ const CustomeDatePicker: React.FC<CustomeDatePickerProps> = (props) => {
     placeholder,
     minDate,
     showTimeSelect,
+    usePortal=true,
     ...rest
   } = props;
 
@@ -62,7 +64,7 @@ const CustomeDatePicker: React.FC<CustomeDatePickerProps> = (props) => {
         <DatePicker
           selected={value}
           onChange={onChange}
-          showTimeSelect = {showTimeSelect}
+          showTimeSelect={showTimeSelect}
           timeFormat="HH:mm"
           timeIntervals={15}
           timeCaption="Time"
@@ -75,9 +77,7 @@ const CustomeDatePicker: React.FC<CustomeDatePickerProps> = (props) => {
           required={required}
           minDate={minDate || undefined}
           wrapperClassName="w-full"
-             portalId="root-portal"
-          
-          
+          portalId={usePortal?"root-portal":""}
           {...rest}
         />
         {error && (

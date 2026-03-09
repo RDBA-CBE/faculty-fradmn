@@ -620,6 +620,59 @@ const master = {
     });
     return promise;
   },
+
+  panel_list: (body, page = 1) => {
+    let promise = new Promise((resolve, reject) => {
+      let url = `interview-panels/?page=${page}`;
+      if (body?.search) url += `&search=${encodeURIComponent(body.search)}`;
+      if (body?.department_id) url += `&department_id=${(body.department_id)}`;
+
+      instance()
+        .get(url)
+        .then((res) => {
+          resolve(res.data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            reject(error.response.message);
+          } else {
+            reject(error);
+          }
+        });
+    });
+
+    return promise;
+  },
+
+  create_panel: (data: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .post("interview-panels/", data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+
+  update_panel: (data: any, id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .patch(`interview-panels/${id}/`, data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+
+  delete_panel: (id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .delete(`interview-panels/${id}/`)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
 };
 
 export default master;

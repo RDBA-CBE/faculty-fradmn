@@ -2,7 +2,6 @@ import instance from "@/utils/axios.utils";
 
 const application = {
   list: (page, body) => {
-console.log('✌️bodssssy --->', body);
     let promise = new Promise((resolve, reject) => {
       let url = `applications/?page=${page}`;
 

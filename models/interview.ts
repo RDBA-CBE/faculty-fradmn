@@ -1,19 +1,17 @@
 import instance from "@/utils/axios.utils";
 
-const department = {
+const interview = {
   list: (page, body) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `departments/?page=${page}`;
+      let url = `interview-slots/?page=${page}`;
 
       if (body?.search) {
         url += `&search=${encodeURIComponent(body.search)}`;
       }
-      if (body?.college) {
-        url += `&college=${encodeURIComponent(body.college)}`;
-      }
       if (body?.ordering) {
         url += `&ordering=${encodeURIComponent(body.ordering)}`;
       }
+
       if (body?.institution) {
         url += `&institution=${encodeURIComponent(body.institution)}`;
       }
@@ -28,9 +26,14 @@ const department = {
         url += `&team=${encodeURIComponent(false)}`;
       }
 
-      if (body?.job_id) {
-        url += `&job_ids=${encodeURIComponent(body?.job_id)}`;
+      if (body?.Is_publish == "Yes") {
+        url += `&Is_publish=${encodeURIComponent(true)}`;
       }
+      if (body?.Is_publish == "No") {
+        url += `&Is_publish=${encodeURIComponent(false)}`;
+      }
+
+      
 
       instance()
         .get(url)
@@ -50,7 +53,7 @@ const department = {
 
   create: (data: any) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `departments/`;
+      let url = `interview-slots/`;
       instance()
         .post(url, data)
         .then((res) => {
@@ -69,7 +72,7 @@ const department = {
 
   update: (data: any, id: any) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `departments/${id}/`;
+      let url = `interview-slots/${id}/`;
 
       instance()
         .patch(url, data)
@@ -89,7 +92,7 @@ const department = {
 
   delete: (id: any) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `departments/${id}/`;
+      let url = `interview-slots/${id}/`;
 
       instance()
         .delete(url)
@@ -109,7 +112,7 @@ const department = {
 
   details: (id: any) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `departments/${id}/`;
+      let url = `interview-slots/${id}/`;
       instance()
         .get(url)
         .then((res) => {
@@ -125,10 +128,6 @@ const department = {
     });
     return promise;
   },
-
-  
-
-  
 };
 
-export default department;
+export default interview;

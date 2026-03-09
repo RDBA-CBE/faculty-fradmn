@@ -16,6 +16,7 @@ import IconLoader from "@/components/Icon/IconLoader";
 import IconEdit from "@/components/Icon/IconEdit";
 import Pagination from "@/components/pagination/pagination";
 import {
+  buildFormData,
   capitalizeFLetter,
   showDeleteAlert,
   useSetState,
@@ -30,6 +31,8 @@ import CustomeDatePicker from "@/components/datePicker";
 import PrivateRouter from "@/hook/privateRouter";
 import moment from "moment";
 import { ROLES, STATUS_COLOR } from "@/utils/constant.utils";
+import Utils from "@/imports/utils.import";
+import * as Yup from "yup";
 
 const Application = () => {
   const dispatch = useDispatch();
@@ -110,6 +113,28 @@ const Application = () => {
 
     profile: null,
     showStatusModal: false,
+
+    // Interview Schedule Modal
+    showInterviewModal: false,
+    selectedJobs: [],
+    selectedDepartments: [],
+    interviewSlot: "",
+    panelMembers: [],
+    selectedApplicants: [],
+    requestForChange: false,
+    roundName: "",
+    interviewStatus: null,
+
+    jobList: [],
+    jobLoading: false,
+    panelMemberList: [],
+    panelMemberLoading: false,
+    applicantsList: [],
+    applicantsLoading: false,
+    interviewStatusList: [
+      { value: "scheduled", label: "Scheduled" },
+      { value: "completed", label: "Completed" },
+    ],
   });
 
   const debounceSearch = useDebounce(state.search, 500);
@@ -183,9 +208,14 @@ const Application = () => {
       const res: any = await Models.auth.profile();
       setState({ profile: res });
       profileRef.current = true;
+
+      // Load panel members for interview schedule
+      loadPanelMembers(1);
+
       if (res?.role == ROLES.SUPER_ADMIN) {
         collegeDropdownList(1, "", false, "", res.id);
         applicationList(1, null, null, null, res?.id);
+        loadJobList(1, null, null);
       } else if (res?.role == ROLES.INSTITUTION_ADMIN) {
         collegeDropdownList(
           1,
@@ -201,11 +231,14 @@ const Application = () => {
           null,
           res?.id
         );
+        loadJobList(res?.institution?.institution_id, null, null);
       } else if (res?.role == ROLES.HR) {
         departmentDropdownList(1, "", false, res?.college?.college_id, res.id);
         applicationList(1, null, res?.college?.college_id, null, res?.id);
+        loadJobList(null, res?.college?.college_id, null);
       } else if (res?.role == ROLES.HOD) {
         applicationList(1, null, null, res?.department?.department_id, res?.id);
+        loadJobList(null, null, res?.department?.department_id);
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -252,7 +285,6 @@ const Application = () => {
         body.created_by = profileId;
       }
       body.team = "No";
-      console.log("✌️body --->", body);
 
       const res: any = await Models.application.list(page, body);
       console.log("✌️res --->", res);
@@ -274,7 +306,10 @@ const Application = () => {
           label: item?.application_status?.name,
         },
         department_name: item?.department?.department_name,
-
+        interview_status:
+          item?.interview_slots?.length > 0
+            ? item?.interview_slots[item?.interview_slots.length - 1]?.status
+            : "-",
       }));
       setState({
         loading: false,
@@ -733,7 +768,7 @@ const Application = () => {
     }
   };
 
-  const handleCreateSubmit = async () => {
+  const handleSubmit = async () => {
     try {
       setState({ submitting: true });
       const body = {
@@ -779,6 +814,209 @@ const Application = () => {
     }
   };
 
+  // Interview Schedule Functions
+  const loadJobList = async (
+    page = 1,
+    search = "",
+    loadMore = false,
+    institutionId = null,
+    collegeId = null,
+    deptId = null
+  ) => {
+    try {
+      setState({ jobLoading: true });
+      const body: any = { search };
+      if (institutionId) body.institution = institutionId;
+      if (collegeId) body.college = collegeId;
+      if (deptId) body.department = deptId;
+
+      const res: any = await Models.job.list(page, body);
+      const dropdown = res?.results?.map((item) => ({
+        value: item.id,
+        label: item.job_title,
+        department_id: item.department,
+      }));
+      setState({
+        jobPage: page,
+        jobLoading: false,
+        jobList: state.jobNext ? [...state.jobList, ...dropdown] : dropdown,
+        jobNext:res?.next
+      });
+    } catch (error) {
+      setState({ jobLoading: false });
+    }
+  };
+console.log('✌️jobList --->', state.jobList);
+
+
+  const loadDepartmentsByJobs = async (
+    page = 1,
+    search = "",
+    loadMore = false,
+    job = null
+  ) => {
+    try {
+      const body = {
+        job_id: job?.map((item) => item?.value),
+        search,
+      };
+
+      const res: any = await Models.department.list(page, body);
+      console.log("✌️res --->", res);
+      // const uniqueDeptIds = [...new Set(deptIds)];
+      // const body: any = { ids: uniqueDeptIds.join(",") };
+      // const res: any = await Models.department.list(1, body);
+      const dropdown = res?.results?.map((item) => ({
+        value: item.id,
+        label: item.department_name,
+      }));
+      setState({
+        interviewDeptList: state.deptNext
+          ? [...state.interviewDeptList, ...dropdown]
+          : dropdown,
+        deptPage: page,
+        deptNext: res?.next,
+      });
+    } catch (error) {
+      console.error("Error loading departments:", error);
+    }
+  };
+
+  const loadPanelMembers = async (
+    page = 1,
+    search = "",
+    loadMore = false,
+    deptId = null
+  ) => {
+    try {
+
+      setState({ panelMemberLoading: true });
+      const body: any = { search };
+      if (deptId) body.department_id = deptId?.map((item) => item?.value);
+      const res: any = await Models.master.panel_list(body, page);
+      const dropdown = res?.results?.map((item) => ({
+        value: item.id,
+        label: item.name,
+      }));
+      setState({
+        panelMemberLoading: false,
+        panelMemberList: state.panelNext
+          ? [...state.panelMemberList, ...dropdown]
+          : dropdown,
+        panelNext: res?.next,
+        panelPage: page,
+      });
+    } catch (error) {
+      setState({ panelMemberLoading: false });
+    }
+  };
+
+  const loadApplicantsByDept = async (
+    page = 1,
+    search = "",
+    loadMore = false,
+    deptIds
+  ) => {
+    try {
+      setState({ applicantsLoading: true });
+      const body: any = {
+        search,
+      };
+      if (deptIds) {
+        body.department = deptIds?.map((item) => item?.value);
+      }
+      body.created_by=state.profile?.id
+      body.team ="No"
+      const res: any = await Models.application.list(page, body);
+      console.log("loadApplicantsByDept --->", res);
+      const dropdown = res?.results?.map((item) => ({
+        value: item.id,
+        label: `${item.first_name} ${item.last_name}`,
+      }));
+      setState({
+        applicantsLoading: false,
+        applicantsList: state.appNext
+          ? [...state.applicantsList, ...dropdown]
+          : dropdown,
+        appPage: page,
+        appNext: res?.next,
+      });
+    } catch (error) {
+      setState({ applicantsLoading: false });
+    }
+  };
+
+  const handleInterviewScheduleSubmit = async () => {
+    try {
+      setState({ submitting: true });
+
+      const validation = {
+        selectedJobs: state.selectedJobs.map((j) => j.value),
+        selectedDepartments: state.selectedDepartments?.map(
+          (item) => item?.value
+        ),
+        interviewSlot: state.interviewSlot
+          ? moment(state.interviewSlot).format("YYYY-MM-DD HH:mm")
+          : "",
+        panelMembers: state.panelMembers.map((p) => p.value),
+        selectedApplicants: state.selectedApplicants.map((a) => a.value),
+        request_for_change: state.requestForChange,
+        roundName: state.roundName,
+        interviewStatus: state.interviewStatus?.label,
+        response_from_applicant: state.requestForChange,
+      };
+
+      await Utils.Validation.interview.validate(validation, {
+        abortEarly: false,
+      });
+
+      const body = {
+        position_ids: state.selectedJobs.map((j) => j.value),
+        // department_id: state.selectedDepartments?.map((item)=>item?.value),
+        department_id: state.selectedDepartments[0]?.value,
+
+        scheduled_date: moment(state.interviewSlot).format("YYYY-MM-DD HH:mm"),
+        panel_ids: state.panelMembers.map((p) => p.value),
+        application_ids: state.selectedApplicants.map((a) => a.value),
+        response_from_applicant: state.requestForChange,
+        round_name: state.roundName,
+        status: state.interviewStatus?.label,
+      };
+
+      const formData = buildFormData(body);
+
+      await Models.interview.create(body);
+      Success("Interview schedule created successfully!");
+      setState({
+        showInterviewModal: false,
+        errors: {},
+        selectedJobs: [],
+        selectedDepartments: [],
+        selectedApplicants: [],
+        panelMembers: [],
+        interviewSlot: "",
+        roundName: "",
+        requestForChange: false,
+        interviewStatus: null,
+        submitting: false,
+      });
+      profile();
+    } catch (error) {
+      if (error instanceof Yup.ValidationError) {
+        const validationErrors = {};
+        error.inner.forEach((err) => {
+          validationErrors[err.path] = err?.message;
+        });
+        console.log("✌️validationErrors --->", validationErrors);
+
+        setState({ errors: validationErrors, submitting: false });
+      } else {
+        Failure(error?.error);
+        setState({ submitting: false });
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-3 dark:from-gray-900 dark:to-gray-800">
       {/* Header Section */}
@@ -792,14 +1030,14 @@ const Application = () => {
               Manage and review job applications
             </p>
           </div>
-          {/* <button
-            onClick={() => setState({ showModal: true })}
-            className='group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl'
+          <button
+            onClick={() => setState({ showInterviewModal: true })}
+            className="group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
           >
-            <div className='absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100'></div>
-            <IconPlus className='relative z-10 h-5 w-5' />
-            <span className='relative z-10'>Add Application</span>
-          </button> */}
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+            <UserCheck className="relative z-10 h-5 w-5" />
+            <span className="relative z-10"> Interview Schedule</span>
+          </button>
         </div>
       </div>
 
@@ -860,7 +1098,7 @@ const Application = () => {
                 Interview Scheduled
               </p>
               <p className="text-3xl font-bold text-red-600 dark:text-red-400">
-                {state.applications_by_status?.["Interview Scheduled "] || 0}
+                {state.applications_by_status?.["Interview Scheduled"] || 0}
               </p>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100 dark:bg-red-900">
@@ -1139,6 +1377,7 @@ const Application = () => {
             <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
               Applications List
             </h3>
+
             <div className="text-sm text-gray-500 dark:text-gray-400">
               {state.count} applications found
             </div>
@@ -1295,7 +1534,7 @@ const Application = () => {
                 sortOrder: direction,
                 page: 1,
               });
-              handleUpdateStatus(columnAccessor,direction)
+              handleUpdateStatus(columnAccessor, direction);
             }}
             minHeight={200}
           />
@@ -1310,173 +1549,6 @@ const Application = () => {
           />
         </div>
       </div>
-
-      {/* Modal */}
-      <Modal
-        open={state.showModal}
-        close={handleCloseModal}
-        renderComponent={() => (
-          <div className="relative">
-            {/* Header with gradient */}
-            <div className="mb-8 text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900">
-                {state.editId ? (
-                  <IconEdit className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-                ) : (
-                  <IconPlus className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-                )}
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {state.editId ? "Update" : "Add New"} Application
-              </h2>
-              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                Fill in the details to create a new job application
-              </p>
-            </div>
-
-            {/* Form with modern styling */}
-            <div className="space-y-6">
-              {/* Row 1 */}
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                <div className="group">
-                  <TextInput
-                    title="Applicant Name"
-                    placeholder="Enter applicant name"
-                    value={state.applicant_name}
-                    onChange={(e) =>
-                      handleFormChange("applicant_name", e.target.value)
-                    }
-                    error={state.errors.applicant_name}
-                    className="transition-all duration-200 focus:shadow-lg group-hover:shadow-md"
-                    required
-                  />
-                </div>
-                <div className="group">
-                  <TextInput
-                    title="Email Address"
-                    type="email"
-                    placeholder="applicant@example.com"
-                    value={state.applicant_email}
-                    onChange={(e) =>
-                      handleFormChange("applicant_email", e.target.value)
-                    }
-                    error={state.errors.applicant_email}
-                    className="transition-all duration-200 focus:shadow-lg group-hover:shadow-md"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Row 2 */}
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                <div className="group">
-                  <CustomPhoneInput
-                    title="Phone Number"
-                    value={state.applicant_phone}
-                    onChange={(value) =>
-                      handleFormChange("applicant_phone", value)
-                    }
-                    error={state.errors.applicant_phone}
-                    required
-                  />
-                </div>
-                <div className="group">
-                  <TextInput
-                    title="Position Applied"
-                    placeholder="Enter position"
-                    value={state.position_applied}
-                    onChange={(e) =>
-                      handleFormChange("position_applied", e.target.value)
-                    }
-                    error={state.errors.position_applied}
-                    className="transition-all duration-200 focus:shadow-lg group-hover:shadow-md"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Row 3 */}
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                <div className="group">
-                  <TextInput
-                    title="Qualification"
-                    placeholder="Enter qualification"
-                    value={state.qualification}
-                    onChange={(e) =>
-                      handleFormChange("qualification", e.target.value)
-                    }
-                    error={state.errors.qualification}
-                    className="transition-all duration-200 focus:shadow-lg group-hover:shadow-md"
-                    required
-                  />
-                </div>
-                <div className="group">
-                  <TextInput
-                    title="Experience"
-                    placeholder="Enter experience"
-                    value={state.experience}
-                    onChange={(e) =>
-                      handleFormChange("experience", e.target.value)
-                    }
-                    error={state.errors.experience}
-                    className="transition-all duration-200 focus:shadow-lg group-hover:shadow-md"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Cover Letter - Full width */}
-              <div className="group">
-                <TextArea
-                  title="Cover Letter"
-                  placeholder="Enter cover letter"
-                  value={state.cover_letter}
-                  onChange={(e) =>
-                    handleFormChange("cover_letter", e.target.value)
-                  }
-                  error={state.errors.cover_letter}
-                  rows={4}
-                  className="transition-all duration-200 focus:shadow-lg group-hover:shadow-md"
-                />
-              </div>
-            </div>
-
-            {/* Action buttons with modern styling */}
-            <div className="mt-8 flex flex-col-reverse gap-3 border-t border-gray-200 pt-6 dark:border-gray-700 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                onClick={handleCloseModal}
-                className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-medium text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleCreateSubmit}
-                disabled={state.submitting}
-                className={`group relative inline-flex items-center justify-center overflow-hidden rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-3 text-sm font-medium text-white shadow-lg transition-all duration-200 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                  state.submitting ? "cursor-not-allowed opacity-70" : ""
-                }`}
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
-                {state.submitting ? (
-                  <IconLoader className="relative z-10 mr-2 h-4 w-4 animate-spin" />
-                ) : state.editId ? (
-                  <IconEdit className="relative z-10 mr-2 h-4 w-4" />
-                ) : (
-                  <IconPlus className="relative z-10 mr-2 h-4 w-4" />
-                )}
-                <span className="relative z-10">
-                  {state.submitting
-                    ? "Loading..."
-                    : state.editId
-                    ? "Update Application"
-                    : "Create Application"}
-                </span>
-              </button>
-            </div>
-          </div>
-        )}
-      />
 
       <Modal
         open={state.showStatusModal}
@@ -1529,6 +1601,278 @@ const Application = () => {
                 className="flex-1 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 text-white hover:shadow-lg"
               >
                 Update Status
+              </button>
+            </div>
+          </div>
+        )}
+      />
+
+      {/* Interview Schedule Modal */}
+      <Modal
+        open={state.showInterviewModal}
+        close={() =>
+          setState({
+            showInterviewModal: false,
+            errors: {},
+            selectedJobs: [],
+            selectedDepartments: [],
+            selectedApplicants: [],
+            panelMembers: [],
+            interviewSlot: "",
+            roundName: "",
+            requestForChange: false,
+            interviewStatus: null,
+          })
+        }
+        renderComponent={() => (
+          <div className="p-6">
+            <div className="mb-6 text-center">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-green-100 to-teal-100 dark:from-green-900 dark:to-teal-900">
+                <UserCheck className="h-8 w-8 text-green-600 dark:text-green-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Create Interview Schedule
+              </h2>
+            </div>
+
+            <div className="space-y-5">
+              <CustomSelect
+                title="Select Jobs"
+                options={state.jobList}
+                value={state.selectedJobs}
+                onChange={(e) => {
+                  setState({
+                    selectedJobs: e,
+                    selectedDepartments: null,
+                    selectedApplicants: [],
+                    panelMemberList: [],
+                    panelMembers: null,
+                    errors: { ...state.errors, selectedJobs: "" },
+                  });
+
+                  if (e) {
+                    loadDepartmentsByJobs(1, "", false, e);
+                  }
+                }}
+                onSearch={(searchTerm) => {
+                  loadJobList(1, searchTerm);
+                }}
+                loadMore={() => {
+                  state.jobNext &&
+
+                  loadJobList(state.jobPage + 1, "");
+                }}
+                isMulti
+                loading={state.jobLoading}
+                error={state.errors.selectedJobs}
+                required
+              />
+
+              <CustomSelect
+                title="Select Departments"
+                options={state.interviewDeptList}
+                value={state.selectedDepartments}
+                onChange={(e) => {
+                  setState({
+                    selectedDepartments: e,
+                    selectedApplicants: [],
+                    panelMemberList: [],
+                    panelMembers: null,
+                    applicantsList: [],
+
+                    errors: { ...state.errors, selectedDepartments: "" },
+                  });
+                  if (e) {
+                    loadPanelMembers(1, "", false, e);
+                    loadApplicantsByDept(1, "", false, e);
+                  }
+                }}
+                onSearch={(searchTerm) => {
+                  loadDepartmentsByJobs(
+                    1,
+                    searchTerm,
+                    false,
+                    state.selectedJobs
+                  );
+                }}
+                loadMore={() => {
+                  state.deptNext &&
+                    loadDepartmentsByJobs(
+                      state.deptPage + 1,
+                      "",
+                      true,
+                      state.selectedJobs
+                    );
+                }}
+                isMulti
+                placeholder="Select Departments"
+                disabled={!state.selectedJobs?.length}
+                error={state.errors.selectedDepartments}
+                required
+              />
+
+              <CustomSelect
+                title="Select Panel Members"
+                placeholder="Select Panel Members"
+                options={state.panelMemberList}
+                value={state.panelMembers}
+                onChange={(e) => {
+                  setState({
+                    panelMembers: e,
+                    errors: { ...state.errors, panelMembers: "" },
+                  });
+                }}
+                onSearch={(searchTerm) => {
+                  loadPanelMembers(
+                    1,
+                    searchTerm,
+                    false,
+                    state.selectedDepartments
+                  );
+                }}
+                loadMore={() => {
+                  if (state.panelNext) {
+                    loadPanelMembers(
+                      state.panelPage + 1,
+                      "",
+                      false,
+                      state.selectedDepartments
+                    );
+                  }
+                }}
+                isMulti
+                loading={state.jobLoading}
+                error={state.errors?.selectedJobs}
+                disabled={!state.selectedDepartments}
+                required
+              />
+
+              <CustomeDatePicker
+                title="Interview Slot"
+                value={state.interviewSlot}
+                placeholder="Choose From"
+                onChange={(e) =>
+                  setState({
+                    interviewSlot: e,
+                    errors: { ...state.errors, interviewSlot: "" },
+                  })
+                }
+                showTimeSelect={true}
+                required
+                usePortal={false}
+                minDate={new Date()}
+                error={state.errors?.interviewSlot}
+              />
+              <CustomSelect
+                title="Select Applicants"
+                options={state.applicantsList}
+                value={state.selectedApplicants}
+                onChange={(e) =>
+                  setState({
+                    selectedApplicants: e,
+                    errors: { ...state.errors, selectedApplicants: "" },
+                  })
+                }
+                onSearch={(searchTerm) => {
+                  loadApplicantsByDept(
+                    1,
+                    searchTerm,
+                    false,
+                    state.selectedDepartments
+                  );
+                }}
+                loadMore={() => {
+                  if (state.appNext) {
+                    loadApplicantsByDept(
+                      state.appPage + 1,
+                      "",
+                      false,
+                      state.selectedDepartments
+                    );
+                  }
+                }}
+                placeholder="Select Applicants"
+                isMulti
+                loading={state.applicantsLoading}
+                disabled={!state.selectedDepartments}
+                error={state.errors.selectedApplicants}
+                required
+              />
+
+              <TextInput
+                title="Round Name"
+                placeholder="Enter round name (e.g., Technical Round 1)"
+                value={state.roundName}
+                onChange={(e) =>
+                  setState({
+                    roundName: e.target.value,
+                    errors: { ...state.errors, roundName: "" },
+                  })
+                }
+                error={state.errors.roundName}
+                required
+              />
+
+              <CustomSelect
+                title="Status"
+                options={state.interviewStatusList}
+                value={state.interviewStatus}
+                onChange={(e) =>
+                  setState({
+                    interviewStatus: e,
+                    errors: { ...state.errors, interviewStatus: "" },
+                  })
+                }
+                placeholder="Select Status"
+                error={state.errors.interviewStatus}
+                required
+              />
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="requestForChange"
+                  checked={state.requestForChange}
+                  onChange={(e) =>
+                    setState({ requestForChange: e.target.checked })
+                  }
+                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <label
+                  htmlFor="requestForChange"
+                  className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Request for Change
+                </label>
+              </div>
+            </div>
+
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() =>
+                  setState({
+                    showInterviewModal: false,
+                    errors: {},
+                    selectedJobs: [],
+                    selectedDepartments: [],
+                    selectedApplicants: [],
+                    panelMembers: [],
+                    interviewSlot: "",
+                    roundName: "",
+                    requestForChange: false,
+                    interviewStatus: null,
+                  })
+                }
+                className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleInterviewScheduleSubmit}
+                disabled={state.submitting}
+                className="flex-1 rounded-lg bg-gradient-to-r from-green-600 to-teal-600 px-4 py-2 text-white hover:shadow-lg disabled:opacity-50"
+              >
+                {state.submitting ? "Creating..." : "Create Schedule"}
               </button>
             </div>
           </div>

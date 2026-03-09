@@ -2,7 +2,11 @@ import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
 import { setPageTitle } from "../../store/themeConfigSlice";
-import { useSetState } from "@/utils/function.utils";
+import {
+  capitalizeFLetter,
+  Success,
+  useSetState,
+} from "@/utils/function.utils";
 import Models from "@/imports/models.import";
 import IconLoader from "@/components/Icon/IconLoader";
 import IconDownload from "@/components/Icon/IconDownload";
@@ -18,9 +22,29 @@ import {
   UserLock,
   UserCog,
   ArrowRight,
+  ChevronDown,
+  ChevronUp,
+  User,
+  Building2,
+  Star,
+  MessageSquare,
+  CheckCircle,
+  XCircle,
+  Clock,
+  UserCheck,
+  Loader,
+  MessageCircle,
+  CheckCircle2,
+  AlertCircle,
+  Award,
+  ThumbsUp,
+  Users,
+  FileText,
+  Send,
 } from "lucide-react";
 import { FRONTEND_URL } from "@/utils/constant.utils";
 import Link from "next/link";
+import CustomSelect from "@/components/FormFields/CustomSelect.component";
 
 const ApplicationDetail = () => {
   const dispatch = useDispatch();
@@ -30,12 +54,14 @@ const ApplicationDetail = () => {
   const [state, setState] = useSetState({
     loading: true,
     application: null,
+    expandedRounds: {},
   });
 
   useEffect(() => {
     dispatch(setPageTitle("Application Details"));
     if (id) {
       fetchApplicationDetail();
+      applicationStatusList();
     }
   }, [id, dispatch]);
 
@@ -44,9 +70,31 @@ const ApplicationDetail = () => {
       setState({ loading: true });
       const res: any = await Models.application.details(id);
       setState({ application: res, loading: false });
+      const statusList: any = await Models.master.application_status_list();
+      const find = statusList?.find((item) => item?.name == res?.status);
+      if (find) {
+        setState({ appstatus: { value: find?.id, label: find?.name } });
+      }
     } catch (error) {
-      console.error("Error fetching application:", error);
+      console.log("Error fetching application:", error);
       setState({ loading: false });
+    }
+  };
+
+  const applicationStatusList = async () => {
+    try {
+      setState({ applicationStatusLoading: true });
+      const res: any = await Models.master.application_status_list();
+      const dropdown = res?.map((item) => ({
+        value: item.id,
+        label: item.name,
+      }));
+      setState({
+        applicationStatusLoading: false,
+        applicationStatusList: dropdown,
+      });
+    } catch (error) {
+      setState({ applicationStatusLoading: false });
     }
   };
 
@@ -69,12 +117,29 @@ const ApplicationDetail = () => {
     return colors[status?.toLowerCase()] || "bg-gray-100 text-gray-800";
   };
 
+  const updateStatus = async () => {
+    try {
+      setState({ btnLoading: true });
+      const body = {
+        status: state.appstatus?.label,
+      };
+      await Models.application.update(body, id);
+      Success("Application status updated successfully!");
+      setState({ btnLoading: false });
+      router.back();
+    } catch (error) {
+      setState({ btnLoading: false });
+
+      console.log("✌️error --->", error);
+    }
+  };
+
   if (state.loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="flex items-center gap-3">
-          <IconLoader className="h-8 w-8 animate-spin text-blue-600" />
-          <span className="text-lg text-gray-600 dark:text-gray-400">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+        <div className="flex flex-col items-center gap-4">
+          <IconLoader className="h-12 w-12 animate-spin text-blue-600" />
+          <span className="text-xl font-semibold text-gray-700 dark:text-gray-300">
             Loading application...
           </span>
         </div>
@@ -86,15 +151,15 @@ const ApplicationDetail = () => {
   const job = app?.job_detail;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-6 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="mx-auto max-w-6xl">
         {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-8 flex items-center justify-between">
           <button
             onClick={() => router.back()}
-            className="flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-gray-700 shadow-sm transition-all hover:shadow-md dark:bg-gray-800 dark:text-gray-300"
+            className="group flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-gray-700 shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl dark:bg-gray-800 dark:text-gray-300"
           >
-            <IconArrowBackward className="h-4 w-4" />
+            <IconArrowBackward className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
             Back
           </button>
 
@@ -104,24 +169,17 @@ const ApplicationDetail = () => {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <div className="group flex cursor-pointer items-center justify-between rounded-xl border bg-white p-2 transition-all duration-200 hover:border-purple-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-900">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-900 dark:text-purple-400">
-                    <UserCog className="h-5 w-5" />
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                      View Profile
-                    </p>
-                  </div>
-                </div>
+              <div className="group flex cursor-pointer items-center gap-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-3 shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl">
+                <UserCog className="h-5 w-5 text-white" />
+                <p className="font-semibold text-white">View Profile</p>
               </div>
             </Link>
           ) : (
-            <p className="text-sm font-medium text-red-400">
-             Applied User
-            </p>
+            <div className="rounded-xl bg-red-100 px-6 py-3 dark:bg-red-900/30">
+              <p className="font-medium text-red-600 dark:text-red-400">
+                No Profile
+              </p>
+            </div>
           )}
           {/* <div className="flex items-start gap-3">
             <UserCog className="mt-1 h-5 w-5 text-purple-600" />
@@ -158,10 +216,10 @@ const ApplicationDetail = () => {
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Left Column - Applicant Info */}
           <div className="lg:col-span-1">
-            <div className="rounded-2xl bg-white p-6 shadow-lg dark:bg-gray-800">
+            <div className="rounded-2xl bg-white p-8 shadow-xl ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700">
               {/* Profile Header */}
-              <div className="mb-6 text-center">
-                <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-3xl font-bold text-white shadow-lg">
+              <div className="mb-8 text-center">
+                <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 via-purple-600 to-pink-600 text-2xl font-bold text-white shadow-xl ring-4 ring-white dark:ring-gray-800">
                   {app?.first_name?.[0]}
                   {app?.last_name?.[0]}
                 </div>
@@ -169,7 +227,7 @@ const ApplicationDetail = () => {
                   {app?.first_name} {app?.last_name}
                 </h2>
                 <span
-                  className={`mt-2 inline-block rounded-full px-4 py-1 text-sm font-medium ${getStatusColor(
+                  className={`mt-3 inline-block rounded-full px-5 py-1.5 text-sm font-semibold shadow-sm ${getStatusColor(
                     app?.status
                   )}`}
                 >
@@ -178,9 +236,9 @@ const ApplicationDetail = () => {
               </div>
 
               {/* Contact Info */}
-              <div className="space-y-4 border-t border-gray-200 pt-6 dark:border-gray-700">
-                <div className="flex items-start gap-3">
-                  <Mail className="mt-1 h-5 w-5 text-blue-600" />
+              <div className="space-y-5 border-t border-gray-200 pt-8 dark:border-gray-700">
+                <div className="flex items-start gap-4 rounded-lg bg-blue-50 p-3 dark:bg-blue-900/20">
+                  <Mail className="mt-0.5 h-5 w-5 text-blue-600" />
                   <div>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       Email
@@ -190,8 +248,8 @@ const ApplicationDetail = () => {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
-                  <Phone className="mt-1 h-5 w-5 text-green-600" />
+                <div className="flex items-start gap-4 rounded-lg bg-green-50 p-3 dark:bg-green-900/20">
+                  <Phone className="mt-0.5 h-5 w-5 text-green-600" />
                   <div>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       Phone
@@ -201,8 +259,8 @@ const ApplicationDetail = () => {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
-                  <Briefcase className="mt-1 h-5 w-5 text-purple-600" />
+                <div className="flex items-start gap-4 rounded-lg bg-purple-50 p-3 dark:bg-purple-900/20">
+                  <Briefcase className="mt-0.5 h-5 w-5 text-purple-600" />
                   <div>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       Experience
@@ -212,8 +270,8 @@ const ApplicationDetail = () => {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
-                  <Calendar className="mt-1 h-5 w-5 text-orange-600" />
+                <div className="flex items-start gap-4 rounded-lg bg-orange-50 p-3 dark:bg-orange-900/20">
+                  <Calendar className="mt-0.5 h-5 w-5 text-orange-600" />
                   <div>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       Applied Date
@@ -230,12 +288,13 @@ const ApplicationDetail = () => {
                 {app?.resume && (
                   <button
                     onClick={handleDownloadResume}
-                    className="flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-2 text-white shadow-lg transition-all hover:bg-blue-700 hover:shadow-xl"
+                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
                   >
-                    <IconDownload className="h-4 w-4" />
+                    <IconDownload className="h-5 w-5" />
                     Download Resume
                   </button>
                 )}
+
                 {/* <div className="flex items-start gap-3">
                   <UserCog className="mt-1 h-5 w-5 text-purple-600" />
                   <div>
@@ -261,31 +320,32 @@ const ApplicationDetail = () => {
 
           {/* Right Column - Job Details */}
           <div className="lg:col-span-2">
-            <div className="rounded-2xl bg-white p-8 shadow-lg dark:bg-gray-800">
-              <h3 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
+            <div className="rounded-2xl bg-white p-8 shadow-xl ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700">
+              <h3 className="mb-8 flex items-center gap-3 text-2xl font-bold text-gray-900 dark:text-white">
+                <Briefcase className="h-7 w-7 text-purple-600" />
                 Job Details
               </h3>
 
               {/* Job Title */}
-              <div className="mb-6 rounded-xl bg-gradient-to-r from-blue-50 to-purple-50 p-6 dark:from-blue-900/20 dark:to-purple-900/20">
-                <h4 className="text-2xl font-bold text-gray-900 dark:text-white">
+              <div className="mb-4 flex items-center rounded-2xl bg-gradient-to-r from-blue-500 via-purple-600 to-pink-600 p-4 shadow-lg">
+                <h4 className="text-2xl font-bold text-white">
                   {job?.job_title}
                 </h4>
-                <p className="mt-2 text-gray-600 dark:text-gray-400">
-                  {job?.company}
-                </p>
+                <p className="mt-3 text-lg text-blue-100">{job?.company}</p>
               </div>
 
               {/* Job Info Grid */}
-              <div className="mb-6 grid gap-4 sm:grid-cols-2">
-                <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
-                  <div className="flex items-center gap-3">
-                    <MapPin className="h-5 w-5 text-red-600" />
+              <div className="mb-8 grid gap-5 sm:grid-cols-2">
+                <div className="group rounded-xl border-2 border-gray-200 bg-gradient-to-br from-red-50 to-pink-50 p-5 transition-all hover:border-red-300 hover:shadow-lg dark:border-gray-700 dark:from-red-900/20 dark:to-pink-900/20">
+                  <div className="flex items-center gap-4">
+                    <div className="rounded-lg bg-red-100 p-3 dark:bg-red-900/50">
+                      <MapPin className="h-6 w-6 text-red-600" />
+                    </div>
                     <div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                         Location
                       </p>
-                      <p className="font-medium text-gray-900 dark:text-white">
+                      <p className="mt-1 font-bold text-gray-900 dark:text-white">
                         {job?.locations?.map((item) => (
                           <span key={item?.id}>{item?.city}</span>
                         ))}
@@ -293,40 +353,46 @@ const ApplicationDetail = () => {
                     </div>
                   </div>
                 </div>
-                <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
-                  <div className="flex items-center gap-3">
-                    <Briefcase className="h-5 w-5 text-purple-600" />
+                <div className="group rounded-xl border-2 border-gray-200 bg-gradient-to-br from-purple-50 to-blue-50 p-5 transition-all hover:border-purple-300 hover:shadow-lg dark:border-gray-700 dark:from-purple-900/20 dark:to-blue-900/20">
+                  <div className="flex items-center gap-4">
+                    <div className="rounded-lg bg-purple-100 p-3 dark:bg-purple-900/50">
+                      <Briefcase className="h-6 w-6 text-purple-600" />
+                    </div>
                     <div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                         Experience Required
                       </p>
-                      <p className="font-medium text-gray-900 dark:text-white">
+                      <p className="mt-1 font-bold text-gray-900 dark:text-white">
                         {job?.experiences?.name}
                       </p>
                     </div>
                   </div>
                 </div>
-                <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
-                  <div className="flex items-center gap-3">
-                    <GraduationCap className="h-5 w-5 text-blue-600" />
+                <div className="group rounded-xl border-2 border-gray-200 bg-gradient-to-br from-blue-50 to-cyan-50 p-5 transition-all hover:border-blue-300 hover:shadow-lg dark:border-gray-700 dark:from-blue-900/20 dark:to-cyan-900/20">
+                  <div className="flex items-center gap-4">
+                    <div className="rounded-lg bg-blue-100 p-3 dark:bg-blue-900/50">
+                      <GraduationCap className="h-6 w-6 text-blue-600" />
+                    </div>
                     <div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                         Qualification
                       </p>
-                      <p className="font-medium text-gray-900 dark:text-white">
+                      <p className="mt-1 font-bold text-gray-900 dark:text-white">
                         {job?.qualification}
                       </p>
                     </div>
                   </div>
                 </div>
-                <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
-                  <div className="flex items-center gap-3">
-                    <Building className="h-5 w-5 text-green-600" />
+                <div className="group rounded-xl border-2 border-gray-200 bg-gradient-to-br from-green-50 to-emerald-50 p-5 transition-all hover:border-green-300 hover:shadow-lg dark:border-gray-700 dark:from-green-900/20 dark:to-emerald-900/20">
+                  <div className="flex items-center gap-4">
+                    <div className="rounded-lg bg-green-100 p-3 dark:bg-green-900/50">
+                      <Building className="h-6 w-6 text-green-600" />
+                    </div>
                     <div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                         Openings
                       </p>
-                      <p className="font-medium text-gray-900 dark:text-white">
+                      <p className="mt-1 font-bold text-gray-900 dark:text-white">
                         {job?.number_of_openings} positions
                       </p>
                     </div>
@@ -336,11 +402,11 @@ const ApplicationDetail = () => {
 
               {/* Job Description */}
               {job?.job_description && job?.job_description !== "{}" && (
-                <div className="mb-6">
-                  <h5 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
+                <div className="mb-8">
+                  <h5 className="mb-4 text-lg font-bold text-gray-900 dark:text-white">
                     Job Description
                   </h5>
-                  <div className="rounded-lg bg-gray-50 p-4 text-gray-700 dark:bg-gray-900 dark:text-gray-300">
+                  <div className="rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 p-6 text-gray-700 shadow-inner dark:from-gray-900 dark:to-gray-800 dark:text-gray-300">
                     {job?.job_description}
                   </div>
                 </div>
@@ -366,33 +432,33 @@ const ApplicationDetail = () => {
               )}
 
               {/* Timeline */}
-              <div className="border-t border-gray-200 pt-6 dark:border-gray-700">
-                <h5 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+              <div className="border-t-2 border-gray-200 pt-8 dark:border-gray-700">
+                <h5 className="mb-6 text-lg font-bold text-gray-900 dark:text-white">
                   Timeline
                 </h5>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
+                    <span className="font-semibold text-gray-700 dark:text-gray-300">
                       Start Date
                     </span>
-                    <span className="font-medium text-gray-900 dark:text-white">
+                    <span className="font-bold text-gray-900 dark:text-white">
                       {new Date(job?.start_date).toLocaleDateString()}
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">
+                  <div className="flex items-center justify-between rounded-lg bg-purple-50 p-4 dark:bg-purple-900/20">
+                    <span className="font-semibold text-gray-700 dark:text-gray-300">
                       Last Date to Apply
                     </span>
-                    <span className="font-medium text-gray-900 dark:text-white">
+                    <span className="font-bold text-gray-900 dark:text-white">
                       {new Date(job?.last_date).toLocaleDateString()}
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">
+                  <div className="flex items-center justify-between rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 p-4 dark:from-green-900/20 dark:to-emerald-900/20">
+                    <span className="font-semibold text-gray-700 dark:text-gray-300">
                       Deadline
                     </span>
                     <span
-                      className={`font-medium ${
+                      className={`font-bold ${
                         job?.is_deadline_passed
                           ? "text-red-600"
                           : "text-green-600"
@@ -405,6 +471,242 @@ const ApplicationDetail = () => {
               </div>
             </div>
           </div>
+
+          {/* Interview Details */}
+        </div>
+      </div>
+
+      {/* Interview Details */}
+      {state.application?.interview_slots?.length > 0 && (
+        <div className="mx-auto mt-8 max-w-6xl rounded-2xl bg-white p-8 shadow-xl ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700">
+          {/* <h3 className="mb-10 flex items-center gap-3 text-3xl font-bold text-gray-900 dark:text-white">
+            <div className="rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 p-3">
+              <Calendar className="h-8 w-8 text-white" />
+            </div>
+         
+          </h3> */}
+
+          <h3 className="mb-8 flex items-center gap-3 text-2xl font-bold text-gray-900 dark:text-white">
+            <div className="rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 p-3">
+              <Calendar className="h-7 w-7  text-white" />{" "}
+            </div>
+            Interview Process
+          </h3>
+
+          <div className="space-y-4">
+            {state.application?.interview_slots?.map((round, index) => (
+              <div
+                key={round.id}
+                className="overflow-hidden rounded-2xl border-2 border-gray-200 bg-gradient-to-br from-white to-gray-50 shadow-lg transition-all hover:shadow-xl dark:border-gray-700 dark:from-gray-800 dark:to-gray-900"
+              >
+                {/* Accordion Header */}
+                <button
+                  onClick={() =>
+                    setState({
+                      expandedRounds: {
+                        ...state.expandedRounds,
+                        [round.id]: !state.expandedRounds[round.id],
+                      },
+                    })
+                  }
+                  className="flex w-full items-center justify-between p-6 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-lg font-bold text-white shadow-lg">
+                      {index + 1}
+                    </div>
+                    <div>
+                      <h4 className="text-xl font-bold text-gray-900 dark:text-white">
+                        {round.round_name}
+                      </h4>
+                      <p className="mt-1 text-sm font-medium text-gray-500">
+                        {new Date(round.scheduled_date).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`rounded-full px-4 py-2 text-xs font-bold  shadow-sm ${
+                        round.status === "completed"
+                          ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white"
+                          : "bg-gradient-to-r from-yellow-500 to-orange-500 text-white"
+                      }`}
+                    >
+                      {round.status}
+                    </span>
+
+                    {/* {round.decision && (
+                      <span className="rounded-full bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2 text-xs font-bold uppercase text-white shadow-sm">
+                        {round.decision}
+                      </span>
+                    )} */}
+
+                    {state.expandedRounds[round.id] ? (
+                      <ChevronUp className="h-6 w-6 text-gray-600 dark:text-gray-400" />
+                    ) : (
+                      <ChevronDown className="h-6 w-6 text-gray-600 dark:text-gray-400" />
+                    )}
+                  </div>
+                </button>
+                <div className="px-4">
+                  {round?.applicant_feedback && (
+                    <div className="mb-3 grid  w-full grid-cols-[40px_1fr] gap-3 overflow-hidden rounded-xl border border-indigo-200 bg-gradient-to-r from-indigo-50 to-purple-50 p-4 dark:border-indigo-800 dark:from-indigo-950/50 dark:to-purple-950/50 md:w-1/2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-500 text-white shadow-md">
+                        <MessageCircle className="h-4 w-4" />
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">
+                            Applicant Response
+                          </p>
+
+                          <span className="text-xs text-gray-500">
+                            {new Date(
+                              round.applicant_feedback.submitted_at
+                            ).toLocaleDateString()}
+                          </span>
+                        </div>
+
+                        {round?.applicant_feedback?.is_available ? (
+                          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                            Applicant available for Interview
+                          </p>
+                        ) : (
+                          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                            {capitalizeFLetter(
+                              round.applicant_feedback.feedback_text
+                            )}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {state.expandedRounds?.[round?.id] && (
+                  <div className="border-t border-gray-200 bg-gray-50/60 p-4 backdrop-blur dark:border-gray-700 dark:bg-gray-900/40">
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {round.panels.map((panel, i) => (
+                        <div
+                          key={i}
+                          className="group rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
+                        >
+                          {/* Header */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              {/* Avatar */}
+                              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-xs font-semibold text-white">
+                                {panel.name?.charAt(0)}
+                              </div>
+
+                              {/* Name + Email */}
+                              <div className="space-y-2">
+                                <p className="text-[18px] font-semibold text-gray-900 dark:text-white">
+                                  {panel.name}
+                                </p>
+
+                                <div className="flex items-center gap-1 text-sm text-gray-500">
+                                  <Mail className="h-3 w-3" />
+                                  {`${panel.email} (${panel.designation})`}
+                                </div>
+
+                                <div className="flex items-center gap-1 text-sm  text-gray-500">
+                                  <Building2 className="h-3 w-3" />
+                                  {panel.department?.department_name}
+                                </div>
+                              </div>
+                            </div>
+
+                            {panel.score && (
+                              <div className="flex items-center gap-1 rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
+                                <Star className="h-3 w-3" />
+                                {panel.score ?? "-"}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Divider */}
+                          <div className="my-3 h-px bg-gray-200 dark:bg-gray-700" />
+
+                          {/* Score Progress */}
+                          {panel?.feedbacks?.length > 0 &&
+                            panel?.feedbacks?.[0] && (
+                              <div className="mt-3">
+                                <div className="flex items-center justify-between text-[11px] text-gray-500">
+                                  <p className="text-[16px]">Score</p>
+                                  <p className="text-[16px]">
+                                    {panel.feedbacks?.[0].score}/10
+                                  </p>
+                                </div>
+
+                                <div className="mt-1 h-1.5 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+                                  <div
+                                    style={{
+                                      width: `${
+                                        (panel.feedbacks?.[0].score / 1) * 1
+                                      }%`,
+                                    }}
+                                    className="h-1.5 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"
+                                  />
+                                </div>
+                              </div>
+                            )}
+
+                          {/* Feedback */}
+                          {panel.feedbacks?.length > 0 &&
+                            panel.feedbacks?.[0] && (
+                              <div className="mt-3 flex gap-2 rounded-lg border border-gray-200 bg-gray-50 p-2 text-xs text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
+                                <MessageSquare className="mt-0.5 h-4 w-4 text-gray-400" />
+                                <span className="font-semibold italic">
+                                  {capitalizeFLetter(
+                                    panel.feedbacks?.[0].feedback_text
+                                  )}
+                                </span>
+                              </div>
+                            )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Final Decision */}
+        </div>
+      )}
+      <div className="mt-12 rounded-2xl border-2 bg-gradient-to-r from-blue-500 via-purple-600 to-pink-600 p-8 shadow-2xl">
+        <h4 className="mb-5 flex items-center gap-2 text-2xl font-bold text-white">
+          <span>✨</span> Final Decision
+        </h4>
+
+        <CustomSelect
+          options={state.applicationStatusList}
+          value={state.appstatus}
+          onChange={(selectedOption) => {
+            setState({
+              appstatus: selectedOption,
+            });
+          }}
+          placeholder="Select Status"
+          isClearable={false}
+          required
+          className="w-full appearance-none rounded-xl  bg-white  text-lg font-semibold shadow-lg focus:ring-4 focus:ring-white/50 dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+        />
+        <div className="mt-3 flex justify-end">
+          <button
+            onClick={() => updateStatus()}
+            className="group flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-gray-700 shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl dark:bg-gray-800 dark:text-gray-300"
+          >
+            {state.btnLoading ? (
+              <Loader className="h-4 w-4 animate-spin" />
+            ) : (
+              "Update Status"
+            )}
+          </button>
         </div>
       </div>
     </div>

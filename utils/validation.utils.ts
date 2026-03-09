@@ -7,13 +7,11 @@ export const login = Yup.object().shape({
   password: Yup.string().required("Password is required"),
 });
 
-
 export const forgotPassword = Yup.object().shape({
   email: Yup.string()
-  .email("Enter a valid email address")
-  .required("Email is required"),
+    .email("Enter a valid email address")
+    .required("Email is required"),
 });
-
 
 export const change_password = Yup.object().shape({
   new_password: Yup.string()
@@ -195,8 +193,9 @@ export const CreateNewJob = Yup.object().shape({
 
   college: Yup.mixed().required("College is required").nullable(false),
   department: Yup.array()
-  .min(1, "At least one Department is required")
-  .required("Department is required").nullable(true),
+    .min(1, "At least one Department is required")
+    .required("Department is required")
+    .nullable(true),
   salary: Yup.string().required("Salary range is required"),
 
   priority: Yup.string().required("Job urgency is required"),
@@ -241,27 +240,57 @@ export const CreateNewJob = Yup.object().shape({
 
   isCollegeEmail: Yup.boolean(),
 
-  applyLink: Yup.string()
-    .when("applyType", {
-      is: "external",
-      then: (schema) =>
-        schema
-          .required("Apply link is required")
-          .url("Enter a valid URL"),
-      otherwise: (schema) => schema.notRequired(),
-    }),
+  applyLink: Yup.string().when("applyType", {
+    is: "external",
+    then: (schema) =>
+      schema.required("Apply link is required").url("Enter a valid URL"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
 
-  alternativeEmail: Yup.string().when(
-    ["applyType", "isCollegeEmail"],
-    {
-      is: (applyType: string, isCollegeEmail: boolean) =>
-        applyType === "internal" && isCollegeEmail === false,
-      then: (schema) =>
-        schema
-          .required("Alternative email is required")
-          .email("Enter a valid email"),
-      otherwise: (schema) => schema.notRequired(),
-    }
-  ),
+  alternativeEmail: Yup.string().when(["applyType", "isCollegeEmail"], {
+    is: (applyType: string, isCollegeEmail: boolean) =>
+      applyType === "internal" && isCollegeEmail === false,
+    then: (schema) =>
+      schema
+        .required("Alternative email is required")
+        .email("Enter a valid email"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+});
 
+export const panel = Yup.object().shape({
+  name: Yup.string().required("Name is required"),
+  phone: Yup.string()
+    .trim()
+    .matches(/^\+?[1-9]\d{9,14}$/, "Please enter a valid phone number")
+    .required("Phone is required"),
+  designation: Yup.string().required("Designation is required"),
+  department_id: Yup.string().required("Department is required"),
+  email: Yup.string()
+    .email("Enter a valid email address")
+    .required("Email is required"),
+});
+
+export const interview = Yup.object().shape({
+  selectedJobs: Yup.array()
+    .min(1, "At least one job is required")
+    .required("Job is required"),
+
+  selectedDepartments: Yup.array()
+    .min(1, "At least one department is required")
+    .required("Department is required"),
+
+  interviewSlot: Yup.string().required("Interview date is required"),
+
+  panelMembers: Yup.array()
+    .min(1, "At least one panel member is required")
+    .required("Panel member is required"),
+
+  selectedApplicants: Yup.array()
+    .min(1, "At least one applicants is required")
+    .required("Applicants is required"),
+
+  roundName: Yup.string().required("Round name is required"),
+
+  interviewStatus: Yup.string().required("Interview status is required"),
 });
