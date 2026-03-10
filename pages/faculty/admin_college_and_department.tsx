@@ -674,11 +674,13 @@ const CollegeAndDepartment = () => {
       total_strength: "",
       summary: "",
       recent_achievements: [],
+      clgLoading:false,
 
       dept_intake_per_year: null,
       dept_summary: "",
       recent_dept_achievements: [],
       isNBAAccreditation: false,
+      newImages: [],
     });
   };
 
@@ -968,9 +970,8 @@ const CollegeAndDepartment = () => {
         }
         if (state.newImages?.length > 0 && state.images?.length === 0) {
           collegeBody.college_logo = state.newImages[0];
-        }else{
+        } else {
           collegeBody.college_logo = null;
-
         }
         if (state.college_hr?.value) {
           collegeBody.college_hr = state.college_hr?.value;
@@ -1027,9 +1028,8 @@ const CollegeAndDepartment = () => {
 
         if (state.newImages?.length > 0 && state.images?.length === 0) {
           collegeBody.college_logo = state.newImages[0];
-        }else{
+        } else {
           collegeBody.college_logo = null;
-
         }
 
         await CreateCollege.validate(collegeBody, { abortEarly: false });
@@ -1118,6 +1118,8 @@ const CollegeAndDepartment = () => {
       setState({ submitting: false });
     }
   };
+
+  console.log("✌️state.college_logo? --->", state.college_logo);
 
   const handleSubmit = async () => {
     try {
@@ -1236,9 +1238,8 @@ const CollegeAndDepartment = () => {
 
         if (state.newImages?.length > 0 && state.images?.length === 0) {
           body.college_logo = state.newImages[0];
-        }else{
-         body.college_logo = null;
-
+        } else {
+          body.college_logo = null;
         }
 
         try {
@@ -1362,9 +1363,8 @@ const CollegeAndDepartment = () => {
 
           if (state.newImages?.length > 0 && state.images?.length === 0) {
             collegeBody.college_logo = state.newImages[0];
-          }else{
+          } else {
             collegeBody.college_logo = null;
-  
           }
 
           const collegeformData = buildFormData(collegeBody);
@@ -1500,6 +1500,7 @@ const CollegeAndDepartment = () => {
 
   const updateCollege = async () => {
     try {
+      setState({clgLoading:true})
       const body: any = {
         college_name: capitalizeFLetter(state.college_name),
         college_code: capitalizeFLetter(state.college_code),
@@ -1540,10 +1541,12 @@ const CollegeAndDepartment = () => {
 
       if (state.newImages?.length > 0 && state.images?.length === 0) {
         body.college_logo = state.newImages[0];
-      }else{
+      } else if (state.college_logo?.length > 0) {
+        body.college_logo = state.college_logo[0];
+      } else {
         body.college_logo = null;
-
       }
+      console.log("✌️body --->", body);
 
       await CreateCollege.validate(body, { abortEarly: false });
       const formData = buildFormData(body);
@@ -1552,6 +1555,7 @@ const CollegeAndDepartment = () => {
       handleCloseModal();
       Success("College updated successfully!");
     } catch (error) {
+      setState({clgLoading:false})
       if (error?.response?.data) {
         const apiErrors = {};
         Object.keys(error.response.data).forEach((field) => {
@@ -2598,7 +2602,7 @@ const CollegeAndDepartment = () => {
                   disabled={state.submitting}
                   className="rounded-lg bg-blue-500 px-6 py-2 text-white hover:bg-blue-600 disabled:opacity-50"
                 >
-                  {state.submitting ? "Updating..." : "Update College"}
+                  {state.clgLoading ? "Updating..." : "Update College"}
                 </button>
               </div>
               {/* ) : (

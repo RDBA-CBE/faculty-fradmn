@@ -554,12 +554,15 @@ const CollegeAndDepartment = () => {
       total_strength: "",
       summary: "",
       recent_achievements: [],
+      clgLoading:false,
 
       dept_intake_per_year: null,
       dept_summary: "",
       recent_dept_achievements: [],
       isNBAAccreditation: false,
+      newImages:[]
     });
+
   };
 
   const handleFormChange = (field, value) => {
@@ -1241,6 +1244,8 @@ const CollegeAndDepartment = () => {
 
   const updateCollege = async () => {
     try {
+      setState({clgLoading:true})
+      
       const body: any = {
         college_name: state.college_name,
         college_code: state.college_code,
@@ -1281,10 +1286,11 @@ const CollegeAndDepartment = () => {
 
       if (state.newImages?.length > 0 && state.images?.length === 0) {
         body.college_logo = state.newImages[0];
+      } else if (state.college_logo?.length > 0) {
+        body.college_logo = state.college_logo[0];
       } else {
         body.college_logo = null;
       }
-
       console.log("✌️body --->", body);
       const formData = buildFormData(body);
 
@@ -1294,6 +1300,8 @@ const CollegeAndDepartment = () => {
       collegeList(1);
       handleCloseModal();
     } catch (error) {
+      setState({clgLoading:false})
+
       console.log("✌️error --->", error);
       Failure("Operation failed. Please try again.");
     }
@@ -2147,7 +2155,7 @@ const CollegeAndDepartment = () => {
                   disabled={state.submitting}
                   className="rounded-lg bg-blue-500 px-6 py-2 text-white hover:bg-blue-600 disabled:opacity-50"
                 >
-                  {state.submitting ? "Updating..." : "Update College"}
+                  {state.clgLoading ? "Updating..." : "Update College"}
                 </button>
               </div>
             </div>

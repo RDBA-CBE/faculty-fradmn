@@ -696,11 +696,13 @@ const CollegeAndDepartment = () => {
       total_strength: "",
       summary: "",
       recent_achievements: [],
+      updateCollegeLoading: false,
 
       dept_intake_per_year: null,
       dept_summary: "",
       recent_dept_achievements: [],
       isNBAAccreditation: false,
+      newImages:[]
     });
   };
 
@@ -1119,17 +1121,17 @@ const CollegeAndDepartment = () => {
 
       if (state.newImages?.length > 0 && state.images?.length === 0) {
         body.college_logo = state.newImages[0];
-      }else{
+      } else if (state.college_logo?.length > 0) {
+        body.college_logo = state.college_logo[0];
+      } else {
         body.college_logo = null;
-
       }
       await CreateCollege.validate(body, { abortEarly: false });
       const formData = buildFormData(body);
-      
+
       const res = await Models.college.update(formData, state.editId);
       collegeList(1);
       handleCloseModal();
-      setState({ updateCollegeLoading: false });
       Success("College updated successfully!");
     } catch (error) {
       console.log("✌️error --->", error);
