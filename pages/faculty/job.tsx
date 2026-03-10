@@ -177,11 +177,11 @@ const Job = () => {
           1,
           "",
           false,
-          res?.institution?.institution_id,
+          res?.institution?.id,
           res?.id
         );
         departmentDropdownList(1, "", false, "", res?.id);
-        jobList(1, res?.institution?.institution_id, "", "", res?.id);
+        jobList(1, res?.institution?.id, "", "", res?.id);
       } else if (res?.role == ROLES.HR) {
         departmentDropdownList(
           1,
@@ -221,8 +221,6 @@ const Job = () => {
     deptId = null,
     createdBy = null
   ) => {
-    console.log("✌️collegeId --->", collegeId);
-
     try {
       setState({ loading: true });
 
@@ -376,13 +374,21 @@ const Job = () => {
 
   const handlePageChange = (pageNumber: number) => {
     setState({ page: pageNumber });
-    jobList(
-      pageNumber,
-      state.instiutionFilter,
-      state.collegeFilter,
-      state.departmentFilter,
-      state?.profile?.id
-    );
+    if (
+      state.instiutionFilter ||
+      state.collegeFilter ||
+      state.departmentFilter
+    ) {
+      jobList(
+        pageNumber,
+        state.instiutionFilter,
+        state.collegeFilter,
+        state.departmentFilter,
+        state?.profile?.id
+      );
+    } else {
+      refetch(pageNumber);
+    }
   };
 
   const handleStatusChange = (selectedOption: any) => {
@@ -712,12 +718,38 @@ const Job = () => {
             ? "Job unapproved successfully!"
             : "Job approved successfully!"
         );
-        jobList(state.page);
+
+        refetch(state.page);
       } catch (error) {
         Failure(
           row.is_approved ? "Failed to unapprove job" : "Failed to approve job"
         );
       }
+    }
+  };
+
+  const refetch = (page) => {
+    if (state.profile?.role == ROLES.SUPER_ADMIN) {
+      jobList(page, "", "", "", state.profile.id);
+    } else if (state.profile.role == ROLES.INSTITUTION_ADMIN) {
+      jobList(
+        page,
+        state.profile.institution?.id,
+        "",
+        "",
+        state.profile.id
+      );
+    } else if (state.profile.role == ROLES.HR) {
+      jobList(
+        page,
+        "",
+        // state.profile.college?.college_id,
+        state.profile.college?.map((item) => item.college_id),
+        "",
+        state.profile.id
+      );
+    } else if (state.profile.role == ROLES.HOD) {
+      jobList(page, "", "", state.profile.department?.id, state.profile.id);
     }
   };
 
@@ -1432,7 +1464,8 @@ const Job = () => {
               jobList(
                 state.page,
                 state.instiutionFilter || state.profile?.institution?.id,
-                state.collegeFilter || state.profile?.college?.map((item) => item.college_id),
+                state.collegeFilter ||
+                  state.profile?.college?.map((item) => item.college_id),
                 state.departmentFilter || state.profile?.department?.id,
                 state?.profile?.id
               );
