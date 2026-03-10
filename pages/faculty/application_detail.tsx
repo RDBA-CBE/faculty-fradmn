@@ -573,6 +573,10 @@ const ApplicationDetail = () => {
                           <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                             Applicant available for Interview
                           </p>
+                        ) : !state.interview_slot?.response_from_applicant ? (
+                          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                            Applicant not available for Interview
+                          </p>
                         ) : (
                           <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                             {capitalizeFLetter(

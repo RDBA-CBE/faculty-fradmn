@@ -215,7 +215,8 @@ const Application = () => {
       if (res?.role == ROLES.SUPER_ADMIN) {
         collegeDropdownList(1, "", false, "", res.id);
         applicationList(1, null, null, null, res?.id);
-        loadJobList(1, null, null);
+        // loadJobList(1, null, null);
+        loadJobList(1, null, false, null, null, null, res?.id);
       } else if (res?.role == ROLES.INSTITUTION_ADMIN) {
         collegeDropdownList(
           1,
@@ -231,14 +232,26 @@ const Application = () => {
           null,
           res?.id
         );
-        loadJobList(res?.institution?.institution_id, null, null);
+        loadJobList(1, null, false, null, null, null, res?.id);
       } else if (res?.role == ROLES.HR) {
-        departmentDropdownList(1, "", false, res?.college?.college_id, res.id);
-        applicationList(1, null, res?.college?.college_id, null, res?.id);
-        loadJobList(null, res?.college?.college_id, null);
+        departmentDropdownList(
+          1,
+          "",
+          false,
+          res?.college?.map((college) => college.college_id),
+          res.id
+        );
+        applicationList(
+          1,
+          null,
+          res?.college?.map((college) => college.college_id),
+          null,
+          res?.id
+        );
+        loadJobList(1, null, false, null, null, null, res?.id);
       } else if (res?.role == ROLES.HOD) {
         applicationList(1, null, null, res?.department?.department_id, res?.id);
-        loadJobList(null, null, res?.department?.department_id);
+        loadJobList(1, null, false, null, null, null, res?.id);
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -821,7 +834,8 @@ const Application = () => {
     loadMore = false,
     institutionId = null,
     collegeId = null,
-    deptId = null
+    deptId = null,
+    created_by=null
   ) => {
     try {
       setState({ jobLoading: true });
@@ -829,7 +843,11 @@ const Application = () => {
       if (institutionId) body.institution = institutionId;
       if (collegeId) body.college = collegeId;
       if (deptId) body.department = deptId;
-
+      body.created_by = state.profile?.id;
+      if (created_by) {
+        body.created_by = created_by;
+      }
+      body.team = "No";
       const res: any = await Models.job.list(page, body);
       const dropdown = res?.results?.map((item) => ({
         value: item.id,
@@ -839,15 +857,15 @@ const Application = () => {
       setState({
         jobPage: page,
         jobLoading: false,
-        jobList: state.jobNext ? [...state.jobList, ...dropdown] : dropdown,
-        jobNext:res?.next
+        jobList:loadMore? [...state.jobList, ...dropdown] : dropdown,
+        jobNext: res?.next,
       });
     } catch (error) {
       setState({ jobLoading: false });
     }
   };
-console.log('✌️jobList --->', state.jobList);
 
+  console.log("✌️jobList --->", state.jobList);
 
   const loadDepartmentsByJobs = async (
     page = 1,
@@ -871,7 +889,7 @@ console.log('✌️jobList --->', state.jobList);
         label: item.department_name,
       }));
       setState({
-        interviewDeptList: state.deptNext
+        interviewDeptList: loadMore
           ? [...state.interviewDeptList, ...dropdown]
           : dropdown,
         deptPage: page,
@@ -889,7 +907,6 @@ console.log('✌️jobList --->', state.jobList);
     deptId = null
   ) => {
     try {
-
       setState({ panelMemberLoading: true });
       const body: any = { search };
       if (deptId) body.department_id = deptId?.map((item) => item?.value);
@@ -900,7 +917,7 @@ console.log('✌️jobList --->', state.jobList);
       }));
       setState({
         panelMemberLoading: false,
-        panelMemberList: state.panelNext
+        panelMemberList: loadMore
           ? [...state.panelMemberList, ...dropdown]
           : dropdown,
         panelNext: res?.next,
@@ -925,8 +942,8 @@ console.log('✌️jobList --->', state.jobList);
       if (deptIds) {
         body.department = deptIds?.map((item) => item?.value);
       }
-      body.created_by=state.profile?.id
-      body.team ="No"
+      body.created_by = state.profile?.id;
+      body.team = "No";
       const res: any = await Models.application.list(page, body);
       console.log("loadApplicantsByDept --->", res);
       const dropdown = res?.results?.map((item) => ({
@@ -935,7 +952,7 @@ console.log('✌️jobList --->', state.jobList);
       }));
       setState({
         applicantsLoading: false,
-        applicantsList: state.appNext
+        applicantsList: loadMore
           ? [...state.applicantsList, ...dropdown]
           : dropdown,
         appPage: page,
@@ -1658,9 +1675,7 @@ console.log('✌️jobList --->', state.jobList);
                   loadJobList(1, searchTerm);
                 }}
                 loadMore={() => {
-                  state.jobNext &&
-
-                  loadJobList(state.jobPage + 1, "");
+                  state.jobNext && loadJobList(state.jobPage + 1, "",true);
                 }}
                 isMulti
                 loading={state.jobLoading}
