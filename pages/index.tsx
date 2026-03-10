@@ -28,7 +28,7 @@ import PrivateRouter from '@/hook/privateRouter';
 const Index = () => {
     const dispatch = useDispatch();
     useEffect(() => {
-        dispatch(setPageTitle('Faculty Plus - Dashboard'));
+        dispatch(setPageTitle('Faculty Pro - Dashboard'));
     });
     const isDark = useSelector((state: IRootState) => state.themeConfig.theme === 'dark' || state.themeConfig.isDarkMode);
     const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl' ? true : false;

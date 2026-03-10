@@ -835,7 +835,7 @@ const Application = () => {
     institutionId = null,
     collegeId = null,
     deptId = null,
-    created_by=null
+    created_by = null
   ) => {
     try {
       setState({ jobLoading: true });
@@ -857,7 +857,7 @@ const Application = () => {
       setState({
         jobPage: page,
         jobLoading: false,
-        jobList:loadMore? [...state.jobList, ...dropdown] : dropdown,
+        jobList: loadMore ? [...state.jobList, ...dropdown] : dropdown,
         jobNext: res?.next,
       });
     } catch (error) {
@@ -981,6 +981,7 @@ const Application = () => {
         roundName: state.roundName,
         interviewStatus: state.interviewStatus?.label,
         response_from_applicant: state.requestForChange,
+        interview_link: state.interview_link,
       };
 
       await Utils.Validation.interview.validate(validation, {
@@ -998,9 +999,8 @@ const Application = () => {
         response_from_applicant: state.requestForChange,
         round_name: state.roundName,
         status: state.interviewStatus?.label,
+        interview_link: state.interview_link,
       };
-
-      const formData = buildFormData(body);
 
       await Models.interview.create(body);
       Success("Interview schedule created successfully!");
@@ -1016,6 +1016,7 @@ const Application = () => {
         requestForChange: false,
         interviewStatus: null,
         submitting: false,
+        interview_link: "",
       });
       profile();
     } catch (error) {
@@ -1033,6 +1034,8 @@ const Application = () => {
       }
     }
   };
+
+  console.log("✌️state.selectedDepartments --->", state.selectedDepartments);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-3 dark:from-gray-900 dark:to-gray-800">
@@ -1441,7 +1444,7 @@ const Application = () => {
               },
               {
                 accessor: "applicant_name",
-                title: "Applicant Name",
+                title: "Faculty Name",
                 sortable: true,
                 render: ({ applicant_name }) => (
                   <div className="font-medium text-gray-900 dark:text-white">
@@ -1675,7 +1678,7 @@ const Application = () => {
                   loadJobList(1, searchTerm);
                 }}
                 loadMore={() => {
-                  state.jobNext && loadJobList(state.jobPage + 1, "",true);
+                  state.jobNext && loadJobList(state.jobPage + 1, "", true);
                 }}
                 isMulti
                 loading={state.jobLoading}
@@ -1757,29 +1760,12 @@ const Application = () => {
                 }}
                 isMulti
                 loading={state.jobLoading}
-                error={state.errors?.selectedJobs}
-                disabled={!state.selectedDepartments}
+                error={state.errors?.panelMembers}
+                disabled={!state.selectedDepartments?.length}
                 required
-              />
-
-              <CustomeDatePicker
-                title="Interview Slot"
-                value={state.interviewSlot}
-                placeholder="Choose From"
-                onChange={(e) =>
-                  setState({
-                    interviewSlot: e,
-                    errors: { ...state.errors, interviewSlot: "" },
-                  })
-                }
-                showTimeSelect={true}
-                required
-                usePortal={false}
-                minDate={new Date()}
-                error={state.errors?.interviewSlot}
               />
               <CustomSelect
-                title="Select Applicants"
+                title="Select Faculty"
                 options={state.applicantsList}
                 value={state.selectedApplicants}
                 onChange={(e) =>
@@ -1806,11 +1792,41 @@ const Application = () => {
                     );
                   }
                 }}
-                placeholder="Select Applicants"
+                placeholder="Select Faculty"
                 isMulti
                 loading={state.applicantsLoading}
-                disabled={!state.selectedDepartments}
+                disabled={!state.selectedDepartments?.length}
                 error={state.errors.selectedApplicants}
+                required
+              />
+              <CustomeDatePicker
+                title="Interview Slot"
+                value={state.interviewSlot}
+                placeholder="Choose From"
+                onChange={(e) =>
+                  setState({
+                    interviewSlot: e,
+                    errors: { ...state.errors, interviewSlot: "" },
+                  })
+                }
+                showTimeSelect={true}
+                required
+                usePortal={false}
+                minDate={new Date()}
+                error={state.errors?.interviewSlot}
+              />
+
+              <TextInput
+                title="Interview Link"
+                placeholder="Enter interview link (e.g., https://example.com/interview)"
+                value={state.interview_link}
+                onChange={(e) =>
+                  setState({
+                    interview_link: e.target.value,
+                    errors: { ...state.errors, interview_link: "" },
+                  })
+                }
+                error={state.errors?.interview_link}
                 required
               />
 
@@ -1824,7 +1840,7 @@ const Application = () => {
                     errors: { ...state.errors, roundName: "" },
                   })
                 }
-                error={state.errors.roundName}
+                error={state.errors?.roundName}
                 required
               />
 
@@ -1876,6 +1892,7 @@ const Application = () => {
                     roundName: "",
                     requestForChange: false,
                     interviewStatus: null,
+                    interview_link: "",
                   })
                 }
                 className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"

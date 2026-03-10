@@ -287,10 +287,36 @@ export const interview = Yup.object().shape({
     .required("Panel member is required"),
 
   selectedApplicants: Yup.array()
-    .min(1, "At least one applicants is required")
-    .required("Applicants is required"),
+    .min(1, "At least one faculty is required")
+    .required("Faculty is required"),
 
   roundName: Yup.string().required("Round name is required"),
 
   interviewStatus: Yup.string().required("Interview status is required"),
+  interview_link: Yup.string().required("Interview link is required"),
+});
+
+export const single_interview = Yup.object().shape({
+  selectedJobs: Yup.array()
+    .min(1, "At least one job is required")
+    .required("Job is required"),
+
+  selectedDepartments: Yup.array()
+    .min(1, "At least one department is required")
+    .required("Department is required"),
+
+  interviewSlot: Yup.string().required("Interview date is required"),
+
+  panelMembers: Yup.array()
+    .min(1, "At least one panel member is required")
+    .required("Panel member is required"),
+
+  selectedApplicants: Yup.array()
+    .min(1, "At least one faculty is required")
+    .required("Faculty is required"),
+
+  roundName: Yup.string().required("Round name is required"),
+
+  interviewStatus: Yup.string().required("Interview status is required"),
+  interview_link: Yup.string().required("Interview link is required"),
 });

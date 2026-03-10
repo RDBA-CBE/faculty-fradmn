@@ -3,7 +3,9 @@ import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
 import { setPageTitle } from "../../store/themeConfigSlice";
 import {
+  buildFormData,
   capitalizeFLetter,
+  Failure,
   Success,
   useSetState,
 } from "@/utils/function.utils";
@@ -41,10 +43,17 @@ import {
   Users,
   FileText,
   Send,
+  ExternalLink,
 } from "lucide-react";
 import { FRONTEND_URL } from "@/utils/constant.utils";
 import Link from "next/link";
 import CustomSelect from "@/components/FormFields/CustomSelect.component";
+import CustomeDatePicker from "@/components/datePicker";
+import TextInput from "@/components/FormFields/TextInput.component";
+import Modal from "@/components/modal/modal.component";
+import moment from "moment";
+import Utils from "@/imports/utils.import";
+import * as Yup from "yup";
 
 const ApplicationDetail = () => {
   const dispatch = useDispatch();
@@ -55,6 +64,20 @@ const ApplicationDetail = () => {
     loading: true,
     application: null,
     expandedRounds: {},
+    showInterviewModal: false,
+
+    selectedJobs: [],
+    selectedDepartments: [],
+    interviewSlot: "",
+    panelMembers: [],
+    selectedApplicants: [],
+    requestForChange: false,
+    roundName: "",
+    interviewStatus: null,
+    interviewStatusList: [
+      { value: "scheduled", label: "Scheduled" },
+      { value: "completed", label: "Completed" },
+    ],
   });
 
   useEffect(() => {
@@ -69,6 +92,8 @@ const ApplicationDetail = () => {
     try {
       setState({ loading: true });
       const res: any = await Models.application.details(id);
+      console.log("✌️res --->", res);
+      await loadPanelMembers(1, "", false, res?.department?.id);
       setState({ application: res, loading: false });
       const statusList: any = await Models.master.application_status_list();
       const find = statusList?.find((item) => item?.name == res?.status);
@@ -134,6 +159,110 @@ const ApplicationDetail = () => {
     }
   };
 
+  const loadPanelMembers = async (
+    page = 1,
+    search = "",
+    loadMore = false,
+    deptId = null
+  ) => {
+    console.log("✌️loadPanelMembers --->");
+
+    try {
+      setState({ panelMemberLoading: true });
+      const body: any = { search };
+      if (deptId) body.department_id = deptId;
+      console.log("✌️body --->", body);
+      const res: any = await Models.master.panel_list(body, page);
+      const dropdown = res?.results?.map((item) => ({
+        value: item.id,
+        label: item.name,
+      }));
+      setState({
+        panelMemberLoading: false,
+        panelMemberList: loadMore
+          ? [...state.panelMemberList, ...dropdown]
+          : dropdown,
+        panelNext: res?.next,
+        panelPage: page,
+      });
+    } catch (error) {
+      setState({ panelMemberLoading: false });
+    }
+  };
+
+  const handleInterviewScheduleSubmit = async () => {
+    try {
+      setState({ submitting: true });
+
+      const validation = {
+        selectedJobs: [state.application?.job_detail?.id],
+        selectedDepartments: [state.application?.department?.id],
+        interviewSlot: state.interviewSlot
+          ? moment(state.interviewSlot).format("YYYY-MM-DD HH:mm")
+          : "",
+        panelMembers: state.panelMembers.map((p) => p.value),
+        selectedApplicants: [state.application?.id],
+        request_for_change: state.requestForChange,
+        roundName: state.roundName,
+        interviewStatus: state.interviewStatus?.label,
+        response_from_applicant: state.requestForChange,
+        interview_link: state.interview_link,
+      };
+
+      await Utils.Validation.single_interview.validate(validation, {
+        abortEarly: false,
+      });
+
+      const body = {
+        position_ids: [state.application?.job_detail?.id],
+        // department_id: state.selectedDepartments?.map((item)=>item?.value),
+        department_id: state.application?.department?.id,
+
+        scheduled_date: moment(state.interviewSlot).format("YYYY-MM-DD HH:mm"),
+        panel_ids: state.panelMembers.map((p) => p.value),
+        application_ids: [state.application?.id],
+        response_from_applicant: state.requestForChange,
+        round_name: state.roundName,
+        status: state.interviewStatus?.label,
+        interview_link: state.interview_link,
+      };
+      console.log("✌️body --->", body);
+
+      setState({ submitting: false });
+
+      await Models.interview.create(body);
+      Success("Interview schedule created successfully!");
+      setState({
+        showInterviewModal: false,
+        errors: {},
+        selectedJobs: [],
+        selectedDepartments: [],
+        selectedApplicants: [],
+        panelMembers: [],
+        interviewSlot: "",
+        roundName: "",
+        requestForChange: false,
+        interviewStatus: null,
+        submitting: false,
+        interview_link: "",
+      });
+      fetchApplicationDetail();
+    } catch (error) {
+      if (error instanceof Yup.ValidationError) {
+        const validationErrors = {};
+        error.inner.forEach((err) => {
+          validationErrors[err.path] = err?.message;
+        });
+        console.log("✌️validationErrors --->", validationErrors);
+
+        setState({ errors: validationErrors, submitting: false });
+      } else {
+        Failure(error?.error);
+        setState({ submitting: false });
+      }
+    }
+  };
+
   if (state.loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
@@ -162,25 +291,35 @@ const ApplicationDetail = () => {
             <IconArrowBackward className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
             Back
           </button>
-
-          {app?.applicant ? (
-            <Link
-              href={`${FRONTEND_URL}profile/${app?.applicant}`}
-              target="_blank"
-              rel="noopener noreferrer"
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setState({ showInterviewModal: true })}
+              className="group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
             >
-              <div className="group flex cursor-pointer items-center gap-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-3 shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl">
-                <UserCog className="h-5 w-5 text-white" />
-                <p className="font-semibold text-white">View Profile</p>
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+              <UserCheck className="relative z-10 h-5 w-5" />
+              <span className="relative z-10"> Interview Schedule</span>
+            </button>
+
+            {app?.applicant ? (
+              <Link
+                href={`${FRONTEND_URL}profile/${app?.applicant}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <div className="group flex cursor-pointer items-center gap-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-3 shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl">
+                  <UserCog className="h-5 w-5 text-white" />
+                  <p className="font-semibold text-white">View Profile</p>
+                </div>
+              </Link>
+            ) : (
+              <div className="rounded-xl bg-red-100 px-6 py-3 dark:bg-red-900/30">
+                <p className="font-medium text-red-600 dark:text-red-400">
+                  No Profile
+                </p>
               </div>
-            </Link>
-          ) : (
-            <div className="rounded-xl bg-red-100 px-6 py-3 dark:bg-red-900/30">
-              <p className="font-medium text-red-600 dark:text-red-400">
-                No Profile
-              </p>
-            </div>
-          )}
+            )}
+          </div>
           {/* <div className="flex items-start gap-3">
             <UserCog className="mt-1 h-5 w-5 text-purple-600" />
             <div>
@@ -549,41 +688,65 @@ const ApplicationDetail = () => {
                     )}
                   </div>
                 </button>
-                <div className="px-4">
-                  {round?.applicant_feedback && (
-                    <div className="mb-3 grid  w-full grid-cols-[40px_1fr] gap-3 overflow-hidden rounded-xl border border-indigo-200 bg-gradient-to-r from-indigo-50 to-purple-50 p-4 dark:border-indigo-800 dark:from-indigo-950/50 dark:to-purple-950/50 md:w-1/2">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-500 text-white shadow-md">
-                        <MessageCircle className="h-4 w-4" />
-                      </div>
-
-                      <div>
-                        <div className="flex items-center justify-between">
-                          <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">
-                            Applicant Response
-                          </p>
-
-                          <span className="text-xs text-gray-500">
-                            {new Date(
-                              round.applicant_feedback.submitted_at
-                            ).toLocaleDateString()}
-                          </span>
+                <div className="mb-3 grid grid-cols-2 gap-4 px-4 md:grid-cols-2">
+                  {round?.interview_link && (
+                    <div className="w-full">
+                      <div className="grid grid-cols-[40px_1fr] gap-3 overflow-hidden rounded-xl border border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 p-4 dark:border-green-800 dark:from-green-950/50 dark:to-emerald-950/50">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-500 text-white shadow-md">
+                          <ExternalLink className="h-4 w-4" />
                         </div>
 
-                        {round?.applicant_feedback?.is_available ? (
-                          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-                            Applicant available for Interview
-                          </p>
-                        ) : !state.interview_slot?.response_from_applicant ? (
-                          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-                            Applicant not available for Interview
-                          </p>
-                        ) : (
-                          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-                            {capitalizeFLetter(
-                              round.applicant_feedback.feedback_text
-                            )}
-                          </p>
-                        )}
+                        <div>
+                          <div className="flex items-center justify-between">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-green-600 dark:text-green-400">
+                              Interview Link
+                            </p>
+                            <Link
+                              href={round?.interview_link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {round?.applicant_feedback && (
+                    <div className="w-full">
+                      <div className="grid grid-cols-[40px_1fr] gap-3 overflow-hidden rounded-xl border border-indigo-200 bg-gradient-to-r from-indigo-50 to-purple-50 p-4 dark:border-indigo-800 dark:from-indigo-950/50 dark:to-purple-950/50">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-500 text-white shadow-md">
+                          <MessageCircle className="h-4 w-4" />
+                        </div>
+
+                        <div>
+                          <div className="flex items-center justify-between">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">
+                              Faculty Response
+                            </p>
+
+                            <span className="text-xs text-gray-500">
+                              {new Date(
+                                round.applicant_feedback.submitted_at
+                              ).toLocaleDateString()}
+                            </span>
+                          </div>
+
+                          {round?.applicant_feedback?.is_available ? (
+                            <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                              Faculty available for Interview
+                            </p>
+                          ) : !state.interview_slot?.response_from_applicant ? (
+                            <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                              Faculty not available for Interview
+                            </p>
+                          ) : (
+                            <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                              {capitalizeFLetter(
+                                round.applicant_feedback.feedback_text
+                              )}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
                   )}
@@ -713,6 +876,224 @@ const ApplicationDetail = () => {
           </button>
         </div>
       </div>
+
+      <Modal
+        open={state.showInterviewModal}
+        close={() =>
+          setState({
+            showInterviewModal: false,
+            errors: {},
+            selectedJobs: [],
+            selectedDepartments: [],
+            selectedApplicants: [],
+            panelMembers: [],
+            interviewSlot: "",
+            roundName: "",
+            requestForChange: false,
+            interviewStatus: null,
+          })
+        }
+        renderComponent={() => (
+          <div className="p-6">
+            <div className="mb-6 text-center">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-green-100 to-teal-100 dark:from-green-900 dark:to-teal-900">
+                <UserCheck className="h-8 w-8 text-green-600 dark:text-green-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Create Interview Schedule
+              </h2>
+            </div>
+
+            <div className="space-y-5">
+              <TextInput
+                title="Select Jobs"
+                placeholder="Select Jobs"
+                value={state.application?.job_detail?.job_title}
+                onChange={(e) =>
+                  setState({
+                    selectedJobs: e.target.value,
+                    errors: { ...state.errors, selectedJobs: "" },
+                  })
+                }
+                required
+                error={state.errors?.selectedJobs}
+                disabled={true}
+              />
+
+              <TextInput
+                title="Select Departments"
+                placeholder="Select Departments"
+                value={state.application?.department?.department_name}
+                onChange={(e) =>
+                  setState({
+                    selectedDepartments: e.target.value,
+                    errors: { ...state.errors, selectedDepartments: "" },
+                  })
+                }
+                required
+                error={state.errors?.selectedDepartments}
+                disabled={true}
+              />
+              <TextInput
+                title="Faculty"
+                placeholder="Enter round name (e.g., Technical Round 1)"
+                value={state.application?.applicant_name}
+                onChange={(e) =>
+                  setState({
+                    selectedApplicants: e.target.value,
+                    errors: { ...state.errors, selectedApplicants: "" },
+                  })
+                }
+                error={state.errors?.selectedApplicants}
+                required
+                disabled
+              />
+
+              <CustomSelect
+                title="Select Panel Members"
+                placeholder="Select Panel Members"
+                options={state.panelMemberList}
+                value={state.panelMembers}
+                onChange={(e) => {
+                  setState({
+                    panelMembers: e,
+                    errors: { ...state.errors, panelMembers: "" },
+                  });
+                }}
+                onSearch={(searchTerm) => {
+                  loadPanelMembers(
+                    1,
+                    searchTerm,
+                    false,
+                    state.application?.department?.id
+                  );
+                }}
+                loadMore={() => {
+                  if (state.panelNext) {
+                    loadPanelMembers(
+                      state.panelPage + 1,
+                      "",
+                      false,
+                      state.application?.department?.id
+                    );
+                  }
+                }}
+                isMulti
+                loading={state.jobLoading}
+                error={state.errors?.panelMembers}
+                disabled={!state.selectedDepartments}
+                required
+              />
+
+              <CustomeDatePicker
+                title="Interview Slot"
+                value={state.interviewSlot}
+                placeholder="Choose From"
+                onChange={(e) =>
+                  setState({
+                    interviewSlot: e,
+                    errors: { ...state.errors, interviewSlot: "" },
+                  })
+                }
+                showTimeSelect={true}
+                required
+                usePortal={false}
+                minDate={new Date()}
+                error={state.errors?.interviewSlot}
+              />
+              <TextInput
+                title="Interview Link"
+                placeholder="Enter interview link (e.g., https://example.com/interview)"
+                value={state.interview_link}
+                onChange={(e) =>
+                  setState({
+                    interview_link: e.target.value,
+                    errors: { ...state.errors, interview_link: "" },
+                  })
+                }
+                error={state.errors?.interview_link}
+                required
+              />
+              <TextInput
+                title="Round Name"
+                placeholder="Enter round name (e.g., Technical Round 1)"
+                value={state.roundName}
+                onChange={(e) =>
+                  setState({
+                    roundName: e.target.value,
+                    errors: { ...state.errors, roundName: "" },
+                  })
+                }
+                error={state.errors?.roundName}
+                required
+              />
+
+              <CustomSelect
+                title="Status"
+                options={state.interviewStatusList}
+                value={state.interviewStatus}
+                onChange={(e) =>
+                  setState({
+                    interviewStatus: e,
+                    errors: { ...state.errors, interviewStatus: "" },
+                  })
+                }
+                placeholder="Select Status"
+                error={state.errors?.interviewStatus}
+                required
+              />
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="requestForChange"
+                  checked={state.requestForChange}
+                  onChange={(e) =>
+                    setState({ requestForChange: e.target.checked })
+                  }
+                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <label
+                  htmlFor="requestForChange"
+                  className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Request for Change
+                </label>
+              </div>
+            </div>
+
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() =>
+                  setState({
+                    showInterviewModal: false,
+                    errors: {},
+                    selectedJobs: [],
+                    selectedDepartments: [],
+                    selectedApplicants: [],
+                    panelMembers: [],
+                    interviewSlot: "",
+                    roundName: "",
+                    requestForChange: false,
+                    interviewStatus: null,
+                    interview_link: "",
+                  })
+                }
+                className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleInterviewScheduleSubmit}
+                disabled={state.submitting}
+                className="flex-1 rounded-lg bg-gradient-to-r from-green-600 to-teal-600 px-4 py-2 text-white hover:shadow-lg disabled:opacity-50"
+              >
+                {state.submitting ? "Creating..." : "Create Schedule"}
+              </button>
+            </div>
+          </div>
+        )}
+      />
     </div>
   );
 };
