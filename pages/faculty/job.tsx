@@ -41,6 +41,7 @@ import { useRouter } from "next/navigation";
 import {
   DROPDOWN_INSTITUTION_ADMIN,
   DROPDOWN_JOB_ROLES,
+  JOB_STATUS,
   ROLES,
 } from "@/utils/constant.utils";
 import IconHistory from "@/components/Icon/IconHistory";
@@ -1086,6 +1087,15 @@ const Job = () => {
                 value={state.salaryFilter}
                 onChange={(e) => setState({ salaryFilter: e })}
                 placeholder="Select salary range"
+                isClearable={true}
+              />
+            </div>
+            <div className="group relative">
+              <CustomSelect
+                options={JOB_STATUS}
+                value={state.statusFilter}
+                onChange={(e) => setState({ statusFilter: e })}
+                placeholder="Select status"
                 isClearable={true}
               />
             </div>

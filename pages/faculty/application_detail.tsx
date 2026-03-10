@@ -697,7 +697,7 @@ const ApplicationDetail = () => {
                         </div>
 
                         <div>
-                          <div className="flex items-center justify-between">
+                          <div className="flex flex-col justify-between">
                             <p className="text-xs font-semibold uppercase tracking-wide text-green-600 dark:text-green-400">
                               Interview Link
                             </p>
@@ -705,7 +705,10 @@ const ApplicationDetail = () => {
                               href={round?.interview_link}
                               target="_blank"
                               rel="noopener noreferrer"
-                            />
+                              className="underline"
+                            >
+                              {round?.interview_link}
+                            </Link>
                           </div>
                         </div>
                       </div>
@@ -735,15 +738,15 @@ const ApplicationDetail = () => {
                             <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                               Faculty available for Interview
                             </p>
-                          ) : !state.interview_slot?.response_from_applicant ? (
-                            <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-                              Faculty not available for Interview
-                            </p>
-                          ) : (
+                          ) : round?.response_from_applicant ? (
                             <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                               {capitalizeFLetter(
                                 round.applicant_feedback.feedback_text
                               )}
+                            </p>
+                          ) : (
+                            <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                              Faculty not available for Interview
                             </p>
                           )}
                         </div>
@@ -1001,19 +1004,7 @@ const ApplicationDetail = () => {
                 minDate={new Date()}
                 error={state.errors?.interviewSlot}
               />
-              <TextInput
-                title="Interview Link"
-                placeholder="Enter interview link (e.g., https://example.com/interview)"
-                value={state.interview_link}
-                onChange={(e) =>
-                  setState({
-                    interview_link: e.target.value,
-                    errors: { ...state.errors, interview_link: "" },
-                  })
-                }
-                error={state.errors?.interview_link}
-                required
-              />
+
               <TextInput
                 title="Round Name"
                 placeholder="Enter round name (e.g., Technical Round 1)"
@@ -1027,7 +1018,18 @@ const ApplicationDetail = () => {
                 error={state.errors?.roundName}
                 required
               />
-
+              <TextInput
+                title="Interview Link"
+                placeholder="Enter interview link (e.g., https://example.com/interview)"
+                value={state.interview_link}
+                onChange={(e) =>
+                  setState({
+                    interview_link: e.target.value,
+                    errors: { ...state.errors, interview_link: "" },
+                  })
+                }
+                error={state.errors?.interview_link}
+              />
               <CustomSelect
                 title="Status"
                 options={state.interviewStatusList}

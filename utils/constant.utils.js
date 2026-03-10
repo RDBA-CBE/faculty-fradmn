@@ -842,3 +842,9 @@ export const STATUS_COLOR = {
   Selected: "bg-green-100 text-green-800",
   Rejected: "bg-red-100 text-red-800",
 };
+
+
+export const JOB_STATUS=[
+  { value: "approved", label: "Approved" },
+  { value: "pending", label: "Pending" },
+]

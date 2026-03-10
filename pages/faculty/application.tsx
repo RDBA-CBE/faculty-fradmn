@@ -2038,19 +2038,7 @@ const Application = () => {
                 minDate={new Date()}
                 error={state.errors?.interviewSlot}
               />
-              <TextInput
-                title="Interview Link"
-                placeholder="Enter interview link (e.g., https://example.com/interview)"
-                value={state.interview_link}
-                onChange={(e) =>
-                  setState({
-                    interview_link: e.target.value,
-                    errors: { ...state.errors, interview_link: "" },
-                  })
-                }
-                error={state.errors?.interview_link}
-                required
-              />
+
               <TextInput
                 title="Round Name"
                 placeholder="Enter round name (e.g., Technical Round 1)"
@@ -2064,7 +2052,18 @@ const Application = () => {
                 error={state.errors?.roundName}
                 required
               />
-
+              <TextInput
+                title="Interview Link"
+                placeholder="Enter interview link (e.g., https://example.com/interview)"
+                value={state.interview_link}
+                onChange={(e) =>
+                  setState({
+                    interview_link: e.target.value,
+                    errors: { ...state.errors, interview_link: "" },
+                  })
+                }
+                error={state.errors?.interview_link}
+              />
               <CustomSelect
                 title="Status"
                 options={state.interviewStatusList}

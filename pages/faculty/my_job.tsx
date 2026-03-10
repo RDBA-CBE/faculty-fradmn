@@ -44,7 +44,7 @@ import {
 } from "lucide-react";
 import moment from "moment";
 import { useRouter } from "next/navigation";
-import { ROLES } from "@/utils/constant.utils";
+import { JOB_STATUS, ROLES } from "@/utils/constant.utils";
 import LogCard from "@/components/logCard";
 import { MdApproval } from "react-icons/md";
 
@@ -142,7 +142,6 @@ const Job = () => {
     state.priorityFilter,
     state.typeFilter,
     state.salaryFilter,
-    state.statusFilter,
   ]);
 
   const profile = async () => {
@@ -413,9 +412,7 @@ const Job = () => {
     if (state.priorityFilter?.value) {
       body.priority = state.priorityFilter.value;
     }
-    if (state.typeFilter?.value) {
-      body.job_type = state.typeFilter.value;
-    }
+
     if (state.salaryFilter?.value) {
       body.salary_range = state.salaryFilter.value;
     }
@@ -951,15 +948,15 @@ const Job = () => {
                 isClearable={true}
               />
             </div>
-            {/* <div className="group relative">
+            <div className="group relative">
               <CustomSelect
-                options={state.typeList}
-                value={state.typeFilter}
-                onChange={(e) => setState({ typeFilter: e })}
-                placeholder="Select job type"
+                options={JOB_STATUS}
+                value={state.statusFilter}
+                onChange={(e) => setState({ statusFilter: e })}
+                placeholder="Select status"
                 isClearable={true}
               />
-            </div> */}
+            </div>
 
             {/* <div className="group relative">
               <CustomSelect

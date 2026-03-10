@@ -293,7 +293,6 @@ export const interview = Yup.object().shape({
   roundName: Yup.string().required("Round name is required"),
 
   interviewStatus: Yup.string().required("Interview status is required"),
-  interview_link: Yup.string().required("Interview link is required"),
 });
 
 export const single_interview = Yup.object().shape({
@@ -318,5 +317,4 @@ export const single_interview = Yup.object().shape({
   roundName: Yup.string().required("Round name is required"),
 
   interviewStatus: Yup.string().required("Interview status is required"),
-  interview_link: Yup.string().required("Interview link is required"),
 });
