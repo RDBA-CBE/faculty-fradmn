@@ -109,7 +109,7 @@ export const menuConfig = {
       key: "master",
        children: [
         {
-          label: "Panel Management",
+          label: "Panel Members",
           href: "/faculty/master/panel",
         },
         {
@@ -215,7 +215,7 @@ export const menuConfig = {
       key: "master",
        children: [
         {
-          label: "Panel Management",
+          label: "Panel Members",
           href: "/faculty/master/panel",
         },
         {
@@ -321,7 +321,7 @@ export const menuConfig = {
       key: "master",
        children: [
         {
-          label: "Panel Management",
+          label: "Panel Members",
           href: "/faculty/master/panel",
         },
         {
@@ -595,7 +595,7 @@ export const OwnmenuConfig = {
       key: "master",
        children: [
         {
-          label: "Panel Management",
+          label: "Panel Members",
           href: "/faculty/master/panel",
         },
         {
