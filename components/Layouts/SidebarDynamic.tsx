@@ -66,7 +66,7 @@ const SidebarDynamic = () => {
         return (
           <div key={idx}>
             <h2 className="-mx-4 mb-1 flex items-center bg-white-light/30 px-7 py-3 font-extrabold uppercase dark:bg-dark dark:bg-opacity-[0.08]">
-              <IconMinus className="hidden h-5 w-4 flex-none" />
+              <IconMinus className="hidden h-5 w-4 flex-none " />
               <span>{t(item.label)}</span>
             </h2>
             <li className="nav-item">
@@ -86,7 +86,7 @@ const SidebarDynamic = () => {
             >
               <div className="flex items-center">
                 {Icon && (
-                  <Icon className="shrink-0 group-hover:!text-primary" />
+                  <Icon className="shrink-0 !text-[#01014b]" />
                 )}
                 <span className="text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3">
                   {t(item.label)}
@@ -109,7 +109,7 @@ const SidebarDynamic = () => {
             >
               <div className="flex items-center">
                 {Icon && (
-                  <Icon className="shrink-0 group-hover:!text-primary" />
+                  <Icon className="shrink-0 !text-[#01014b]" />
                 )}
                 <span className="text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3">
                   {t(item.label)}
@@ -157,21 +157,21 @@ const SidebarDynamic = () => {
   return (
     <div className={semidark ? "dark" : ""}>
       <nav
-        className={`sidebar fixed bottom-0 top-0 z-50 h-full min-h-screen w-[260px] shadow-[5px_0_25px_0_rgba(94,92,154,0.1)] transition-all duration-300 ${
+        className={`sidebar fixed bottom-0 top-0 z-50 h-full min-h-screen w-[230px]  transition-all duration-300  ${
           semidark ? "text-white-dark" : ""
         }`}
       >
-        <div className="h-full bg-white dark:bg-black">
+        <div className="h-full bg-lblue dark:bg-black  border-r border-lblue">
           {/* Logo */}
-          <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center justify-between px-2 py-3">
             <Link href="/" className="main-logo flex shrink-0 items-center ">
             <div></div>
               <img
-                className="ml-[5px] w-8 flex-none"
+                className="ml-[5px] w-6 flex-none"
                 src="/assets/images/Logo.png"
                 alt="logo"
               />
-              <span className="align-middle text-2xl font-semibold dark:text-white-light lg:inline ltr:ml-1.5 rtl:mr-1.5">
+              <span className="align-middle text-lg font-semibold dark:text-white-light lg:inline ltr:ml-1.5 rtl:mr-1.5">
                 {t("Faculty Pro")}
               </span>
             </Link>
@@ -192,7 +192,7 @@ const SidebarDynamic = () => {
                 onClick={() => setShowOwn(!showOwn)}
                 className="flex w-full items-center justify-between"
               >
-                <span className="align-middle text-xl font-semibold dark:text-white-light">
+                <span className="align-middle text-lg font-semibold  dark:text-white-light">
                   {t("Own")}
                 </span>
                 <IconCaretDown
@@ -213,8 +213,8 @@ const SidebarDynamic = () => {
                 onClick={() => setShowTeam(!showTeam)}
                 className="flex w-full items-center justify-between"
               >
-                <span className="align-middle text-xl font-semibold dark:text-white-light">
-                  {t("Team")}
+                <span className="align-middle text-lg font-semibold dark:text-white-light">
+                  {t("TEAM")}
                 </span>
                 <IconCaretDown
                   className={`transition-transform ${!showTeam ? "-rotate-90" : ""}`}

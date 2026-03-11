@@ -256,8 +256,8 @@ const Header = () => {
         themeConfig.semidark && themeConfig.menu === "horizontal" ? "dark" : ""
       }`}
     >
-      <div className="shadow-sm">
-        <div className="relative flex w-full items-center bg-white px-5 py-2.5 dark:bg-black">
+      <div className="">
+        <div className="relative flex w-full items-center bg-lblue px-5 py-2.5 dark:bg-black  border-b border-lblue z-2">
           <div className="horizontal-logo flex items-center justify-between lg:hidden ltr:mr-2 rtl:ml-2">
             <Link href="/" className="main-logo flex shrink-0 items-center">
               <img

@@ -87,11 +87,11 @@
 
     .sidebar .nav-item > button,
     .sidebar .nav-item > a {
-        @apply mb-1 flex w-full items-center justify-between overflow-hidden whitespace-nowrap rounded-md p-2.5 text-[#506690] hover:bg-[#000]/[0.08] hover:text-black dark:hover:bg-[#181f32] dark:hover:text-white-dark;
+        @apply mb-1 flex w-full items-center justify-between overflow-hidden whitespace-nowrap rounded-md py-2.5 px-0 text-[#506690] hover:bg-[#000]/[0.08] hover:text-black dark:hover:bg-[#181f32] dark:hover:text-white-dark;
     }
     .sidebar .nav-item > button.active,
     .sidebar .nav-item > a.active {
-        @apply bg-[#000]/[0.08] text-black dark:bg-[#181f32] dark:text-white-dark;
+        @apply bg-[#fff] text-black dark:bg-[#181f32] dark:text-white-dark;
     }
 
     .sidebar .nav-item > button.active > div > span,
@@ -115,7 +115,7 @@ hover:text-primary hover:before:!bg-primary ltr:before:mr-2 rtl:before:ml-2 dark
     }
 
     .main-container .main-content {
-        @apply transition-all duration-300 lg:ltr:ml-[260px] lg:rtl:mr-[260px];
+        @apply transition-all duration-300 lg:ltr:ml-[230px] lg:rtl:mr-[230px];
     }
 
     /* Horizontal layouts */
@@ -793,4 +793,32 @@ pre.hljs {
      border-radius: 5px;
      /* padding: 5px 16px; */
      padding: 1px 8px;
+   }
+
+   .bg-lblue{
+    background-color: #ededf8;
+   }
+   .bg-dblue{
+    background-color: #01014b;
+   }
+
+   .text-dblue{
+    color: #01014b;
+   }
+
+   .border-lblue{
+    border-color: #01014b14;
+   }
+
+   .page-ti{
+    font-size:24px ;
+    color: #000;
+   }
+
+   p , span, li, button, div{
+    font-weight: 400;
+   }
+
+   h1, h2, h3 , h4, h5, h6{
+    font-weight: 500;
    }
