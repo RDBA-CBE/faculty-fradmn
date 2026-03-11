@@ -610,3 +610,23 @@ export const parseApiError = (error: any): string => {
   
   return "An error occurred. Please try again.";
 };
+
+
+export const formatScheduleDateTime = (date, time) => {
+  const d = new Date(date);
+
+  if (time) {
+    const [hours, minutes] = time.split(":");
+    d.setHours(hours);
+    d.setMinutes(minutes);
+  }
+
+  return d.toLocaleString("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+};

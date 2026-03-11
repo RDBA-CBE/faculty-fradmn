@@ -156,7 +156,7 @@ const Job = () => {
           1,
           "",
           false,
-          res?.institution?.institution_id,
+          res?.institution?.id,
           res.id
         );
       } else if (res?.role == ROLES.HR) {
@@ -322,7 +322,7 @@ const Job = () => {
       if (institutionId) {
         body.institution = institutionId;
       } else if (state.profile?.role === "institution_admin") {
-        body.institution = state.profile?.institution?.institution_id;
+        body.institution = state.profile?.institution?.id;
       }
 
       if (createdBy) {
@@ -773,7 +773,7 @@ const Job = () => {
                     const institutionId =
                       state.profile?.role === ROLES.SUPER_ADMIN
                         ? state.institutionFilter?.value
-                        : state.profile?.institution?.institution_id;
+                        : state.profile?.institution?.id;
                     state.collegeNext &&
                       collegeDropdownList(
                         state.collegePage + 1,

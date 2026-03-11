@@ -113,17 +113,18 @@ export default function Newjob() {
   const profile = async () => {
     try {
       const res: any = await Models.auth.profile();
+console.log('✌️res --->', res);
       setState({ profile: res });
 
       if (res?.role == ROLES.INSTITUTION_ADMIN) {
         setState({
           profile: res,
           institution: {
-            value: res?.institution?.institution_id,
-            label: res?.institution?.institution_name,
+            value: res?.institution?.id,
+            label: res?.institution?.name,
           },
         });
-        fetchColleges(res?.institution?.institution_id, 1);
+        fetchColleges(res?.institution?.institution?.id, 1);
       } else if (res?.role == ROLES.HR) {
         setState({
           profile: res,
@@ -143,6 +144,7 @@ export default function Newjob() {
       console.error("Error fetching institutions:", error);
     }
   };
+
 
   const getJobDetails = async (profileResponse) => {
     try {
@@ -620,17 +622,17 @@ export default function Newjob() {
         // body.department = state.department?.value;
         body.department = state.department?.map((dept: any) => dept.value);
       } else if (state.profile?.role == ROLES.INSTITUTION_ADMIN) {
-        body.institution = state.profile?.institution?.institution_id;
+        body.institution = state.profile?.institution?.id;
         body.college = state.college?.value;
         // body.department = state.department?.value;
         body.department = state.department?.map((dept: any) => dept.value);
       } else if (state.profile?.role == ROLES.HR) {
-        body.institution = state.profile?.institution?.institution_id;
+        body.institution = state.profile?.institution?.id;
         body.college = state.profile?.college?.college_id;
         // body.department = state.department?.value;
         body.department = state.department?.map((dept: any) => dept.value);
       } else {
-        body.institution = state.profile?.institution?.institution_id;
+        body.institution = state.profile?.institution?.id;
         body.college = state.profile?.college?.college_id;
         body.department = state.profile?.department?.department_id;
       }
@@ -1035,7 +1037,7 @@ export default function Newjob() {
                     <TextInput
                       title="Institution"
                       placeholder="Institution"
-                      value={state.profile?.institution?.institution_name}
+                      value={state.profile?.institution?.name}
                       onChange={(e) => {}}
                       disabled
                     />

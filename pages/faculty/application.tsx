@@ -20,6 +20,7 @@ import {
   capitalizeFLetter,
   showDeleteAlert,
   useSetState,
+  formatScheduleDateTime,
 } from "@/utils/function.utils";
 import Modal from "@/components/modal/modal.component";
 import { Models } from "@/imports/models.import";
@@ -33,6 +34,7 @@ import {
   XCircle,
   UserCheck,
   UserX,
+  MessageSquare,
 } from "lucide-react";
 import CustomeDatePicker from "@/components/datePicker";
 import PrivateRouter from "@/hook/privateRouter";
@@ -146,6 +148,9 @@ const Application = () => {
       { value: "scheduled", label: "Scheduled" },
       { value: "completed", label: "Completed" },
     ],
+    isOpenRound: false,
+    expandedRounds: {},
+    selectedRecords: [],
   });
 
   const debounceSearch = useDebounce(state.search, 500);
@@ -177,7 +182,7 @@ const Application = () => {
           null,
           state.profile?.id
         );
-        loadJobList(state.profile?.institution?.institution_id, null, null);
+        loadJobList(state.profile?.institution?.id, null, null);
       } else if (role == ROLES.HR) {
         console.log("✌️ROLES.HR --->", ROLES.HR);
         applicationList(
@@ -236,7 +241,7 @@ const Application = () => {
           null,
           state.profile?.id
         );
-        loadJobList(state.profile?.institution?.institution_id, null, null);
+        loadJobList(state.profile?.institution?.id, null, null);
       } else if (role == ROLES.HR) {
         console.log("✌️ROLES.HR --->", ROLES.HR);
         applicationList(
@@ -342,6 +347,14 @@ const Application = () => {
         status: item?.status,
         resume: item?.resume,
         department_name: item?.department?.department_name,
+        application_status: {
+          value: item?.application_status?.id,
+          label: item?.application_status?.name,
+        },
+        interview_status:
+          item?.interview_slots?.length > 0
+            ? item?.interview_slots[item?.interview_slots.length - 1]?.status
+            : "-",
       }));
       setState({
         loading: false,
@@ -415,7 +428,7 @@ const Application = () => {
     } else if (role === ROLES.INSTITUTION_ADMIN) {
       applicationList(
         pageNumber,
-        state.profile?.institution?.institution_id,
+        state.profile?.institution?.id,
         null,
         null,
         state.profile?.id
@@ -504,7 +517,38 @@ const Application = () => {
   };
 
   const handleUpdateStatus = async (row: any, newStatus: string) => {
-    setState({ showStatusModal: true, selectedApplication: row });
+    try {
+      const role = state.profile?.role;
+      if (role === ROLES.SUPER_ADMIN) {
+        applicationList(state.page, null, null, null, state.profile?.id);
+      } else if (role === ROLES.INSTITUTION_ADMIN) {
+        applicationList(
+          state.page,
+          state.profile?.institution?.id,
+          null,
+          null,
+          state.profile?.id
+        );
+      } else if (role === ROLES.HR) {
+        applicationList(
+          state.page,
+          null,
+          state.profile?.college?.college_id,
+          null,
+          state.profile?.id
+        );
+      } else if (role === ROLES.HOD) {
+        applicationList(
+          state.page,
+          null,
+          null,
+          state.profile?.department?.department_id,
+          state.profile?.id
+        );
+      }
+    } catch (error) {
+      Failure("Failed to update status. Please try again.");
+    }
   };
 
   const handleStatusSubmit = async () => {
@@ -529,7 +573,7 @@ const Application = () => {
       } else if (role === ROLES.INSTITUTION_ADMIN) {
         applicationList(
           state.page,
-          state.profile?.institution?.institution_id,
+          state.profile?.institution?.id,
           null,
           null,
           state.profile?.id
@@ -607,7 +651,7 @@ const Application = () => {
       if (institutionId) {
         body.institution = institutionId;
       } else if (state.profile?.role === "institution_admin") {
-        body.institution = state.profile?.institution?.institution_id;
+        body.institution = state.profile?.institution?.id;
       }
       if (createdBy) {
         body.created_by = createdBy;
@@ -813,7 +857,11 @@ const Application = () => {
     try {
       await Models.application.delete(row?.id);
       Success("Application deleted successfully!");
-      applicationList(state.page);
+      handleUpdateStatus("", "");
+      if(state.selectedRecords?.length>0){
+        const filter =state.selectedRecords?.filter((item)=>item != row?.id)
+        setState({ selectedRecords: filter })
+      }
     } catch (error) {
       Failure("Failed to delete application. Please try again.");
     }
@@ -1008,7 +1056,7 @@ const Application = () => {
         selectedApplicants: state.selectedApplicants.map((a) => a.value),
         request_for_change: state.requestForChange,
         roundName: state.roundName,
-        interviewStatus: state.interviewStatus?.label,
+        interviewStatus: "Scheduled",
         response_from_applicant: state.requestForChange,
         interview_link: state.interview_link,
       };
@@ -1027,8 +1075,8 @@ const Application = () => {
         application_ids: state.selectedApplicants.map((a) => a.value),
         response_from_applicant: state.requestForChange,
         round_name: state.roundName,
-        status: state.interviewStatus?.label,
-        interview_link: state.interview_link,
+        status: "Scheduled",
+        interview_link: state.interview_link ?? "",
       };
 
       const formData = buildFormData(body);
@@ -1048,6 +1096,7 @@ const Application = () => {
         interviewStatus: null,
         submitting: false,
         interview_link: "",
+        selectedRecords: [],
       });
       profile();
     } catch (error) {
@@ -1073,6 +1122,107 @@ const Application = () => {
     }
   };
 
+  const handleRound = async (row) => {
+    console.log("✌️row --->", row);
+    try {
+      const res: any = await Models.application.details(row?.id);
+
+      setState({
+        application: res,
+        loading: false,
+        appstatus: row?.application_status,
+      });
+
+      setState({ isOpenRound: true });
+    } catch (error) {
+      console.log("✌️error --->", error);
+    }
+  };
+
+  const updateStatus = async () => {
+    try {
+      setState({ btnLoading: true });
+      const body = {
+        status: state.appstatus?.label,
+      };
+      const res = await Models.application.update(body, state.application?.id);
+      Success("Application status updated successfully!");
+      setState({ btnLoading: false, isOpenRound: false });
+      handleUpdateStatus("", "");
+      if (state.appstatus?.label == "Rejected") {
+        const filter = state.selectedRecords?.filter(
+          (item) => item != state.application?.id
+        );
+        setState({ selectedRecords: filter });
+      }
+    } catch (error) {
+      setState({ btnLoading: false, isOpenRound: false });
+
+      console.log("✌️error --->", error);
+    }
+  };
+
+  const bulkSelect = async () => {
+    try {
+      const responses = await Promise.all(
+        state.selectedRecords.map((id) => Models.application.details(id))
+      );
+
+      const jobMap = new Map();
+      const deptMap = new Map();
+      const applicantMap = new Map();
+
+      responses.forEach((res) => {
+        const job = res?.job_detail;
+        const dept = res?.department;
+
+        // Job
+        if (job && !jobMap.has(job.id)) {
+          jobMap.set(job.id, {
+            value: job.id,
+            label: job.job_title?.trim() || "No Title",
+          });
+        }
+
+        // Department
+        if (dept && !deptMap.has(dept.id)) {
+          deptMap.set(dept.id, {
+            value: dept.id,
+            label: dept.department_name?.trim() || "No Department",
+          });
+        }
+
+        // Applicant
+        if (res?.id && !applicantMap.has(res.id)) {
+          applicantMap.set(res.id, {
+            value: res.id,
+            label: res.applicant_name?.trim() || "No Name",
+          });
+        }
+      });
+
+      const jobList = Array.from(jobMap.values());
+      console.log("✌️jobList --->", jobList);
+      const departmentList = Array.from(deptMap.values());
+      console.log("✌️departmentList --->", departmentList);
+      const applicantList = Array.from(applicantMap.values());
+      console.log("✌️applicantList --->", applicantList);
+
+      if (departmentList?.length > 0) {
+        loadPanelMembers(1, "", false, departmentList);
+      }
+
+      setState({
+        selectedJobs: jobList,
+        selectedDepartments: departmentList,
+        selectedApplicants: applicantList,
+        showInterviewModal: true,
+      });
+    } catch (error) {
+      console.log("error --->", error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-3 dark:from-gray-900 dark:to-gray-800">
       {/* Header Section */}
@@ -1086,14 +1236,14 @@ const Application = () => {
               Manage and review job applications
             </p>
           </div>
-          <button
+          {/* <button
             onClick={() => setState({ showInterviewModal: true })}
             className="group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
             <UserCheck className="relative z-10 h-5 w-5" />
             <span className="relative z-10"> Interview Schedule</span>
-          </button>
+          </button> */}
           {/* <button
             onClick={() => setState({ showModal: true })}
             className='group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl'
@@ -1238,7 +1388,7 @@ const Application = () => {
                     const institutionId =
                       state.profile?.role === ROLES.SUPER_ADMIN
                         ? state.institutionFilter?.value
-                        : state.profile?.institution?.institution_id;
+                        : state.profile?.institution?.id;
                     state.collegeNext &&
                       collegeDropdownList(
                         state.collegePage + 1,
@@ -1437,18 +1587,21 @@ const Application = () => {
       </div>
 
       {/* Table Section */}
-      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
+      <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
+        {/* Header */}
         <div className="border-b border-gray-200 p-6 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
               Applications List
             </h3>
+
             <div className="text-sm text-gray-500 dark:text-gray-400">
               {state.count} applications found
             </div>
           </div>
         </div>
 
+        {/* Table */}
         <div className="overflow-x-auto">
           <DataTable
             noRecordsText="No applications found"
@@ -1456,6 +1609,22 @@ const Application = () => {
             className="table-hover whitespace-nowrap"
             records={state.applicationList}
             fetching={state.loading}
+            selectedRecords={state.applicationList?.filter((record) =>
+              state.selectedRecords.includes(record.id)
+            )}
+            onSelectedRecordsChange={(records) => {
+              const currentPageIds = state.applicationList?.map((r) => r.id);
+
+              const otherPageSelections = state.selectedRecords?.filter(
+                (id) => !currentPageIds.includes(id)
+              );
+
+              const newSelections = records?.map((r:any) => r.id);
+
+              setState({
+                selectedRecords: [...otherPageSelections, ...newSelections],
+              });
+            }}
             customLoader={
               <div className="flex items-center justify-center py-12">
                 <div className="flex items-center gap-3">
@@ -1468,7 +1637,7 @@ const Application = () => {
             }
             columns={[
               {
-                accessor: "Job Position",
+                accessor: "job_title",
                 title: "Job Position",
                 render: ({ job_title }) => (
                   <div className="text-gray-600 dark:text-gray-400">
@@ -1477,7 +1646,6 @@ const Application = () => {
                 ),
                 sortable: true,
               },
-
               {
                 accessor: "department_name",
                 title: "Department",
@@ -1488,7 +1656,6 @@ const Application = () => {
                 ),
                 sortable: true,
               },
-
               {
                 accessor: "applicant_name",
                 title: "Faculty Name",
@@ -1547,34 +1714,45 @@ const Application = () => {
                 accessor: "actions",
                 title: "Actions",
                 textAlignment: "center",
-                render: (row: any) => (
+                render: (row) => (
                   <div className="flex items-center justify-center gap-2">
                     <button
+                      onClick={() => handleRound(row)}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-pink-100 text-pink-600 hover:bg-pink-200"
+                      title="Interview Round"
+                    >
+                      <MessageSquare className="h-4 w-4" />
+                    </button>
+
+                    <button
                       onClick={() => handleDownloadResume(row)}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 transition-all duration-200 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-400"
+                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200"
                       title="Resume"
                     >
                       <FileText className="h-4 w-4" />
                     </button>
+
                     <button
                       onClick={() => handleEdit(row)}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-100 text-green-600 transition-all duration-200 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-400"
+                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-100 text-green-600 hover:bg-green-200"
                       title="View"
                     >
                       <IconEye className="h-4 w-4" />
                     </button>
-                    {state.profile?.role == ROLES.HR && (
+
+                    {state.profile?.role === ROLES.HR && (
                       <button
-                        onClick={() => handleUpdateStatus(row, "")}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 text-purple-600 transition-all duration-200 hover:bg-purple-200 dark:bg-purple-900 dark:text-purple-400"
+                        onClick={() => handleUpdateStatus(row,"")}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 text-purple-600 hover:bg-purple-200"
                         title="Update Status"
                       >
                         <UserCheck className="h-4 w-4" />
                       </button>
                     )}
+
                     <button
                       onClick={() => handleDelete(row)}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600 transition-all duration-200 hover:bg-red-200 dark:bg-red-900 dark:text-red-400"
+                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600 hover:bg-red-200"
                       title="Delete"
                     >
                       <IconTrash className="h-4 w-4" />
@@ -1585,7 +1763,7 @@ const Application = () => {
             ]}
             sortStatus={{
               columnAccessor: state.sortBy,
-              direction: state.sortOrder as "asc" | "desc",
+              direction: state.sortOrder,
             }}
             onSortStatusChange={({ columnAccessor, direction }) => {
               setState({
@@ -1599,6 +1777,7 @@ const Application = () => {
           />
         </div>
 
+        {/* Pagination */}
         <div className="border-t border-gray-200 p-6 dark:border-gray-700">
           <Pagination
             activeNumber={handlePageChange}
@@ -1608,6 +1787,25 @@ const Application = () => {
           />
         </div>
       </div>
+      
+
+      {/* Floating Interview Schedule Button */}
+      {state.selectedRecords?.length > 0 && (
+        <div className="fixed bottom-6 right-9 z-50">
+          <button
+            onClick={bulkSelect}
+            className="group relative inline-flex items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-medium text-white shadow-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-2xl"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+
+            <UserCheck className="relative z-10 h-5 w-5" />
+
+            <span className="relative z-10">
+              Interview Schedule ({state.selectedRecords.length})
+            </span>
+          </button>
+        </div>
+      )}
 
       {/* Status Update Modal */}
       <Modal
@@ -1906,6 +2104,7 @@ const Application = () => {
                 loading={state.jobLoading}
                 error={state.errors.selectedJobs}
                 required
+                disabled
               />
 
               <CustomSelect
@@ -1946,9 +2145,45 @@ const Application = () => {
                 }}
                 isMulti
                 placeholder="Select Departments"
-                disabled={!state.selectedJobs?.length}
                 error={state.errors.selectedDepartments}
                 required
+                disabled
+              />
+
+              <CustomSelect
+                title="Select Faculty"
+                options={state.applicantsList}
+                value={state.selectedApplicants}
+                onChange={(e) =>
+                  setState({
+                    selectedApplicants: e,
+                    errors: { ...state.errors, selectedApplicants: "" },
+                  })
+                }
+                onSearch={(searchTerm) => {
+                  loadApplicantsByDept(
+                    1,
+                    searchTerm,
+                    false,
+                    state.selectedDepartments
+                  );
+                }}
+                loadMore={() => {
+                  if (state.appNext) {
+                    loadApplicantsByDept(
+                      state.appPage + 1,
+                      "",
+                      false,
+                      state.selectedDepartments
+                    );
+                  }
+                }}
+                placeholder="Select Faculty"
+                isMulti
+                loading={state.applicantsLoading}
+                error={state.errors?.selectedApplicants}
+                required
+                disabled
               />
 
               <CustomSelect
@@ -1987,41 +2222,6 @@ const Application = () => {
                 required
               />
 
-              <CustomSelect
-                title="Select Faculty"
-                options={state.applicantsList}
-                value={state.selectedApplicants}
-                onChange={(e) =>
-                  setState({
-                    selectedApplicants: e,
-                    errors: { ...state.errors, selectedApplicants: "" },
-                  })
-                }
-                onSearch={(searchTerm) => {
-                  loadApplicantsByDept(
-                    1,
-                    searchTerm,
-                    false,
-                    state.selectedDepartments
-                  );
-                }}
-                loadMore={() => {
-                  if (state.appNext) {
-                    loadApplicantsByDept(
-                      state.appPage + 1,
-                      "",
-                      false,
-                      state.selectedDepartments
-                    );
-                  }
-                }}
-                placeholder="Select Faculty"
-                isMulti
-                loading={state.applicantsLoading}
-                disabled={!state.selectedDepartments?.length}
-                error={state.errors?.selectedApplicants}
-                required
-              />
               <CustomeDatePicker
                 title="Interview Slot"
                 value={state.interviewSlot}
@@ -2064,7 +2264,7 @@ const Application = () => {
                 }
                 error={state.errors?.interview_link}
               />
-              <CustomSelect
+              {/* <CustomSelect
                 title="Status"
                 options={state.interviewStatusList}
                 value={state.interviewStatus}
@@ -2077,7 +2277,7 @@ const Application = () => {
                 placeholder="Select Status"
                 error={state.errors?.interviewStatus}
                 required
-              />
+              /> */}
 
               <div className="flex items-center gap-2">
                 <input
@@ -2126,6 +2326,114 @@ const Application = () => {
               >
                 {state.submitting ? "Creating..." : "Create Schedule"}
               </button>
+            </div>
+          </div>
+        )}
+      />
+
+      <Modal
+        subTitle="Interview Rounds"
+        open={state.isOpenRound}
+        close={() => setState({ isOpenRound: false })}
+        closeIcon={() => setState({ isOpenRound: false })}
+        padding="px-0"
+        renderComponent={() => (
+          <div className="flex h-[75vh] flex-col">
+            {/* Scrollable Content */}
+            <div className="flex-1 space-y-6 overflow-y-auto px-4">
+              {/* Candidate */}
+              <div className="rounded-lg border bg-gray-50 p-4">
+                <h3 className="text-lg font-semibold">
+                  {state.application?.first_name} {state.application?.last_name}
+                </h3>
+                <p className="text-sm text-gray-500">
+                  {state.application?.email} • {state.application?.phone}
+                </p>
+              </div>
+
+              {/* Rounds */}
+              <div className="space-y-4 pb-6">
+                {state.application?.interview_slots?.map((round) => (
+                  <div
+                    key={round.id}
+                    className="rounded-lg border bg-white p-4 shadow-sm"
+                  >
+                    {/* Round Header */}
+                    <div className="mb-3 flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold">
+                          {capitalizeFLetter(round.round_name)}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {formatScheduleDateTime(
+                            round.scheduled_date,
+                            round.scheduled_time
+                          )}
+                        </p>
+                      </div>
+
+                      <span
+                        className={`rounded px-3 py-1 text-xs font-semibold ${
+                          round.status === "completed"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-yellow-100 text-yellow-700"
+                        }`}
+                      >
+                        {capitalizeFLetter(round.status)}
+                      </span>
+                    </div>
+
+                    {/* Feedback List */}
+                    <div className="space-y-2">
+                      {round.panels?.map((panel) => (
+                        <div
+                          key={panel.id}
+                          className="flex items-start justify-between rounded border bg-gray-50 p-3"
+                        >
+                          <div>
+                            <p className="text-sm">{panel.name}</p>
+
+                            {panel?.feedbacks?.[0]?.feedback_text && (
+                              <p className="mt-1 text-sm text-gray-700">
+                                {capitalizeFLetter(
+                                  panel.feedbacks[0].feedback_text
+                                )}
+                              </p>
+                            )}
+                          </div>
+
+                          {panel?.feedbacks?.[0]?.score && (
+                            <span className="text-sm font-semibold text-blue-600">
+                              {panel.feedbacks[0].score}/10
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Fixed Bottom Section */}
+            <div className="sticky bottom-0 border-t bg-white p-4">
+              <div className="flex items-end gap-3">
+                <div className="flex-1">
+                  <CustomSelect
+                    options={state.applicationStatusList}
+                    value={state.appstatus}
+                    onChange={(e) => setState({ appstatus: e })}
+                    placeholder="Select final status"
+                  />
+                </div>
+
+                <button
+                  onClick={() => updateStatus()}
+                  className="rounded bg-blue-600 px-5 py-2 text-white"
+                >
+                  Update Status
+                </button>
+              </div>
             </div>
           </div>
         )}

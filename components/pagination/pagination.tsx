@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import IconChevronLeft from "@/components/Icon/IconArrowLeft";
 import IconChevronRight from "@/components/Icon/IconArrowForward";
+import IconArrowBackward from "../Icon/IconArrowBackward";
 
 const Pagination = (props) => {
   const { activeNumber, totalPage, currentPages, pageSize = 10 } = props;
@@ -85,7 +86,7 @@ const Pagination = (props) => {
               : "bg-white text-gray-700 shadow-sm ring-1 ring-gray-300 hover:bg-gray-50 hover:shadow-md dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-600 dark:hover:bg-gray-700"
           }`}
         >
-          <IconChevronLeft className="h-4 w-4" />
+          <IconArrowBackward className="h-4 w-4" />
           <span className="hidden sm:inline">Previous</span>
         </button>
 

@@ -170,18 +170,18 @@ const Users = () => {
       if (res?.role === ROLES.INSTITUTION_ADMIN) {
         // if (res?.institution) {
         const dropdown = {
-          value: res?.institution?.institution_id,
-          label: res?.institution?.institution_id,
+          value: res?.institution?.id,
+          label: res?.institution?.name,
         };
 
         setState({
-          profile_institution: res?.institution?.institution_name,
+          profile_institution: res?.institution?.name,
           selectedHRInstitution: dropdown,
         });
         hrCollegeList(1, "", false, dropdown);
 
         setState({
-          profile_institution: res?.institution?.institution_name,
+          profile_institution: res?.institution?.name,
           selectedHODInstitution: dropdown,
         });
         hodCollegeList(1, "", false, dropdown);
@@ -191,7 +191,7 @@ const Users = () => {
         if (res?.college) {
           const dropdown = Dropdown(res?.institution, "institution_name");
           setState({
-            profile_institution: res?.institution?.institution_name,
+            profile_institution: res?.institution?.name,
             selectedHODInstitution: dropdown,
           });
           hodCollegeList(1, "", false, dropdown);
@@ -257,7 +257,7 @@ const Users = () => {
         qualification: item?.education_qualification,
         experience: item?.experience,
         status: item?.status,
-        college: item?.colleges?.map((item) => item?.name).join(", "),
+        college: item?.colleges?.map((item) => item?.name),
         institution: item?.institution?.name,
         institutionData: item?.institution
           ? { label: item?.institution?.name, value: item?.institution?.id }
@@ -340,7 +340,7 @@ const Users = () => {
           body.team = "No";
         } else {
           body.team = "Yes";
-          body.institution_id = state.profile?.institution?.institution_id;
+          body.institution_id = state.profile?.institution?.id;
         }
       } else {
         body.created_by = userId;
@@ -417,7 +417,7 @@ const Users = () => {
       if (institutionId) {
         body.institution = institutionId;
       } else if (state.profile?.role === ROLES.INSTITUTION_ADMIN) {
-        body.institution = state.profile?.institution?.institution_id;
+        body.institution = state.profile?.institution?.id;
       }
 
       const res: any = await Models.college.list(page, body);
@@ -541,10 +541,6 @@ const Users = () => {
       setState({ departmentLoading: false });
     }
   };
-  console.log(
-    "✌️superAdminDepartmentList --->",
-    state.superAdminDepartmentList
-  );
 
   const hrInstitutionList = async (page, search = "", loadMore = false) => {
     try {
@@ -1438,13 +1434,121 @@ const Users = () => {
         title: "College",
         sortable: true,
 
-        render: (row: any) => (
-          <div className="text-gray-600 dark:text-gray-400">{row?.college}</div>
-        ),
+        render: (row: any) => {
+          const department = row?.college;
+          if (!department || department?.length === 0) {
+            return <span className="text-gray-400">-</span>;
+          }
+
+          const firstDept = department?.[0];
+          const otherDept = department?.slice(1);
+          const maxShow = 3;
+          const remaining = otherDept?.length - maxShow;
+          const visibleDept = otherDept?.slice(0, maxShow);
+          const hiddenDept = otherDept?.slice(maxShow);
+
+          return (
+            <div className="flex items-center gap-2">
+              {/* First department text */}
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {firstDept}
+              </span>
+
+              {/* Avatars */}
+              <div className="flex items-center -space-x-2">
+                {visibleDept?.map((dept: string, index: number) => (
+                  <div key={index} className="group relative">
+                    <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-blue-500 text-xs font-semibold text-white dark:border-gray-900">
+                      {dept?.slice(0, 2)?.toUpperCase()}
+                    </div>
+
+                    {/* Tooltip */}
+                    <div className="absolute bottom-10 left-1/2 z-[999] -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
+                      {capitalizeFLetter(dept)}
+                    </div>
+                  </div>
+                ))}
+                {remaining > 0 && (
+                  <div className="group relative">
+                    <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-gray-400 text-xs font-semibold text-white dark:border-gray-900">
+                      +{remaining}
+                    </div>
+
+                    {/* Remaining tooltip */}
+                    <div className="absolute  bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
+                      {hiddenDept
+                        ?.map((d: string) => capitalizeFLetter(d))
+                        .join(", ")}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        },
       });
     }
 
     if (state.activeTab === "hod") {
+      baseColumns.splice(3, 0, {
+        accessor: "college",
+        title: "College",
+        sortable: true,
+
+        render: (row: any) => {
+          const department = row?.college;
+          if (!department || department?.length === 0) {
+            return <span className="text-gray-400">-</span>;
+          }
+
+          const firstDept = department?.[0];
+          const otherDept = department?.slice(1);
+          const maxShow = 3;
+          const remaining = otherDept?.length - maxShow;
+          const visibleDept = otherDept?.slice(0, maxShow);
+          const hiddenDept = otherDept?.slice(maxShow);
+
+          return (
+            <div className="flex items-center gap-2">
+              {/* First department text */}
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {firstDept}
+              </span>
+
+              {/* Avatars */}
+              <div className="flex items-center -space-x-2">
+                {visibleDept?.map((dept: string, index: number) => (
+                  <div key={index} className="group relative">
+                    <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-blue-500 text-xs font-semibold text-white dark:border-gray-900">
+                      {dept?.slice(0, 2)?.toUpperCase()}
+                    </div>
+
+                    {/* Tooltip */}
+                    <div className="absolute bottom-10 left-1/2 z-[999] -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
+                      {capitalizeFLetter(dept)}
+                    </div>
+                  </div>
+                ))}
+                {remaining > 0 && (
+                  <div className="group relative">
+                    <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-gray-400 text-xs font-semibold text-white dark:border-gray-900">
+                      +{remaining}
+                    </div>
+
+                    {/* Remaining tooltip */}
+                    <div className="absolute  bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
+                      {hiddenDept
+                        ?.map((d: string) => capitalizeFLetter(d))
+                        .join(", ")}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        },
+      });
+
       baseColumns.splice(3, 0, {
         accessor: "department",
         title: "Department",
@@ -1457,31 +1561,22 @@ const Users = () => {
       });
     }
 
-    if (state.activeTab === "hod" || state.activeTab === "applicant") {
-      baseColumns.push(
-        {
-          accessor: "qualification",
-          title: "Qualification",
-          sortable: true,
+    // if (state.activeTab === "hod" || state.activeTab === "applicant") {
+    //   baseColumns.push(
+    //     {
+    //       accessor: "qualification",
+    //       title: "Qualification",
+    //       sortable: true,
 
-          render: (row: any) => (
-            <div className="text-gray-600 dark:text-gray-400">
-              {row?.qualification}
-            </div>
-          ),
-        }
+    //       render: (row: any) => (
+    //         <div className="text-gray-600 dark:text-gray-400">
+    //           {row?.qualification}
+    //         </div>
+    //       ),
+    //     }
 
-        // {
-        //   accessor: "experience",
-        //   title: "Experience",
-        //   render: (row: any) => (
-        //     <div className="text-gray-600 dark:text-gray-400">
-        //       {row?.experience}
-        //     </div>
-        //   ),
-        // }
-      );
-    }
+    //   );
+    // }
 
     baseColumns.push({
       accessor: "actions",

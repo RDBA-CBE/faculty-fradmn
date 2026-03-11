@@ -232,7 +232,7 @@ const CollegeAndDepartment = () => {
       body.college = profileRef.current?.college?.map(
         (item) => item.college_id
       );
-      body.institution = profileRef.current?.institution?.institution_id;
+      body.institution = profileRef.current?.institution?.id;
 
       console.log("body", body);
 
@@ -249,8 +249,8 @@ const CollegeAndDepartment = () => {
         college_name: item?.college_name,
         college_id: item?.college,
         total_jobs: item?.total_jobs,
-        institution_name: item?.college_name,
-        institution_id: item?.college,
+        institution_name: item?.institution_name,
+        institution_id: item?.institution,
         department_head: item?.hod?.name,
         hod_id: item?.hod?.id,
 

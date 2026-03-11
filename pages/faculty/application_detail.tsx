@@ -6,6 +6,7 @@ import {
   buildFormData,
   capitalizeFLetter,
   Failure,
+  formatScheduleDateTime,
   Success,
   useSetState,
 } from "@/utils/function.utils";
@@ -44,6 +45,7 @@ import {
   FileText,
   Send,
   ExternalLink,
+  ClipboardList,
 } from "lucide-react";
 import { FRONTEND_URL } from "@/utils/constant.utils";
 import Link from "next/link";
@@ -204,7 +206,8 @@ const ApplicationDetail = () => {
         selectedApplicants: [state.application?.id],
         request_for_change: state.requestForChange,
         roundName: state.roundName,
-        interviewStatus: state.interviewStatus?.label,
+        interviewStatus: "Scheduled",
+
         response_from_applicant: state.requestForChange,
         interview_link: state.interview_link,
       };
@@ -223,7 +226,7 @@ const ApplicationDetail = () => {
         application_ids: [state.application?.id],
         response_from_applicant: state.requestForChange,
         round_name: state.roundName,
-        status: state.interviewStatus?.label,
+        status: "Scheduled",
         interview_link: state.interview_link,
       };
       console.log("✌️body --->", body);
@@ -292,14 +295,14 @@ const ApplicationDetail = () => {
             Back
           </button>
           <div className="flex items-center gap-3">
-            <button
+            {/* <button
               onClick={() => setState({ showInterviewModal: true })}
               className="group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
               <UserCheck className="relative z-10 h-5 w-5" />
               <span className="relative z-10"> Interview Schedule</span>
-            </button>
+            </button> */}
 
             {app?.applicant ? (
               <Link
@@ -421,6 +424,18 @@ const ApplicationDetail = () => {
                         month: "long",
                         day: "numeric",
                       })}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4 rounded-lg bg-pink-50 p-3 dark:bg-pink-900/20">
+                  <ClipboardList className="mt-0.5 h-5 w-5 text-pink-600" />
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Applicant summary
+                    </p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                      {capitalizeFLetter(app?.message)}
                     </p>
                   </div>
                 </div>
@@ -632,7 +647,7 @@ const ApplicationDetail = () => {
             Interview Process
           </h3>
 
-          <div className="space-y-4">
+          <div className="space-y-4 ">
             {state.application?.interview_slots?.map((round, index) => (
               <div
                 key={round.id}
@@ -659,7 +674,10 @@ const ApplicationDetail = () => {
                         {round.round_name}
                       </h4>
                       <p className="mt-1 text-sm font-medium text-gray-500">
-                        {new Date(round.scheduled_date).toLocaleString()}
+                        {formatScheduleDateTime(
+                          round.scheduled_date,
+                          round.scheduled_time
+                        )}
                       </p>
                     </div>
                   </div>
@@ -844,7 +862,16 @@ const ApplicationDetail = () => {
               </div>
             ))}
           </div>
-
+          <div className="mt-5 flex justify-end">
+            <button
+              onClick={() => setState({ showInterviewModal: true })}
+              className=" group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+              <UserCheck className="relative z-10 h-5 w-5" />
+              <span className="relative z-10"> Interview Schedule</span>
+            </button>
+          </div>
           {/* Final Decision */}
         </div>
       )}
@@ -898,15 +925,6 @@ const ApplicationDetail = () => {
         }
         renderComponent={() => (
           <div className="p-6">
-            <div className="mb-6 text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-green-100 to-teal-100 dark:from-green-900 dark:to-teal-900">
-                <UserCheck className="h-8 w-8 text-green-600 dark:text-green-400" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Create Interview Schedule
-              </h2>
-            </div>
-
             <div className="space-y-5">
               <TextInput
                 title="Select Jobs"
@@ -1029,20 +1047,6 @@ const ApplicationDetail = () => {
                   })
                 }
                 error={state.errors?.interview_link}
-              />
-              <CustomSelect
-                title="Status"
-                options={state.interviewStatusList}
-                value={state.interviewStatus}
-                onChange={(e) =>
-                  setState({
-                    interviewStatus: e,
-                    errors: { ...state.errors, interviewStatus: "" },
-                  })
-                }
-                placeholder="Select Status"
-                error={state.errors?.interviewStatus}
-                required
               />
 
               <div className="flex items-center gap-2">

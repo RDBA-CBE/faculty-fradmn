@@ -245,7 +245,7 @@ const CollegeAndDepartment = () => {
       setState({ userLoading: true });
       const body = {
         role: "hr",
-        institution_id: profileData?.institution?.institution_id,
+        institution_id: profileData?.institution?.id,
       };
       const res: any = await Models.auth.userList(page, body);
       const userDropdown = Dropdown(res?.results, "username");
@@ -725,7 +725,7 @@ const CollegeAndDepartment = () => {
     }
 
     if (state.profile?.role === ROLES.INSTITUTION_ADMIN) {
-      body.institution = state.profile?.institution?.institution_id;
+      body.institution = state.profile?.institution?.id;
     } else if (state.institutionFilter?.value) {
       body.institution = state.institutionFilter?.value;
     }

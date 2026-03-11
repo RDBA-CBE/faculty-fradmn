@@ -235,8 +235,8 @@ const CollegeAndDepartment = () => {
         college_name: item?.college_name,
         college_id: item?.college,
         total_jobs: item?.total_jobs,
-        institution_name: item?.college_name,
-        institution_id: item?.college,
+        institution_name: item?.institution_name,
+        institution_id: item?.institution,
       }));
 
       setState({
