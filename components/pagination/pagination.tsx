@@ -115,7 +115,7 @@ const Pagination = (props) => {
                 onClick={() => handlePageClick(pageNumber)}
                 className={`relative flex h-10 w-10 items-center justify-center rounded-xl text-sm font-semibold transition-all duration-200 ${
                   isActive
-                    ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg ring-2 ring-blue-200 dark:ring-blue-800"
+                    ? "bg-dblue text-white shadow-lg "
                     : "text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white"
                 }`}
               >

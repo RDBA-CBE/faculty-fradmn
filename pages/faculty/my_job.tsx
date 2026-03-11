@@ -1,5 +1,5 @@
 import { DataTable } from "mantine-datatable";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { setPageTitle } from "../../store/themeConfigSlice";
 import TextInput from "@/components/FormFields/TextInput.component";
@@ -41,6 +41,11 @@ import {
   CheckCheckIcon,
   Repeat,
   RefreshCw,
+  ClipboardList,
+  Filter,
+  FilterIcon,
+  SlidersHorizontal,
+  Hourglass,
 } from "lucide-react";
 import moment from "moment";
 import { useRouter } from "next/navigation";
@@ -57,6 +62,7 @@ const Job = () => {
     search: "",
     statusFilter: null,
     showModal: false,
+    showFilterModal: false,
     loading: false,
     submitting: false,
     sortBy: "",
@@ -618,23 +624,21 @@ const Job = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-3 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen dark:from-gray-900 dark:to-gray-800">
       {/* Header Section */}
-      <div className="mb-8">
+      <div className="mb-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
-            <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-3xl font-bold text-transparent">
-              Job Management
-            </h1>
+            <h1 className=" page-ti text-transparent">Job Management</h1>
             <p className="text-gray-600 dark:text-gray-400">
               Manage job postings and opportunities
             </p>
           </div>
           <button
             onClick={() => router.push("newjob")}
-            className="group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+            className="bg-dblue group relative inline-flex transform items-center gap-2 overflow-hidden rounded-lg px-4 py-2  text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+            <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
             <IconPlus className="relative z-10 h-5 w-5" />
             <span className="relative z-10">Add Job</span>
           </button>
@@ -642,340 +646,195 @@ const Job = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="mb-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-sm transition-all duration-200 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Total Jobs
-              </p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white">
+      <div className="mb-6 flex gap-4">
+        <div className="rounded-lg border border-gray-200 bg-blue-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
+          <div className="flex items-center gap-5">
+            <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
+              <Briefcase className="text-dblue h-10 w-10" />
+            </div>
+
+            <div className="flex flex-col">
+              <p className="text-2xl  leading-none text-gray-900 dark:text-white">
                 {state.count || 0}
               </p>
-            </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900">
-              <Briefcase className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Total Jobs
+              </p>
             </div>
           </div>
         </div>
+        <div className="rounded-lg border border-gray-200 bg-green-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
+          <div className="flex items-center gap-5 ">
+            <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
+              <CheckCircle className="text-dblue h-10 w-10" />
+            </div>
 
-        <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-sm transition-all duration-200 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Approved Jobs
-              </p>
-              <p className="text-3xl font-bold text-green-600 dark:text-green-400">
+            <div className="flex flex-col">
+              <p className="text-2xl  leading-none text-gray-900 dark:text-white">
                 {state.jobList?.filter((job) => job.is_approved)?.length || 0}
               </p>
-            </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 dark:bg-green-900">
-              <CheckCheckIcon className="h-6 w-6 text-green-600 dark:text-green-400" />
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Approved Jobs
+              </p>
             </div>
           </div>
         </div>
+        <div className="rounded-lg border border-gray-200 bg-yellow-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
+          <div className="flex items-center gap-5">
+            <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
+              <Hourglass className="text-dblue h-10 w-10" />
+            </div>
 
-        <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-sm transition-all duration-200 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Pending Jobs
-              </p>
-              <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+            <div className="flex flex-col">
+              <p className="text-2xl  leading-none text-gray-900 dark:text-white">
                 {state.jobList?.filter((job) => !job.is_approved)?.length || 0}
               </p>
-            </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 dark:bg-purple-900">
-              <Building2 className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Pending Jobs
+              </p>
             </div>
           </div>
         </div>
+        <div className="rounded-lg border border-gray-200 bg-red-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
+          <div className="flex items-center gap-5">
+            <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
+              <Clock className="text-dblue h-10 w-10" />
+            </div>
 
-        <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-sm transition-all duration-200 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Urgent Job
-              </p>
-              <p className="text-3xl font-bold text-red-600 dark:text-red-400">
+            <div className="flex flex-col">
+              <p className="text-2xl  leading-none text-gray-900 dark:text-white">
                 {state.jobList?.filter((job) => job.priority == "0 - 30 Days")
                   ?.length || 0}
               </p>
-            </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100 dark:bg-red-900">
-              <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Urgent Job
+              </p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Filters Section */}
-      <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
-        <div className="mb-4 flex items-center gap-2">
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-            Filters
-          </h3>
+      <div className="mb-5 rounded-2xl  backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
+        <div className="flex items-center justify-between gap-5">
+          <TextInput
+            placeholder="Search jobs..."
+            value={state.search}
+            onChange={(e) => setState({ search: e.target.value })}
+            icon={<IconSearch className="h-4 w-4" />}
+          />
+          <CustomeDatePicker
+            value={state.start_date}
+            placeholder="Choose From"
+            onChange={(e) => setState({ start_date: e })}
+            showTimeSelect={false}
+          />
+          <CustomeDatePicker
+            value={state.end_date}
+            placeholder="Choose To "
+            onChange={(e) => setState({ end_date: e })}
+            showTimeSelect={false}
+          />
+          <button
+            onClick={() => setState({ showFilterModal: true })}
+            className="flex items-center gap-4 rounded-lg border bg-white p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 "
+          >
+            <SlidersHorizontal className="h-4 w-4" />
+            Filter
+          </button>
         </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div className="group relative">
-            <TextInput
-              placeholder="Search jobs..."
-              value={state.search}
-              onChange={(e) => setState({ search: e.target.value })}
-              icon={<IconSearch className="h-4 w-4" />}
-            />
-          </div>
-          <>
-            {(state.profile?.role == ROLES.SUPER_ADMIN ||
-              state.profile?.role == ROLES.INSTITUTION_ADMIN) && (
-              <>
-                {state.profile?.role == ROLES.SUPER_ADMIN && (
-                  <CustomSelect
-                    options={state.institutionList}
-                    value={state.institutionFilter}
-                    onChange={handleInstitutionChange}
-                    placeholder="Select institution"
-                    isClearable={true}
-                    onSearch={(searchTerm) =>
-                      institutionDropdownList(1, searchTerm)
+        <div className="mt-4">
+          <div className="group relative"></div>
+          {(() => {
+            const activeFilters = [];
+            if (state.institutionFilter)
+              activeFilters.push({
+                key: "institutionFilter",
+                label: `Inst: ${state.institutionFilter.label}`,
+              });
+            if (state.collegeFilter)
+              activeFilters.push({
+                key: "collegeFilter",
+                label: `College: ${state.collegeFilter.label}`,
+              });
+            if (state.departmentFilter)
+              activeFilters.push({
+                key: "departmentFilter",
+                label: `Dept: ${state.departmentFilter.label}`,
+              });
+            if (state.start_date)
+              activeFilters.push({
+                key: "start_date",
+                label: `From: ${moment(state.start_date).format("DD/MM/YY")}`,
+              });
+            if (state.end_date)
+              activeFilters.push({
+                key: "end_date",
+                label: `To: ${moment(state.end_date).format("DD/MM/YY")}`,
+              });
+            if (state.locationFilter)
+              activeFilters.push({
+                key: "locationFilter",
+                label: `Loc: ${state.locationFilter.label}`,
+              });
+            if (state.salaryFilter)
+              activeFilters.push({
+                key: "salaryFilter",
+                label: `Salary: ${state.salaryFilter.label}`,
+              });
+            if (state.statusFilter)
+              activeFilters.push({
+                key: "statusFilter",
+                label: `Status: ${state.statusFilter.label}`,
+              });
+
+            if (activeFilters.length > 0) {
+              return (
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  {activeFilters.map((filter) => (
+                    <div
+                      key={filter.key}
+                      className="flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                    >
+                      <span>{filter.label}</span>
+                      <button
+                        onClick={() => setState({ [filter.key]: null })}
+                        className="rounded-full p-0.5 hover:bg-blue-200 dark:hover:bg-blue-700"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    onClick={() =>
+                      setState({
+                        institutionFilter: null,
+                        collegeFilter: null,
+                        departmentFilter: null,
+                        start_date: null,
+                        end_date: null,
+                        locationFilter: null,
+                        salaryFilter: null,
+                        statusFilter: null,
+                      })
                     }
-                    loadMore={() =>
-                      state.institutionNext &&
-                      institutionDropdownList(
-                        state.institutionPage + 1,
-                        "",
-                        true
-                      )
-                    }
-                    loading={state.institutionLoading}
-                  />
-                )}
-                <CustomSelect
-                  options={state.collegeList}
-                  value={state.collegeFilter}
-                  onChange={handleCollegeChange}
-                  placeholder="Select college"
-                  isClearable={true}
-                  onSearch={(searchTerm) => {
-                    const institutionId =
-                      state.profile?.role === ROLES.SUPER_ADMIN
-                        ? state.institutionFilter?.value
-                        : null;
-                    collegeDropdownList(
-                      1,
-                      searchTerm,
-                      false,
-                      institutionId,
-                      state.profile?.id
-                    );
-                  }}
-                  loadMore={() => {
-                    const institutionId =
-                      state.profile?.role === ROLES.SUPER_ADMIN
-                        ? state.institutionFilter?.value
-                        : state.profile?.institution?.id;
-                    state.collegeNext &&
-                      collegeDropdownList(
-                        state.collegePage + 1,
-                        "",
-                        true,
-                        institutionId,
-                        state.profile?.id
-                      );
-                  }}
-                  loading={state.collegeLoading}
-                />
-
-                <CustomSelect
-                  options={state.departmentList}
-                  value={state.departmentFilter}
-                  onChange={handleDepartmentChange}
-                  placeholder="Select department"
-                  isClearable={true}
-                  onSearch={(searchTerm) => {
-                    const collegeId = state.collegeFilter?.value;
-                    collegeId &&
-                      departmentDropdownList(
-                        1,
-                        searchTerm,
-                        false,
-                        collegeId,
-                        state.profile?.id
-                      );
-                  }}
-                  loadMore={() => {
-                    const collegeId = state.collegeFilter?.value;
-                    state.departmentNext &&
-                      collegeId &&
-                      departmentDropdownList(
-                        state.departmentPage + 1,
-                        "",
-                        true,
-                        collegeId,
-                        state.profile?.id
-                      );
-                  }}
-                  loading={state.departmentLoading}
-                  disabled={!state.collegeFilter}
-                />
-              </>
-            )}
-            {state.profile?.role == ROLES.HR && (
-              <>
-                {/* <CustomSelect
-                  options={state.collegeList}
-                  value={state.collegeFilter}
-                  onChange={handleCollegeChange}
-                  placeholder="Select college"
-                  isClearable={true}
-                  onSearch={(searchTerm) => {
-                    const institutionId =
-                      state.profile?.role === ROLES.SUPER_ADMIN
-                        ? state.institutionFilter?.value
-                        : null;
-                    collegeDropdownList(
-                      1,
-                      searchTerm,
-                      false,
-                      institutionId,
-                      state.profile?.id
-                    );
-                  }}
-                  loadMore={() => {
-                    const institutionId =
-                      state.profile?.role === ROLES.SUPER_ADMIN
-                        ? state.institutionFilter?.value
-                        : state.profile?.institution?.institution_id;
-                    state.collegeNext &&
-                      collegeDropdownList(
-                        state.collegePage + 1,
-                        "",
-                        true,
-                        institutionId,
-                        state.profile?.id
-                      );
-                  }}
-                  loading={state.collegeLoading}
-                /> */}
-
-                <CustomSelect
-                  options={state.departmentList}
-                  value={state.departmentFilter}
-                  onChange={handleDepartmentChange}
-                  placeholder="Select department"
-                  isClearable={true}
-                  onSearch={(searchTerm) => {
-                    const collegeId = state.collegeFilter?.value;
-                    collegeId &&
-                      departmentDropdownList(
-                        1,
-                        searchTerm,
-                        false,
-                        collegeId,
-                        state.profile?.id
-                      );
-                  }}
-                  loadMore={() => {
-                    const collegeId = state.collegeFilter?.value;
-                    state.departmentNext &&
-                      collegeId &&
-                      departmentDropdownList(
-                        state.departmentPage + 1,
-                        "",
-                        true,
-                        collegeId,
-                        state.profile?.id
-                      );
-                  }}
-                  loading={state.departmentLoading}
-                />
-              </>
-            )}
-
-            <div className="group relative">
-              <CustomeDatePicker
-                value={state.start_date}
-                placeholder="Choose From"
-                onChange={(e) => setState({ start_date: e })}
-                showTimeSelect={false}
-              />
-            </div>
-            <div className="group relative">
-              <CustomeDatePicker
-                value={state.end_date}
-                placeholder="Choose To "
-                onChange={(e) => setState({ end_date: e })}
-                showTimeSelect={false}
-              />
-            </div>
-            <div className="group relative">
-              <CustomSelect
-                options={state.locationList}
-                value={state.locationFilter}
-                onChange={(e) => setState({ locationFilter: e })}
-                placeholder="Select location"
-                isClearable={true}
-                loading={state.locationLoading}
-              />
-            </div>
-
-            {/* <div className="group relative">
-              <CustomSelect
-                options={state.categoryList}
-                value={state.categoryFilter}
-                onChange={(e) => setState({ categoryFilter: e })}
-                placeholder="Select category"
-                isClearable={true}
-                loading={state.categoryLoading}
-              />
-            </div> */}
-
-            {/* <div className="group relative">
-              <CustomSelect
-                options={state.jobStatusList}
-                value={state.statusFilter}
-                onChange={(e) => setState({ statusFilter: e })}
-                placeholder="Filter by status"
-                isClearable={true}
-              />
-            </div> */}
-            <div className="group relative">
-              <CustomSelect
-                options={state.salaryRangeList}
-                value={state.salaryFilter}
-                onChange={(e) => setState({ salaryFilter: e })}
-                placeholder="Select salary range"
-                isClearable={true}
-              />
-            </div>
-            <div className="group relative">
-              <CustomSelect
-                options={JOB_STATUS}
-                value={state.statusFilter}
-                onChange={(e) => setState({ statusFilter: e })}
-                placeholder="Select status"
-                isClearable={true}
-              />
-            </div>
-
-            {/* <div className="group relative">
-              <CustomSelect
-                options={state.priorityList}
-                value={state.priorityFilter}
-                onChange={(e) => setState({ priorityFilter: e })}
-                placeholder="Filter by priority"
-                isClearable={true}
-              />
-            </div> */}
-          </>
+                    className="text-xs  text-red-500 hover:underline"
+                  >
+                    Clear All
+                  </button>
+                </div>
+              );
+            }
+            return null;
+          })()}
         </div>
       </div>
 
       {/* Table Section */}
-      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
-        <div className="border-b border-gray-200 p-6 dark:border-gray-700">
+      <div className="overflow-hidden rounded-lg   backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
+        <div className=" mb-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+            <h3 className="text-lg font-bold text-gray-800 dark:text-white">
               Jobs List
             </h3>
             <div className="flex items-center gap-4">
@@ -988,14 +847,12 @@ const Job = () => {
                   Delete ({state.selectedRecords.length})
                 </button>
               )}
-              <div className="text-sm text-gray-500 dark:text-gray-400">
-                {state.count} jobs found
-              </div>
+              <div className="text-sm text-black">{state.count} jobs found</div>
             </div>
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className=" overflow-x-auto border border-gray-200 bg-white ">
           <DataTable
             noRecordsText="No jobs found"
             highlightOnHover
@@ -1021,10 +878,10 @@ const Job = () => {
             columns={[
               {
                 accessor: "job_title",
-                title: "Job Title",
+                title: "Title",
                 sortable: true,
                 render: ({ job_title }) => (
-                  <div className="font-medium text-gray-900 dark:text-white">
+                  <div className=" text-gray-900 dark:text-white">
                     {capitalizeFLetter(job_title)}
                   </div>
                 ),
@@ -1033,6 +890,10 @@ const Job = () => {
                 accessor: "department_name",
                 title: "Dept",
                 sortable: true,
+                cellsStyle: {
+                  whiteSpace: "normal",
+                  wordBreak: "break-word",
+                },
                 render: ({ department }) => {
                   if (!department || department?.length === 0) {
                     return <span className="text-gray-400">-</span>;
@@ -1046,9 +907,9 @@ const Job = () => {
                   const hiddenDept = otherDept?.slice(maxShow);
 
                   return (
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       {/* First department text */}
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <span className="text-sm  text-gray-700 dark:text-gray-300">
                         {firstDept}
                       </span>
 
@@ -1056,7 +917,7 @@ const Job = () => {
                       <div className="flex items-center -space-x-2">
                         {visibleDept?.map((dept: string, index: number) => (
                           <div key={index} className="group relative">
-                            <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-blue-500 text-xs font-semibold text-white dark:border-gray-900">
+                            <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-blue-500 text-xs  text-white dark:border-gray-900">
                               {dept?.slice(0, 2)?.toUpperCase()}
                             </div>
 
@@ -1068,7 +929,7 @@ const Job = () => {
                         ))}
                         {remaining > 0 && (
                           <div className="group relative">
-                            <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-gray-400 text-xs font-semibold text-white dark:border-gray-900">
+                            <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-gray-400 text-xs  text-white dark:border-gray-900">
                               +{remaining}
                             </div>
 
@@ -1087,8 +948,12 @@ const Job = () => {
               },
               {
                 accessor: "college_name",
-                title: "College",
+                title: "College Name",
                 sortable: true,
+                cellsStyle: {
+                  whiteSpace: "normal",
+                  wordBreak: "break-word",
+                },
                 render: ({ college_name }) => (
                   <span className="text-gray-600 dark:text-gray-400">
                     {capitalizeFLetter(college_name || "-")}
@@ -1100,7 +965,7 @@ const Job = () => {
               //   accessor: "job_type",
               //   title: "Type",
               //   render: ({ job_type }) => (
-              //     <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+              //     <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs  text-blue-800 dark:bg-blue-900 dark:text-blue-200">
               //       {job_type?.replace("_", " ") || "-"}
               //     </span>
               //   ),
@@ -1108,6 +973,10 @@ const Job = () => {
               {
                 accessor: "experiences",
                 title: "Experience",
+                cellsStyle: {
+                  whiteSpace: "normal",
+                  wordBreak: "break-word",
+                },
                 render: ({ experiences }) => (
                   <span className="text-gray-600 dark:text-gray-400">
                     {capitalizeFLetter(experiences?.label || "-")}
@@ -1117,6 +986,10 @@ const Job = () => {
               {
                 accessor: "number_of_openings",
                 title: "Openings",
+                cellsStyle: {
+                  whiteSpace: "normal",
+                  wordBreak: "break-word",
+                },
                 render: ({ number_of_openings }) => (
                   <span className="text-gray-600 dark:text-gray-400">
                     {number_of_openings || "-"}
@@ -1126,9 +999,10 @@ const Job = () => {
               {
                 accessor: "job_status",
                 title: "Status",
+
                 render: (row) => (
                   <span
-                    className={`inline-flex cursor-pointer items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${
+                    className={`inline-flex cursor-pointer items-center gap-1 rounded-full px-3 py-1 text-xs  ${
                       (row as any).is_approved
                         ? "bg-green-100 text-green-800 hover:bg-green-200"
                         : "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
@@ -1140,17 +1014,18 @@ const Job = () => {
                       <Clock className="h-3 w-3" />
                     )}
                     {capitalizeFLetter(
-                      (row as any).is_approved ? "Approved" : "Pending"
+                      (row as any).is_approved ? "Approved" : "Pending",
                     ) || "-"}
                   </span>
                 ),
               },
               {
                 accessor: "priority",
-                title: "Job Urgency",
+                title: "Urgency",
+
                 render: ({ priority }) => (
                   <span
-                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
+                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs  ${
                       priority === "urgent"
                         ? "bg-red-100 text-red-800"
                         : priority === "high"
@@ -1169,6 +1044,10 @@ const Job = () => {
                 accessor: "total_applications",
                 title: "Applications",
                 sortable: true,
+                cellsStyle: {
+                  whiteSpace: "normal",
+                  wordBreak: "break-word",
+                },
                 render: ({ total_applications }) => (
                   <span className="text-gray-600 dark:text-gray-400">
                     {total_applications}
@@ -1189,12 +1068,12 @@ const Job = () => {
                 accessor: "actions",
                 title: "Actions",
                 render: (row: any) => (
-                  <div className="flex items-center justify-center gap-2">
+                  <div className="flex items-center justify-center gap-3">
                     <button
                       onClick={() =>
                         router.push(`/faculty/job_details?id=${row.id}`)
                       }
-                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 hover:bg-indigo-200"
+                      className="flex  items-center justify-center rounded-lg  text-indigo-600 "
                       title="View"
                     >
                       <IconEye className="h-4 w-4" />
@@ -1207,10 +1086,10 @@ const Job = () => {
                         // }
                       }}
                       // onClick={() => handleToggleStatus(row)}
-                      className={`flex h-8 w-8 items-center justify-center rounded-lg ${
+                      className={`flex items-center justify-center rounded-lg ${
                         row?.job_status === "published"
-                          ? "bg-red-100 text-red-600 hover:bg-red-200"
-                          : "bg-green-100 text-green-600 hover:bg-green-200"
+                          ? "text-red-600 "
+                          : " text-green-600 "
                       }`}
                       title={"Job Status"}
                     >
@@ -1219,7 +1098,7 @@ const Job = () => {
                     {/* )} */}
                     <button
                       onClick={() => handleLog(row)}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 text-purple-600 hover:bg-purple-200"
+                      className="flex items-center justify-center rounded-lg  text-purple-600 "
                       title="Logs"
                     >
                       <IconHistory className="h-4 w-4" />
@@ -1227,7 +1106,7 @@ const Job = () => {
 
                     <button
                       onClick={() => handleEdit(row)}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200"
+                      className="flex  items-center justify-center rounded-lg text-blue-600 "
                       title="Edit"
                     >
                       <IconEdit className="h-4 w-4" />
@@ -1235,7 +1114,7 @@ const Job = () => {
 
                     <button
                       onClick={() => handleDelete(row)}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600 hover:bg-red-200"
+                      className="flex  items-center justify-center rounded-lg  text-red-600 "
                       title="Delete"
                     >
                       <IconTrash className="h-4 w-4" />
@@ -1282,6 +1161,207 @@ const Job = () => {
               onSendMessage={(e) => createJobLog(e)}
             />
           </>
+        )}
+      />
+      <Modal
+        open={state.showFilterModal}
+        close={() => setState({ showFilterModal: false })}
+        // title="Filters"
+        maxWidth="!w-[800px]"
+        renderComponent={() => (
+          <div>
+            <div className="flex items-center justify-between ">
+              <h2 className="text-lg ">Filters</h2>
+              <button
+                onClick={() => setState({ showFilterModal: false })}
+                className="rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="grid grid-cols-1 gap-4 py-3 md:grid-cols-3">
+              {(state.profile?.role == ROLES.SUPER_ADMIN ||
+                state.profile?.role == ROLES.INSTITUTION_ADMIN) && (
+                <>
+                  {state.profile?.role == ROLES.SUPER_ADMIN && (
+                    <CustomSelect
+                      options={state.institutionList}
+                      value={state.institutionFilter}
+                      onChange={handleInstitutionChange}
+                      placeholder="Select institution"
+                      isClearable={true}
+                      onSearch={(searchTerm) =>
+                        institutionDropdownList(1, searchTerm)
+                      }
+                      loadMore={() =>
+                        state.institutionNext &&
+                        institutionDropdownList(
+                          state.institutionPage + 1,
+                          "",
+                          true,
+                        )
+                      }
+                      loading={state.institutionLoading}
+                    />
+                  )}
+                  <CustomSelect
+                    options={state.collegeList}
+                    value={state.collegeFilter}
+                    onChange={handleCollegeChange}
+                    placeholder="Select college"
+                    isClearable={true}
+                    onSearch={(searchTerm) => {
+                      const institutionId =
+                        state.profile?.role === ROLES.SUPER_ADMIN
+                          ? state.institutionFilter?.value
+                          : null;
+                      collegeDropdownList(
+                        1,
+                        searchTerm,
+                        false,
+                        institutionId,
+                        state.profile?.id,
+                      );
+                    }}
+                    loadMore={() => {
+                      const institutionId =
+                        state.profile?.role === ROLES.SUPER_ADMIN
+                          ? state.institutionFilter?.value
+                          : state.profile?.institution?.institution_id;
+                      state.collegeNext &&
+                        collegeDropdownList(
+                          state.collegePage + 1,
+                          "",
+                          true,
+                          institutionId,
+                          state.profile?.id,
+                        );
+                    }}
+                    loading={state.collegeLoading}
+                  />
+
+                  <CustomSelect
+                    options={state.departmentList}
+                    value={state.departmentFilter}
+                    onChange={handleDepartmentChange}
+                    placeholder="Select department"
+                    isClearable={true}
+                    onSearch={(searchTerm) => {
+                      const collegeId = state.collegeFilter?.value;
+                      collegeId &&
+                        departmentDropdownList(
+                          1,
+                          searchTerm,
+                          false,
+                          collegeId,
+                          state.profile?.id,
+                        );
+                    }}
+                    loadMore={() => {
+                      const collegeId = state.collegeFilter?.value;
+                      state.departmentNext &&
+                        collegeId &&
+                        departmentDropdownList(
+                          state.departmentPage + 1,
+                          "",
+                          true,
+                          collegeId,
+                          state.profile?.id,
+                        );
+                    }}
+                    loading={state.departmentLoading}
+                    disabled={!state.collegeFilter}
+                  />
+                </>
+              )}
+              {state.profile?.role == ROLES.HR && (
+                <>
+                  <CustomSelect
+                    options={state.departmentList}
+                    value={state.departmentFilter}
+                    onChange={handleDepartmentChange}
+                    placeholder="Select department"
+                    isClearable={true}
+                    onSearch={(searchTerm) => {
+                      const collegeId = state.collegeFilter?.value;
+                      collegeId &&
+                        departmentDropdownList(
+                          1,
+                          searchTerm,
+                          false,
+                          collegeId,
+                          state.profile?.id,
+                        );
+                    }}
+                    loadMore={() => {
+                      const collegeId = state.collegeFilter?.value;
+                      state.departmentNext &&
+                        collegeId &&
+                        departmentDropdownList(
+                          state.departmentPage + 1,
+                          "",
+                          true,
+                          collegeId,
+                          state.profile?.id,
+                        );
+                    }}
+                    loading={state.departmentLoading}
+                  />
+                </>
+              )}
+
+              <CustomSelect
+                options={state.locationList}
+                value={state.locationFilter}
+                onChange={(e) => setState({ locationFilter: e })}
+                placeholder="Select location"
+                isClearable={true}
+                loading={state.locationLoading}
+              />
+              <CustomSelect
+                options={state.salaryRangeList}
+                value={state.salaryFilter}
+                onChange={(e) => setState({ salaryFilter: e })}
+                placeholder="Select salary range"
+                isClearable={true}
+              />
+              <CustomSelect
+                options={JOB_STATUS}
+                value={state.statusFilter}
+                onChange={(e) => setState({ statusFilter: e })}
+                placeholder="Select status"
+                isClearable={true}
+              />
+            </div>
+            <div className="flex items-center justify-between py-3 ">
+              <button
+                onClick={() => {
+                  setState({
+                    statusFilter: null,
+                    institutionFilter: null,
+                    collegeFilter: null,
+                    departmentFilter: null,
+                    start_date: null,
+                    end_date: null,
+                    locationFilter: null,
+                    categoryFilter: null,
+                    priorityFilter: null,
+                    typeFilter: null,
+                    salaryFilter: null,
+                  });
+                }}
+                className=" text-sm text-red-500 transition-all hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                Clear All
+              </button>
+              <button
+                onClick={() => setState({ showFilterModal: false })}
+                className="bg-dblue  rounded-lg px-4 py-2  text-sm text-white shadow-md transition-all hover:shadow-lg"
+              >
+                Show {state.count} Job Results
+              </button>
+            </div>
+          </div>
         )}
       />
     </div>
