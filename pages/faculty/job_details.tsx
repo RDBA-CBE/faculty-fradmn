@@ -23,6 +23,9 @@ import {
   ArrowLeft,
   CheckCircle,
   XCircle,
+  Check,
+  CheckIcon,
+  IndianRupee,
 } from "lucide-react";
 import moment from "moment";
 import IconEye from "@/components/Icon/IconEye";
@@ -100,386 +103,301 @@ const JobDetails = () => {
   const job = state.jobDetails;
 
   return (
-    <div className="min-h-screen dark:from-gray-900 dark:to-gray-800">
-      {/* Floating Header */}
-      <div className="sticky top-4 z-10 mb-8 flex items-center justify-between rounded-2xl border border-white/20 bg-white/80 p-4 shadow-xl backdrop-blur-xl dark:border-gray-700/50 dark:bg-gray-800/80">
+    <div className="min-h-screen bg-gray-50  dark:bg-gray-900">
+      {/* Back button */}
+      <div className="mb-4">
         <button
           onClick={() => router.back()}
-          className="group flex items-center gap-2 rounded-xl px-4 py-2 font-medium text-gray-700 transition-all hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+          className="group flex items-center gap-2 rounded-xl   font-medium text-gray-700 transition-all  dark:text-gray-300 dark:hover:bg-gray-700"
         >
           <ArrowLeft className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
           <span>Back</span>
         </button>
-        <button
-          onClick={() => router.push(`/faculty/updatejob?id=${jobId}`)}
-          className="group flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 px-6 py-3 font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl"
-        >
-          <IconEdit className="h-5 w-5" />
-          <span>Edit Job</span>
-        </button>
       </div>
 
-      {/* Hero Section */}
-      <div className="mb-8 overflow-hidden rounded-3xl border border-white/20 bg-gradient-to-br from-white via-purple-50/30 to-pink-50/30 shadow-2xl backdrop-blur-xl dark:border-gray-700/50 dark:from-gray-800 dark:via-purple-900/20 dark:to-pink-900/20">
-        <div className="p-8">
-          <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-            <div className="flex-1">
-              <div className="mb-3 flex items-center gap-3">
-                {job?.is_approved ? (
-                  <CheckCircle className="h-6 w-6 text-green-500" />
-                ) : (
-                  <XCircle className="h-6 w-6 text-yellow-500" />
-                )}
+      <div className="">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+          {/* Main Content (Left Column) */}
+          <div className="space-y-4 lg:col-span-2">
+            {/* Job Header */}
+            <div className="rounded-lg border bg-white p-6  dark:bg-gray-800">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h1 className="page-ti mb-4">{job?.job_title}</h1>
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-gray-600 dark:text-gray-400">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="text-dyellow h-4 w-4" />
+                      <span>{job?.college?.name}</span>
+                    </div>
+                    {job?.locations?.[0] && (
+                      <div className="flex items-center gap-2">
+                        <MapPin className="text-dyellow h-4 w-4" />
+                        <span>{job?.locations[0]?.city}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={() => router.push(`/faculty/updatejob?id=${jobId}`)}
+                  className="bg-dblue group relative inline-flex transform items-center gap-2 overflow-hidden rounded-lg px-4 py-2  text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+                >
+                  <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+                  <IconEdit className="relative z-10 h-5 w-5" />
+                  <span className="relative z-10">Edit</span>
+                </button>
+              </div>
+              <div className="mt-4 flex flex-wrap items-center gap-3">
                 <span
-                  className={`text-sm font-semibold ${
-                    job?.is_approved ? "text-green-600" : "text-yellow-600"
+                  className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs  ${
+                    job?.is_approved
+                      ? "bg-green-100 text-green-700"
+                      : "bg-yellow-100 text-yellow-700"
                   }`}
                 >
+                  {job?.is_approved ? (
+                    <CheckCircle className="h-4 w-4" />
+                  ) : (
+                    <Clock className="h-4 w-4" />
+                  )}
                   {job?.is_approved ? "Approved" : "Pending Approval"}
                 </span>
-              </div>
-              <h1 className="mb-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-4xl font-bold text-transparent">
-                {job?.job_title}
-              </h1>
-              <div className="flex flex-wrap gap-4 text-gray-600 dark:text-gray-400">
-                <div className="flex items-center gap-2 rounded-lg bg-white/60 px-3 py-2 backdrop-blur-sm dark:bg-gray-700/60">
-                  <Building2 className="h-5 w-5 text-indigo-600" />
-                  <span className="font-medium">{job?.college?.name}</span>
-                </div>
-                {/* {job?.department?.length > 0 && (
-                  <div className="flex items-center gap-2 rounded-lg bg-white/60 px-3 py-2 backdrop-blur-sm dark:bg-gray-700/60">
-                    <Briefcase className="h-5 w-5 text-purple-600" />
-                    <span className="font-medium">
-                      {job.department.map((dept) => dept.name).join(", ")}
-                    </span>
-                  </div>
-                )} */}
-                {job?.locations?.[0] && (
-                  <div className="flex items-center gap-2 rounded-lg bg-white/60 px-3 py-2 backdrop-blur-sm dark:bg-gray-700/60">
-                    <MapPin className="h-5 w-5 text-pink-600" />
-                    <span className="font-medium">
-                      {job?.locations[0]?.city}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="flex flex-col gap-3">
-              <span
-                className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold shadow-lg ${
-                  job?.priority_display === "urgent"
-                    ? "bg-gradient-to-r from-red-500 to-pink-500 text-white"
-                    : job?.priority_display === "high"
-                    ? "bg-gradient-to-r from-orange-500 to-red-500 text-white"
-                    : job?.priority_display === "medium"
-                    ? "bg-gradient-to-r from-yellow-400 to-orange-400 text-white"
-                    : "bg-gradient-to-r from-gray-400 to-gray-500 text-white"
-                }`}
-              >
-                <AlertCircle className="h-4 w-4" />
-                {capitalizeFLetter(job?.priority_display) || "N/A"}
-              </span>
-              {/* <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 px-5 py-2.5 text-sm font-bold text-white shadow-lg">
-                <Briefcase className="h-4 w-4" />
-                {job?.job_type_obj?.name || job?.job_type}
-              </span> */}
-            </div>
-          </div>
-
-          {/* Stats Grid */}
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            <div className="group rounded-2xl border border-white/40 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 p-4 backdrop-blur-sm transition-all hover:scale-105 hover:shadow-lg dark:border-gray-700/40">
-              <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 shadow-lg">
-                <DollarSign className="h-6 w-6 text-white" />
-              </div>
-              <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                Salary Range
-              </p>
-              <p className="text-lg font-bold text-gray-900 dark:text-white">
-                {job?.salary_range || "Not specified"}
-              </p>
-            </div>
-
-            <div className="group rounded-2xl border border-white/40 bg-gradient-to-br from-green-500/10 to-emerald-500/10 p-4 backdrop-blur-sm transition-all hover:scale-105 hover:shadow-lg dark:border-gray-700/40">
-              <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 shadow-lg">
-                <Users className="h-6 w-6 text-white" />
-              </div>
-              <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                Openings
-              </p>
-              <p className="text-lg font-bold text-gray-900 dark:text-white">
-                {job?.number_of_openings || 0}
-              </p>
-            </div>
-
-            <div className="group rounded-2xl border border-white/40 bg-gradient-to-br from-purple-500/10 to-pink-500/10 p-4 backdrop-blur-sm transition-all hover:scale-105 hover:shadow-lg dark:border-gray-700/40">
-              <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 shadow-lg">
-                <Clock className="h-6 w-6 text-white" />
-              </div>
-              <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                Experience
-              </p>
-              <p className="text-lg font-bold text-gray-900 dark:text-white">
-                {job?.experiences?.name || "Not specified"}
-              </p>
-            </div>
-
-            <div className="group rounded-2xl border border-white/40 bg-gradient-to-br from-orange-500/10 to-red-500/10 p-4 backdrop-blur-sm transition-all hover:scale-105 hover:shadow-lg dark:border-gray-700/40">
-              <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-red-500 shadow-lg">
-                <Calendar className="h-6 w-6 text-white" />
-              </div>
-              <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                Deadline
-              </p>
-              <p className="text-lg font-bold text-gray-900 dark:text-white">
-                {job?.last_date
-                  ? moment(job.last_date).format("MMM DD")
-                  : "N/A"}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Content Grid */}
-      <div className="mb-8 grid gap-6 lg:grid-cols-2">
-        {/* Company Info */}
-        {job?.college && (
-          <div className="group rounded-3xl border border-white/20 bg-white/80 p-6 shadow-xl backdrop-blur-xl transition-all hover:shadow-2xl dark:border-gray-700/50 dark:bg-gray-800/80">
-            <div className="mb-4 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-blue-500">
-                <Building2 className="h-5 w-5 text-white" />
-              </div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                College
-              </h2>
-            </div>
-            <div className="flex items-start gap-4">
-              {job?.college?.college_logo && (
-                <img
-                  src={job.college?.college_logo}
-                  alt={job.college.name}
-                  className="h-16 w-16 rounded-xl object-cover shadow-lg"
-                />
-              )}
-              <div>
-                <p className="text-lg font-bold text-gray-900 dark:text-white">
-                  {job.college?.name}
-                </p>
-                <p className="text-gray-600 dark:text-gray-400">
-                  {job.college?.company_detail}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Departments */}
-        {job?.department?.length > 0 && (
-          <div className="group rounded-3xl border border-white/20 bg-white/80 p-6 shadow-xl backdrop-blur-xl transition-all hover:shadow-2xl dark:border-gray-700/50 dark:bg-gray-800/80">
-            <div className="mb-4 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-pink-500">
-                <Briefcase className="h-5 w-5 text-white" />
-              </div>
-
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                Departments
-              </h2>
-            </div>
-
-            <div className="flex flex-wrap gap-3">
-              {job.department.map((dept: any) => (
-                <div
-                  key={dept.id}
-                  className="rounded-xl bg-gradient-to-r from-purple-100 to-pink-100 px-4 py-2 text-sm font-semibold text-purple-700 shadow-sm dark:from-purple-900/30 dark:to-pink-900/30 dark:text-purple-300"
+                <span
+                  className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs  ${
+                    job?.priority_display === "urgent"
+                      ? "bg-red-100 text-red-700"
+                      : "bg-gray-100 text-gray-700"
+                  }`}
                 >
-                  {dept.name}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Qualification */}
-        <div className="group rounded-3xl border border-white/20 bg-white/80 p-6 shadow-xl backdrop-blur-xl transition-all hover:shadow-2xl dark:border-gray-700/50 dark:bg-gray-800/80">
-          <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-500">
-              <Award className="h-5 w-5 text-white" />
-            </div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Qualification
-            </h2>
-          </div>
-          <p className="whitespace-pre-wrap leading-relaxed text-gray-600 dark:text-gray-400">
-            {job?.qualification || "Not specified"}
-          </p>
-        </div>
-
-        {/* Key Responsibilities */}
-        {job?.responsibility?.blocks && (
-          <div className="group rounded-3xl border border-white/20 bg-white/80 p-6 shadow-xl backdrop-blur-xl transition-all hover:shadow-2xl dark:border-gray-700/50 dark:bg-gray-800/80">
-            <div className="mb-4 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-pink-500">
-                <AlertCircle className="h-5 w-5 text-white" />
+                  <AlertCircle className="h-4 w-4" />
+                  {capitalizeFLetter(job?.priority_display) || "N/A"}
+                </span>
+                {/* <span className="inline-flex items-center gap-2 rounded-full bg-blue-100 px-3 py-1 text-xs  text-blue-700">
+                  <Briefcase className="h-4 w-4" />
+                  {job?.job_type_obj?.name || job?.job_type}
+                </span> */}
               </div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                Key Responsibilities
+            </div>
+
+            <div className="rounded-lg border bg-white p-6  dark:bg-gray-800">
+              {/* Job Description */}
+              <h2 className="mb-2 text-lg  text-gray-900 dark:text-white">
+                Job Description
               </h2>
-            </div>
-            <ul className="space-y-2">
-              {job.responsibility?.blocks.map((block: any, idx: number) => {
-                // 👉 Paragraph
-                if (block.type === "paragraph") {
-                  return (
-                    <p
-                      key={idx}
-                      className="mb-2 text-gray-600 dark:text-gray-400"
-                      dangerouslySetInnerHTML={{ __html: block.data.text }}
-                    />
-                  );
-                }
+              <p className="whitespace-pre-wrap leading-relaxed text-gray-700 dark:text-gray-300">
+                {job?.job_description || "No description provided."}
+              </p>
 
-                // 👉 List
-                if (block.type === "list") {
-                  return block.data.items.map((item: string, i: number) => (
-                    <li key={`${idx}-${i}`} className="flex items-start gap-3">
-                      <span className="mt-1.5 flex h-2 w-2 flex-shrink-0 rounded-full bg-gradient-to-r from-purple-500 to-pink-500"></span>
-                      <span
-                        className="text-gray-600 dark:text-gray-400"
-                        dangerouslySetInnerHTML={{ __html: item }}
+              {/* Key Responsibilities */}
+              {job?.responsibility?.blocks?.length > 0 && (
+                <>
+                  <h2 className="mb-2 mt-4  text-lg text-gray-900 dark:text-white">
+                    Key Responsibilities
+                  </h2>
+                  <ul className="space-y-2">
+                    {job.responsibility.blocks.map((block, idx) => {
+                      if (block.type === "list") {
+                        return block.data.items.map((item, i) => (
+                          <li
+                            key={`${idx}-${i}`}
+                            className="flex items-start gap-2"
+                          >
+                            <CheckIcon className="text-dyellow" size={16} />
+                            <span
+                              className="text-gray-700 dark:text-gray-300"
+                              dangerouslySetInnerHTML={{ __html: item }}
+                            />
+                          </li>
+                        ));
+                      }
+                      return null;
+                    })}
+                  </ul>
+                </>
+              )}
+
+              <h2 className="mb-2 mt-4 text-lg  text-gray-900 dark:text-white">
+                Additional Information
+              </h2>
+              <div className="grid gap-4 border-t pt-6 md:grid-cols-2">
+                <div className="flex items-center justify-between rounded-xl bg-gradient-to-r from-indigo-50 to-purple-50 p-4 dark:from-indigo-900/20 dark:to-purple-900/20">
+                  <span className="font-medium text-gray-700 dark:text-gray-300">
+                    Start Date
+                  </span>
+                  <span className="font-bold text-gray-900 dark:text-white">
+                    {job?.start_date
+                      ? moment(job.start_date).format("MMM DD, YYYY")
+                      : "N/A"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between rounded-xl bg-gradient-to-r from-pink-50 to-red-50 p-4 dark:from-pink-900/20 dark:to-red-900/20">
+                  <span className="font-medium text-gray-700 dark:text-gray-300">
+                    Deadline
+                  </span>
+                  <span className="font-bold text-gray-900 dark:text-white">
+                    {job?.deadline
+                      ? moment(job.deadline).format("MMM DD, YYYY")
+                      : "N/A"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Sidebar (Right Column) */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-24 space-y-4">
+              {/* Key Details Card */}
+              <div className="rounded-lg border bg-white p-6  dark:bg-gray-800">
+                <h2 className="mb-4 text-lg  text-gray-900 dark:text-white">
+                  Key Details
+                </h2>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                      <IndianRupee className="text-dyellow h-4 w-4" /> Salary
+                    </span>
+                    <span className=" text-gray-900 dark:text-white">
+                      {job?.salary_range || "Not specified"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                      <Users className="text-dyellow h-4 w-4" /> Openings
+                    </span>
+                    <span className=" text-gray-900 dark:text-white">
+                      {job?.number_of_openings || 0}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                      <Clock className="text-dyellow h-4 w-4" /> Experience
+                    </span>
+                    <span className=" text-gray-900 dark:text-white">
+                      {job?.experiences?.name || "Not specified"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                      <Calendar className="text-dyellow h-4 w-4" /> Deadline
+                    </span>
+                    <span className=" text-gray-900 dark:text-white">
+                      {job?.last_date
+                        ? moment(job.last_date).format("MMM DD, YYYY")
+                        : "N/A"}
+                    </span>
+                  </div>
+                  <div className="flex flex-col justify-start">
+                    <span className="flex items-center gap-2 text-gray-600 dark:text-gray-400 ">
+                      <Award className="text-dyellow h-4 w-4" /> Qualification
+                    </span>
+                    <span className=" mt-2 text-gray-900 dark:text-white">
+                      {job?.qualification || "Not specified"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Departments Card */}
+              {job?.department?.length > 0 && (
+                <div className="rounded-lg border bg-white p-6  dark:bg-gray-800">
+                  <h2 className="mb-4 text-lg  text-gray-900 dark:text-white">
+                    College
+                  </h2>
+                  <div className="flex items-start gap-4">
+                    {job?.college?.college_logo && (
+                      <img
+                        src={job.college?.college_logo}
+                        alt={job.college.name}
+                        className="h-8 w-8 rounded-lg border object-contain"
                       />
-                    </li>
-                  ));
-                }
-
-                return null;
-              })}
-            </ul>
-          </div>
-        )}
-
-        {/* Additional Info  */}
-        <div className="group rounded-3xl border border-white/20 bg-white/80 p-6 shadow-xl backdrop-blur-xl transition-all hover:shadow-2xl dark:border-gray-700/50 dark:bg-gray-800/80">
-          <div className="mb-6 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-red-500">
-              <Tag className="h-5 w-5 text-white" />
-            </div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Additional Information
-            </h2>
-          </div>
-
-          <div className="space-y-6 ">
-            {/* {job?.categories?.length > 0 && (
-              <div>
-                <p className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Categories
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {job.categories.map((cat: any) => (
-                    <span
-                      key={cat.id}
-                      className="rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 px-4 py-2 text-sm font-semibold text-white shadow-lg"
-                    >
-                      {cat.name}
-                    </span>
-                  ))}
+                    )}
+                    <div>
+                      <p className=" ">{job.college?.name}</p>
+                      <p className="text-gray-600 dark:text-gray-400">
+                        {job.college?.company_detail}
+                      </p>
+                    </div>
+                  </div>
+                  <h2 className="mb-4 mt-4  text-lg text-gray-900 dark:text-white">
+                    Departments
+                  </h2>
+                  <div className="flex flex-wrap gap-2">
+                    {job.department.map((dept) => (
+                      <span
+                        key={dept.id}
+                        className="bg-lblue rounded-full px-3 py-1 text-sm font-medium text-black "
+                      >
+                        {dept.name}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {job?.skills?.length > 0 && (
-              <div>
-                <p className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Skills Required
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {job.skills.map((skill: any) => (
-                    <span
-                      key={skill.id}
-                      className="rounded-full bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-lg"
-                    >
-                      {skill.name}
-                    </span>
-                  ))}
+              {/* Skills & Tags Card */}
+              {/* {(job?.skills?.length > 0 || job?.tags?.length > 0) && (
+                <div className="rounded-lg border bg-white p-6  dark:bg-gray-800">
+                  <h2 className="mb-4 text-xl  text-gray-900 dark:text-white">
+                    Skills & Tags
+                  </h2>
+                  <div className="space-y-4">
+                    {job?.skills?.length > 0 && (
+                      <div>
+                        <h3 className="mb-2 text-sm  text-gray-500 dark:text-gray-400">
+                          Skills
+                        </h3>
+                        <div className="flex flex-wrap gap-2">
+                          {job.skills.map((skill) => (
+                            <span
+                              key={skill.id}
+                              className="rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                            >
+                              {skill.name}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {job?.tags?.length > 0 && (
+                      <div>
+                        <h3 className="mb-2 text-sm  text-gray-500 dark:text-gray-400">
+                          Tags
+                        </h3>
+                        <div className="flex flex-wrap gap-2">
+                          {job.tags.map((tag) => (
+                            <span
+                              key={tag.id}
+                              className="rounded-full px-3 py-1 text-sm font-medium text-white"
+                              style={{ backgroundColor: tag.color }}
+                            >
+                              {tag.name}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
-
-            {job?.tags?.length > 0 && (
-              <div>
-                <p className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Tags
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {job.tags.map((tag: any) => (
-                    <span
-                      key={tag.id}
-                      className="rounded-full px-4 py-2 text-sm font-semibold shadow-lg"
-                      style={{ backgroundColor: tag.color, color: "#fff" }}
-                    >
-                      {tag.name}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )} */}
-
-            <div className="grid gap-4 border-t pt-6 md:grid-cols-2">
-              <div className="flex items-center justify-between rounded-xl bg-gradient-to-r from-indigo-50 to-purple-50 p-4 dark:from-indigo-900/20 dark:to-purple-900/20">
-                <span className="font-medium text-gray-700 dark:text-gray-300">
-                  Start Date
-                </span>
-                <span className="font-bold text-gray-900 dark:text-white">
-                  {job?.start_date
-                    ? moment(job.start_date).format("MMM DD, YYYY")
-                    : "N/A"}
-                </span>
-              </div>
-              <div className="flex items-center justify-between rounded-xl bg-gradient-to-r from-pink-50 to-red-50 p-4 dark:from-pink-900/20 dark:to-red-900/20">
-                <span className="font-medium text-gray-700 dark:text-gray-300">
-                  Deadline
-                </span>
-                <span className="font-bold text-gray-900 dark:text-white">
-                  {job?.deadline
-                    ? moment(job.deadline).format("MMM DD, YYYY")
-                    : "N/A"}
-                </span>
-              </div>
+              )} */}
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Job Description */}
-      <div className="mb-8 rounded-3xl border border-white/20 bg-white/80 p-6 shadow-xl backdrop-blur-xl dark:border-gray-700/50 dark:bg-gray-800/80">
-        <div className="mb-4 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500">
-            <FileText className="h-5 w-5 text-white" />
-          </div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-            Job Description
-          </h2>
-        </div>
-        <p className="whitespace-pre-wrap leading-relaxed text-gray-600 dark:text-gray-400">
-          {job?.job_description || "No description provided"}
-        </p>
       </div>
 
       {/* Applicants Section */}
-      <div className="rounded-3xl border border-white/20 bg-white/80 shadow-xl backdrop-blur-xl dark:border-gray-700/50 dark:bg-gray-800/80">
-        <div className="border-b border-gray-200/50 p-6 dark:border-gray-700/50">
+      <div className="mt-8 rounded-lg   dark:bg-gray-800">
+        <div className="mb-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-pink-500">
-              <Users className="h-5 w-5 text-white" />
+            <div className="flex items-center justify-center">
+              <Users className="h-5 w-5 text-black" />
             </div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+            <h2 className="text-lg  text-black ">
               Applicants{" "}
               <span className="text-purple-600">({state.applicantCount})</span>
             </h2>
           </div>
         </div>
-        <div className="p-6">
+        <div className="overflow-x-auto border border-gray-200 bg-white ">
           <DataTable
             noRecordsText="No applicants yet"
             highlightOnHover
@@ -496,7 +414,7 @@ const JobDetails = () => {
                 accessor: "name",
                 title: "Name",
                 render: (row: any) => (
-                  <div className="font-semibold text-gray-900 dark:text-white">
+                  <div className=" text-gray-900 dark:text-white">
                     {row?.first_name} {row?.last_name}
                   </div>
                 ),
@@ -533,12 +451,12 @@ const JobDetails = () => {
                 title: "Status",
                 render: (row: any) => (
                   <span
-                    className={`inline-flex rounded-full px-3 py-1 text-xs font-bold shadow-md ${
+                    className={`inline-flex rounded-full px-3 py-1 text-xs  shadow-md ${
                       row?.status === "accepted"
-                        ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white"
+                        ? "bg-green-500 text-white"
                         : row?.status === "rejected"
-                        ? "bg-gradient-to-r from-red-500 to-pink-500 text-white"
-                        : "bg-gradient-to-r from-yellow-400 to-orange-400 text-white"
+                        ? "bg-red-500 text-white"
+                        : "bg-yellow-400 text-white"
                     }`}
                   >
                     {capitalizeFLetter(row?.status || "Pending")}
