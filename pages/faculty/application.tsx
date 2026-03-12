@@ -2385,30 +2385,151 @@ const Application = () => {
 
                     {/* Feedback List */}
                     <div className="space-y-2">
-                      {round.panels?.map((panel) => (
-                        <div
-                          key={panel.id}
-                          className="flex items-start justify-between rounded border bg-gray-50 p-3"
-                        >
-                          <div>
-                            <p className="text-sm">{panel.name}</p>
+                      {round.panels?.map((panel) => {
+                        const feedback = panel?.feedbacks?.[0];
+                        return (
+                          <div
+                            key={panel.id}
+                            className="flex items-start justify-between rounded border bg-gray-50 p-3"
+                          >
+                            <div>
+                              <p className="text-sm">{panel.name}</p>
 
-                            {panel?.feedbacks?.[0]?.feedback_text && (
+                              {/* {panel?.feedbacks?.[0]?.feedback_text && (
                               <p className="mt-1 text-sm text-gray-700">
                                 {capitalizeFLetter(
                                   panel.feedbacks[0].feedback_text
                                 )}
                               </p>
-                            )}
-                          </div>
+                            )} */}
 
-                          {panel?.feedbacks?.[0]?.score && (
-                            <span className="text-sm font-semibold text-blue-600">
-                              {panel.feedbacks[0].score}/10
-                            </span>
-                          )}
-                        </div>
-                      ))}
+                              {feedback && (
+                                <div className="mt-3 space-y-2 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm dark:border-gray-700 dark:bg-gray-900">
+                                  {feedback.is_same_as_applicant !==
+                                    undefined && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Same As Applicant :
+                                      </span>{" "}
+                                      {feedback.is_same_as_applicant
+                                        ? "Yes"
+                                        : "No"}
+                                    </p>
+                                  )}
+
+                                  {feedback.academic_record_remark && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Academic Record :
+                                      </span>{" "}
+                                      {feedback.academic_record_remark}
+                                    </p>
+                                  )}
+
+                                  {feedback.experience_remark && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Experience :
+                                      </span>{" "}
+                                      {feedback.experience_remark}
+                                    </p>
+                                  )}
+
+                                  {feedback.knowledge_rating && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Knowledge Rating :
+                                      </span>{" "}
+                                      {feedback.knowledge_rating}
+                                    </p>
+                                  )}
+
+                                  {feedback.knowledge_detail && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Knowledge Detail :
+                                      </span>{" "}
+                                      {feedback.knowledge_detail}
+                                    </p>
+                                  )}
+
+                                  {feedback.communication_skills_rating && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Communication Rating :
+                                      </span>{" "}
+                                      {feedback.communication_skills_rating}
+                                    </p>
+                                  )}
+
+                                  {feedback.communication_skills_comment && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Communication Comment :
+                                      </span>{" "}
+                                      {feedback.communication_skills_comment}
+                                    </p>
+                                  )}
+
+                                  {feedback.attitude_rating && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Attitude Rating :
+                                      </span>{" "}
+                                      {feedback.attitude_rating}
+                                    </p>
+                                  )}
+
+                                  {feedback.attitude_comment && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Attitude Comment :
+                                      </span>{" "}
+                                      {feedback.attitude_comment}
+                                    </p>
+                                  )}
+
+                                  {feedback.overall_assessment_rating && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Overall Assessment :
+                                      </span>{" "}
+                                      {feedback.overall_assessment_rating}
+                                    </p>
+                                  )}
+
+                                  {feedback.overall_assessment_remark && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Overall Remark :
+                                      </span>{" "}
+                                      {feedback.overall_assessment_remark}
+                                    </p>
+                                  )}
+
+                                  {feedback.position_recommendation && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Position Recommendation :
+                                      </span>{" "}
+                                      {feedback.position_recommendation}
+                                    </p>
+                                  )}
+
+                                  {feedback.recommendation_comments && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Recommendation Comment :
+                                      </span>{" "}
+                                      {feedback.recommendation_comments}
+                                    </p>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 ))}
