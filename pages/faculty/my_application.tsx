@@ -197,7 +197,7 @@ const Application = () => {
           state.profile?.institution?.institution?.id,
           null,
           null,
-          state.profile?.id,
+          state.profile?.id
         );
       } else if (role === ROLES.HR) {
         applicationList(
@@ -205,7 +205,7 @@ const Application = () => {
           null,
           state.profile?.college?.map((item) => item?.college_id),
           null,
-          state.profile?.id,
+          state.profile?.id
         );
       } else if (role === ROLES.HOD) {
         applicationList(
@@ -213,7 +213,7 @@ const Application = () => {
           null,
           null,
           state.profile?.department?.department_id,
-          state.profile?.id,
+          state.profile?.id
         );
       }
     }
@@ -248,20 +248,8 @@ const Application = () => {
         // loadJobList(1, null, null);
         loadJobList(1, null, false, null, null, null, res?.id);
       } else if (res?.role == ROLES.INSTITUTION_ADMIN) {
-        collegeDropdownList(
-          1,
-          "",
-          false,
-          res?.institution?.id,
-          res.id
-        );
-        applicationList(
-          1,
-          res?.institution?.id,
-          null,
-          null,
-          res?.id,
-        );
+        collegeDropdownList(1, "", false, res?.institution?.id, res.id);
+        applicationList(1, res?.institution?.id, null, null, res?.id);
         loadJobList(1, null, false, null, null, null, res?.id);
       } else if (res?.role == ROLES.HR) {
         departmentDropdownList(
@@ -269,14 +257,14 @@ const Application = () => {
           "",
           false,
           res?.college?.map((college) => college.college_id),
-          res.id,
+          res.id
         );
         applicationList(
           1,
           null,
           res?.college?.map((college) => college.college_id),
           null,
-          res?.id,
+          res?.id
         );
         loadJobList(1, null, false, null, null, null, res?.id);
       } else if (res?.role == ROLES.HOD) {
@@ -310,7 +298,7 @@ const Application = () => {
     institutionId = null,
     collegeId = null,
     deptId = null,
-    profileId = null,
+    profileId = null
   ) => {
     try {
       setState({ loading: true });
@@ -428,7 +416,7 @@ const Application = () => {
         state.profile?.institution?.id,
         null,
         null,
-        state.profile?.id,
+        state.profile?.id
       );
     } else if (role === ROLES.HR) {
       applicationList(
@@ -436,7 +424,7 @@ const Application = () => {
         null,
         state.profile?.college?.college_id,
         null,
-        state.profile?.id,
+        state.profile?.id
       );
     } else if (role === ROLES.HOD) {
       applicationList(
@@ -444,7 +432,7 @@ const Application = () => {
         null,
         null,
         state.profile?.department?.department_id,
-        state.profile?.id,
+        state.profile?.id
       );
     }
   };
@@ -503,7 +491,7 @@ const Application = () => {
           state.profile?.institution?.id,
           null,
           null,
-          state.profile?.id,
+          state.profile?.id
         );
       } else if (role === ROLES.HR) {
         applicationList(
@@ -511,7 +499,7 @@ const Application = () => {
           null,
           state.profile?.college?.college_id,
           null,
-          state.profile?.id,
+          state.profile?.id
         );
       } else if (role === ROLES.HOD) {
         applicationList(
@@ -519,7 +507,7 @@ const Application = () => {
           null,
           null,
           state.profile?.department?.department_id,
-          state.profile?.id,
+          state.profile?.id
         );
       }
     } catch (error) {
@@ -542,7 +530,7 @@ const Application = () => {
           state.profile?.institution?.id,
           null,
           null,
-          state.profile?.id,
+          state.profile?.id
         );
       } else if (role === ROLES.HR) {
         applicationList(
@@ -550,7 +538,7 @@ const Application = () => {
           null,
           state.profile?.college?.college_id,
           null,
-          state.profile?.id,
+          state.profile?.id
         );
       } else if (role === ROLES.HOD) {
         applicationList(
@@ -558,7 +546,7 @@ const Application = () => {
           null,
           null,
           state.profile?.department?.department_id,
-          state.profile?.id,
+          state.profile?.id
         );
       }
     } catch (error) {
@@ -574,14 +562,14 @@ const Application = () => {
       () => {
         Swal.fire("Cancelled", "Your Record is safe :)", "info");
       },
-      "Are you sure want to delete record?",
+      "Are you sure want to delete record?"
     );
   };
 
   const institutionDropdownList = async (
     page,
     search = "",
-    loadMore = false,
+    loadMore = false
   ) => {
     try {
       setState({ institutionLoading: true });
@@ -609,7 +597,7 @@ const Application = () => {
     search = "",
     loadMore = false,
     institutionId = null,
-    createdBy = null,
+    createdBy = null
   ) => {
     try {
       setState({ collegeLoading: true });
@@ -644,7 +632,7 @@ const Application = () => {
     search = "",
     loadMore = false,
     collegeId = null,
-    createdBy = null,
+    createdBy = null
   ) => {
     try {
       setState({ departmentLoading: true });
@@ -773,7 +761,7 @@ const Application = () => {
         "",
         false,
         selectedOption.value,
-        state.profile?.id,
+        state.profile?.id
       );
     }
   };
@@ -791,7 +779,7 @@ const Application = () => {
         "",
         false,
         selectedOption.value,
-        state.profile?.id,
+        state.profile?.id
       );
     }
   };
@@ -806,11 +794,10 @@ const Application = () => {
       Success("Application deleted successfully!");
       // applicationList(state.page);
       handleUpdateStatus("", "");
-      if(state.selectedRecords?.length>0){
-        const filter =state.selectedRecords?.filter((item)=>item != row?.id)
-        setState({ selectedRecords: filter })
+      if (state.selectedRecords?.length > 0) {
+        const filter = state.selectedRecords?.filter((item) => item != row?.id);
+        setState({ selectedRecords: filter });
       }
-
     } catch (error) {
       Failure("Failed to delete application. Please try again.");
     }
@@ -869,7 +856,7 @@ const Application = () => {
     institutionId = null,
     collegeId = null,
     deptId = null,
-    created_by = null,
+    created_by = null
   ) => {
     try {
       setState({ jobLoading: true });
@@ -903,7 +890,7 @@ const Application = () => {
     page = 1,
     search = "",
     loadMore = false,
-    job = null,
+    job = null
   ) => {
     try {
       const body = {
@@ -935,7 +922,7 @@ const Application = () => {
     page = 1,
     search = "",
     loadMore = false,
-    deptId = null,
+    deptId = null
   ) => {
     try {
       setState({ panelMemberLoading: true });
@@ -963,7 +950,7 @@ const Application = () => {
     page = 1,
     search = "",
     loadMore = false,
-    deptIds,
+    deptIds
   ) => {
     try {
       setState({ applicantsLoading: true });
@@ -1000,7 +987,7 @@ const Application = () => {
       const validation = {
         selectedJobs: state.selectedJobs.map((j) => j.value),
         selectedDepartments: state.selectedDepartments?.map(
-          (item) => item?.value,
+          (item) => item?.value
         ),
         interviewSlot: state.interviewSlot
           ? moment(state.interviewSlot).format("YYYY-MM-DD HH:mm")
@@ -1166,8 +1153,7 @@ const Application = () => {
     }
   };
 
-console.log('✌️state.selectedRecords --->', state.selectedRecords);
-
+  console.log("✌️state.selectedRecords --->", state.selectedRecords);
 
   return (
     <div className="min-h-screen dark:from-gray-900 dark:to-gray-800">
@@ -1254,8 +1240,6 @@ console.log('✌️state.selectedRecords --->', state.selectedRecords);
             </div>
           </div>
         </div>
-
-        
       </div>
 
       {/* Filters Section */}
@@ -1581,7 +1565,7 @@ console.log('✌️state.selectedRecords --->', state.selectedRecords);
         <div className="fixed bottom-6 right-9 z-50">
           <button
             onClick={bulkSelect}
-            className="group relative inline-flex items-center gap-2 overflow-hidden rounded-xl bg-dblue px-6 py-3 font-medium text-white shadow-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-2xl"
+            className="bg-dblue group relative inline-flex items-center gap-2 overflow-hidden rounded-xl px-6 py-3 font-medium text-white shadow-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-2xl"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
 
@@ -1735,7 +1719,7 @@ console.log('✌️state.selectedRecords --->', state.selectedRecords);
                     1,
                     searchTerm,
                     false,
-                    state.selectedJobs,
+                    state.selectedJobs
                   );
                 }}
                 loadMore={() => {
@@ -1744,7 +1728,7 @@ console.log('✌️state.selectedRecords --->', state.selectedRecords);
                       state.deptPage + 1,
                       "",
                       true,
-                      state.selectedJobs,
+                      state.selectedJobs
                     );
                 }}
                 isMulti
@@ -1806,7 +1790,7 @@ console.log('✌️state.selectedRecords --->', state.selectedRecords);
                     1,
                     searchTerm,
                     false,
-                    state.selectedDepartments,
+                    state.selectedDepartments
                   );
                 }}
                 loadMore={() => {
@@ -1815,7 +1799,7 @@ console.log('✌️state.selectedRecords --->', state.selectedRecords);
                       state.panelPage + 1,
                       "",
                       false,
-                      state.selectedDepartments,
+                      state.selectedDepartments
                     );
                   }
                 }}
@@ -1975,30 +1959,151 @@ console.log('✌️state.selectedRecords --->', state.selectedRecords);
 
                     {/* Feedback List */}
                     <div className="space-y-2">
-                      {round.panels?.map((panel) => (
-                        <div
-                          key={panel.id}
-                          className="flex items-start justify-between rounded border bg-gray-50 p-3"
-                        >
-                          <div>
-                            <p className="text-sm">{panel.name}</p>
+                      {round.panels?.map((panel) => {
+                        const feedback = panel?.feedbacks?.[0];
+                        return (
+                          <div
+                            key={panel.id}
+                            className="flex items-start justify-between rounded border bg-gray-50 p-3"
+                          >
+                            <div>
+                              <p className="text-sm">{panel.name}</p>
 
-                            {panel?.feedbacks?.[0]?.feedback_text && (
+                              {/* {panel?.feedbacks?.[0]?.feedback_text && (
                               <p className="mt-1 text-sm text-gray-700">
                                 {capitalizeFLetter(
                                   panel.feedbacks[0].feedback_text
                                 )}
                               </p>
-                            )}
-                          </div>
+                            )} */}
 
-                          {panel?.feedbacks?.[0]?.score && (
-                            <span className="text-sm font-semibold text-blue-600">
-                              {panel.feedbacks[0].score}/10
-                            </span>
-                          )}
-                        </div>
-                      ))}
+                              {feedback && (
+                                <div className="mt-3 space-y-2 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm dark:border-gray-700 dark:bg-gray-900">
+                                  {feedback.is_same_as_applicant !==
+                                    undefined && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Same As Applicant :
+                                      </span>{" "}
+                                      {feedback.is_same_as_applicant
+                                        ? "Yes"
+                                        : "No"}
+                                    </p>
+                                  )}
+
+                                  {feedback.academic_record_remark && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Academic Record :
+                                      </span>{" "}
+                                      {feedback.academic_record_remark}
+                                    </p>
+                                  )}
+
+                                  {feedback.experience_remark && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Experience :
+                                      </span>{" "}
+                                      {feedback.experience_remark}
+                                    </p>
+                                  )}
+
+                                  {feedback.knowledge_rating && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Knowledge Rating :
+                                      </span>{" "}
+                                      {feedback.knowledge_rating}
+                                    </p>
+                                  )}
+
+                                  {feedback.knowledge_detail && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Knowledge Detail :
+                                      </span>{" "}
+                                      {feedback.knowledge_detail}
+                                    </p>
+                                  )}
+
+                                  {feedback.communication_skills_rating && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Communication Rating :
+                                      </span>{" "}
+                                      {feedback.communication_skills_rating}
+                                    </p>
+                                  )}
+
+                                  {feedback.communication_skills_comment && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Communication Comment :
+                                      </span>{" "}
+                                      {feedback.communication_skills_comment}
+                                    </p>
+                                  )}
+
+                                  {feedback.attitude_rating && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Attitude Rating :
+                                      </span>{" "}
+                                      {feedback.attitude_rating}
+                                    </p>
+                                  )}
+
+                                  {feedback.attitude_comment && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Attitude Comment :
+                                      </span>{" "}
+                                      {feedback.attitude_comment}
+                                    </p>
+                                  )}
+
+                                  {feedback.overall_assessment_rating && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Overall Assessment :
+                                      </span>{" "}
+                                      {feedback.overall_assessment_rating}
+                                    </p>
+                                  )}
+
+                                  {feedback.overall_assessment_remark && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Overall Remark :
+                                      </span>{" "}
+                                      {feedback.overall_assessment_remark}
+                                    </p>
+                                  )}
+
+                                  {feedback.position_recommendation && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Position Recommendation :
+                                      </span>{" "}
+                                      {feedback.position_recommendation}
+                                    </p>
+                                  )}
+
+                                  {feedback.recommendation_comments && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Recommendation Comment :
+                                      </span>{" "}
+                                      {feedback.recommendation_comments}
+                                    </p>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 ))}
@@ -2019,7 +2124,7 @@ console.log('✌️state.selectedRecords --->', state.selectedRecords);
 
                 <button
                   onClick={() => updateStatus()}
-                  className="rounded bg-dblue px-5 py-2 text-white"
+                  className="bg-dblue rounded px-5 py-2 text-white"
                 >
                   Update Status
                 </button>
@@ -2029,9 +2134,7 @@ console.log('✌️state.selectedRecords --->', state.selectedRecords);
         )}
       />
 
-      
-
-       <Modal
+      <Modal
         open={state.showFilterModal}
         close={() => setState({ showFilterModal: false })}
         // title="Filters"
