@@ -89,7 +89,7 @@ const JobDetails = () => {
 
   if (state.loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800">
+      <div className="flex min-h-screen items-center justify-center ">
         <div className="flex items-center gap-3">
           <IconLoader className="h-8 w-8 animate-spin text-indigo-600" />
           <span className="text-lg font-medium text-gray-700 dark:text-gray-300">
@@ -116,7 +116,7 @@ const JobDetails = () => {
       </div>
 
       <div className="">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           {/* Main Content (Left Column) */}
           <div className="space-y-4 lg:col-span-2">
             {/* Job Header */}
