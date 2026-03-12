@@ -788,22 +788,10 @@ const ApplicationDetail = () => {
 
                   <div className="flex items-center gap-3">
                     <select
-                      value={round?.status || ""}
+                      value={round?.status}
                       onClick={(e) => e.stopPropagation()}
                       onChange={(e) => {
-                        if(round?.status == "rescheduled"){
-                          const body={
-                            target:{
-                              value:"rescheduled"
-                            
-                            }
-                          }
-                        rescheduleInterview(body, round);
-
-                        }else{
-                        console.log("✌️e --->", e?.target?.value);
                         rescheduleInterview(e, round);
-                      }
                       }}
                       className={`cursor-pointer rounded-full px-4 py-2 text-xs font-bold shadow-sm outline-none ${
                         round.status === "completed"
@@ -909,86 +897,177 @@ const ApplicationDetail = () => {
                 {state.expandedRounds?.[round?.id] && (
                   <div className="border-t border-gray-200 bg-gray-50/60 p-4 backdrop-blur dark:border-gray-700 dark:bg-gray-900/40">
                     <div className="grid gap-4 md:grid-cols-2">
-                      {round.panels.map((panel, i) => (
-                        <div
-                          key={i}
-                          className="group rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
-                        >
-                          {/* Header */}
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              {/* Avatar */}
-                              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-xs font-semibold text-white">
-                                {panel.name?.charAt(0)}
-                              </div>
-
-                              {/* Name + Email */}
-                              <div className="space-y-2">
-                                <p className="text-[18px] font-semibold text-gray-900 dark:text-white">
-                                  {panel.name}
-                                </p>
-
-                                <div className="flex items-center gap-1 text-sm text-gray-500">
-                                  <Mail className="h-3 w-3" />
-                                  {`${panel.email} (${panel.designation})`}
+                      {round.panels.map((panel, i) => {
+                        const feedback = panel?.feedbacks?.[0];
+                        return (
+                          <div
+                            key={i}
+                            className="group rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
+                          >
+                            {/* Header */}
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                {/* Avatar */}
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-xs font-semibold text-white">
+                                  {panel.name?.charAt(0)}
                                 </div>
 
-                                <div className="flex items-center gap-1 text-sm  text-gray-500">
-                                  <Building2 className="h-3 w-3" />
-                                  {panel.department?.department_name}
+                                {/* Name + Email */}
+                                <div className="space-y-2">
+                                  <p className="text-[18px] font-semibold text-gray-900 dark:text-white">
+                                    {panel.name}
+                                  </p>
+
+                                  <div className="flex items-center gap-1 text-sm text-gray-500">
+                                    <Mail className="h-3 w-3" />
+                                    {`${panel.email} (${panel.designation})`}
+                                  </div>
+
+                                  <div className="flex items-center gap-1 text-sm  text-gray-500">
+                                    <Building2 className="h-3 w-3" />
+                                    {panel.department?.department_name}
+                                  </div>
                                 </div>
                               </div>
+
+                              {panel.score && (
+                                <div className="flex items-center gap-1 rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
+                                  <Star className="h-3 w-3" />
+                                  {panel.score ?? "-"}
+                                </div>
+                              )}
                             </div>
 
-                            {panel.score && (
-                              <div className="flex items-center gap-1 rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
-                                <Star className="h-3 w-3" />
-                                {panel.score ?? "-"}
+                            {/* Divider */}
+                            <div className="my-3 h-px bg-gray-200 dark:bg-gray-700" />
+
+                            {/* Score Progress */}
+                            {feedback && (
+                              <div className="mt-3 space-y-2 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm dark:border-gray-700 dark:bg-gray-900">
+                                {feedback.is_same_as_applicant !==
+                                  undefined && (
+                                  <p>
+                                    <span className="font-semibold">
+                                      Same As Applicant :
+                                    </span>{" "}
+                                    {feedback.is_same_as_applicant
+                                      ? "Yes"
+                                      : "No"}
+                                  </p>
+                                )}
+
+                                {feedback.academic_record_remark && (
+                                  <p>
+                                    <span className="font-semibold">
+                                      Academic Record :
+                                    </span>{" "}
+                                    {feedback.academic_record_remark}
+                                  </p>
+                                )}
+
+                                {feedback.experience_remark && (
+                                  <p>
+                                    <span className="font-semibold">
+                                      Experience :
+                                    </span>{" "}
+                                    {feedback.experience_remark}
+                                  </p>
+                                )}
+
+                                {feedback.knowledge_rating && (
+                                  <p>
+                                    <span className="font-semibold">
+                                      Knowledge Rating :
+                                    </span>{" "}
+                                    {feedback.knowledge_rating}
+                                  </p>
+                                )}
+
+                                {feedback.knowledge_detail && (
+                                  <p>
+                                    <span className="font-semibold">
+                                      Knowledge Detail :
+                                    </span>{" "}
+                                    {feedback.knowledge_detail}
+                                  </p>
+                                )}
+
+                                {feedback.communication_skills_rating && (
+                                  <p>
+                                    <span className="font-semibold">
+                                      Communication Rating :
+                                    </span>{" "}
+                                    {feedback.communication_skills_rating}
+                                  </p>
+                                )}
+
+                                {feedback.communication_skills_comment && (
+                                  <p>
+                                    <span className="font-semibold">
+                                      Communication Comment :
+                                    </span>{" "}
+                                    {feedback.communication_skills_comment}
+                                  </p>
+                                )}
+
+                                {feedback.attitude_rating && (
+                                  <p>
+                                    <span className="font-semibold">
+                                      Attitude Rating :
+                                    </span>{" "}
+                                    {feedback.attitude_rating}
+                                  </p>
+                                )}
+
+                                {feedback.attitude_comment && (
+                                  <p>
+                                    <span className="font-semibold">
+                                      Attitude Comment :
+                                    </span>{" "}
+                                    {feedback.attitude_comment}
+                                  </p>
+                                )}
+
+                                {feedback.overall_assessment_rating && (
+                                  <p>
+                                    <span className="font-semibold">
+                                      Overall Assessment :
+                                    </span>{" "}
+                                    {feedback.overall_assessment_rating}
+                                  </p>
+                                )}
+
+                                {feedback.overall_assessment_remark && (
+                                  <p>
+                                    <span className="font-semibold">
+                                      Overall Remark :
+                                    </span>{" "}
+                                    {feedback.overall_assessment_remark}
+                                  </p>
+                                )}
+
+                                {feedback.position_recommendation && (
+                                  <p>
+                                    <span className="font-semibold">
+                                      Position Recommendation :
+                                    </span>{" "}
+                                    {feedback.position_recommendation}
+                                  </p>
+                                )}
+
+                                {feedback.recommendation_comments && (
+                                  <p>
+                                    <span className="font-semibold">
+                                      Recommendation Comment :
+                                    </span>{" "}
+                                    {feedback.recommendation_comments}
+                                  </p>
+                                )}
                               </div>
                             )}
                           </div>
-
-                          {/* Divider */}
-                          <div className="my-3 h-px bg-gray-200 dark:bg-gray-700" />
-
-                          {/* Score Progress */}
-                          {panel?.feedbacks?.length > 0 &&
-                            panel?.feedbacks?.[0] && (
-                              <div className="mt-3">
-                                <div className="flex items-center justify-between text-[11px] text-gray-500">
-                                  <p className="text-[16px]">Score</p>
-                                  <p className="text-[16px]">
-                                    {panel.feedbacks?.[0].score}/10
-                                  </p>
-                                </div>
-
-                                <div className="mt-1 h-1.5 w-full rounded-full bg-gray-200 dark:bg-gray-700">
-                                  <div
-                                    style={{
-                                      width: `${
-                                        (panel.feedbacks?.[0].score / 1) * 1
-                                      }%`,
-                                    }}
-                                    className="h-1.5 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"
-                                  />
-                                </div>
-                              </div>
-                            )}
-
-                          {/* Feedback */}
-                          {panel.feedbacks?.length > 0 &&
-                            panel.feedbacks?.[0] && (
-                              <div className="mt-3 flex gap-2 rounded-lg border border-gray-200 bg-gray-50 p-2 text-xs text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
-                                <MessageSquare className="mt-0.5 h-4 w-4 text-gray-400" />
-                                <span className="font-semibold italic">
-                                  {capitalizeFLetter(
-                                    panel.feedbacks?.[0].feedback_text
-                                  )}
-                                </span>
-                              </div>
-                            )}
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 )}
