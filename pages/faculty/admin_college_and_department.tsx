@@ -2232,12 +2232,12 @@ const CollegeAndDepartment = () => {
 
       {/* Tabs */}
       <div className="mb-4">
-        <div className="inline-flex rounded-lg bg-gray-100 p-1 dark:bg-gray-800">
+        <div className="inline-flex rounded-lg bg-white p-1 dark:bg-gray-800">
           <button
             onClick={() => handleTabChange("colleges")}
             className={`rounded-md px-2 py-1 text-sm font-medium transition-all duration-200 ${
               state.activeTab === "colleges"
-                ? "bg-white text-blue-600 shadow-sm dark:bg-gray-700 dark:text-blue-400"
+                ? "bg-lyellow text-black shadow-sm dark:bg-gray-700 dark:text-blue-400"
                 : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
             }`}
           >
@@ -2247,7 +2247,7 @@ const CollegeAndDepartment = () => {
             onClick={() => handleTabChange("departments")}
             className={`rounded-md px-2 py-1 text-sm font-medium transition-all duration-200 ${
               state.activeTab === "departments"
-                ? "bg-white text-blue-600 shadow-sm dark:bg-gray-700 dark:text-blue-400"
+                ? "bg-lyellow text-black shadow-sm dark:bg-gray-700 dark:text-blue-400"
                 : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
             }`}
           >

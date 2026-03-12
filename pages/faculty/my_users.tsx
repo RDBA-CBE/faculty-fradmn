@@ -1582,15 +1582,15 @@ const Users = () => {
       accessor: "actions",
       title: "Actions",
       render: (row) => (
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex items-center justify-center gap-3">
           {state.activeTab == "applicant" && (
             <a
               href={`${FRONTEND_URL}profile/${row?.id}`}
               target="_blank"
-              className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-200 ${
+              className={`flex items-center justify-center rounded-lg transition-all duration-200 ${
                 row.status === "active"
-                  ? "bg-green-100 text-green-600 hover:bg-green-200"
-                  : "bg-red-100 text-red-600 hover:bg-red-200"
+                  ? " text-green-600 "
+                  : "text-red-600 "
               }`}
               title={"View"}
             >
@@ -1601,7 +1601,7 @@ const Users = () => {
             <>
               <button
                 onClick={() => handleEdit(row)}
-                className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 transition-all duration-200 hover:bg-blue-200"
+                className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
                 title="Edit"
               >
                 <IconEdit className="h-4 w-4" />
@@ -1626,7 +1626,7 @@ const Users = () => {
           )}
           <button
             onClick={() => handleDelete(row)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600 transition-all duration-200 hover:bg-red-200"
+            className="flex items-center justify-center rounded-lg  text-red-600 transition-all duration-200"
             title="Delete"
           >
             <IconTrash className="h-4 w-4" />
@@ -1650,12 +1650,12 @@ const Users = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-3 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen dark:from-gray-900 dark:to-gray-800">
       {/* Header Section */}
-      <div className="mb-8">
+      <div className="mb-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
-            <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-3xl font-bold text-transparent">
+            <h1 className="page-ti text-transparent">
               {getTabLabel()} Management
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
@@ -1665,9 +1665,9 @@ const Users = () => {
           {/* {state.activeTab !== ROLES.APPLICANT && ( */}
           <button
             onClick={() => setState({ showModal: true })}
-            className="group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+            className="bg-dblue group relative inline-flex transform items-center gap-2 overflow-hidden rounded-lg px-4 py-2  text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+            <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
             <IconPlus className="relative z-10 h-5 w-5" />
             <span className="relative z-10">Add {getTabLabel()}</span>
           </button>
@@ -1677,14 +1677,14 @@ const Users = () => {
 
       {/* Tabs */}
       {state.profile?.role != ROLES.HOD && (
-        <div className="mb-6">
-          <div className="inline-flex rounded-lg bg-gray-100 p-1 dark:bg-gray-800">
+        <div className="mb-4">
+          <div className="inline-flex rounded-lg bg-white p-1 dark:bg-gray-800">
             {state.profile?.role === ROLES.SUPER_ADMIN && (
               <button
                 onClick={() => handleTabChange("institution_admin")}
-                className={`rounded-md px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                className={`rounded-md px-2 py-1 text-sm font-medium transition-all duration-200 ${
                   state.activeTab === "institution_admin"
-                    ? "bg-white text-blue-600 shadow-sm dark:bg-gray-700 dark:text-blue-400"
+                    ? "bg-lyellow text-black shadow-sm dark:bg-gray-700 dark:text-blue-400"
                     : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                 }`}
               >
@@ -1695,9 +1695,9 @@ const Users = () => {
               state.profile?.role == ROLES.INSTITUTION_ADMIN) && (
               <button
                 onClick={() => handleTabChange("hr")}
-                className={`rounded-md px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                className={`rounded-md px-2 py-1 text-sm font-medium transition-all duration-200 ${
                   state.activeTab === "hr"
-                    ? "bg-white text-blue-600 shadow-sm dark:bg-gray-700 dark:text-blue-400"
+                    ? "bg-lyellow text-black shadow-sm dark:bg-gray-700 dark:text-blue-400"
                     : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                 }`}
               >
@@ -1707,9 +1707,9 @@ const Users = () => {
             {state.profile?.role != ROLES.HOD && (
               <button
                 onClick={() => handleTabChange("hod")}
-                className={`rounded-md px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                className={`rounded-md px-2 py-1 text-sm font-medium transition-all duration-200 ${
                   state.activeTab === "hod"
-                    ? "bg-white text-blue-600 shadow-sm dark:bg-gray-700 dark:text-blue-400"
+                    ? "bg-lyellow text-black shadow-sm dark:bg-gray-700 dark:text-blue-400"
                     : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                 }`}
               >
@@ -1718,9 +1718,9 @@ const Users = () => {
             )}
             <button
               onClick={() => handleTabChange("applicant")}
-              className={`rounded-md px-4 py-2 text-sm font-medium transition-all duration-200 ${
+              className={`rounded-md px-2 py-1 text-sm font-medium transition-all duration-200 ${
                 state.activeTab === "applicant"
-                  ? "bg-white text-blue-600 shadow-sm dark:bg-gray-700 dark:text-blue-400"
+                  ? "bg-lyellow text-black shadow-sm dark:bg-gray-700 dark:text-blue-400"
                   : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
               }`}
             >
@@ -1731,14 +1731,14 @@ const Users = () => {
       )}
 
       {/* Filters Section */}
-      <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
-        <div className="mb-4 flex items-center gap-2">
+      <div className="mb-4 rounded-2xl  backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
+        {/* <div className="mb-2 flex items-center gap-2">
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
             Filters
           </h3>
-        </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div className="group relative">
+        </div> */}
+        <div className="flex flex-wrap gap-4 items-center">
+          <div className="group relative w-fit">
             <TextInput
               placeholder={`Search ${getTabLabel().toLowerCase()}...`}
               value={state.search}
@@ -1757,6 +1757,7 @@ const Users = () => {
                 <>
                   {state.profile?.role === ROLES.SUPER_ADMIN && (
                     <CustomSelect
+                    className="!w-fit"
                       options={state.institutionList}
                       value={state.superAdminInstitutionFilter}
                       onChange={handlesuperAdminInstitutionChange}
@@ -1779,9 +1780,11 @@ const Users = () => {
                     onSearch={handleCollegeSearch}
                     loadMore={handleLoadMoreCollege}
                     loading={state.collegeLoading}
+                    className="!w-fit"
                   />
                   {state.activeTab == "hod" && (
                     <CustomSelect
+                    className="!w-fit"
                       options={state.superAdminDepartmentList}
                       value={state.superAdminDepartmentFilter}
                       onChange={handlesuperAdminDepartmentChange}
@@ -1852,10 +1855,10 @@ const Users = () => {
       </div>
 
       {/* Table Section */}
-      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
-        <div className="border-b border-gray-200 p-6 dark:border-gray-700">
+      <div className="overflow-hidden rounded-lg   backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
+        <div className="mb-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+            <h3 className="text-lg font-bold text-gray-800 dark:text-white">
               {getTabLabel()} List
             </h3>
             <div className="flex items-center gap-4">
@@ -1868,18 +1871,18 @@ const Users = () => {
                   Delete ({state.selectedRecords.length})
                 </button>
               )}
-              <div className="text-sm text-gray-500 dark:text-gray-400">
+              <div className="text-sm text-black">
                 {state.userCount} records found
               </div>
             </div>
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-aut border border-gray-200 bg-white">
           <DataTable
             noRecordsText={`No ${getTabLabel().toLowerCase()} found`}
             highlightOnHover
-            className="table-hover whitespace-nowrap"
+            className="table-hover"
             records={state.userList}
             fetching={state.loading}
             selectedRecords={state.userList.filter((record) =>

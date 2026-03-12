@@ -44,6 +44,13 @@ import {
   ExternalLink,
   ChevronDown,
   ChevronUp,
+  Filter,
+  FilterIcon,
+  SlidersHorizontal,
+  Hourglass,
+  Verified,
+  VerifiedIcon,
+  X,
 } from "lucide-react";
 import CustomeDatePicker from "@/components/datePicker";
 import PrivateRouter from "@/hook/privateRouter";
@@ -66,6 +73,7 @@ const Application = () => {
     search: "",
     statusFilter: null,
     showModal: false,
+    showFilterModal: false,
     loading: false,
     submitting: false,
     sortBy: "",
@@ -189,7 +197,7 @@ const Application = () => {
           state.profile?.institution?.institution?.id,
           null,
           null,
-          state.profile?.id
+          state.profile?.id,
         );
       } else if (role === ROLES.HR) {
         applicationList(
@@ -197,7 +205,7 @@ const Application = () => {
           null,
           state.profile?.college?.map((item) => item?.college_id),
           null,
-          state.profile?.id
+          state.profile?.id,
         );
       } else if (role === ROLES.HOD) {
         applicationList(
@@ -205,7 +213,7 @@ const Application = () => {
           null,
           null,
           state.profile?.department?.department_id,
-          state.profile?.id
+          state.profile?.id,
         );
       }
     }
@@ -252,7 +260,7 @@ const Application = () => {
           res?.institution?.id,
           null,
           null,
-          res?.id
+          res?.id,
         );
         loadJobList(1, null, false, null, null, null, res?.id);
       } else if (res?.role == ROLES.HR) {
@@ -261,14 +269,14 @@ const Application = () => {
           "",
           false,
           res?.college?.map((college) => college.college_id),
-          res.id
+          res.id,
         );
         applicationList(
           1,
           null,
           res?.college?.map((college) => college.college_id),
           null,
-          res?.id
+          res?.id,
         );
         loadJobList(1, null, false, null, null, null, res?.id);
       } else if (res?.role == ROLES.HOD) {
@@ -302,7 +310,7 @@ const Application = () => {
     institutionId = null,
     collegeId = null,
     deptId = null,
-    profileId = null
+    profileId = null,
   ) => {
     try {
       setState({ loading: true });
@@ -420,7 +428,7 @@ const Application = () => {
         state.profile?.institution?.id,
         null,
         null,
-        state.profile?.id
+        state.profile?.id,
       );
     } else if (role === ROLES.HR) {
       applicationList(
@@ -428,7 +436,7 @@ const Application = () => {
         null,
         state.profile?.college?.college_id,
         null,
-        state.profile?.id
+        state.profile?.id,
       );
     } else if (role === ROLES.HOD) {
       applicationList(
@@ -436,7 +444,7 @@ const Application = () => {
         null,
         null,
         state.profile?.department?.department_id,
-        state.profile?.id
+        state.profile?.id,
       );
     }
   };
@@ -495,7 +503,7 @@ const Application = () => {
           state.profile?.institution?.id,
           null,
           null,
-          state.profile?.id
+          state.profile?.id,
         );
       } else if (role === ROLES.HR) {
         applicationList(
@@ -503,7 +511,7 @@ const Application = () => {
           null,
           state.profile?.college?.college_id,
           null,
-          state.profile?.id
+          state.profile?.id,
         );
       } else if (role === ROLES.HOD) {
         applicationList(
@@ -511,7 +519,7 @@ const Application = () => {
           null,
           null,
           state.profile?.department?.department_id,
-          state.profile?.id
+          state.profile?.id,
         );
       }
     } catch (error) {
@@ -534,7 +542,7 @@ const Application = () => {
           state.profile?.institution?.id,
           null,
           null,
-          state.profile?.id
+          state.profile?.id,
         );
       } else if (role === ROLES.HR) {
         applicationList(
@@ -542,7 +550,7 @@ const Application = () => {
           null,
           state.profile?.college?.college_id,
           null,
-          state.profile?.id
+          state.profile?.id,
         );
       } else if (role === ROLES.HOD) {
         applicationList(
@@ -550,7 +558,7 @@ const Application = () => {
           null,
           null,
           state.profile?.department?.department_id,
-          state.profile?.id
+          state.profile?.id,
         );
       }
     } catch (error) {
@@ -566,14 +574,14 @@ const Application = () => {
       () => {
         Swal.fire("Cancelled", "Your Record is safe :)", "info");
       },
-      "Are you sure want to delete record?"
+      "Are you sure want to delete record?",
     );
   };
 
   const institutionDropdownList = async (
     page,
     search = "",
-    loadMore = false
+    loadMore = false,
   ) => {
     try {
       setState({ institutionLoading: true });
@@ -601,7 +609,7 @@ const Application = () => {
     search = "",
     loadMore = false,
     institutionId = null,
-    createdBy = null
+    createdBy = null,
   ) => {
     try {
       setState({ collegeLoading: true });
@@ -636,7 +644,7 @@ const Application = () => {
     search = "",
     loadMore = false,
     collegeId = null,
-    createdBy = null
+    createdBy = null,
   ) => {
     try {
       setState({ departmentLoading: true });
@@ -765,7 +773,7 @@ const Application = () => {
         "",
         false,
         selectedOption.value,
-        state.profile?.id
+        state.profile?.id,
       );
     }
   };
@@ -783,7 +791,7 @@ const Application = () => {
         "",
         false,
         selectedOption.value,
-        state.profile?.id
+        state.profile?.id,
       );
     }
   };
@@ -861,7 +869,7 @@ const Application = () => {
     institutionId = null,
     collegeId = null,
     deptId = null,
-    created_by = null
+    created_by = null,
   ) => {
     try {
       setState({ jobLoading: true });
@@ -895,7 +903,7 @@ const Application = () => {
     page = 1,
     search = "",
     loadMore = false,
-    job = null
+    job = null,
   ) => {
     try {
       const body = {
@@ -927,7 +935,7 @@ const Application = () => {
     page = 1,
     search = "",
     loadMore = false,
-    deptId = null
+    deptId = null,
   ) => {
     try {
       setState({ panelMemberLoading: true });
@@ -955,7 +963,7 @@ const Application = () => {
     page = 1,
     search = "",
     loadMore = false,
-    deptIds
+    deptIds,
   ) => {
     try {
       setState({ applicantsLoading: true });
@@ -992,7 +1000,7 @@ const Application = () => {
       const validation = {
         selectedJobs: state.selectedJobs.map((j) => j.value),
         selectedDepartments: state.selectedDepartments?.map(
-          (item) => item?.value
+          (item) => item?.value,
         ),
         interviewSlot: state.interviewSlot
           ? moment(state.interviewSlot).format("YYYY-MM-DD HH:mm")
@@ -1162,12 +1170,12 @@ console.log('✌️state.selectedRecords --->', state.selectedRecords);
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-3 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen dark:from-gray-900 dark:to-gray-800">
       {/* Header Section */}
-      <div className="mb-8">
+      <div className="mb-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
-            <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-3xl font-bold text-transparent">
+            <h1 className="page-ti  text-transparent">
               Application Management
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
@@ -1178,340 +1186,188 @@ console.log('✌️state.selectedRecords --->', state.selectedRecords);
       </div>
 
       {/* Stats Cards */}
-      <div className="mb-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-sm transition-all duration-200 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Total Applications
-              </p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white">
+      <div className="mb-6 flex gap-4">
+        <div className="rounded-lg border border-gray-200 bg-blue-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
+          <div className="flex items-center gap-5">
+            <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
+              <FileText className="text-dblue h-10 w-10" />
+            </div>
+
+            <div className="flex flex-col">
+              <p className="text-2xl  leading-none text-gray-900 dark:text-white">
                 {state.count || 0}
               </p>
-            </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900">
-              <FileText className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Total Applications
+              </p>
             </div>
           </div>
         </div>
 
-        <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-sm transition-all duration-200 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Applied
-              </p>
-              <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
+        <div className="rounded-lg border border-gray-200 bg-yellow-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
+          <div className="flex items-center gap-5">
+            <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
+              <Clock className="h-10 w-10 text-yellow-600" />
+            </div>
+
+            <div className="flex flex-col">
+              <p className="text-2xl  leading-none text-gray-900 dark:text-white">
                 {state.applications_by_status?.applied || 0}
               </p>
-            </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-yellow-100 dark:bg-yellow-900">
-              <Clock className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Applied
+              </p>
             </div>
           </div>
         </div>
 
-        <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-sm transition-all duration-200 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Selected
-              </p>
-              <p className="text-3xl font-bold text-green-600 dark:text-green-400">
+        <div className="rounded-lg border border-gray-200 bg-green-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
+          <div className="flex items-center gap-5">
+            <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
+              <CheckCircle className="h-10 w-10 text-green-600" />
+            </div>
+
+            <div className="flex flex-col">
+              <p className="text-2xl  leading-none text-gray-900 dark:text-white">
                 {state.applications_by_status?.Selected || 0}
               </p>
-            </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 dark:bg-green-900">
-              <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Selected
+              </p>
             </div>
           </div>
         </div>
 
-        <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-sm transition-all duration-200 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Interview Scheduled
-              </p>
-              <p className="text-3xl font-bold text-red-600 dark:text-red-400">
+        <div className="rounded-lg border border-gray-200 bg-indigo-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
+          <div className="flex items-center gap-5">
+            <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
+              <Clock className="h-10 w-10 text-indigo-600" />
+            </div>
+
+            <div className="flex flex-col">
+              <p className="text-2xl  leading-none text-gray-900 dark:text-white">
                 {state.applications_by_status?.["Interview Scheduled"] || 0}
               </p>
-            </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100 dark:bg-red-900">
-              <XCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Interview Scheduled
+              </p>
             </div>
           </div>
         </div>
+
+        
       </div>
 
       {/* Filters Section */}
-      <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
-        <div className="mb-4 flex items-center gap-2">
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-            Filters
-          </h3>
+      <div className="mb-5 rounded-2xl backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
+        <div className="flex items-center justify-between gap-5">
+          <TextInput
+            placeholder="Search applications..."
+            value={state.search}
+            onChange={(e) => setState({ search: e.target.value })}
+            icon={<IconSearch className="h-4 w-4" />}
+          />
+          <CustomeDatePicker
+            value={state.start_date}
+            placeholder="Choose From"
+            onChange={(e) => setState({ start_date: e })}
+            showTimeSelect={false}
+          />
+          <CustomeDatePicker
+            value={state.end_date}
+            placeholder="Choose To "
+            onChange={(e) => setState({ end_date: e })}
+            showTimeSelect={false}
+          />
+          <button
+            onClick={() => setState({ showFilterModal: true })}
+            className="flex items-center gap-4 rounded-lg border bg-white p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 "
+          >
+            <SlidersHorizontal className="h-4 w-4" />
+            Filter
+          </button>
         </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div className="group relative">
-            <TextInput
-              placeholder="Search jobs..."
-              value={state.search}
-              onChange={(e) => setState({ search: e.target.value })}
-              icon={<IconSearch className="h-4 w-4" />}
-            />
-          </div>
-          <>
-            {(state.profile?.role == ROLES.SUPER_ADMIN ||
-              state.profile?.role == ROLES.INSTITUTION_ADMIN) && (
-              <>
-                {state.profile?.role == ROLES.SUPER_ADMIN && (
-                  <CustomSelect
-                    options={state.institutionList}
-                    value={state.institutionFilter}
-                    onChange={handleInstitutionChange}
-                    placeholder="Select institution"
-                    isClearable={true}
-                    onSearch={(searchTerm) =>
-                      institutionDropdownList(1, searchTerm)
+        <div className="mt-4">
+          <div className="group relative"></div>
+          {(() => {
+            const activeFilters = [];
+            if (state.institutionFilter)
+              activeFilters.push({
+                key: "institutionFilter",
+                label: `Inst: ${state.institutionFilter.label}`,
+              });
+            if (state.collegeFilter)
+              activeFilters.push({
+                key: "collegeFilter",
+                label: `College: ${state.collegeFilter.label}`,
+              });
+            if (state.departmentFilter)
+              activeFilters.push({
+                key: "departmentFilter",
+                label: `Dept: ${state.departmentFilter.label}`,
+              });
+            if (state.start_date)
+              activeFilters.push({
+                key: "start_date",
+                label: `From: ${moment(state.start_date).format("DD/MM/YY")}`,
+              });
+            if (state.end_date)
+              activeFilters.push({
+                key: "end_date",
+                label: `To: ${moment(state.end_date).format("DD/MM/YY")}`,
+              });
+            if (state.selectedStatus)
+              activeFilters.push({
+                key: "selectedStatus",
+                label: `Status: ${state.selectedStatus.label}`,
+              });
+
+            if (activeFilters.length > 0) {
+              return (
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  {activeFilters.map((filter) => (
+                    <div
+                      key={filter.key}
+                      className="flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                    >
+                      <span>{filter.label}</span>
+                      <button
+                        onClick={() => setState({ [filter.key]: null })}
+                        className="rounded-full p-0.5 hover:bg-blue-200 dark:hover:bg-blue-700"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    onClick={() =>
+                      setState({
+                        institutionFilter: null,
+                        collegeFilter: null,
+                        departmentFilter: null,
+                        start_date: null,
+                        end_date: null,
+                        selectedStatus: null,
+                      })
                     }
-                    loadMore={() =>
-                      state.institutionNext &&
-                      institutionDropdownList(
-                        state.institutionPage + 1,
-                        "",
-                        true
-                      )
-                    }
-                    loading={state.institutionLoading}
-                  />
-                )}
-                <CustomSelect
-                  options={state.collegeList}
-                  value={state.collegeFilter}
-                  onChange={handleCollegeChange}
-                  placeholder="Select college"
-                  isClearable={true}
-                  onSearch={(searchTerm) => {
-                    const institutionId =
-                      state.profile?.role === ROLES.SUPER_ADMIN
-                        ? state.institutionFilter?.value
-                        : null;
-                    collegeDropdownList(
-                      1,
-                      searchTerm,
-                      false,
-                      institutionId,
-                      state.profile?.id
-                    );
-                  }}
-                  loadMore={() => {
-                    const institutionId =
-                      state.profile?.role === ROLES.SUPER_ADMIN
-                        ? state.institutionFilter?.value
-                        : state.profile?.institution?.id;
-                    state.collegeNext &&
-                      collegeDropdownList(
-                        state.collegePage + 1,
-                        "",
-                        true,
-                        institutionId,
-                        state.profile?.id
-                      );
-                  }}
-                  loading={state.collegeLoading}
-                />
-
-                <CustomSelect
-                  options={state.departmentList}
-                  value={state.departmentFilter}
-                  onChange={handleDepartmentChange}
-                  placeholder="Select department"
-                  isClearable={true}
-                  onSearch={(searchTerm) => {
-                    const collegeId = state.collegeFilter?.value;
-                    collegeId &&
-                      departmentDropdownList(
-                        1,
-                        searchTerm,
-                        false,
-                        collegeId,
-                        state.profile?.id
-                      );
-                  }}
-                  loadMore={() => {
-                    const collegeId = state.collegeFilter?.value;
-                    state.departmentNext &&
-                      collegeId &&
-                      departmentDropdownList(
-                        state.departmentPage + 1,
-                        "",
-                        true,
-                        collegeId,
-                        state.profile?.id
-                      );
-                  }}
-                  loading={state.departmentLoading}
-                  disabled={!state.collegeFilter}
-                />
-              </>
-            )}
-            {state.profile?.role == ROLES.HR && (
-              <>
-                {/* <CustomSelect
-                  options={state.collegeList}
-                  value={state.collegeFilter}
-                  onChange={handleCollegeChange}
-                  placeholder="Select college"
-                  isClearable={true}
-                  onSearch={(searchTerm) => {
-                    const institutionId =
-                      state.profile?.role === ROLES.SUPER_ADMIN
-                        ? state.institutionFilter?.value
-                        : null;
-                    collegeDropdownList(
-                      1,
-                      searchTerm,
-                      false,
-                      institutionId,
-                      state.profile?.id
-                    );
-                  }}
-                  loadMore={() => {
-                    const institutionId =
-                      state.profile?.role === ROLES.SUPER_ADMIN
-                        ? state.institutionFilter?.value
-                        : state.profile?.institution?.institution_id;
-                    state.collegeNext &&
-                      collegeDropdownList(
-                        state.collegePage + 1,
-                        "",
-                        true,
-                        institutionId,
-                        state.profile?.id
-                      );
-                  }}
-                  loading={state.collegeLoading}
-                /> */}
-
-                <CustomSelect
-                  options={state.departmentList}
-                  value={state.departmentFilter}
-                  onChange={handleDepartmentChange}
-                  placeholder="Select department"
-                  isClearable={true}
-                  onSearch={(searchTerm) => {
-                    const collegeId = state.collegeFilter?.value;
-                    collegeId &&
-                      departmentDropdownList(
-                        1,
-                        searchTerm,
-                        false,
-                        collegeId,
-                        state.profile?.id
-                      );
-                  }}
-                  loadMore={() => {
-                    const collegeId = state.collegeFilter?.value;
-                    state.departmentNext &&
-                      collegeId &&
-                      departmentDropdownList(
-                        state.departmentPage + 1,
-                        "",
-                        true,
-                        collegeId,
-                        state.profile?.id
-                      );
-                  }}
-                  loading={state.departmentLoading}
-                />
-              </>
-            )}
-
-            <div className="group relative">
-              <CustomeDatePicker
-                value={state.start_date}
-                placeholder="Choose From"
-                onChange={(e) => setState({ start_date: e })}
-                showTimeSelect={false}
-              />
-            </div>
-            <div className="group relative">
-              <CustomeDatePicker
-                value={state.end_date}
-                placeholder="Choose To "
-                onChange={(e) => setState({ end_date: e })}
-                showTimeSelect={false}
-              />
-            </div>
-            {/* <div className="group relative">
-              <CustomSelect
-                options={state.locationList}
-                value={state.locationFilter}
-                onChange={(e) => setState({ locationFilter: e })}
-                placeholder="Select location"
-                isClearable={true}
-                loading={state.locationLoading}
-              />
-            </div> */}
-
-            {/* <div className="group relative">
-              <CustomSelect
-                options={state.categoryList}
-                value={state.categoryFilter}
-                onChange={(e) => setState({ categoryFilter: e })}
-                placeholder="Select category"
-                isClearable={true}
-                loading={state.categoryLoading}
-              />
-            </div> */}
-
-            <div className="group relative">
-              <CustomSelect
-                options={state.applicationStatusList}
-                value={state.selectedStatus}
-                onChange={(e) => setState({ selectedStatus: e })}
-                placeholder="Select status"
-                loading={state.applicationStatusLoading}
-              />
-            </div>
-            {/* <div className="group relative">
-              <CustomSelect
-                options={state.salaryRangeList}
-                value={state.salaryFilter}
-                onChange={(e) => setState({ salaryFilter: e })}
-                placeholder="Select salary range"
-                isClearable={true}
-              />
-            </div> */}
-            {/* <div className="group relative">
-              <CustomSelect
-                options={state.typeList}
-                value={state.typeFilter}
-                onChange={(e) => setState({ typeFilter: e })}
-                placeholder="Select job type"
-                isClearable={true}
-              />
-            </div> */}
-
-            {/* <div className="group relative">
-              <CustomSelect
-                options={state.priorityList}
-                value={state.priorityFilter}
-                onChange={(e) => setState({ priorityFilter: e })}
-                placeholder="Filter by priority"
-                isClearable={true}
-              />
-            </div> */}
-          </>
+                    className="text-xs  text-red-500 hover:underline"
+                  >
+                    Clear All
+                  </button>
+                </div>
+              );
+            }
+            return null;
+          })()}
         </div>
       </div>
 
       {/* Table Section */}
-      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
-        <div className="border-b border-gray-200 p-6 dark:border-gray-700">
+      <div className="overflow-hidden rounded-lg   backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
+        <div className="mb-4">
           <div className="flex items-center justify-between">
             {/* Left */}
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+            <h3 className="ext-lg font-bold text-gray-800 dark:text-white">
               Applications List
             </h3>
 
@@ -1528,17 +1384,17 @@ console.log('✌️state.selectedRecords --->', state.selectedRecords);
                 </button>
               )} */}
 
-              <div className="text-sm text-gray-500 dark:text-gray-400">
+              <div className="text-sm text-black">
                 {state.count} applications found
               </div>
             </div>
           </div>
         </div>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto border border-gray-200 bg-white ">
           <DataTable
             noRecordsText="No applications found"
             highlightOnHover
-            className="table-hover whitespace-nowrap"
+            className="table-hover "
             records={state.applicationList}
             fetching={state.loading}
             selectedRecords={state.applicationList?.filter((record) =>
@@ -1569,7 +1425,7 @@ console.log('✌️state.selectedRecords --->', state.selectedRecords);
             columns={[
               {
                 accessor: "job_title",
-                title: "Job Position",
+                title: "Title",
                 sortable: true,
                 render: ({ job_title }) => (
                   <div className="text-gray-600 dark:text-gray-400">
@@ -1589,7 +1445,7 @@ console.log('✌️state.selectedRecords --->', state.selectedRecords);
               },
               {
                 accessor: "applicant_name",
-                title: "Faculty Name",
+                title: "Faculty",
                 sortable: true,
                 render: ({ applicant_name }) => (
                   <div className="font-medium text-gray-900 dark:text-white">
@@ -1647,10 +1503,10 @@ console.log('✌️state.selectedRecords --->', state.selectedRecords);
                 title: "Actions",
                 textAlignment: "center",
                 render: (row: any) => (
-                  <div className="flex items-center justify-center gap-2">
+                  <div className="flex items-center justify-center gap-3">
                     <button
                       onClick={() => handleRound(row)}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-pink-100 text-pink-600 transition-all duration-200 hover:bg-pink-200 dark:bg-pink-900 dark:text-pink-400"
+                      className="flex  items-center justify-center rounded-lg  text-pink-600 transition-all duration-200 "
                       title="Interview Round"
                     >
                       <MessageSquare className="h-4 w-4" />
@@ -1658,14 +1514,14 @@ console.log('✌️state.selectedRecords --->', state.selectedRecords);
 
                     <button
                       onClick={() => handleDownloadResume(row)}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 transition-all duration-200 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-400"
+                      className="flex  items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
                       title="Resume"
                     >
                       <FileText className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => handleEdit(row)}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-100 text-green-600 transition-all duration-200 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-400"
+                      className="flex  items-center justify-center rounded-lg  text-green-600 transition-all duration-200 "
                       title="View"
                     >
                       <IconEye className="h-4 w-4" />
@@ -1679,7 +1535,7 @@ console.log('✌️state.selectedRecords --->', state.selectedRecords);
                             selectedStatus: row.application_status,
                           });
                         }}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 text-purple-600 transition-all duration-200 hover:bg-purple-200 dark:bg-purple-900 dark:text-purple-400"
+                        className="flex items-center justify-center rounded-lg text-purple-600 transition-all duration-200 "
                         title="Update Status"
                       >
                         <UserCheck className="h-4 w-4" />
@@ -1687,7 +1543,7 @@ console.log('✌️state.selectedRecords --->', state.selectedRecords);
                     )}
                     <button
                       onClick={() => handleDelete(row)}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600 transition-all duration-200 hover:bg-red-200 dark:bg-red-900 dark:text-red-400"
+                      className="flex items-center justify-center rounded-lg  text-red-600 transition-all duration-200 "
                       title="Delete"
                     >
                       <IconTrash className="h-4 w-4" />
@@ -1879,7 +1735,7 @@ console.log('✌️state.selectedRecords --->', state.selectedRecords);
                     1,
                     searchTerm,
                     false,
-                    state.selectedJobs
+                    state.selectedJobs,
                   );
                 }}
                 loadMore={() => {
@@ -1888,7 +1744,7 @@ console.log('✌️state.selectedRecords --->', state.selectedRecords);
                       state.deptPage + 1,
                       "",
                       true,
-                      state.selectedJobs
+                      state.selectedJobs,
                     );
                 }}
                 isMulti
@@ -1950,7 +1806,7 @@ console.log('✌️state.selectedRecords --->', state.selectedRecords);
                     1,
                     searchTerm,
                     false,
-                    state.selectedDepartments
+                    state.selectedDepartments,
                   );
                 }}
                 loadMore={() => {
@@ -1959,7 +1815,7 @@ console.log('✌️state.selectedRecords --->', state.selectedRecords);
                       state.panelPage + 1,
                       "",
                       false,
-                      state.selectedDepartments
+                      state.selectedDepartments,
                     );
                   }
                 }}
@@ -2070,7 +1926,7 @@ console.log('✌️state.selectedRecords --->', state.selectedRecords);
         open={state.isOpenRound}
         close={() => setState({ isOpenRound: false })}
         closeIcon={() => setState({ isOpenRound: false })}
-        padding="px-0"
+        padding="px-0 py-5"
         renderComponent={() => (
           <div className="flex h-[75vh] flex-col">
             {/* Scrollable Content */}
@@ -2168,6 +2024,152 @@ console.log('✌️state.selectedRecords --->', state.selectedRecords);
                   Update Status
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+      />
+
+      
+
+       <Modal
+        open={state.showFilterModal}
+        close={() => setState({ showFilterModal: false })}
+        // title="Filters"
+        maxWidth="!w-[800px]"
+        renderComponent={() => (
+          <div>
+            <div className="flex items-center justify-between ">
+              <h2 className="text-lg ">Filters</h2>
+              <button
+                onClick={() => setState({ showFilterModal: false })}
+                className="rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="grid grid-cols-1 gap-4 py-3 md:grid-cols-3">
+              {(state.profile?.role == ROLES.SUPER_ADMIN ||
+                state.profile?.role == ROLES.INSTITUTION_ADMIN) && (
+                <>
+                  {state.profile?.role == ROLES.SUPER_ADMIN && (
+                    <CustomSelect
+                      options={state.institutionList}
+                      value={state.institutionFilter}
+                      onChange={handleInstitutionChange}
+                      placeholder="Select institution"
+                      isClearable={true}
+                      onSearch={(searchTerm) =>
+                        institutionDropdownList(1, searchTerm)
+                      }
+                      loadMore={() =>
+                        state.institutionNext &&
+                        institutionDropdownList(
+                          state.institutionPage + 1,
+                          "",
+                          true
+                        )
+                      }
+                      loading={state.institutionLoading}
+                    />
+                  )}
+                  <CustomSelect
+                    options={state.collegeList}
+                    value={state.collegeFilter}
+                    onChange={handleCollegeChange}
+                    placeholder="Select college"
+                    isClearable={true}
+                    onSearch={(searchTerm) => {
+                      const institutionId =
+                        state.profile?.role === ROLES.SUPER_ADMIN
+                          ? state.institutionFilter?.value
+                          : null;
+                      collegeDropdownList(
+                        1,
+                        searchTerm,
+                        false,
+                        institutionId,
+                        state.profile?.id
+                      );
+                    }}
+                    loadMore={() => {
+                      const institutionId =
+                        state.profile?.role === ROLES.SUPER_ADMIN
+                          ? state.institutionFilter?.value
+                          : state.profile?.institution?.id;
+                      state.collegeNext &&
+                        collegeDropdownList(
+                          state.collegePage + 1,
+                          "",
+                          true,
+                          institutionId,
+                          state.profile?.id
+                        );
+                    }}
+                    loading={state.collegeLoading}
+                  />
+
+                  <CustomSelect
+                    options={state.departmentList}
+                    value={state.departmentFilter}
+                    onChange={handleDepartmentChange}
+                    placeholder="Select department"
+                    isClearable={true}
+                    onSearch={(searchTerm) => {
+                      const collegeId = state.collegeFilter?.value;
+                      collegeId &&
+                        departmentDropdownList(
+                          1,
+                          searchTerm,
+                          false,
+                          collegeId,
+                          state.profile?.id
+                        );
+                    }}
+                    loadMore={() => {
+                      const collegeId = state.collegeFilter?.value;
+                      state.departmentNext &&
+                        collegeId &&
+                        departmentDropdownList(
+                          state.departmentPage + 1,
+                          "",
+                          true,
+                          collegeId,
+                          state.profile?.id
+                        );
+                    }}
+                    loading={state.departmentLoading}
+                    disabled={!state.collegeFilter}
+                  />
+                </>
+              )}
+              <CustomSelect
+                options={state.applicationStatusList}
+                value={state.selectedStatus}
+                onChange={(e) => setState({ selectedStatus: e })}
+                placeholder="Select status"
+                loading={state.applicationStatusLoading}
+              />
+            </div>
+            <div className="flex items-center justify-between py-3 ">
+              <button
+                onClick={() => {
+                  setState({
+                    institutionFilter: null,
+                    collegeFilter: null,
+                    departmentFilter: null,
+                    selectedStatus: null,
+                  });
+                }}
+                className=" text-sm text-red-500 transition-all hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                Clear All
+              </button>
+              <button
+                onClick={() => setState({ showFilterModal: false })}
+                className="bg-dblue  rounded-lg px-4 py-2  text-sm text-white shadow-md transition-all hover:shadow-lg"
+              >
+                Show {state.count} Application Results
+              </button>
             </div>
           </div>
         )}

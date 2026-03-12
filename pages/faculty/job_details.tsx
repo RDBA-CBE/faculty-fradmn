@@ -100,7 +100,7 @@ const JobDetails = () => {
   const job = state.jobDetails;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen dark:from-gray-900 dark:to-gray-800">
       {/* Floating Header */}
       <div className="sticky top-4 z-10 mb-8 flex items-center justify-between rounded-2xl border border-white/20 bg-white/80 p-4 shadow-xl backdrop-blur-xl dark:border-gray-700/50 dark:bg-gray-800/80">
         <button

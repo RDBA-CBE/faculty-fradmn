@@ -810,6 +810,10 @@ pre.hljs {
     border-color: #01014b14;
    }
 
+   .bg-lyellow{
+    background-color: #ffedc6;
+   }
+
    .page-ti{
     font-size:24px ;
     color: #000;

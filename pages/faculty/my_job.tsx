@@ -666,7 +666,7 @@ const Job = () => {
         <div className="rounded-lg border border-gray-200 bg-green-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
           <div className="flex items-center gap-5 ">
             <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
-              <CheckCircle className="text-dblue h-10 w-10" />
+              <CheckCircle className="text-green-600 h-10 w-10" />
             </div>
 
             <div className="flex flex-col">
@@ -682,7 +682,7 @@ const Job = () => {
         <div className="rounded-lg border border-gray-200 bg-yellow-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
           <div className="flex items-center gap-5">
             <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
-              <Hourglass className="text-dblue h-10 w-10" />
+              <Hourglass className="text-yellow-600 h-10 w-10" />
             </div>
 
             <div className="flex flex-col">
@@ -698,7 +698,7 @@ const Job = () => {
         <div className="rounded-lg border border-gray-200 bg-red-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
           <div className="flex items-center gap-5">
             <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
-              <Clock className="text-dblue h-10 w-10" />
+              <Clock className="text-red-600 h-10 w-10" />
             </div>
 
             <div className="flex flex-col">
