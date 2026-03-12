@@ -22,7 +22,7 @@ body.swal2-toast-shown .swal2-container.toast {
     margin: 0px !important;
     width: 100%;
     color: #3b3f5c;
-    font-size: 24px;
+    font-size: 20px;
     @apply ltr:!pr-10 rtl:!pl-10;
 }
 
@@ -40,20 +40,22 @@ body.swal2-toast-shown .swal2-container.toast {
 
 .swal2-popup .swal2-styled.swal2-cancel {
     background-color: #fff !important;
-    color: #4361ee;
-    border: 1px solid #e8e8e8;
+    color: #000;
+    border: 1px solid #ee7a7a;
     box-shadow: none;
     padding: 7px 20px;
 }
 
 .dark .swal2-popup .swal2-styled.swal2-cancel {
-    background-color: #3b3f5c !important;
-    color: #e0e6ed;
+    background-color: red !important;
+    color: #000;
     border-color: #3b3f5c;
 }
-
+.swal2-actions{
+    gap: 10px;
+}
 .swal2-popup .swal2-styled.swal2-confirm {
-    background-color: #4361ee;
+    background-color: #01014b;
 }
 
 .swal2-popup .swal2-styled.swal2-confirm:focus {
@@ -118,10 +120,11 @@ body.swal2-toast-shown .swal2-container.toast {
 }
 
 .sweet-alerts .swal2-icon:not(.swal2-error):not(.swal2-success) {
-    width: 2em !important;
+    width: 1em !important;
     line-height: 119px !important;
-    height: 2em !important;
-    margin: 0.25em auto 0.875em !important;
+    height: 1em !important;
+    /* margin: 0.25em auto 0.875em !important; */
+    margin: 3px auto;
 }
 
 .swal2-icon.swal2-error [class^='swal2-x-mark-line'] {
@@ -251,7 +254,7 @@ body.swal2-toast-shown .swal2-container.toast {
 }
 
 .sweet-alerts .swal2-icon-content {
-    font-size: 5.75rem !important;
+    font-size: 2.75rem !important;
 }
 .swal2-icon-content {
     @apply !text-xl;

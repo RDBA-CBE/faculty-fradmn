@@ -1617,7 +1617,7 @@ const Institution = () => {
                           isStepCompleted(step.id)
                             ? "bg-green-500 text-white"
                             : state.currentStep === step.id
-                            ? "bg-blue-500 text-white"
+                            ? "bg-dblue text-white"
                             : isStepAccessible(step.id)
                             ? "bg-gray-200 text-gray-600"
                             : "bg-gray-100 text-gray-400"
@@ -2301,7 +2301,7 @@ const Institution = () => {
                   <button
                     onClick={() => handleStepComplete(state.currentStep)}
                     disabled={state.submitting}
-                    className="rounded-lg bg-blue-500 px-6 py-2 text-white hover:bg-blue-600 disabled:opacity-50"
+                    className="rounded-lg bg-dblue px-6 py-2 text-white hover:bg-dblue disabled:opacity-50"
                   >
                     {state.submitting ? "Creating..." : "Create & Next"}
                   </button>

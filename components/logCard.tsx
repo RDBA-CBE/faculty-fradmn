@@ -149,7 +149,7 @@ const LogCard = (props: any) => {
           <button
             onClick={handleSend}
             disabled={!message.trim()}
-            className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+            className="flex h-10 w-10 items-center justify-center rounded-lg bg-dblue text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
             title="Send message"
           >
             <Send className="h-5 w-5" />

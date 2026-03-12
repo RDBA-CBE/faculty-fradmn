@@ -2019,7 +2019,7 @@ console.log('✌️state.selectedRecords --->', state.selectedRecords);
 
                 <button
                   onClick={() => updateStatus()}
-                  className="rounded bg-blue-600 px-5 py-2 text-white"
+                  className="rounded bg-dblue px-5 py-2 text-white"
                 >
                   Update Status
                 </button>

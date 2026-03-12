@@ -542,7 +542,7 @@ const Job = () => {
         : "Are you sure you want to approve this job?",
       icon: "question",
       showCancelButton: true,
-      confirmButtonColor: "#3085d6",
+      confirmButtonColor: "#01014b",
       cancelButtonColor: "#d33",
       confirmButtonText: row.is_approved
         ? "Yes, unapprove it!"
@@ -580,7 +580,9 @@ const Job = () => {
   };
 
   const handleDelete = (row) => {
+    
     showDeleteAlert(
+      
       () => deleteRecord(row?.id),
       () => Swal.fire("Cancelled", "Record is safe", "info"),
       "Are you sure you want to delete this job?"
@@ -917,7 +919,7 @@ const Job = () => {
                       <div className="flex items-center -space-x-2">
                         {visibleDept?.map((dept: string, index: number) => (
                           <div key={index} className="group relative">
-                            <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-blue-500 text-xs  text-white dark:border-gray-900">
+                            <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-dblue text-xs  text-white dark:border-gray-900">
                               {dept?.slice(0, 2)?.toUpperCase()}
                             </div>
 

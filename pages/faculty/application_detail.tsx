@@ -346,7 +346,7 @@ const ApplicationDetail = () => {
           {/* {app?.resume && (
             <button
               onClick={handleDownloadResume}
-              className="flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-2 text-white shadow-lg transition-all hover:bg-blue-700 hover:shadow-xl"
+              className="flex items-center gap-2 rounded-lg bg-dblue px-6 py-2 text-white shadow-lg transition-all hover:bg-blue-700 hover:shadow-xl"
             >
               <IconDownload className="h-4 w-4" />
               Download Resume
@@ -575,7 +575,7 @@ const ApplicationDetail = () => {
                   <ul className="space-y-2">
                     {job?.responsibility.map((item, index) => (
                       <li key={index} className="flex items-start gap-2">
-                        <span className="mt-1.5 h-2 w-2 rounded-full bg-blue-600"></span>
+                        <span className="mt-1.5 h-2 w-2 rounded-full bg-dblue"></span>
                         <span className="text-gray-700 dark:text-gray-300">
                           {item}
                         </span>

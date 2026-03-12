@@ -260,7 +260,7 @@ const UpdatePropertyImagePreview: React.FC<ImageUploadProps> = ({
             e.stopPropagation();
             openFileDialog();
           }}
-          className="mt-4 rounded-md bg-blue-600 px-6 py-2 text-white hover:bg-blue-700"
+          className="mt-4 rounded-md bg-dblue px-6 py-2 text-white hover:bg-blue-700"
         >
           Browse Files
         </button>

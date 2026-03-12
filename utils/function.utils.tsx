@@ -53,6 +53,8 @@ export const showDeleteAlert = (onConfirm, onCancel, title) => {
       popup: "sweet-alerts",
     },
     buttonsStyling: false,
+    confirmButtonColor: "#01014b",
+    cancelButtonColor: "#d33",
   });
 
   swalWithBootstrapButtons
@@ -176,24 +178,26 @@ export const convertUrlToFile = async (url: any, filename: any) => {
 export const urlToFile = async (url, filename = null) => {
   try {
     const response = await fetch(url);
-    
+
     if (!response.ok) {
-      throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Failed to fetch image: ${response.status} ${response.statusText}`,
+      );
     }
-    
+
     const blob = await response.blob();
-    
+
     // Extract filename from URL if not provided
     let finalFilename = filename;
     if (!finalFilename) {
-      const urlParts = url.split('/');
-      finalFilename = urlParts[urlParts.length - 1] || 'image.jpg';
+      const urlParts = url.split("/");
+      finalFilename = urlParts[urlParts.length - 1] || "image.jpg";
     }
-    
+
     // Create File object from blob
     return new File([blob], finalFilename, { type: blob.type });
   } catch (error) {
-    console.error('Error converting URL to File:', error);
+    console.error("Error converting URL to File:", error);
     throw error;
   }
 };
@@ -322,7 +326,7 @@ export const formatTimeRange = (date, time, intervalMinutes) => {
   const end = moment(start).add(intervalMinutes, "minutes");
 
   return `${start.format("MMMM D, YYYY")} at ${start.format(
-    "h:mm A"
+    "h:mm A",
   )} - ${end.format("h:mm A")}`;
 };
 
@@ -411,12 +415,10 @@ export const extractZoomMeetingId = (url) => {
 //   return formData;
 // };
 
-
 export const buildFormData = (data: Record<string, any>): FormData => {
   const formData = new FormData();
 
   Object.entries(data).forEach(([key, value]) => {
-
     // null or undefined → send as null
     if (value === null || value === undefined) {
       formData.append(key, "null");
@@ -446,8 +448,6 @@ export const buildFormData = (data: Record<string, any>): FormData => {
   return formData;
 };
 
-
-
 export const getTimeZone = (time) => {
   const tz = time.split(")")[1].trim();
   return tz;
@@ -476,7 +476,7 @@ export const getTime = (startDate, startTime) => {
     hours,
     minutes,
     seconds,
-    milliseconds
+    milliseconds,
   );
   return combinedDate;
 };
@@ -535,7 +535,6 @@ export const formatPhoneNumber = (phone) => {
   return phone;
 };
 
-
 export const formatToINRS = (price: number | string): string => {
   const numericPrice = typeof price === "string" ? parseFloat(price) : price;
 
@@ -557,22 +556,24 @@ export const formatToINRS = (price: number | string): string => {
 
 export const formatPriceRange = (
   minPrice: number | string | null,
-  maxPrice: number | string | null
+  maxPrice: number | string | null,
 ): string => {
   if (minPrice === null && maxPrice === null) {
     return "Price on request";
   }
-  
+
   if (minPrice === null) {
     return `Max: ${formatToINRS(maxPrice)}`;
   }
-  
+
   if (maxPrice === null) {
     return `Min: ${formatToINRS(minPrice)}`;
   }
 
-  const numericMin = typeof minPrice === "string" ? parseFloat(minPrice) : minPrice;
-  const numericMax = typeof maxPrice === "string" ? parseFloat(maxPrice) : maxPrice;
+  const numericMin =
+    typeof minPrice === "string" ? parseFloat(minPrice) : minPrice;
+  const numericMax =
+    typeof maxPrice === "string" ? parseFloat(maxPrice) : maxPrice;
 
   if (isNaN(numericMin) || isNaN(numericMax)) return "Contact for price";
 
@@ -582,11 +583,10 @@ export const formatPriceRange = (
   return `${formattedMin} - ${formattedMax}`;
 };
 
-
 export const parseApiError = (error: any): string => {
   if (error?.response?.data?.error) {
     const serverError = error.response.data.error;
-    
+
     // Handle MySQL duplicate entry errors
     if (serverError.includes("Duplicate entry")) {
       if (serverError.includes("email")) {
@@ -599,18 +599,17 @@ export const parseApiError = (error: any): string => {
       }
       return "Duplicate entry detected. This data already exists.";
     }
-    
+
     // Return the clean error message
     return serverError;
   }
-  
+
   if (error?.message?.includes("Network Error")) {
     return "Network error. Please check your connection.";
   }
-  
+
   return "An error occurred. Please try again.";
 };
-
 
 export const formatScheduleDateTime = (date, time) => {
   const d = new Date(date);
