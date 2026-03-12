@@ -154,7 +154,7 @@ const Skill = () => {
       <div className="mb-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
-            <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-3xl font-bold text-transparent">
+            <h1 className="page-ti text-transparent">
               Skill Management
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
@@ -163,7 +163,7 @@ const Skill = () => {
           </div>
           <button
             onClick={() => setState({ showModal: true })}
-            className="group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+            className="group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-dblue px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
             <IconPlus className="relative z-10 h-5 w-5" />
@@ -284,7 +284,7 @@ const Skill = () => {
         renderComponent={() => (
           <div className="relative">
             <div className="mb-8 text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-dblue dark:from-blue-900 dark:to-purple-900">
                 {state.editId ? (
                   <IconEdit className="h-8 w-8 text-blue-600 dark:text-blue-400" />
                 ) : (
@@ -318,7 +318,7 @@ const Skill = () => {
               <button
                 onClick={handleSubmit}
                 disabled={state.submitting}
-                className={`group relative inline-flex items-center justify-center overflow-hidden rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-3 text-sm font-medium text-white shadow-lg transition-all duration-200 ${
+                className={`group relative inline-flex items-center justify-center overflow-hidden rounded-lg bg-dblue px-8 py-3 text-sm font-medium text-white shadow-lg transition-all duration-200 ${
                   state.submitting ? "cursor-not-allowed opacity-70" : ""
                 }`}
               >

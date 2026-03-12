@@ -297,7 +297,7 @@ const ApplicationDetail = () => {
           <div className="flex items-center gap-3">
             {/* <button
               onClick={() => setState({ showInterviewModal: true })}
-              className="group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+              className="group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-dblue px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
               <UserCheck className="relative z-10 h-5 w-5" />
@@ -442,7 +442,7 @@ const ApplicationDetail = () => {
                 {app?.resume && (
                   <button
                     onClick={handleDownloadResume}
-                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
+                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-dblue px-6 py-3 font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
                   >
                     <IconDownload className="h-5 w-5" />
                     Download Resume
@@ -865,7 +865,7 @@ const ApplicationDetail = () => {
           <div className="mt-5 flex justify-end">
             <button
               onClick={() => setState({ showInterviewModal: true })}
-              className=" group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+              className=" group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-dblue px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
               <UserCheck className="relative z-10 h-5 w-5" />

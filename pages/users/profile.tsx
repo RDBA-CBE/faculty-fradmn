@@ -155,7 +155,7 @@ export default function Profile() {
       {/* Header */}
 
       <div className="mb-8">
-        <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-3xl font-bold text-transparent">
+        <h1 className="page-ti text-transparent">
           My Profile
         </h1>
 
@@ -381,7 +381,7 @@ export default function Profile() {
           <div className="w-full  p-6">
             {/* Header */}
             <div className="mb-6 text-center">
-              <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900">
+              <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-dblue dark:from-blue-900 dark:to-purple-900">
                 <IconUser className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
 

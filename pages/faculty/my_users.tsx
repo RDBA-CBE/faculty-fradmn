@@ -1937,11 +1937,11 @@ const Users = () => {
         renderComponent={() => (
           <div className="relative">
             <div className="mb-8 text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-dblue dark:from-blue-900 dark:to-purple-900">
                 {state.editId ? (
-                  <IconEdit className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                  <IconEdit className="h-8 w-8 text-white dark:text-blue-400" />
                 ) : (
-                  <IconPlus className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                  <IconPlus className="h-8 w-8 text-white dark:text-blue-400" />
                 )}
               </div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -1959,18 +1959,18 @@ const Users = () => {
               <button
                 type="button"
                 onClick={handleCloseModal}
-                className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-medium text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-2 text-sm font-medium text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSubmit}
                 disabled={state.submitting}
-                className={`group relative inline-flex items-center justify-center overflow-hidden rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-3 text-sm font-medium text-white shadow-lg transition-all duration-200 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                className={`group relative inline-flex items-center justify-center overflow-hidden rounded-lg bg-dblue px-8 py-2 text-sm font-medium text-white shadow-lg transition-all duration-200 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
                   state.submitting ? "cursor-not-allowed opacity-70" : ""
                 }`}
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+                <div className="absolute inset-0 bg-dblue opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
                 {state.submitting ? (
                   <IconLoader className="relative z-10 mr-2 h-4 w-4 animate-spin" />
                 ) : (
