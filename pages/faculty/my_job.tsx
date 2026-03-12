@@ -858,7 +858,7 @@ const Job = () => {
           <DataTable
             noRecordsText="No jobs found"
             highlightOnHover
-            className="table-hover whitespace-nowrap"
+            className="table-hover "
             records={state.jobList}
             fetching={state.loading}
             selectedRecords={state.jobList?.filter((record) =>
