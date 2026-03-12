@@ -80,6 +80,7 @@ const ApplicationDetail = () => {
       { value: "scheduled", label: "Scheduled" },
       { value: "completed", label: "Completed" },
     ],
+    isOpenReschedule: false,
   });
 
   useEffect(() => {
@@ -231,8 +232,6 @@ const ApplicationDetail = () => {
       };
       console.log("✌️body --->", body);
 
-      setState({ submitting: false });
-
       await Models.interview.create(body);
       Success("Interview schedule created successfully!");
       setState({
@@ -249,6 +248,7 @@ const ApplicationDetail = () => {
         submitting: false,
         interview_link: "",
       });
+      setState({ submitting: false });
       fetchApplicationDetail();
     } catch (error) {
       if (error instanceof Yup.ValidationError) {
@@ -263,6 +263,110 @@ const ApplicationDetail = () => {
         Failure(error?.error);
         setState({ submitting: false });
       }
+    }
+  };
+
+  const handleRescheduleInterview = async () => {
+    try {
+      setState({ submitting: true });
+
+      const validation = {
+        selectedJobs: [state.application?.job_detail?.id],
+        selectedDepartments: [state.application?.department?.id],
+        interviewSlot: state.interviewSlot
+          ? moment(state.interviewSlot).format("YYYY-MM-DD HH:mm")
+          : "",
+        panelMembers: state.panelMembers.map((p) => p.value),
+        selectedApplicants: [state.application?.id],
+        request_for_change: state.requestForChange,
+        roundName: state.roundName,
+        interviewStatus: "Scheduled",
+
+        response_from_applicant: state.requestForChange,
+        interview_link: state.interview_link,
+      };
+
+      await Utils.Validation.single_interview.validate(validation, {
+        abortEarly: false,
+      });
+
+      const body = {
+        position_ids: [state.application?.job_detail?.id],
+        // department_id: state.selectedDepartments?.map((item)=>item?.value),
+        department_id: state.application?.department?.id,
+
+        scheduled_date: moment(state.interviewSlot).format("YYYY-MM-DD HH:mm"),
+        panel_ids: state.panelMembers.map((p) => p.value),
+        application_ids: [state.application?.id],
+        response_from_applicant: state.requestForChange,
+        round_name: state.roundName,
+        status: "reschedule",
+        interview_link: state.interview_link,
+      };
+      console.log("✌️body --->", body);
+
+      await Models.interview.update(body, state.rescheduleId);
+      Success("Interview schedule created successfully!");
+      setState({
+        isOpenReschedule: false,
+        errors: {},
+        selectedJobs: [],
+        selectedDepartments: [],
+        selectedApplicants: [],
+        panelMembers: [],
+        interviewSlot: "",
+        roundName: "",
+        requestForChange: false,
+        interviewStatus: null,
+        submitting: false,
+        interview_link: "",
+        rescheduleId: null,
+      });
+
+      fetchApplicationDetail();
+    } catch (error) {
+      if (error instanceof Yup.ValidationError) {
+        const validationErrors = {};
+        error.inner.forEach((err) => {
+          validationErrors[err.path] = err?.message;
+        });
+        console.log("✌️validationErrors --->", validationErrors);
+
+        setState({ errors: validationErrors, submitting: false });
+      } else {
+        Failure(error?.error);
+        setState({ submitting: false });
+      }
+    }
+  };
+
+  const rescheduleInterview = async (e, row) => {
+    console.log("✌️row --->", row);
+    try {
+      e.stopPropagation();
+      if (e?.target?.value == "rescheduled") {
+        setState({ isOpenReschedule: true, rescheduleId: row?.id });
+        if (row?.panels?.length > 0) {
+          setState({
+            panelMembers: row?.panels?.map((item) => ({
+              value: item?.id,
+              label: item?.name,
+            })),
+          });
+        }
+      } else {
+        const body = {
+          status: e?.target?.value,
+        };
+        await Models.interview.update(body, row?.id);
+
+        // await Models.interview.update(body, state?.application?.interview?.id);
+        Success("Interview status updated successfully!");
+        // setState({ isOpenReschedule: false, interview_link: "" });
+        fetchApplicationDetail();
+      }
+    } catch (error) {
+      console.log("✌️error --->", error);
     }
   };
 
@@ -297,7 +401,7 @@ const ApplicationDetail = () => {
           <div className="flex items-center gap-3">
             {/* <button
               onClick={() => setState({ showInterviewModal: true })}
-              className="group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-dblue px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+              className="group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
               <UserCheck className="relative z-10 h-5 w-5" />
@@ -346,7 +450,7 @@ const ApplicationDetail = () => {
           {/* {app?.resume && (
             <button
               onClick={handleDownloadResume}
-              className="flex items-center gap-2 rounded-lg bg-dblue px-6 py-2 text-white shadow-lg transition-all hover:bg-blue-700 hover:shadow-xl"
+              className="flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-2 text-white shadow-lg transition-all hover:bg-blue-700 hover:shadow-xl"
             >
               <IconDownload className="h-4 w-4" />
               Download Resume
@@ -442,7 +546,7 @@ const ApplicationDetail = () => {
                 {app?.resume && (
                   <button
                     onClick={handleDownloadResume}
-                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-dblue px-6 py-3 font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
+                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
                   >
                     <IconDownload className="h-5 w-5" />
                     Download Resume
@@ -575,7 +679,7 @@ const ApplicationDetail = () => {
                   <ul className="space-y-2">
                     {job?.responsibility.map((item, index) => (
                       <li key={index} className="flex items-start gap-2">
-                        <span className="mt-1.5 h-2 w-2 rounded-full bg-dblue"></span>
+                        <span className="mt-1.5 h-2 w-2 rounded-full bg-blue-600"></span>
                         <span className="text-gray-700 dark:text-gray-300">
                           {item}
                         </span>
@@ -683,15 +787,44 @@ const ApplicationDetail = () => {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <span
-                      className={`rounded-full px-4 py-2 text-xs font-bold  shadow-sm ${
+                    <select
+                      value={round?.status || ""}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => {
+                        if(round?.status == "rescheduled"){
+                          const body={
+                            target:{
+                              value:"rescheduled"
+                            
+                            }
+                          }
+                        rescheduleInterview(body, round);
+
+                        }else{
+                        console.log("✌️e --->", e?.target?.value);
+                        rescheduleInterview(e, round);
+                      }
+                      }}
+                      className={`cursor-pointer rounded-full px-4 py-2 text-xs font-bold shadow-sm outline-none ${
                         round.status === "completed"
                           ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white"
-                          : "bg-gradient-to-r from-yellow-500 to-orange-500 text-white"
+                          : round.status === "rescheduled"
+                          ? "bg-gradient-to-r from-yellow-500 to-orange-500 text-white"
+                          : "bg-gradient-to-r from-blue-500 to-indigo-500 text-white"
                       }`}
                     >
-                      {round.status}
-                    </span>
+                      <option disabled value="Scheduled" className="text-black">
+                        Scheduled
+                      </option>
+
+                      <option value="rescheduled" className="text-black">
+                        Rescheduled
+                      </option>
+
+                      <option value="completed" className="text-black">
+                        Completed
+                      </option>
+                    </select>
 
                     {/* {round.decision && (
                       <span className="rounded-full bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2 text-xs font-bold uppercase text-white shadow-sm">
@@ -865,7 +998,7 @@ const ApplicationDetail = () => {
           <div className="mt-5 flex justify-end">
             <button
               onClick={() => setState({ showInterviewModal: true })}
-              className=" group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-dblue px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+              className=" group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
               <UserCheck className="relative z-10 h-5 w-5" />
@@ -1095,6 +1228,204 @@ const ApplicationDetail = () => {
                 className="flex-1 rounded-lg bg-gradient-to-r from-green-600 to-teal-600 px-4 py-2 text-white hover:shadow-lg disabled:opacity-50"
               >
                 {state.submitting ? "Creating..." : "Create Schedule"}
+              </button>
+            </div>
+          </div>
+        )}
+      />
+
+      {/* // ReSchedule interview slot */}
+
+      <Modal
+        open={state.isOpenReschedule}
+        close={() =>
+          setState({
+            isOpenReschedule: false,
+            errors: {},
+            selectedJobs: [],
+            selectedDepartments: [],
+            selectedApplicants: [],
+            panelMembers: [],
+            interviewSlot: "",
+            roundName: "",
+            requestForChange: false,
+            interviewStatus: null,
+            rescheduleId: null,
+          })
+        }
+        renderComponent={() => (
+          <div className="p-6">
+            <div className="space-y-5">
+              <TextInput
+                title="Select Jobs"
+                placeholder="Select Jobs"
+                value={state.application?.job_detail?.job_title}
+                onChange={(e) =>
+                  setState({
+                    selectedJobs: e.target.value,
+                    errors: { ...state.errors, selectedJobs: "" },
+                  })
+                }
+                required
+                error={state.errors?.selectedJobs}
+                disabled={true}
+              />
+
+              <TextInput
+                title="Select Departments"
+                placeholder="Select Departments"
+                value={state.application?.department?.department_name}
+                onChange={(e) =>
+                  setState({
+                    selectedDepartments: e.target.value,
+                    errors: { ...state.errors, selectedDepartments: "" },
+                  })
+                }
+                required
+                error={state.errors?.selectedDepartments}
+                disabled={true}
+              />
+              <TextInput
+                title="Faculty"
+                placeholder="Enter round name (e.g., Technical Round 1)"
+                value={state.application?.applicant_name}
+                onChange={(e) =>
+                  setState({
+                    selectedApplicants: e.target.value,
+                    errors: { ...state.errors, selectedApplicants: "" },
+                  })
+                }
+                error={state.errors?.selectedApplicants}
+                required
+                disabled
+              />
+
+              <CustomSelect
+                title="Select Panel Members"
+                placeholder="Select Panel Members"
+                options={state.panelMemberList}
+                value={state.panelMembers}
+                onChange={(e) => {
+                  setState({
+                    panelMembers: e,
+                    errors: { ...state.errors, panelMembers: "" },
+                  });
+                }}
+                onSearch={(searchTerm) => {
+                  loadPanelMembers(
+                    1,
+                    searchTerm,
+                    false,
+                    state.application?.department?.id
+                  );
+                }}
+                loadMore={() => {
+                  if (state.panelNext) {
+                    loadPanelMembers(
+                      state.panelPage + 1,
+                      "",
+                      false,
+                      state.application?.department?.id
+                    );
+                  }
+                }}
+                isMulti
+                loading={state.jobLoading}
+                error={state.errors?.panelMembers}
+                disabled={!state.selectedDepartments}
+                required
+              />
+
+              <CustomeDatePicker
+                title="Interview Slot"
+                value={state.interviewSlot}
+                placeholder="Choose From"
+                onChange={(e) =>
+                  setState({
+                    interviewSlot: e,
+                    errors: { ...state.errors, interviewSlot: "" },
+                  })
+                }
+                showTimeSelect={true}
+                required
+                usePortal={false}
+                minDate={new Date()}
+                error={state.errors?.interviewSlot}
+              />
+
+              <TextInput
+                title="Round Name"
+                placeholder="Enter round name (e.g., Technical Round 1)"
+                value={state.roundName}
+                onChange={(e) =>
+                  setState({
+                    roundName: e.target.value,
+                    errors: { ...state.errors, roundName: "" },
+                  })
+                }
+                error={state.errors?.roundName}
+                required
+              />
+              <TextInput
+                title="Interview Link"
+                placeholder="Enter interview link (e.g., https://example.com/interview)"
+                value={state.interview_link}
+                onChange={(e) =>
+                  setState({
+                    interview_link: e.target.value,
+                    errors: { ...state.errors, interview_link: "" },
+                  })
+                }
+                error={state.errors?.interview_link}
+              />
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="requestForChange"
+                  checked={state.requestForChange}
+                  onChange={(e) =>
+                    setState({ requestForChange: e.target.checked })
+                  }
+                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <label
+                  htmlFor="requestForChange"
+                  className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Request for Change
+                </label>
+              </div>
+            </div>
+
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() =>
+                  setState({
+                    isOpenReschedule: false,
+                    errors: {},
+                    selectedJobs: [],
+                    selectedDepartments: [],
+                    selectedApplicants: [],
+                    panelMembers: [],
+                    interviewSlot: "",
+                    roundName: "",
+                    requestForChange: false,
+                    interviewStatus: null,
+                    interview_link: "",
+                    rescheduleId: null,
+                  })
+                }
+                className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleRescheduleInterview()}
+                disabled={state.submitting}
+                className="flex-1 rounded-lg bg-gradient-to-r from-green-600 to-teal-600 px-4 py-2 text-white hover:shadow-lg disabled:opacity-50"
+              >
+                {state.submitting ? "Loading..." : "Reschedule"}
               </button>
             </div>
           </div>
