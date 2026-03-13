@@ -343,18 +343,6 @@ const Category = () => {
         </div>
       </div>
 
-      {/* <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
-        <div className="border-b border-gray-200 p-6 dark:border-gray-700">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-              Panel Member List
-            </h3>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              {state.count} records found
-            </div>
-          </div>
-        </div> */}
-
       <div className="overflow-hidden rounded-lg   backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
         <div className="mb-4">
           <div className="flex items-center justify-between">
