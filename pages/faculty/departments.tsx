@@ -787,7 +787,7 @@ const CollegeAndDepartment = () => {
         <div className="flex items-center justify-center gap-2">
           <button
             onClick={() => handleEdit(row)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 transition-all duration-200 hover:bg-blue-200"
+            className="flex  items-center justify-center rounded-lg  text-blue-600 transition-all duration-200 "
             title="Edit"
           >
             <IconEdit className="h-4 w-4" />
@@ -809,7 +809,7 @@ const CollegeAndDepartment = () => {
           </button> */}
           <button
             onClick={() => handleDelete(row)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600 transition-all duration-200 hover:bg-red-200"
+            className="flex  items-center justify-center rounded-lg  text-red-600 transition-all duration-200 "
             title="Delete"
           >
             <IconTrash className="h-4 w-4" />
@@ -820,9 +820,9 @@ const CollegeAndDepartment = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-3 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen dark:from-gray-900 dark:to-gray-800">
       {/* Header Section */}
-      <div className="mb-8">
+      <div className="mb-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
             <h1 className="page-ti text-transparent">
@@ -838,12 +838,8 @@ const CollegeAndDepartment = () => {
       {/* Tabs */}
 
       {/* Filters Section */}
-      <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
-        <div className="mb-4 flex items-center gap-2">
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-            Filters
-          </h3>
-        </div>
+      <div className="mb-5 rounded-2xl  backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
+        
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <div className="group relative">
             <TextInput
@@ -895,10 +891,10 @@ const CollegeAndDepartment = () => {
       </div>
 
       {/* Table Section */}
-      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
-        <div className="border-b border-gray-200 p-6 dark:border-gray-700">
+      <div className="overflow-hidden rounded-lg   backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
+        <div className="mb-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+            <h3 className="text-lg font-bold text-gray-800 dark:text-white">
               {"Departments"} List
             </h3>
             <div className="flex items-center gap-4">
@@ -911,7 +907,7 @@ const CollegeAndDepartment = () => {
                   Delete ({state.selectedRecords.length})
                 </button>
               )}
-              <div className="text-sm text-gray-500 dark:text-gray-400">
+              <div className="text-sm text-black">
                 {state.activeTab === "colleges"
                   ? state.collegeCount
                   : state.departmentCount}{" "}
@@ -921,11 +917,11 @@ const CollegeAndDepartment = () => {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto border border-gray-200 bg-white">
           <DataTable
             noRecordsText={`No ${state.activeTab} found`}
             highlightOnHover
-            className="table-hover whitespace-nowrap"
+            className="table-hover"
             records={state.deptList || []}
             fetching={state.loading}
             selectedRecords={(state.deptList || []).filter((record) =>

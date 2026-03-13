@@ -151,10 +151,10 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen dark:from-gray-900 dark:to-gray-800">
       {/* Header */}
 
-      <div className="mb-8">
+      <div className="mb-4">
         <h1 className="page-ti text-transparent">
           My Profile
         </h1>
@@ -171,7 +171,7 @@ export default function Profile() {
           <div className="w-full border-r border-gray-200 bg-gradient-to-b from-gray-50 to-white dark:border-gray-700 dark:from-gray-900 dark:to-gray-800 md:w-72">
             <div className="p-6">
               <div className="mb-6 flex items-center gap-4">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-2xl font-bold text-white shadow-lg">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-dblue text-lg font-bold text-white shadow-lg">
                   {state.profile?.username?.charAt(0)?.toUpperCase()}
                 </div>
 
@@ -190,9 +190,9 @@ export default function Profile() {
             <nav className="flex flex-col space-y-1 px-3 pb-6">
               <button
                 onClick={() => setActiveTab("profile")}
-                className={`group flex items-center gap-3 rounded-xl px-4 py-3 text-left font-medium transition ${
+                className={`group flex items-center gap-3 rounded-lg px-4 py-3 text-left font-medium transition ${
                   activeTab === "profile"
-                    ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white"
+                    ? "bg-dblue text-white"
                     : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
                 }`}
               >
@@ -202,9 +202,9 @@ export default function Profile() {
 
               <button
                 onClick={() => setActiveTab("password")}
-                className={`group flex items-center gap-3 rounded-xl px-4 py-3 text-left font-medium transition ${
+                className={`group flex items-center gap-3 rounded-lg px-4 py-3 text-left font-medium transition ${
                   activeTab === "password"
-                    ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white"
+                    ? "bg-dblue text-white"
                     : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
                 }`}
               >
@@ -234,7 +234,7 @@ export default function Profile() {
 
                   <button
                     onClick={() => setState({ isOpen: true })}
-                    className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 px-4 py-2 text-sm font-medium text-white"
+                    className="flex items-center gap-2 rounded-lg bg-dblue px-4 py-2 text-sm font-medium text-white"
                   >
                     <IconEdit className="h-4 w-4" />
                     Edit Profile
@@ -382,7 +382,7 @@ export default function Profile() {
             {/* Header */}
             <div className="mb-6 text-center">
               <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-dblue dark:from-blue-900 dark:to-purple-900">
-                <IconUser className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                <IconUser className="h-6 w-6 text-white dark:text-blue-400" />
               </div>
 
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
@@ -426,7 +426,7 @@ export default function Profile() {
 
               <button
                 onClick={updateProfile}
-                className="flex-1 rounded-lg bg-gradient-to-r items-center flex justify-center from-blue-600 to-purple-600 px-4 py-2.5 text-sm font-medium text-white shadow-md transition hover:shadow-lg"
+                className="flex-1 rounded-lg bg-gradient-to-r items-center flex justify-center bg-dblue px-4 py-2.5 text-sm font-medium text-white shadow-md transition hover:shadow-lg"
               >
                 {state.btnLoading?<IconLoader className="animate-spin" />:"Update Profile"}
               </button>
@@ -440,7 +440,7 @@ export default function Profile() {
 
 function InfoCard({ label, value, icon }: any) {
   return (
-    <div className="rounded-xl border border-gray-200 p-5 dark:border-gray-700">
+    <div className="rounded-lg border border-gray-200 p-5 dark:border-gray-700">
       <div className="mb-2 flex items-center gap-2 text-sm text-gray-500">
         {icon}
         {label}
