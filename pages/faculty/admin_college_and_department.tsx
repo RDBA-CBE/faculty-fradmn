@@ -281,7 +281,7 @@ const CollegeAndDepartment = () => {
     page,
     search = "",
     loadMore = false,
-    seletedInstitution = null
+    seletedInstitution = null,
   ) => {
     try {
       setState({ collegeLoading: true });
@@ -311,7 +311,7 @@ const CollegeAndDepartment = () => {
     page,
     search = "",
     loadMore = false,
-    selectedCollege = null
+    selectedCollege = null,
   ) => {
     try {
       setState({ deptHodLoading: true });
@@ -340,7 +340,7 @@ const CollegeAndDepartment = () => {
   const institutionDropdownList = async (
     page,
     search = "",
-    loadMore = false
+    loadMore = false,
   ) => {
     try {
       setState({ institutionLoading: true });
@@ -458,7 +458,7 @@ const CollegeAndDepartment = () => {
   const naac_accreditations = async (
     page = 1,
     search = "",
-    loadMore = false
+    loadMore = false,
   ) => {
     try {
       const body: any = {};
@@ -532,7 +532,7 @@ const CollegeAndDepartment = () => {
   const loadInstitutionOptions = async (
     page,
     search = "",
-    loadMore = false
+    loadMore = false,
   ) => {
     try {
       setState({ institutionLoading: true });
@@ -580,7 +580,7 @@ const CollegeAndDepartment = () => {
     page,
     search = "",
     loadMore = false,
-    institutionOption = null
+    institutionOption = null,
   ) => {
     try {
       setState({ collegeFilterLoading: true });
@@ -674,7 +674,7 @@ const CollegeAndDepartment = () => {
       total_strength: "",
       summary: "",
       recent_achievements: [],
-      clgLoading:false,
+      clgLoading: false,
 
       dept_intake_per_year: null,
       dept_summary: "",
@@ -848,7 +848,7 @@ const CollegeAndDepartment = () => {
     showDeleteAlert(
       () => deleteRecord(row.id),
       () => Swal.fire("Cancelled", "Record is safe", "info"),
-      "Are you sure you want to delete this record?"
+      "Are you sure you want to delete this record?",
     );
   };
 
@@ -860,7 +860,7 @@ const CollegeAndDepartment = () => {
       () => {
         Swal.fire("Cancelled", "Your Records are safe :)", "info");
       },
-      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`
+      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`,
     );
   };
 
@@ -877,7 +877,7 @@ const CollegeAndDepartment = () => {
       }
     } catch (error) {
       Failure(
-        `Failed to delete ${state.activeTab.slice(0, -1)}. Please try again.`
+        `Failed to delete ${state.activeTab.slice(0, -1)}. Please try again.`,
       );
     }
   };
@@ -892,7 +892,7 @@ const CollegeAndDepartment = () => {
         }
       }
       Success(
-        `${state.selectedRecords.length} ${state.activeTab} deleted successfully!`
+        `${state.selectedRecords.length} ${state.activeTab} deleted successfully!`,
       );
       setState({ selectedRecords: [] });
       if (state.activeTab === "colleges") {
@@ -919,7 +919,7 @@ const CollegeAndDepartment = () => {
     } catch (rollbackError) {
       console.error("Rollback error:", rollbackError);
       Failure(
-        "Failed to cleanup created records. Please contact administrator."
+        "Failed to cleanup created records. Please contact administrator.",
       );
     }
   };
@@ -947,7 +947,7 @@ const CollegeAndDepartment = () => {
 
         if (state.college_type?.length > 0) {
           collegeBody.college_type_ids = state.college_type?.map(
-            (item) => item?.value
+            (item) => item?.value,
           );
         } else {
           collegeBody.college_type_ids = [];
@@ -955,7 +955,7 @@ const CollegeAndDepartment = () => {
 
         if (state.nirf_category?.length > 0) {
           collegeBody.nirf_category_ids = state.nirf_category?.map(
-            (item) => item?.value
+            (item) => item?.value,
           );
         } else {
           collegeBody.college_type_ids = [];
@@ -963,7 +963,7 @@ const CollegeAndDepartment = () => {
 
         if (state.naac_accreditation?.length > 0) {
           collegeBody.naac_accreditation_ids = state.naac_accreditation?.map(
-            (item) => item?.value
+            (item) => item?.value,
           );
         } else {
           collegeBody.naac_accreditation_ids = [];
@@ -1004,7 +1004,7 @@ const CollegeAndDepartment = () => {
 
         if (state.college_type?.length > 0) {
           collegeBody.college_type_ids = state.college_type?.map(
-            (item) => item?.value
+            (item) => item?.value,
           );
         } else {
           collegeBody.college_type_ids = [];
@@ -1012,7 +1012,7 @@ const CollegeAndDepartment = () => {
 
         if (state.nirf_category?.length > 0) {
           collegeBody.nirf_category_ids = state.nirf_category?.map(
-            (item) => item?.value
+            (item) => item?.value,
           );
         } else {
           collegeBody.nirf_category_ids = [];
@@ -1020,7 +1020,7 @@ const CollegeAndDepartment = () => {
 
         if (state.naac_accreditation?.length > 0) {
           collegeBody.naac_accreditation_ids = state.naac_accreditation?.map(
-            (item) => item?.value
+            (item) => item?.value,
           );
         } else {
           collegeBody.naac_accreditation_ids = [];
@@ -1069,7 +1069,7 @@ const CollegeAndDepartment = () => {
           // Show step-specific error message
           if (createdRecords.collegeId && !createdRecords.departmentId) {
             Failure(
-              "Step 2.2 failed: Department creation failed. College was created but removed due to error."
+              "Step 2.2 failed: Department creation failed. College was created but removed due to error.",
             );
           } else {
             Failure("Step 2.1 failed: College creation failed.");
@@ -1110,7 +1110,7 @@ const CollegeAndDepartment = () => {
               error?.data?.error ||
               error?.message ||
               "Creation failed. Please try again."
-            }`
+            }`,
           );
         }
       }
@@ -1214,7 +1214,7 @@ const CollegeAndDepartment = () => {
 
         if (state.college_type?.length > 0) {
           body.college_type_ids = state.college_type?.map(
-            (item) => item?.value
+            (item) => item?.value,
           );
         } else {
           body.college_type_ids = [];
@@ -1222,7 +1222,7 @@ const CollegeAndDepartment = () => {
 
         if (state.nirf_category?.length > 0) {
           body.nirf_category_ids = state.nirf_category?.map(
-            (item) => item?.value
+            (item) => item?.value,
           );
         } else {
           body.nirf_category_ids = [];
@@ -1230,7 +1230,7 @@ const CollegeAndDepartment = () => {
 
         if (state.naac_accreditation?.length > 0) {
           body.naac_accreditation_ids = state.naac_accreditation?.map(
-            (item) => item?.value
+            (item) => item?.value,
           );
         } else {
           body.naac_accreditation_ids = [];
@@ -1339,7 +1339,7 @@ const CollegeAndDepartment = () => {
 
           if (state.college_type?.length > 0) {
             collegeBody.college_type_ids = state.college_type?.map(
-              (item) => item?.value
+              (item) => item?.value,
             );
           } else {
             collegeBody.college_type_ids = [];
@@ -1347,7 +1347,7 @@ const CollegeAndDepartment = () => {
 
           if (state.nirf_category?.length > 0) {
             collegeBody.nirf_category_ids = state.nirf_category?.map(
-              (item) => item?.value
+              (item) => item?.value,
             );
           } else {
             collegeBody.nirf_category_ids = [];
@@ -1355,7 +1355,7 @@ const CollegeAndDepartment = () => {
 
           if (state.naac_accreditation?.length > 0) {
             collegeBody.naac_accreditation_ids = state.naac_accreditation?.map(
-              (item) => item?.value
+              (item) => item?.value,
             );
           } else {
             collegeBody.naac_accreditation_ids = [];
@@ -1432,7 +1432,7 @@ const CollegeAndDepartment = () => {
               });
 
               throw new Error(
-                `Hod  creation failed:\n${errorMessages.join("\n")}`
+                `Hod  creation failed:\n${errorMessages.join("\n")}`,
               );
             }
             throw new Error(`hod  creation failed: ${error?.message}`);
@@ -1452,7 +1452,7 @@ const CollegeAndDepartment = () => {
               });
 
               throw new Error(
-                `Department  creation failed:\n${errorMessages.join("\n")}`
+                `Department  creation failed:\n${errorMessages.join("\n")}`,
               );
             }
             throw new Error(`Department  creation failed: ${error?.message}`);
@@ -1500,7 +1500,7 @@ const CollegeAndDepartment = () => {
 
   const updateCollege = async () => {
     try {
-      setState({clgLoading:true})
+      setState({ clgLoading: true });
       const body: any = {
         college_name: capitalizeFLetter(state.college_name),
         college_code: capitalizeFLetter(state.college_code),
@@ -1525,7 +1525,7 @@ const CollegeAndDepartment = () => {
 
       if (state.nirf_category?.length > 0) {
         body.nirf_category_ids = state.nirf_category?.map(
-          (item) => item?.value
+          (item) => item?.value,
         );
       } else {
         body.nirf_category_ids = [];
@@ -1533,7 +1533,7 @@ const CollegeAndDepartment = () => {
 
       if (state.naac_accreditation?.length > 0) {
         body.naac_accreditation_ids = state.naac_accreditation?.map(
-          (item) => item?.value
+          (item) => item?.value,
         );
       } else {
         body.naac_accreditation_ids = [];
@@ -1555,7 +1555,7 @@ const CollegeAndDepartment = () => {
       handleCloseModal();
       Success("College updated successfully!");
     } catch (error) {
-      setState({clgLoading:false})
+      setState({ clgLoading: false });
       if (error?.response?.data) {
         const apiErrors = {};
         Object.keys(error.response.data).forEach((field) => {
@@ -1802,7 +1802,7 @@ const CollegeAndDepartment = () => {
                 1,
                 searchTerm,
                 false,
-                state.seletedInstitution
+                state.seletedInstitution,
               )
             }
             placeholder="Select College"
@@ -1813,7 +1813,7 @@ const CollegeAndDepartment = () => {
                 state.collegePage + 1,
                 "",
                 true,
-                state.seletedInstitution
+                state.seletedInstitution,
               )
             }
             loading={state.collegeLoading}
@@ -1843,7 +1843,7 @@ const CollegeAndDepartment = () => {
                 state.deptHodPage + 1,
                 "",
                 true,
-                state.college?.value
+                state.college?.value,
               )
             }
             loading={state.deptHodLoading}
@@ -2210,9 +2210,7 @@ const CollegeAndDepartment = () => {
       <div className="mb-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
-            <h1 className="page-ti text-transparent">
-              Colleges & Departments
-            </h1>
+            <h1 className="page-ti text-transparent">Colleges & Departments</h1>
             <p className="text-gray-600 dark:text-gray-400">
               Manage colleges and departments
             </p>
@@ -2314,11 +2312,14 @@ const CollegeAndDepartment = () => {
             <div className="flex items-center gap-4">
               {state.selectedRecords.length > 0 && (
                 <button
-                  onClick={handleBulkDelete}
-                  className="flex items-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+                  onClick={() => handleBulkDelete()}
+                  className=" group relative inline-flex transform items-center gap-2 overflow-hidden rounded-md border border-red-500  px-3 py-1 text-red-500 shadow-lg transition-all duration-200 "
                 >
+                  <div className=" absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
                   <IconTrash className="h-4 w-4" />
-                  Delete ({state.selectedRecords.length})
+                  <span className="relative z-10 text-[13px]">
+                    Delete ({state.selectedRecords?.length})
+                  </span>
                 </button>
               )}
               <div className="text-sm text-black ">
@@ -2496,7 +2497,7 @@ const CollegeAndDepartment = () => {
                   <button
                     onClick={handleSubmit}
                     disabled={state.submitting}
-                    className="rounded-lg bg-dblue px-6 py-2 text-white hover:bg-dblue disabled:opacity-50"
+                    className="bg-dblue hover:bg-dblue rounded-lg px-6 py-2 text-white disabled:opacity-50"
                   >
                     {state.submitting
                       ? "Loading..."
@@ -2533,7 +2534,7 @@ const CollegeAndDepartment = () => {
                     <button
                       onClick={handleSubmit}
                       disabled={state.submitting}
-                      className="rounded-lg bg-dblue px-6 py-2 text-white hover:bg-dblue disabled:opacity-50"
+                      className="bg-dblue hover:bg-dblue rounded-lg px-6 py-2 text-white disabled:opacity-50"
                     >
                       {state.submitting
                         ? "Creating..."
@@ -2600,7 +2601,7 @@ const CollegeAndDepartment = () => {
                 <button
                   onClick={() => updateCollege()}
                   disabled={state.submitting}
-                  className="rounded-lg bg-dblue px-6 py-2 text-white hover:bg-dblue disabled:opacity-50"
+                  className="bg-dblue hover:bg-dblue rounded-lg px-6 py-2 text-white disabled:opacity-50"
                 >
                   {state.clgLoading ? "Updating..." : "Update College"}
                 </button>

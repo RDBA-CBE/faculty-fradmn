@@ -158,13 +158,7 @@ const Job = () => {
       if (res?.role == ROLES.SUPER_ADMIN) {
         collegeDropdownList(1, "", false, "", res.id);
       } else if (res?.role == ROLES.INSTITUTION_ADMIN) {
-        collegeDropdownList(
-          1,
-          "",
-          false,
-          res?.institution?.id,
-          res.id
-        );
+        collegeDropdownList(1, "", false, res?.institution?.id, res.id);
       } else if (res?.role == ROLES.HR) {
         departmentDropdownList(1, "", false, res?.college?.college_id, res.id);
       }
@@ -293,7 +287,7 @@ const Job = () => {
   const institutionDropdownList = async (
     page,
     search = "",
-    loadMore = false
+    loadMore = false,
   ) => {
     try {
       setState({ institutionLoading: true });
@@ -319,7 +313,7 @@ const Job = () => {
     search = "",
     loadMore = false,
     institutionId = null,
-    createdBy = null
+    createdBy = null,
   ) => {
     try {
       setState({ collegeLoading: true });
@@ -355,7 +349,7 @@ const Job = () => {
     search = "",
     loadMore = false,
     collegeId = null,
-    createdBy = null
+    createdBy = null,
   ) => {
     try {
       setState({ departmentLoading: true });
@@ -452,7 +446,7 @@ const Job = () => {
         "",
         false,
         selectedOption.value,
-        state.profile?.id
+        state.profile?.id,
       );
     }
   };
@@ -502,7 +496,7 @@ const Job = () => {
         "",
         false,
         selectedOption.value,
-        state.profile?.id
+        state.profile?.id,
       );
     }
   };
@@ -556,12 +550,12 @@ const Job = () => {
         Success(
           row.is_approved
             ? "Job unapproved successfully!"
-            : "Job approved successfully!"
+            : "Job approved successfully!",
         );
         jobList(state.page);
       } catch (error) {
         Failure(
-          row.is_approved ? "Failed to unapprove job" : "Failed to approve job"
+          row.is_approved ? "Failed to unapprove job" : "Failed to approve job",
         );
       }
     }
@@ -580,12 +574,10 @@ const Job = () => {
   };
 
   const handleDelete = (row) => {
-    
     showDeleteAlert(
-      
       () => deleteRecord(row?.id),
       () => Swal.fire("Cancelled", "Record is safe", "info"),
-      "Are you sure you want to delete this job?"
+      "Are you sure you want to delete this job?",
     );
   };
 
@@ -603,7 +595,7 @@ const Job = () => {
     showDeleteAlert(
       () => bulkDeleteRecords(),
       () => Swal.fire("Cancelled", "Your Records are safe :)", "info"),
-      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`
+      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`,
     );
   };
 
@@ -668,7 +660,7 @@ const Job = () => {
         <div className="rounded-lg border border-gray-200 bg-green-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
           <div className="flex items-center gap-5 ">
             <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
-              <CheckCircle className="text-green-600 h-10 w-10" />
+              <CheckCircle className="h-10 w-10 text-green-600" />
             </div>
 
             <div className="flex flex-col">
@@ -684,7 +676,7 @@ const Job = () => {
         <div className="rounded-lg border border-gray-200 bg-yellow-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
           <div className="flex items-center gap-5">
             <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
-              <Hourglass className="text-yellow-600 h-10 w-10" />
+              <Hourglass className="h-10 w-10 text-yellow-600" />
             </div>
 
             <div className="flex flex-col">
@@ -700,7 +692,7 @@ const Job = () => {
         <div className="rounded-lg border border-gray-200 bg-red-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
           <div className="flex items-center gap-5">
             <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
-              <Clock className="text-red-600 h-10 w-10" />
+              <Clock className="h-10 w-10 text-red-600" />
             </div>
 
             <div className="flex flex-col">
@@ -842,11 +834,14 @@ const Job = () => {
             <div className="flex items-center gap-4">
               {state.selectedRecords.length > 0 && (
                 <button
-                  onClick={handleBulkDelete}
-                  className="flex items-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+                  onClick={() => handleBulkDelete()}
+                  className=" group relative inline-flex transform items-center gap-2 overflow-hidden rounded-md border border-red-500  px-3 py-1 text-red-500 shadow-lg transition-all duration-200 "
                 >
+                  <div className=" absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
                   <IconTrash className="h-4 w-4" />
-                  Delete ({state.selectedRecords.length})
+                  <span className="relative z-10 text-[13px]">
+                    Delete ({state.selectedRecords?.length})
+                  </span>
                 </button>
               )}
               <div className="text-sm text-black">{state.count} jobs found</div>
@@ -862,7 +857,7 @@ const Job = () => {
             records={state.jobList}
             fetching={state.loading}
             selectedRecords={state.jobList?.filter((record) =>
-              state.selectedRecords.includes(record.id)
+              state.selectedRecords.includes(record.id),
             )}
             onSelectedRecordsChange={(records) =>
               setState({ selectedRecords: records.map((r: any) => r.id) })
@@ -919,7 +914,7 @@ const Job = () => {
                       <div className="flex items-center -space-x-2">
                         {visibleDept?.map((dept: string, index: number) => (
                           <div key={index} className="group relative">
-                            <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-dblue text-xs  text-white dark:border-gray-900">
+                            <div className="bg-dblue flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white text-xs  text-white dark:border-gray-900">
                               {dept?.slice(0, 2)?.toUpperCase()}
                             </div>
 

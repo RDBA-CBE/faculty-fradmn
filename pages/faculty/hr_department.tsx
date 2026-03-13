@@ -14,7 +14,12 @@ import IconEyeOff from "@/components/Icon/IconEyeOff";
 import IconLoader from "@/components/Icon/IconLoader";
 import { GraduationCap, BookOpen, UserCheck } from "lucide-react";
 import Pagination from "@/components/pagination/pagination";
-import { buildFormData, Dropdown, showDeleteAlert, useSetState } from "@/utils/function.utils";
+import {
+  buildFormData,
+  Dropdown,
+  showDeleteAlert,
+  useSetState,
+} from "@/utils/function.utils";
 import Modal from "@/components/modal/modal.component";
 import { Success, Failure } from "@/utils/function.utils";
 import useDebounce from "@/hook/useDebounce";
@@ -147,12 +152,11 @@ const CollegeAndDepartment = () => {
     }
   };
 
-
   const collegeDropdownList = async (
     page,
     search = "",
     loadMore = false,
-    seletedInstitution = null
+    seletedInstitution = null,
   ) => {
     try {
       setState({ collegeLoading: true });
@@ -177,8 +181,6 @@ const CollegeAndDepartment = () => {
       setState({ collegeLoading: false });
     }
   };
-
- 
 
   const collegeList = async (page, institutionId = null) => {
     try {
@@ -252,13 +254,10 @@ const CollegeAndDepartment = () => {
     }
   };
 
-
   const handlePageChange = (pageNumber) => {
     setState({ page: pageNumber });
     collegeList(pageNumber);
   };
-
-
 
   const handleCloseModal = () => {
     setState({
@@ -337,24 +336,24 @@ const CollegeAndDepartment = () => {
 
   const handleEdit = (row) => {
     console.log("✌️row --->", row);
-  
-      setState({
-        editId: row.id,
-        showModal: true,
-        department_name: row.department_name,
-        department_code: row.department_code,
-        institutionDept: {
-          value: row?.institution_id,
-          label: row.institution_name,
-        },
-        // department_email: row.department_email,
-        // department_phone: row.department_phone,
-        // department_head: row.department_head,
-        college: {
-          value: row?.college_id,
-          label: row.college_name,
-        },
-      });
+
+    setState({
+      editId: row.id,
+      showModal: true,
+      department_name: row.department_name,
+      department_code: row.department_code,
+      institutionDept: {
+        value: row?.institution_id,
+        label: row.institution_name,
+      },
+      // department_email: row.department_email,
+      // department_phone: row.department_phone,
+      // department_head: row.department_head,
+      college: {
+        value: row?.college_id,
+        label: row.college_name,
+      },
+    });
   };
 
   const handleToggleStatus = async (row) => {
@@ -380,7 +379,7 @@ const CollegeAndDepartment = () => {
     showDeleteAlert(
       () => deleteRecord(row.id),
       () => Swal.fire("Cancelled", "Record is safe", "info"),
-      "Are you sure you want to delete this record?"
+      "Are you sure you want to delete this record?",
     );
   };
 
@@ -392,7 +391,7 @@ const CollegeAndDepartment = () => {
       () => {
         Swal.fire("Cancelled", "Your Records are safe :)", "info");
       },
-      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`
+      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`,
     );
   };
 
@@ -409,7 +408,7 @@ const CollegeAndDepartment = () => {
       }
     } catch (error) {
       Failure(
-        `Failed to delete ${state.activeTab.slice(0, -1)}. Please try again.`
+        `Failed to delete ${state.activeTab.slice(0, -1)}. Please try again.`,
       );
     }
   };
@@ -417,15 +416,14 @@ const CollegeAndDepartment = () => {
   const bulkDeleteRecords = async () => {
     try {
       for (const id of state.selectedRecords) {
-       
-          await Models.department.delete(id);
+        await Models.department.delete(id);
       }
       Success(
-        `${state.selectedRecords.length} ${state.activeTab} deleted successfully!`
+        `${state.selectedRecords.length} ${state.activeTab} deleted successfully!`,
       );
       setState({ selectedRecords: [] });
-    
-        deptList(state.page);
+
+      deptList(state.page);
     } catch (error) {
       Failure(`Failed to delete ${state.activeTab}. Please try again.`);
     }
@@ -453,7 +451,7 @@ const CollegeAndDepartment = () => {
     } catch (rollbackError) {
       console.error("Rollback error:", rollbackError);
       Failure(
-        "Failed to cleanup created records. Please contact administrator."
+        "Failed to cleanup created records. Please contact administrator.",
       );
     }
   };
@@ -502,7 +500,7 @@ const CollegeAndDepartment = () => {
           createdRecords.collegeId = collegeRes?.id;
           console.log(
             "Step 2.1: College created successfully with ID:",
-            createdRecords.collegeId
+            createdRecords.collegeId,
           );
 
           const deptBody = {
@@ -517,7 +515,7 @@ const CollegeAndDepartment = () => {
           createdRecords.departmentId = deptRes?.id;
           console.log(
             "Step 2.2: Department created successfully with ID:",
-            createdRecords.departmentId
+            createdRecords.departmentId,
           );
 
           Success("College and Department created successfully!");
@@ -530,7 +528,7 @@ const CollegeAndDepartment = () => {
           if (createdRecords.collegeId && !createdRecords.departmentId) {
             console.log("Error occurred during department creation");
             Failure(
-              "Step 2.2 failed: Department creation failed. College was created but removed due to error."
+              "Step 2.2 failed: Department creation failed. College was created but removed due to error.",
             );
           } else {
             console.log("Error occurred during college creation");
@@ -570,7 +568,7 @@ const CollegeAndDepartment = () => {
           Failure(
             `Step ${state.currentStep} failed: ${
               error?.message || "Creation failed. Please try again."
-            }`
+            }`,
           );
         }
       }
@@ -742,7 +740,7 @@ const CollegeAndDepartment = () => {
           createdRecords.collegeId = collegeRes?.id;
           console.log(
             "Step 3.1: College created successfully with ID:",
-            createdRecords.collegeId
+            createdRecords.collegeId,
           );
 
           // Step 3.2: Create department with the created college ID
@@ -758,7 +756,7 @@ const CollegeAndDepartment = () => {
           createdRecords.departmentId = deptRes?.id;
           console.log(
             "Step 3.2: Department created successfully with ID:",
-            createdRecords.departmentId
+            createdRecords.departmentId,
           );
 
           // Step 3.3: Create HOD with the created department ID
@@ -776,13 +774,13 @@ const CollegeAndDepartment = () => {
           };
 
           console.log("Step 3.3: Creating HOD...", finalHodBody);
-                                const formData=buildFormData(finalHodBody)
-          
+          const formData = buildFormData(finalHodBody);
+
           const hodRes: any = await Models.auth.createUser(formData);
           createdRecords.hodId = hodRes?.id;
           console.log(
             "Step 3.3: HOD created successfully with ID:",
-            createdRecords.hodId
+            createdRecords.hodId,
           );
 
           Success("College, Department and HOD created successfully!");
@@ -813,7 +811,7 @@ const CollegeAndDepartment = () => {
               });
 
               throw new Error(
-                `Hod  creation failed:\n${errorMessages.join("\n")}`
+                `Hod  creation failed:\n${errorMessages.join("\n")}`,
               );
             }
             throw new Error(`hod  creation failed: ${error?.message}`);
@@ -834,7 +832,7 @@ const CollegeAndDepartment = () => {
               });
 
               throw new Error(
-                `Department  creation failed:\n${errorMessages.join("\n")}`
+                `Department  creation failed:\n${errorMessages.join("\n")}`,
               );
             }
             throw new Error(`Department  creation failed: ${error?.message}`);
@@ -926,65 +924,64 @@ const CollegeAndDepartment = () => {
 
   const renderDepartmentForm = () => (
     <div className="space-y-6">
-        <>
-          <CustomSelect
-            options={state.institutionDropdownList}
-            value={state.institutionDept}
-            onChange={(selectedOption) => {
-              if (selectedOption) {
-                setState({
-                  institutionDept: selectedOption,
-                  errors: { ...state.errors, institution: "" },
-                  seletedInstitution: selectedOption,
-                  college: null,
-                });
-                collegeList(1, selectedOption);
-              } else {
-                setState({
-                  institutionDept: null,
-                  seletedInstitution: selectedOption,
-                  college: null,
-                  collegeDropdownList: [],
-                });
-              }
-            }}
-            placeholder="Select Institution"
-            isClearable={true}
-          
-            loading={state.institutionDropLoading}
-            title="Select Institution"
-            error={state.errors.institution}
-            required
-          />
-          <CustomSelect
-            options={state.collegeDropdownList}
-            value={state.college}
-            onChange={(selectedOption) =>
+      <>
+        <CustomSelect
+          options={state.institutionDropdownList}
+          value={state.institutionDept}
+          onChange={(selectedOption) => {
+            if (selectedOption) {
               setState({
-                college: selectedOption,
-                errors: { ...state.errors, college: "" },
-              })
+                institutionDept: selectedOption,
+                errors: { ...state.errors, institution: "" },
+                seletedInstitution: selectedOption,
+                college: null,
+              });
+              collegeList(1, selectedOption);
+            } else {
+              setState({
+                institutionDept: null,
+                seletedInstitution: selectedOption,
+                college: null,
+                collegeDropdownList: [],
+              });
             }
-            onSearch={(searchTerm) =>
-              collegeDropdownList(1, searchTerm, state.seletedInstitution)
-            }
-            placeholder="Select College"
-            isClearable={true}
-            loadMore={() =>
-              state.collegeNext &&
-              collegeDropdownList(
-                state.collegePage + 1,
-                "",
-                true,
-                state.seletedInstitution
-              )
-            }
-            loading={state.collegeLoading}
-            title="Select College"
-            error={state.errors.college}
-            required
-          />
-        </>
+          }}
+          placeholder="Select Institution"
+          isClearable={true}
+          loading={state.institutionDropLoading}
+          title="Select Institution"
+          error={state.errors.institution}
+          required
+        />
+        <CustomSelect
+          options={state.collegeDropdownList}
+          value={state.college}
+          onChange={(selectedOption) =>
+            setState({
+              college: selectedOption,
+              errors: { ...state.errors, college: "" },
+            })
+          }
+          onSearch={(searchTerm) =>
+            collegeDropdownList(1, searchTerm, state.seletedInstitution)
+          }
+          placeholder="Select College"
+          isClearable={true}
+          loadMore={() =>
+            state.collegeNext &&
+            collegeDropdownList(
+              state.collegePage + 1,
+              "",
+              true,
+              state.seletedInstitution,
+            )
+          }
+          loading={state.collegeLoading}
+          title="Select College"
+          error={state.errors.college}
+          required
+        />
+      </>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <TextInput
           title="Department Name"
@@ -1005,8 +1002,6 @@ const CollegeAndDepartment = () => {
       </div>
     </div>
   );
-
- 
 
   const departmentColumns = [
     {
@@ -1103,22 +1098,18 @@ const CollegeAndDepartment = () => {
       <div className="mb-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
-            <h1 className="page-ti text-transparent">
-              Departments
-            </h1>
+            <h1 className="page-ti text-transparent">Departments</h1>
             <p className="text-gray-600 dark:text-gray-400">
               Manage departments
             </p>
           </div>
           <button
             onClick={() => setState({ showModal: true })}
-            className="group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-dblue px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+            className="bg-dblue group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
             <IconPlus className="relative z-10 h-5 w-5" />
-            <span className="relative z-10">
-              Add Department
-            </span>
+            <span className="relative z-10">Add Department</span>
           </button>
         </div>
       </div>
@@ -1143,7 +1134,6 @@ const CollegeAndDepartment = () => {
             />
           </div>
 
-         
           {/* <div className="group relative z-50">
             <CustomSelect
               options={statusOptions}
@@ -1166,11 +1156,14 @@ const CollegeAndDepartment = () => {
             <div className="flex items-center gap-4">
               {state.selectedRecords.length > 0 && (
                 <button
-                  onClick={handleBulkDelete}
-                  className="flex items-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+                  onClick={() => handleBulkDelete()}
+                  className=" group relative inline-flex transform items-center gap-2 overflow-hidden rounded-md border border-red-500  px-3 py-1 text-red-500 shadow-lg transition-all duration-200 "
                 >
+                  <div className=" absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
                   <IconTrash className="h-4 w-4" />
-                  Delete ({state.selectedRecords.length})
+                  <span className="relative z-10 text-[13px]">
+                    Delete ({state.selectedRecords?.length})
+                  </span>
                 </button>
               )}
               <div className="text-sm text-gray-500 dark:text-gray-400">
@@ -1191,7 +1184,7 @@ const CollegeAndDepartment = () => {
             records={state.deptList || []}
             fetching={state.loading}
             selectedRecords={(state.deptList || []).filter((record) =>
-              state.selectedRecords.includes(record.id)
+              state.selectedRecords.includes(record.id),
             )}
             onSelectedRecordsChange={(records) =>
               setState({ selectedRecords: records.map((r) => r.id) })
@@ -1238,9 +1231,7 @@ const CollegeAndDepartment = () => {
       <Modal
         open={state.showModal}
         close={handleCloseModal}
-        addHeader={
-           "Add Department"
-        }
+        addHeader={"Add Department"}
         renderComponent={() => (
           <div className="w-full max-w-4xl">
             <style jsx>{`
@@ -1253,33 +1244,32 @@ const CollegeAndDepartment = () => {
               }
             `}</style>
             {/* Progress Header */}
-         
+
             {/* Step Content */}
             <div className="min-h-[300px]">{renderDepartmentForm()}</div>
 
             {/* Navigation Footer */}
             <div className="flex justify-between border-t p-6">
-                <div className="flex w-full justify-end gap-4">
-                  <button
-                    onClick={handleFinalSubmit}
-                    disabled={state.submitting}
-                    className="rounded-lg border px-6 py-2 text-black hover:bg-green-600 disabled:opacity-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSubmit}
-                    disabled={state.submitting}
-                    className="rounded-lg bg-dblue px-6 py-2 text-white hover:bg-dblue disabled:opacity-50"
-                  >
-                    {state.submitting
-                      ? "Loading..."
-                      : state.editId
-                      ? "Update Department"
-                      : "Create Department"}
-                  </button>
-                </div>
-             
+              <div className="flex w-full justify-end gap-4">
+                <button
+                  onClick={handleFinalSubmit}
+                  disabled={state.submitting}
+                  className="rounded-lg border px-6 py-2 text-black hover:bg-green-600 disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  disabled={state.submitting}
+                  className="bg-dblue hover:bg-dblue rounded-lg px-6 py-2 text-white disabled:opacity-50"
+                >
+                  {state.submitting
+                    ? "Loading..."
+                    : state.editId
+                    ? "Update Department"
+                    : "Create Department"}
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -1287,9 +1277,7 @@ const CollegeAndDepartment = () => {
       <Modal
         open={state.showEditModal}
         close={handleCloseModal}
-        addHeader={
-         "Update Department"
-        }
+        addHeader={"Update Department"}
         renderComponent={() => (
           <div className="w-full max-w-4xl">
             <style jsx>{`
@@ -1305,7 +1293,7 @@ const CollegeAndDepartment = () => {
 
             {/* Step Content */}
             <div className="min-h-[300px]">
-              { renderDepartmentForm()}
+              {renderDepartmentForm()}
               {/* {state.activeTab === "departments" ? (
                 renderDepartmentForm()
               ) : (
@@ -1331,12 +1319,11 @@ const CollegeAndDepartment = () => {
                 <button
                   onClick={() => updateCollege()}
                   disabled={state.submitting}
-                  className="rounded-lg bg-dblue px-6 py-2 text-white hover:bg-dblue disabled:opacity-50"
+                  className="bg-dblue hover:bg-dblue rounded-lg px-6 py-2 text-white disabled:opacity-50"
                 >
                   {state.submitting ? "Updating..." : "Update College"}
                 </button>
               </div>
-             
             </div>
           </div>
         )}

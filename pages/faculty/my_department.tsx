@@ -794,13 +794,16 @@ const CollegeAndDepartment = () => {
             </h3>
             <div className="flex items-center gap-4">
               {state.selectedRecords.length > 0 && (
-                <button
-                  onClick={handleBulkDelete}
-                  className="flex items-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-white hover:bg-red-600"
-                >
-                  <IconTrash className="h-4 w-4" />
-                  Delete ({state.selectedRecords.length})
-                </button>
+               <button
+                                 onClick={() => handleBulkDelete()}
+                                 className=" group relative inline-flex transform items-center gap-2 overflow-hidden rounded-md border border-red-500  px-3 py-1 text-red-500 shadow-lg transition-all duration-200 "
+                               >
+                                 <div className=" absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+                                 <IconTrash className="h-4 w-4" />
+                                 <span className="relative z-10 text-[13px]">
+                                   Delete ({state.selectedRecords?.length})
+                                 </span>
+                               </button>
               )}
               <div className="text-sm text-black ">
                 {state.activeTab === "colleges"
