@@ -2304,7 +2304,7 @@ const CollegeAndDepartment = () => {
                       <button
                         onClick={handleFinalSubmit}
                         disabled={state.submitting}
-                        className="rounded-lg bg-green-500 px-6 py-2 text-white hover:bg-green-600 disabled:opacity-50"
+                        className="rounded-lg bg-dblue px-6 py-2 text-white disabled:opacity-50"
                       >
                         {state.submitting ? "Creating..." : "Submit"}
                       </button>
@@ -2404,7 +2404,7 @@ const CollegeAndDepartment = () => {
                       <button
                         onClick={handleFinalSubmit}
                         disabled={state.submitting}
-                        className="rounded-lg bg-green-500 px-6 py-2 text-white hover:bg-green-600 disabled:opacity-50"
+                        className="rounded-lg bg-dblue px-6 py-2 text-white disabled:opacity-50"
                       >
                         {state.submitting ? "Creating..." : "Submit"}
                       </button>

@@ -2295,7 +2295,7 @@ const Institution = () => {
                   <button
                     onClick={handleFinalSubmit}
                     disabled={state.submitting1}
-                    className="rounded-lg bg-green-500 px-6 py-2 text-white hover:bg-green-600"
+                    className="rounded-lg bg-dblue px-6 py-2 text-white"
                   >
                     {state.submitting1 ? "Creating..." : "Submit"}
                   </button>
@@ -2311,7 +2311,7 @@ const Institution = () => {
                 ) : (
                   <button
                     onClick={handleFinishWizard}
-                    className="rounded-lg bg-green-500 px-6 py-2 text-white hover:bg-green-600"
+                    className="rounded-lg bg-dblue px-6 py-2 text-white"
                   >
                     Finish Setup
                   </button>
@@ -2392,13 +2392,13 @@ const Institution = () => {
               <div className="flex gap-2">
                 <button
                   onClick={() => handleCloseModal()}
-                  className="rounded-lg border px-6 py-2  hover:bg-green-600"
+                  className="rounded-lg border px-6 py-2"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={() => handleUpdate()}
-                  className="rounded-lg bg-green-500 px-6 py-2 text-white hover:bg-green-600"
+                  className="rounded-lg bg-dblue px-6 py-2 text-white"
                 >
                   {state.btnLoading ? "Updating..." : "Update"}
                 </button>

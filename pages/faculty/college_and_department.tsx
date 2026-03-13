@@ -1441,7 +1441,7 @@ const CollegeAndDepartment = () => {
             onClick={() => setState({ showModal: true })}
             className="group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-dblue px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+            <div className="absolute inset-0 bg-dblue opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
             <IconPlus className="relative z-10 h-5 w-5" />
             <span className="relative z-10">
               Add {state.activeTab === "colleges" ? "College" : "Department"}
@@ -1727,7 +1727,7 @@ const CollegeAndDepartment = () => {
                       <button
                         onClick={handleFinalSubmit}
                         disabled={state.submitting}
-                        className="rounded-lg bg-green-500 px-6 py-2 text-white hover:bg-green-600 disabled:opacity-50"
+                        className="rounded-lg bg-dblue px-6 py-2 text-white disabled:opacity-50"
                       >
                         {state.submitting ? "Creating..." : "Submit"}
                       </button>
@@ -1827,7 +1827,7 @@ const CollegeAndDepartment = () => {
                       <button
                         onClick={handleFinalSubmit}
                         disabled={state.submitting}
-                        className="rounded-lg bg-green-500 px-6 py-2 text-white hover:bg-green-600 disabled:opacity-50"
+                        className="rounded-lg bg-dblue px-6 py-2 text-white disabled:opacity-50"
                       >
                         {state.submitting ? "Creating..." : "Submit"}
                       </button>

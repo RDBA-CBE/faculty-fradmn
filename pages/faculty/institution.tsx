@@ -1184,7 +1184,7 @@ const Institution = () => {
             onClick={() => setState({ showModal: true })}
             className="group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-dblue px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+            <div className="absolute inset-0 bg-dblue opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
             <IconPlus className="relative z-10 h-5 w-5" />
             <span className="relative z-10">Setup Institution</span>
           </button>
@@ -2068,7 +2068,7 @@ const Institution = () => {
               <div className="flex gap-2">
                 <button
                   onClick={handleFinalSubmit}
-                  className="rounded-lg bg-green-500 px-6 py-2 text-white hover:bg-green-600"
+                  className="rounded-lg bg-dblue px-6 py-2 text-white"
                 >
                   Submit
                 </button>
@@ -2083,7 +2083,7 @@ const Institution = () => {
                 ) : (
                   <button
                     onClick={handleFinishWizard}
-                    className="rounded-lg bg-green-500 px-6 py-2 text-white hover:bg-green-600"
+                    className="rounded-lg bg-dblue px-6 py-2 text-white"
                   >
                     Finish Setup
                   </button>
@@ -2165,13 +2165,13 @@ const Institution = () => {
               <div className="flex gap-2">
                 <button
                   onClick={() => handleCloseModal()}
-                  className="rounded-lg border px-6 py-2  hover:bg-green-600"
+                  className="rounded-lg border px-6 py-2"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={() => handleUpdate()}
-                  className="rounded-lg bg-green-500 px-6 py-2 text-white hover:bg-green-600"
+                  className="rounded-lg bg-dblue px-6 py-2 text-white"
                 >
                   {state.btnLoading ? "Updating..." : "Update"}
                 </button>

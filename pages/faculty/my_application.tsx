@@ -1361,7 +1361,7 @@ const Application = () => {
                   onClick={() => bulkSelect()}
                   className="group relative inline-flex items-center gap-2 overflow-hidden rounded-xl bg-dblue px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+                  <div className="absolute inset-0 bg-dblue opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
                   <UserCheck className="relative z-10 h-5 w-5" />
                   <span className="relative z-10">Interview Schedule</span>
                 </button>
@@ -1577,7 +1577,7 @@ const Application = () => {
             onClick={bulkSelect}
             className="bg-dblue group relative inline-flex items-center gap-2 overflow-hidden rounded-xl px-6 py-3 font-medium text-white shadow-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-2xl"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+            <div className="absolute inset-0 bg-dblue opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
 
             <UserCheck className="relative z-10 h-5 w-5" />
 
@@ -1636,7 +1636,7 @@ const Application = () => {
               </button>
               <button
                 onClick={handleStatusSubmit}
-                className="flex-1 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 text-white hover:shadow-lg"
+                className="flex-1 rounded-lg bg-dblue px-4 py-2 text-white hover:shadow-lg"
               >
                 Update Status
               </button>
