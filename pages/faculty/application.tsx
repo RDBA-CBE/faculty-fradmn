@@ -1692,26 +1692,26 @@ const Application = () => {
                   </span>
                 ),
               },
-              {
-                accessor: "applicant_phone",
-                title: "Phone",
-                render: ({ applicant_phone }) => (
-                  <div className="text-gray-600 dark:text-gray-400">
-                    {applicant_phone}
-                  </div>
-                ),
-                sortable: true,
-              },
-              {
-                accessor: "experience",
-                title: "Experience",
-                render: ({ experience }) => (
-                  <div className="text-gray-600 dark:text-gray-400">
-                    {experience}
-                  </div>
-                ),
-                sortable: true,
-              },
+              // {
+              //   accessor: "applicant_phone",
+              //   title: "Phone",
+              //   render: ({ applicant_phone }) => (
+              //     <div className="text-gray-600 dark:text-gray-400">
+              //       {applicant_phone}
+              //     </div>
+              //   ),
+              //   sortable: true,
+              // },
+              // {
+              //   accessor: "experience",
+              //   title: "Experience",
+              //   render: ({ experience }) => (
+              //     <div className="text-gray-600 dark:text-gray-400">
+              //       {experience}
+              //     </div>
+              //   ),
+              //   sortable: true,
+              // },
               {
                 accessor: "status",
                 title: "Status",

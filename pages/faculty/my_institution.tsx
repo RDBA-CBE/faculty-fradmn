@@ -1404,7 +1404,7 @@ const Institution = () => {
           </div>
         </div>
 
-        <div className="overflow-x-aut border border-gray-200 bg-white">
+        <div className="overflow-x-auto border border-gray-200 bg-white">
           <DataTable
             noRecordsText="No institutions found"
             highlightOnHover
