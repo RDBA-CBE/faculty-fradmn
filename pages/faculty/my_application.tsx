@@ -335,6 +335,7 @@ const Application = () => {
           value: item?.application_status?.id,
           label: item?.application_status?.name,
         },
+        college_name: item?.job_detail?.college?.name,
         department_name: item?.department?.department_name,
         interview_status:
           item?.interview_slots?.length > 0
@@ -1153,8 +1154,6 @@ const Application = () => {
     }
   };
 
-  console.log("✌️state.selectedRecords --->", state.selectedRecords);
-
   return (
     <div className="min-h-screen dark:from-gray-900 dark:to-gray-800">
       {/* Header Section */}
@@ -1417,6 +1416,17 @@ const Application = () => {
                   </div>
                 ),
               },
+
+              {
+                accessor: "college",
+                title: "College",
+                sortable: true,
+                render: ({ college_name }) => (
+                  <div className="text-gray-600 dark:text-gray-400">
+                    {capitalizeFLetter(college_name)}
+                  </div>
+                ),
+              },
               {
                 accessor: "department_name",
                 title: "Department",
@@ -1448,24 +1458,24 @@ const Application = () => {
                   </span>
                 ),
               },
-              {
-                accessor: "applicant_phone",
-                title: "Phone",
-                render: ({ applicant_phone }) => (
-                  <div className="text-gray-600 dark:text-gray-400">
-                    {applicant_phone}
-                  </div>
-                ),
-              },
-              {
-                accessor: "experience",
-                title: "Experience",
-                render: ({ experience }) => (
-                  <div className="text-gray-600 dark:text-gray-400">
-                    {experience}
-                  </div>
-                ),
-              },
+              // {
+              //   accessor: "applicant_phone",
+              //   title: "Phone",
+              //   render: ({ applicant_phone }) => (
+              //     <div className="text-gray-600 dark:text-gray-400">
+              //       {applicant_phone}
+              //     </div>
+              //   ),
+              // },
+              // {
+              //   accessor: "experience",
+              //   title: "Experience",
+              //   render: ({ experience }) => (
+              //     <div className="text-gray-600 dark:text-gray-400">
+              //       {experience}
+              //     </div>
+              //   ),
+              // },
 
               {
                 accessor: "status",
