@@ -536,7 +536,7 @@ const Job = () => {
         : "Are you sure you want to approve this job?",
       icon: "question",
       showCancelButton: true,
-      confirmButtonColor: "#01014b",
+      confirmButtonColor: "#1E3786",
       cancelButtonColor: "#d33",
       confirmButtonText: row.is_approved
         ? "Yes, unapprove it!"

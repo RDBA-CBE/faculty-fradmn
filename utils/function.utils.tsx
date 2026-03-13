@@ -53,7 +53,7 @@ export const showDeleteAlert = (onConfirm, onCancel, title) => {
       popup: "sweet-alerts",
     },
     buttonsStyling: false,
-    confirmButtonColor: "#01014b",
+    confirmButtonColor: "#1E3786",
     cancelButtonColor: "#d33",
   });
 

@@ -803,15 +803,15 @@ pre.hljs {
   background-color: #ededf8;
 }
 .bg-dblue {
-  background-color: #01014b;
+  background-color: #1E3786;
 }
 
 .text-dblue {
-  color: #01014b;
+  color: #1E3786;
 }
 
 .border-lblue {
-  border-color: #01014b14;
+  border-color: #1E378614;
 }
 
 .bg-lyellow {
@@ -852,6 +852,6 @@ h6 {
 }
 
 .btn.cancel-btn {
-  background-color: #01014b;
+  background-color: #1E3786;
   color: #fff;
 }

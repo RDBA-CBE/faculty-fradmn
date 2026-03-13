@@ -86,7 +86,7 @@ const SidebarDynamic = () => {
             >
               <div className="flex items-center">
                 {Icon && (
-                  <Icon className="shrink-0 !text-[#01014b]" />
+                  <Icon className="shrink-0 !text-[#1E3786]" />
                 )}
                 <span className="text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3">
                   {t(item.label)}
@@ -109,7 +109,7 @@ const SidebarDynamic = () => {
             >
               <div className="flex items-center">
                 {Icon && (
-                  <Icon className="shrink-0 !text-[#01014b]" />
+                  <Icon className="shrink-0 !text-[#1E3786]" />
                 )}
                 <span className="text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3">
                   {t(item.label)}
@@ -167,13 +167,13 @@ const SidebarDynamic = () => {
             <Link href="/" className="main-logo flex shrink-0 items-center ">
             <div></div>
               <img
-                className="ml-[5px] w-6 flex-none"
-                src="/assets/images/Logo.png"
+                className="ml-[5px] w-[160px] h-[30px] flex-none"
+                src="/assets/images/faculty-logo.png"
                 alt="logo"
               />
-              <span className="align-middle text-lg font-semibold dark:text-white-light lg:inline ltr:ml-1.5 rtl:mr-1.5">
+              {/* <span className="align-middle text-lg font-semibold dark:text-white-light lg:inline ltr:ml-1.5 rtl:mr-1.5">
                 {t("Faculty Pro")}
-              </span>
+              </span> */}
             </Link>
             <button
               type="button"
