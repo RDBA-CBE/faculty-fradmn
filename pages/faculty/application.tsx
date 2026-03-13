@@ -1327,7 +1327,7 @@ const Application = () => {
 
             <div className="flex flex-col">
               <p className="text-2xl  leading-none text-gray-900 dark:text-white">
-                {state.applications_by_status?.["Interview Scheduled "] || 0}
+                {state.applications_by_status?.["Interview Scheduled"] || 0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Interview Sheduled
