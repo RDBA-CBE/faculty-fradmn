@@ -443,6 +443,8 @@ const CollegeAndDepartment = () => {
         body.college_id = selectedCollege;
       }
 
+      body.role="hod"
+
       const res: any = await Models.auth.userList(page, body);
       const dropdown = Dropdown(res?.results, "username");
 
