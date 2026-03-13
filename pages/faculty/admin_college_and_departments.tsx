@@ -202,7 +202,7 @@ const CollegeAndDepartment = () => {
   const loadCollegeFilterForInstitution = async (
     profileData,
     page = 1,
-    loadMore = false
+    loadMore = false,
   ) => {
     try {
       setState({ collegeFilterLoading: true });
@@ -235,7 +235,7 @@ const CollegeAndDepartment = () => {
       loadCollegeFilterForInstitution(
         state.profile,
         state.collegeFilterPage + 1,
-        true
+        true,
       );
     }
   };
@@ -312,7 +312,7 @@ const CollegeAndDepartment = () => {
     page,
     search = "",
     loadMore = false,
-    seletedInstitution = null
+    seletedInstitution = null,
   ) => {
     try {
       setState({ collegeLoading: true });
@@ -341,7 +341,7 @@ const CollegeAndDepartment = () => {
   const institutionDropdownList = async (
     page,
     search = "",
-    loadMore = false
+    loadMore = false,
   ) => {
     try {
       setState({ institutionLoading: true });
@@ -474,7 +474,7 @@ const CollegeAndDepartment = () => {
   const naac_accreditations = async (
     page = 1,
     search = "",
-    loadMore = false
+    loadMore = false,
   ) => {
     try {
       const body: any = {};
@@ -547,7 +547,7 @@ const CollegeAndDepartment = () => {
   const loadInstitutionFilterOptions = async (
     page,
     search = "",
-    loadMore = false
+    loadMore = false,
   ) => {
     try {
       setState({ institutionFilterLoading: true });
@@ -702,7 +702,7 @@ const CollegeAndDepartment = () => {
       dept_summary: "",
       recent_dept_achievements: [],
       isNBAAccreditation: false,
-      newImages:[]
+      newImages: [],
     });
   };
 
@@ -868,7 +868,7 @@ const CollegeAndDepartment = () => {
     page,
     search = "",
     loadMore = false,
-    selectedCollege = null
+    selectedCollege = null,
   ) => {
     try {
       setState({ deptHodLoading: true });
@@ -917,7 +917,7 @@ const CollegeAndDepartment = () => {
     showDeleteAlert(
       () => deleteRecord(row.id),
       () => Swal.fire("Cancelled", "Record is safe", "info"),
-      "Are you sure you want to delete this record?"
+      "Are you sure you want to delete this record?",
     );
   };
 
@@ -929,7 +929,7 @@ const CollegeAndDepartment = () => {
       () => {
         Swal.fire("Cancelled", "Your Records are safe :)", "info");
       },
-      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`
+      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`,
     );
   };
 
@@ -946,7 +946,7 @@ const CollegeAndDepartment = () => {
       }
     } catch (error) {
       Failure(
-        `Failed to delete ${state.activeTab.slice(0, -1)}. Please try again.`
+        `Failed to delete ${state.activeTab.slice(0, -1)}. Please try again.`,
       );
     }
   };
@@ -961,7 +961,7 @@ const CollegeAndDepartment = () => {
         }
       }
       Success(
-        `${state.selectedRecords.length} ${state.activeTab} deleted successfully!`
+        `${state.selectedRecords.length} ${state.activeTab} deleted successfully!`,
       );
       setState({ selectedRecords: [] });
       if (state.activeTab === "colleges") {
@@ -996,7 +996,7 @@ const CollegeAndDepartment = () => {
     } catch (rollbackError) {
       console.error("Rollback error:", rollbackError);
       Failure(
-        "Failed to cleanup created records. Please contact administrator."
+        "Failed to cleanup created records. Please contact administrator.",
       );
     }
   };
@@ -1105,7 +1105,7 @@ const CollegeAndDepartment = () => {
 
       if (state.nirf_category?.length > 0) {
         body.nirf_category_ids = state.nirf_category?.map(
-          (item) => item?.value
+          (item) => item?.value,
         );
       } else {
         body.nirf_category_ids = [];
@@ -1113,7 +1113,7 @@ const CollegeAndDepartment = () => {
 
       if (state.naac_accreditation?.length > 0) {
         body.naac_accreditation_ids = state.naac_accreditation?.map(
-          (item) => item?.value
+          (item) => item?.value,
         );
       } else {
         body.naac_accreditation_ids = [];
@@ -1158,7 +1158,7 @@ const CollegeAndDepartment = () => {
       title: "College Code",
       sortable: true,
       render: ({ college_code }) => (
-        <span className="inline-flex items-center justify-center rounded-full bg-blue-100 px-4 py-2 text-sm font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+        <span className="inline-flex items-center justify-center rounded-full bg-blue-100 px-4 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
           {college_code}
         </span>
       ),
@@ -1227,10 +1227,10 @@ const CollegeAndDepartment = () => {
       title: "Actions",
       textAlign: "center",
       render: (row) => (
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex items-center justify-center gap-3">
           <button
             onClick={() => handleEdit(row)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 transition-all duration-200 hover:bg-blue-200"
+            className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200"
             title="Edit"
           >
             <IconEdit className="h-4 w-4" />
@@ -1252,7 +1252,7 @@ const CollegeAndDepartment = () => {
           </button> */}
           <button
             onClick={() => handleDelete(row)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600 transition-all duration-200 hover:bg-red-200"
+            className="flex items-center justify-center rounded-lg text-red-600 transition-all duration-200"
             title="Delete"
           >
             <IconTrash className="h-4 w-4" />
@@ -1330,7 +1330,7 @@ const CollegeAndDepartment = () => {
         <div className="flex items-center justify-center gap-2">
           <button
             onClick={() => handleEdit(row)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 transition-all duration-200 hover:bg-blue-200"
+            className="flex  items-center justify-center rounded-lg  text-blue-600 transition-all duration-200"
             title="Edit"
           >
             <IconEdit className="h-4 w-4" />
@@ -1352,7 +1352,7 @@ const CollegeAndDepartment = () => {
           </button> */}
           <button
             onClick={() => handleDelete(row)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600 transition-all duration-200 hover:bg-red-200"
+            className="flex h-8 w-8 items-center justify-center rounded-lg  text-red-600 transition-all duration-200 "
             title="Delete"
           >
             <IconTrash className="h-4 w-4" />
@@ -1363,9 +1363,9 @@ const CollegeAndDepartment = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-3 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen dark:from-gray-900 dark:to-gray-800">
       {/* Header Section */}
-      <div className="mb-8">
+      <div className="mb-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
             <h1 className="page-ti text-transparent">
@@ -1380,12 +1380,12 @@ const CollegeAndDepartment = () => {
 
       {/* Tabs */}
       <div className="mb-6">
-        <div className="inline-flex rounded-lg bg-gray-100 p-1 dark:bg-gray-800">
+        <div className="inline-flex rounded-lg bg-white p-1 dark:bg-gray-800">
           <button
             onClick={() => handleTabChange("colleges")}
-            className={`rounded-md px-4 py-2 text-sm font-medium transition-all duration-200 ${
+            className={`rounded-md px-2 py-1 text-sm font-medium transition-all duration-200 ${
               state.activeTab === "colleges"
-                ? "bg-white text-blue-600 shadow-sm dark:bg-gray-700 dark:text-blue-400"
+                ? "bg-lyellow text-black shadow-sm dark:bg-gray-700 dark:text-blue-400"
                 : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
             }`}
           >
@@ -1393,9 +1393,9 @@ const CollegeAndDepartment = () => {
           </button>
           <button
             onClick={() => handleTabChange("departments")}
-            className={`rounded-md px-4 py-2 text-sm font-medium transition-all duration-200 ${
+            className={`rounded-md px-2 py-1 text-sm font-medium transition-all duration-200 ${
               state.activeTab === "departments"
-                ? "bg-white text-blue-600 shadow-sm dark:bg-gray-700 dark:text-blue-400"
+                ? "bg-lyellow text-black shadow-sm dark:bg-gray-700 dark:text-blue-400"
                 : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
             }`}
           >
@@ -1405,13 +1405,13 @@ const CollegeAndDepartment = () => {
       </div>
 
       {/* Filters Section */}
-      <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
-        <div className="mb-4 flex items-center gap-2">
+      <div className="mb-5 rounded-2xl  backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
+        {/* <div className="mb-4 flex items-center gap-2">
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
             Filters
           </h3>
-        </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        </div> */}
+        <div className="flex gap-4">
           <div className="group relative">
             <TextInput
               placeholder={`Search ${state.activeTab}...`}
@@ -1424,6 +1424,7 @@ const CollegeAndDepartment = () => {
           {state.profile?.role == ROLES.SUPER_ADMIN && (
             <>
               <CustomSelect
+                className="!w-fit"
                 options={state.institutionFilterOptions}
                 value={state.institutionFilter}
                 onChange={handleInstitutionFilterChange}
@@ -1438,6 +1439,7 @@ const CollegeAndDepartment = () => {
               {state.activeTab === "departments" && (
                 <div className="group relative z-50">
                   <CustomSelect
+                    className="!w-fit"
                     options={state.collegeFilterOptions}
                     value={state.collegeFilter}
                     onChange={(selectedOption) =>
@@ -1455,6 +1457,7 @@ const CollegeAndDepartment = () => {
           {state.profile?.role == ROLES.SUPER_ADMIN ? (
             <>
               <CustomSelect
+                className="!w-fit"
                 options={DROPDOWN_ROLES}
                 value={state.selectedRole}
                 onChange={handleRoleChange}
@@ -1464,6 +1467,7 @@ const CollegeAndDepartment = () => {
               />
 
               <CustomSelect
+                className="!w-fit"
                 options={state.userOptions}
                 value={state.selectedUser}
                 onChange={(e) => setState({ selectedUser: e })}
@@ -1480,6 +1484,7 @@ const CollegeAndDepartment = () => {
               {state.activeTab === "departments" && (
                 <div className="group relative z-50">
                   <CustomSelect
+                    className="!w-fit"
                     options={state.collegeFilterOptions}
                     value={state.collegeFilter}
                     onChange={(selectedOption) =>
@@ -1493,6 +1498,7 @@ const CollegeAndDepartment = () => {
                 </div>
               )}
               <CustomSelect
+                className="!w-fit"
                 options={state.userOptions}
                 value={state.selectedUser}
                 onChange={(e) => setState({ selectedUser: e })}
@@ -1508,10 +1514,10 @@ const CollegeAndDepartment = () => {
       </div>
 
       {/* Table Section */}
-      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
-        <div className="border-b border-gray-200 p-6 dark:border-gray-700">
+      <div className="overflow-hidden rounded-lg   backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
+        <div className="mb-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+            <h3 className="text-lg font-bold text-gray-800 dark:text-white">
               {state.activeTab === "colleges" ? "Colleges" : "Departments"} List
             </h3>
             <div className="flex items-center gap-4">
@@ -1524,7 +1530,7 @@ const CollegeAndDepartment = () => {
                   Delete ({state.selectedRecords.length})
                 </button>
               )}
-              <div className="text-sm text-gray-500 dark:text-gray-400">
+              <div className="text-sm text-black dark:text-gray-400">
                 {state.activeTab === "colleges"
                   ? state.collegeCount
                   : state.departmentCount}{" "}
@@ -1534,11 +1540,11 @@ const CollegeAndDepartment = () => {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-aut border border-gray-200 bg-white">
           <DataTable
             noRecordsText={`No ${state.activeTab} found`}
             highlightOnHover
-            className="table-hover whitespace-nowrap"
+            className="table-hover"
             records={
               state.activeTab === "colleges"
                 ? state.collegeList || []
@@ -1676,7 +1682,7 @@ const CollegeAndDepartment = () => {
                       1,
                       searchTerm,
                       false,
-                      state.seletedInstitution
+                      state.seletedInstitution,
                     )
                   }
                   placeholder="Select College"
@@ -1687,7 +1693,7 @@ const CollegeAndDepartment = () => {
                       state.collegePage + 1,
                       "",
                       true,
-                      state.seletedInstitution
+                      state.seletedInstitution,
                     )
                   }
                   loading={state.collegeLoading}
@@ -1710,7 +1716,7 @@ const CollegeAndDepartment = () => {
                       1,
                       searchTerm,
                       false,
-                      state.college?.value
+                      state.college?.value,
                     )
                   }
                   placeholder="Select HOD"
@@ -1721,7 +1727,7 @@ const CollegeAndDepartment = () => {
                       state.deptHodPage + 1,
                       "",
                       true,
-                      state.college?.value
+                      state.college?.value,
                     )
                   }
                   loading={state.deptHodLoading}
@@ -1804,7 +1810,7 @@ const CollegeAndDepartment = () => {
                 <button
                   onClick={() => handleSubmit()}
                   disabled={state.submitting}
-                  className="rounded-lg bg-dblue px-6 py-2 text-white hover:bg-dblue disabled:opacity-50"
+                  className="bg-dblue hover:bg-dblue rounded-lg px-6 py-2 text-white disabled:opacity-50"
                 >
                   {state.submitting ? "Updating..." : "Update Department"}
                 </button>
@@ -1885,7 +1891,7 @@ const CollegeAndDepartment = () => {
                   onDeleteImage={(imageUrl) => {
                     setState({
                       college_logo: state.college_logo.filter(
-                        (img) => img !== imageUrl
+                        (img) => img !== imageUrl,
                       ),
                     });
                   }}
@@ -2040,7 +2046,7 @@ const CollegeAndDepartment = () => {
                 <button
                   onClick={() => updateCollege()}
                   disabled={state.submitting}
-                  className="rounded-lg bg-dblue px-6 py-2 text-white hover:bg-dblue disabled:opacity-50"
+                  className="bg-dblue hover:bg-dblue rounded-lg px-6 py-2 text-white disabled:opacity-50"
                 >
                   {state.updateCollegeLoading
                     ? "Updating..."
