@@ -1350,7 +1350,7 @@ const Application = () => {
         <div className="mb-4">
           <div className="flex items-center justify-between">
             {/* Left */}
-            <h3 className="ext-lg font-bold text-gray-800 dark:text-white">
+            <h3 className="text-lg font-bold text-gray-800 dark:text-white">
               Applications List
             </h3>
 

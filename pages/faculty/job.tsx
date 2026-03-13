@@ -1203,7 +1203,7 @@ const Job = () => {
       <div className="overflow-hidden rounded-lg   backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
         <div className="mb-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg  text-gray-800 dark:text-white">
+            <h3 className="text-lg font-bold text-gray-800 dark:text-white">
               Jobs List
             </h3>
             <div className="flex items-center gap-4">
