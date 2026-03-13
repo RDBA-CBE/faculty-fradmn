@@ -112,9 +112,15 @@ const LoginBoxed = () => {
           alt="image"
           className="absolute bottom-0 end-[28%]"
         /> */}
+        
         <div className="relative w-full max-w-[600px]  rounded-lg">
+          <div className="flex justify-center items-center">
+            <img src="/assets/images/faculty-logo.png" alt="" className="w-[200px] h-10 mb-10 text-center"/>
+          </div>
+           
           <div className="relative flex flex-col justify-center rounded-lg bg-white px-6 py-10 backdrop-blur-lg dark:bg-black/50 ">
             <div className="mx-auto w-full max-w-[440px]">
+             
               <div className="mb-6 text-center">
                 <h1 className="text-xl  font-extrabold uppercase !leading-snug text-dblue ">
                   Sign in

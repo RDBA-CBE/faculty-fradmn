@@ -55,7 +55,7 @@ const RecoverIdBox = () => {
 
       Success(
         res?.message ||
-          "Password reset link sent successfully! Please check your email."
+          "Password reset link sent successfully! Please check your email.",
       );
 
       router.push("/auth/signin");
@@ -113,7 +113,7 @@ const RecoverIdBox = () => {
         /> */}
       </div>
 
-      <div className="relative flex min-h-screen items-center justify-center bg-lblue bg-cover bg-center bg-no-repeat px-6 py-10 dark:bg-[#060818] sm:px-16">
+      <div className="bg-lblue relative flex min-h-screen items-center justify-center bg-cover bg-center bg-no-repeat px-6 py-10 dark:bg-[#060818] sm:px-16">
         {/* <img
           src="/assets/images/auth/coming-soon-object1.png"
           alt="image"
@@ -135,6 +135,13 @@ const RecoverIdBox = () => {
           className="absolute bottom-0 end-[28%]"
         /> */}
         <div className="relative w-full max-w-[600px]  rounded-lg">
+          <div className="flex items-center justify-center">
+            <img
+              src="/assets/images/faculty-logo.png"
+              alt=""
+              className="mb-10 h-10 w-[200px] text-center"
+            />
+          </div>
           <div className="relative flex flex-col justify-center rounded-lg bg-white px-6 py-10 backdrop-blur-lg dark:bg-black/50 ">
             {/* <div className="absolute end-6 top-6">
                             <div className="dropdown">
@@ -181,7 +188,7 @@ const RecoverIdBox = () => {
                         </div> */}
             <div className="mx-auto w-full max-w-[440px]">
               <div className="mb-7 text-center">
-                <h1 className="text-xl  font-extrabold uppercase !leading-snug text-dblue">
+                <h1 className="text-dblue  text-xl font-extrabold uppercase !leading-snug">
                   Forget Password
                 </h1>
                 <p>Enter your email to recover your ID</p>
@@ -200,7 +207,7 @@ const RecoverIdBox = () => {
               <button
                 onClick={() => handleSubmit()}
                 type="button"
-                className="btn bg-dblue text-white !mt-6 w-full border-0 uppercase shadow-[0_10px_20px_-10px_rgba(67,97,238,0.44)]"
+                className="btn bg-dblue !mt-6 w-full border-0 uppercase text-white shadow-[0_10px_20px_-10px_rgba(67,97,238,0.44)]"
               >
                 {state.btnLoading ? (
                   <Loader className="animate-spin" size={20} />
