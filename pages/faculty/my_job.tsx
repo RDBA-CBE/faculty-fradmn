@@ -972,32 +972,32 @@ const Job = () => {
               //     </span>
               //   ),
               // },
-              {
-                accessor: "experiences",
-                title: "Experience",
-                cellsStyle: {
-                  whiteSpace: "normal",
-                  wordBreak: "break-word",
-                },
-                render: ({ experiences }) => (
-                  <span className="text-gray-600 dark:text-gray-400">
-                    {capitalizeFLetter(experiences?.label || "-")}
-                  </span>
-                ),
-              },
-              {
-                accessor: "number_of_openings",
-                title: "Openings",
-                cellsStyle: {
-                  whiteSpace: "normal",
-                  wordBreak: "break-word",
-                },
-                render: ({ number_of_openings }) => (
-                  <span className="text-gray-600 dark:text-gray-400">
-                    {number_of_openings || "-"}
-                  </span>
-                ),
-              },
+              // {
+              //   accessor: "experiences",
+              //   title: "Experience",
+              //   cellsStyle: {
+              //     whiteSpace: "normal",
+              //     wordBreak: "break-word",
+              //   },
+              //   render: ({ experiences }) => (
+              //     <span className="text-gray-600 dark:text-gray-400">
+              //       {capitalizeFLetter(experiences?.label || "-")}
+              //     </span>
+              //   ),
+              // },
+              // {
+              //   accessor: "number_of_openings",
+              //   title: "Openings",
+              //   cellsStyle: {
+              //     whiteSpace: "normal",
+              //     wordBreak: "break-word",
+              //   },
+              //   render: ({ number_of_openings }) => (
+              //     <span className="text-gray-600 dark:text-gray-400">
+              //       {number_of_openings || "-"}
+              //     </span>
+              //   ),
+              // },
               {
                 accessor: "job_status",
                 title: "Status",

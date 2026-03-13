@@ -733,11 +733,11 @@ console.log('✌️res --->', res);
         }
       `}</style>
       {/* Header */}
-      <div className="sticky top-0 z-10 border-b border-gray-200 bg-white shadow-sm">
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+      <div className=" z-10">
+        <div className="pb-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-2xl font-bold text-transparent sm:text-3xl">
+              <h1 className="page-ti text-transparent">
                 Update Job Posting
               </h1>
               <p className="mt-1 text-sm text-gray-500">Update a opportunity</p>
@@ -747,7 +747,7 @@ console.log('✌️res --->', res);
       </div>
 
       {/* Stepper */}
-      <div className="sticky top-[73px] z-10 border-b border-gray-200 bg-white">
+      <div className="sticky top-[58px] z-10 border-b border-gray-200 bg-white">
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           <div className="mx-auto flex max-w-5xl items-center justify-between">
             <div
@@ -757,7 +757,7 @@ console.log('✌️res --->', res);
               <div
                 className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition-all ${
                   state.activeStep >= 1
-                    ? "bg-purple-600 text-white"
+                    ? "bg-dblue text-white"
                     : "bg-gray-200 text-gray-600"
                 }`}
               >
@@ -775,7 +775,7 @@ console.log('✌️res --->', res);
             </div>
             <div
               className={`mx-2 h-1 flex-1 ${
-                state.activeStep >= 2 ? "bg-purple-600" : "bg-gray-200"
+                state.activeStep >= 2 ? "bg-dblue" : "bg-gray-200"
               }`}
             ></div>
 
@@ -786,7 +786,7 @@ console.log('✌️res --->', res);
               <div
                 className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition-all ${
                   state.activeStep >= 2
-                    ? "bg-purple-600 text-white"
+                    ? "bg-dblue text-white"
                     : "bg-gray-200 text-gray-600"
                 }`}
               >
@@ -804,7 +804,7 @@ console.log('✌️res --->', res);
             </div>
             <div
               className={`mx-2 h-1 flex-1 ${
-                state.activeStep >= 3 ? "bg-purple-600" : "bg-gray-200"
+                state.activeStep >= 3 ? "bg-dblue" : "bg-gray-200"
               }`}
             ></div>
 
@@ -815,7 +815,7 @@ console.log('✌️res --->', res);
               <div
                 className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition-all ${
                   state.activeStep >= 3
-                    ? "bg-purple-600 text-white"
+                    ? "bg-dblue text-white"
                     : "bg-gray-200 text-gray-600"
                 }`}
               >
@@ -833,7 +833,7 @@ console.log('✌️res --->', res);
             </div>
             <div
               className={`mx-2 h-1 flex-1 ${
-                state.activeStep >= 4 ? "bg-purple-600" : "bg-gray-200"
+                state.activeStep >= 4 ? "bg-dblue" : "bg-gray-200"
               }`}
             ></div>
 
@@ -844,7 +844,7 @@ console.log('✌️res --->', res);
               <div
                 className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition-all ${
                   state.activeStep >= 4
-                    ? "bg-purple-600 text-white"
+                    ? "bg-dblue text-white"
                     : "bg-gray-200 text-gray-600"
                 }`}
               >
@@ -863,7 +863,7 @@ console.log('✌️res --->', res);
 
             {/* <div
               className={`mx-2 h-1 flex-1 ${
-                state.activeStep >= 5 ? "bg-purple-600" : "bg-gray-200"
+                state.activeStep >= 5 ? "bg-dblue" : "bg-gray-200"
               }`}
             ></div>
 
@@ -874,7 +874,7 @@ console.log('✌️res --->', res);
               <div
                 className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition-all ${
                   state.activeStep >= 5
-                    ? "bg-purple-600 text-white"
+                    ? "bg-dblue text-white"
                     : "bg-gray-200 text-gray-600"
                 }`}
               >
@@ -894,15 +894,15 @@ console.log('✌️res --->', res);
         </div>
       </div>
 
-      <div className="mx-auto   py-6 sm:px-6 lg:px-8  lg:py-8">
-        <div className="space-y-6">
+      <div className=" py-4">
+        <div className="space-y-4">
           {/* Card 1: Basic Information */}
           <div
             ref={section1Ref}
-            className="scroll-mt-32 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+            className="scroll-mt-32 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
           >
-            <div className="bg-gradient-to-r from-purple-500 to-purple-600 px-6 py-4">
-              <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
+            <div className="border-b px-6 py-4">
+              <h2 className="flex items-center gap-2 text-lg font-semibold text-black">
                 <svg
                   className="h-5 w-5"
                   fill="none"
@@ -951,10 +951,10 @@ console.log('✌️res --->', res);
           {/* Card 2: Job Details */}
           <div
             ref={section2Ref}
-            className="scroll-mt-32 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+            className="scroll-mt-32 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
           >
-            <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
-              <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
+            <div className="border-b px-6 py-4">
+              <h2 className="flex items-center gap-2 text-lg font-semibold text-black">
                 <svg
                   className="h-5 w-5"
                   fill="none"
@@ -1392,10 +1392,10 @@ console.log('✌️res --->', res);
           />
           <div
             ref={section5Ref}
-            className="scroll-mt-32 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+            className="scroll-mt-32 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
           >
-            <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-4">
-              <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
+            <div className="border-b px-6 py-4">
+              <h2 className="flex items-center gap-2 text-lg font-semibold text-black">
                 <svg
                   className="h-5 w-5"
                   fill="none"
@@ -1430,10 +1430,10 @@ console.log('✌️res --->', res);
           {/* Card 3: Key Responsibility */}
           <div
             ref={section3Ref}
-            className="scroll-mt-32 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+            className="scroll-mt-32 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
           >
-            <div className="bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-4">
-              <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
+            <div className="border-b px-6 py-4">
+              <h2 className="flex items-center gap-2 text-lg font-semibold text-black">
                 <svg
                   className="h-5 w-5"
                   fill="none"
@@ -1451,7 +1451,7 @@ console.log('✌️res --->', res);
               </h2>
             </div>
             <div className="p-6">
-              <div className="overflow-hidden rounded-lg border-2 border-dashed border-gray-300 transition-colors hover:border-purple-400">
+              <div className="overflow-hidden rounded-lg border-2 border-dashed border-gray-300 transition-colors">
                 <div
                   ref={keyResponsibilityEditorRef}
                   id="keyResponsibilityEditor"
@@ -1552,7 +1552,7 @@ console.log('✌️res --->', res);
             </button>
             <button
               type="button"
-              className="w-full rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 px-8 py-3 font-semibold text-white shadow-lg transition-all hover:from-purple-700 hover:to-blue-700 hover:shadow-xl sm:w-auto"
+              className="w-full rounded-lg bg-dblue px-8 py-2 font-semibold text-white shadow-lg transition-all hover:from-purple-700 hover:to-blue-700 hover:shadow-xl sm:w-auto"
               onClick={() => handleSubmit()}
               disabled={state.btnLoading}
             >
