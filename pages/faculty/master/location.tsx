@@ -281,9 +281,11 @@ const Location = () => {
       <Modal
         open={state.showModal}
         close={handleCloseModal}
+        subTitle={`${state.editId ? "Update" : "Add New"} Location`}
+        closeIcon
         renderComponent={() => (
           <div className="relative">
-            <div className="mb-8 text-center">
+            {/* <div className="mb-8 text-center">
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-dblue dark:from-blue-900 dark:to-purple-900">
                 {state.editId ? (
                   <IconEdit className="h-8 w-8 text-blue-600 dark:text-blue-400" />
@@ -294,7 +296,7 @@ const Location = () => {
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                 {state.editId ? "Update" : "Add New"} Location
               </h2>
-            </div>
+            </div> */}
 
             <div className="space-y-6">
               <TextInput

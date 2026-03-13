@@ -278,34 +278,32 @@ const Category = () => {
     }
   };
 
+  const handleBulkDelete = () => {
+    showDeleteAlert(
+      () => {
+        bulkDeleteRecords();
+      },
+      () => {
+        Swal.fire("Cancelled", "Your Records are safe :)", "info");
+      },
+      `Are you sure want to delete ${state.selectedRecords?.length} record(s)?`
+    );
+  };
 
-    const handleBulkDelete = () => {
-      showDeleteAlert(
-        () => {
-          bulkDeleteRecords();
-        },
-        () => {
-          Swal.fire("Cancelled", "Your Records are safe :)", "info");
-        },
-        `Are you sure want to delete ${state.selectedRecords?.length} record(s)?`
-      );
-    };
-  
-    const bulkDeleteRecords = async () => {
-      try {
-        for (const id of state.selectedRecords) {
-          await Models.master.delete_panel(id);
-        }
-        Success(
-          `${state.selectedRecords?.length} panel member deleted successfully!`
-        );
-        setState({ selectedRecords: [] });
-        panelList(state.page);
-      } catch (error) {
-        Failure("Failed to delete panel member. Please try again.");
+  const bulkDeleteRecords = async () => {
+    try {
+      for (const id of state.selectedRecords) {
+        await Models.master.delete_panel(id);
       }
-    };
-  
+      Success(
+        `${state.selectedRecords?.length} panel member deleted successfully!`
+      );
+      setState({ selectedRecords: [] });
+      panelList(state.page);
+    } catch (error) {
+      Failure("Failed to delete panel member. Please try again.");
+    }
+  };
 
   return (
     <div className="min-h-screen dark:from-gray-900 dark:to-gray-800">
@@ -494,9 +492,11 @@ const Category = () => {
       <Modal
         open={state.showModal}
         close={handleCloseModal}
+        subTitle={`${state.editId ? "Update" : "Add New"} Panel Member`}
+        closeIcon
         renderComponent={() => (
           <div className="relative">
-            <div className="mb-8 text-center">
+            {/* <div className="mb-8 text-center">
               <div className="bg-dblue mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full dark:from-blue-900 dark:to-purple-900">
                 {state.editId ? (
                   <IconEdit className="h-8 w-8 text-blue-600 dark:text-blue-400" />
@@ -507,7 +507,7 @@ const Category = () => {
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                 {state.editId ? "Update" : "Add New"} Panel Member
               </h2>
-            </div>
+            </div> */}
 
             <div className="space-y-6">
               <TextInput
