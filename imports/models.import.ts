@@ -12,6 +12,7 @@ import hrManagement from "@/models/hrManagement.model";
 import hodManagement from "@/models/hodManagement.model";
 import application from "@/models/application.model";
 import interview from "@/models/interview";
+import dashboard from "@/models/dashboard.models";
 
 
 export const Models = {
@@ -25,7 +26,8 @@ export const Models = {
   hrManagement,
   hodManagement,
   application,
-  interview
+  interview,
+  dashboard
 };
 
 export default Models;
