@@ -12,14 +12,25 @@ import IconUsers from "@/components/Icon/IconUsers";
 import IconUser from "@/components/Icon/IconUser";
 import IconCalendar from "@/components/Icon/IconCalendar";
 import IconChecks from "@/components/Icon/IconChecks";
+import Funnel from "@/components/funnelChart";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
 });
 
 const MONTHS = [
-  "Jan","Feb","Mar","Apr","May","Jun",
-  "Jul","Aug","Sep","Oct","Nov","Dec",
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
 ];
 
 const Dashboard = () => {
@@ -60,7 +71,7 @@ const Dashboard = () => {
   const fetchDashboard = async () => {
     try {
       const profileRes = await Models.auth.profile();
-      const dashRes :any = await Models.dashboard.list();
+      const dashRes: any = await Models.dashboard.list();
 
       const data = dashRes?.data;
 
@@ -99,8 +110,10 @@ const Dashboard = () => {
     dashboard?.trend?.map((t: any) => t.new_faculty_registrations ?? 0) ?? [];
   const interviewTrend =
     dashboard?.trend?.map((t: any) => t.interview_scheduled) ?? [];
-  const decisionSelectedTrend = dashboard?.trend?.map((t: any) => t.selected ?? 0) ?? [];
-  const decisionRejectedTrend = dashboard?.trend?.map((t: any) => t.rejected ?? 0) ?? [];
+  const decisionSelectedTrend =
+    dashboard?.trend?.map((t: any) => t.selected ?? 0) ?? [];
+  const decisionRejectedTrend =
+    dashboard?.trend?.map((t: any) => t.rejected ?? 0) ?? [];
 
   const trendChart: any = {
     series: [
@@ -170,7 +183,12 @@ const Dashboard = () => {
       { name: "Rejected", data: decisionRejectedTrend },
     ],
     options: {
-      chart: { height: 160, type: "bar", toolbar: { show: false }, stacked: true },
+      chart: {
+        height: 160,
+        type: "bar",
+        toolbar: { show: false },
+        stacked: true,
+      },
       colors: ["#00ab55", "#e7515a"],
       plotOptions: { bar: { borderRadius: 4, columnWidth: "50%" } },
       labels: trendLabels,
@@ -205,7 +223,9 @@ const Dashboard = () => {
         enabled: true,
         formatter: (val: number, opt: any) => {
           const pct = Math.round((val / funnelTotal) * 100);
-          return `${opt.w.globals.labels[opt.dataPointIndex]}: ${val} (${pct}%)`;
+          return `${
+            opt.w.globals.labels[opt.dataPointIndex]
+          }: ${val} (${pct}%)`;
         },
       },
       xaxis: { labels: { show: false } },
@@ -290,7 +310,7 @@ const Dashboard = () => {
                 </div>
                 <div className="text-xs text-gray-500">{card.label}</div>
                 {card.sub && (
-                  <div className="text-xs text-gray-400 mt-0.5">{card.sub}</div>
+                  <div className="mt-0.5 text-xs text-gray-400">{card.sub}</div>
                 )}
               </div>
             </div>
@@ -314,9 +334,7 @@ const Dashboard = () => {
         </div>
 
         <div className="panel">
-          <h5 className="mb-4 text-lg font-semibold">
-            Colleges by Category
-          </h5>
+          <h5 className="mb-4 text-lg font-semibold">Colleges by Category</h5>
 
           {isMounted && (
             <ReactApexChart
@@ -332,9 +350,7 @@ const Dashboard = () => {
       {/* Row 2 */}
       <div className="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-2">
         <div className="panel">
-          <h5 className="mb-3 text-lg font-semibold">
-            Interviews Scheduled
-          </h5>
+          <h5 className="mb-3 text-lg font-semibold">Interviews Scheduled</h5>
 
           {isMounted && (
             <ReactApexChart
@@ -363,14 +379,34 @@ const Dashboard = () => {
       {/* Super Admin Stats */}
       {isSuperAdmin && dashboard?.super_admin && (
         <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {([
-            { label: "Total Jobs", value: dashboard.super_admin.jobs, color: "text-primary" },
-            { label: "Total Applications", value: dashboard.super_admin.applications, color: "text-info" },
-            { label: "College Registrations", value: dashboard.super_admin.college_registrations, color: "text-success" },
-            { label: "New Faculty Registrations", value: dashboard.super_admin.new_faculty_registrations, color: "text-warning" },
-          ] as any[]).map((item) => (
+          {(
+            [
+              {
+                label: "Total Jobs",
+                value: dashboard.super_admin.jobs,
+                color: "text-primary",
+              },
+              {
+                label: "Total Applications",
+                value: dashboard.super_admin.applications,
+                color: "text-info",
+              },
+              {
+                label: "College Registrations",
+                value: dashboard.super_admin.college_registrations,
+                color: "text-success",
+              },
+              {
+                label: "New Faculty Registrations",
+                value: dashboard.super_admin.new_faculty_registrations,
+                color: "text-warning",
+              },
+            ] as any[]
+          ).map((item) => (
             <div key={item.label} className="panel rounded-lg p-4">
-              <div className={`text-2xl font-bold ${item.color}`}>{item.value}</div>
+              <div className={`text-2xl font-bold ${item.color}`}>
+                {item.value}
+              </div>
               <div className="text-xs text-gray-500">{item.label}</div>
             </div>
           ))}
@@ -380,17 +416,27 @@ const Dashboard = () => {
       {/* Row 3 */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <div className="panel">
-          <h5 className="mb-3 text-lg font-semibold">
-            Application Funnel
-          </h5>
+          <h5 className="mb-3 text-lg font-semibold">Application Funnel</h5>
 
           {isMounted && (
-            <ReactApexChart
-              series={funnelChart.series}
-              options={funnelChart.options}
-              type="bar"
-              height={350}
+            <Funnel
+              data={[
+                { name: "Awareness", value: 252 },
+                { name: "Interest", value: 105 },
+                { name: "Consideration", value: 84 },
+                { name: "Evaluation", value: 72 },
+                { name: "Commitment", value: 19 },
+                { name: "Pre-sale", value: 0 },
+                { name: "Sale", value: 10 },
+              ]}
             />
+
+            // <ReactApexChart
+            //   series={funnelChart.series}
+            //   options={funnelChart.options}
+            //   type="bar"
+            //   height={350}
+            // />
           )}
         </div>
       </div>
