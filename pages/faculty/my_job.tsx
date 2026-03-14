@@ -19,6 +19,7 @@ import {
   capitalizeFLetter,
   Dropdown,
   showDeleteAlert,
+  truncateText,
   useSetState,
 } from "@/utils/function.utils";
 import Modal from "@/components/modal/modal.component";
@@ -287,7 +288,7 @@ const Job = () => {
   const institutionDropdownList = async (
     page,
     search = "",
-    loadMore = false,
+    loadMore = false
   ) => {
     try {
       setState({ institutionLoading: true });
@@ -313,7 +314,7 @@ const Job = () => {
     search = "",
     loadMore = false,
     institutionId = null,
-    createdBy = null,
+    createdBy = null
   ) => {
     try {
       setState({ collegeLoading: true });
@@ -349,7 +350,7 @@ const Job = () => {
     search = "",
     loadMore = false,
     collegeId = null,
-    createdBy = null,
+    createdBy = null
   ) => {
     try {
       setState({ departmentLoading: true });
@@ -446,7 +447,7 @@ const Job = () => {
         "",
         false,
         selectedOption.value,
-        state.profile?.id,
+        state.profile?.id
       );
     }
   };
@@ -496,7 +497,7 @@ const Job = () => {
         "",
         false,
         selectedOption.value,
-        state.profile?.id,
+        state.profile?.id
       );
     }
   };
@@ -550,12 +551,12 @@ const Job = () => {
         Success(
           row.is_approved
             ? "Job unapproved successfully!"
-            : "Job approved successfully!",
+            : "Job approved successfully!"
         );
         jobList(state.page);
       } catch (error) {
         Failure(
-          row.is_approved ? "Failed to unapprove job" : "Failed to approve job",
+          row.is_approved ? "Failed to unapprove job" : "Failed to approve job"
         );
       }
     }
@@ -577,7 +578,7 @@ const Job = () => {
     showDeleteAlert(
       () => deleteRecord(row?.id),
       () => Swal.fire("Cancelled", "Record is safe", "info"),
-      "Are you sure you want to delete this job?",
+      "Are you sure you want to delete this job?"
     );
   };
 
@@ -595,7 +596,7 @@ const Job = () => {
     showDeleteAlert(
       () => bulkDeleteRecords(),
       () => Swal.fire("Cancelled", "Your Records are safe :)", "info"),
-      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`,
+      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`
     );
   };
 
@@ -853,11 +854,11 @@ const Job = () => {
           <DataTable
             noRecordsText="No jobs found"
             highlightOnHover
-            className="table-hover "
+            className="table-hover whitespace-nowrap"
             records={state.jobList}
             fetching={state.loading}
             selectedRecords={state.jobList?.filter((record) =>
-              state.selectedRecords.includes(record.id),
+              state.selectedRecords.includes(record.id)
             )}
             onSelectedRecordsChange={(records) =>
               setState({ selectedRecords: records.map((r: any) => r.id) })
@@ -878,8 +879,11 @@ const Job = () => {
                 title: "Title",
                 sortable: true,
                 render: ({ job_title }) => (
-                  <div className=" text-gray-900 dark:text-white">
-                    {capitalizeFLetter(job_title)}
+                  <div
+                    title={job_title}
+                    className=" text-gray-900 dark:text-white"
+                  >
+                    {truncateText(job_title)}
                   </div>
                 ),
               },
@@ -887,10 +891,7 @@ const Job = () => {
                 accessor: "department_name",
                 title: "Dept",
                 sortable: true,
-                cellsStyle: {
-                  whiteSpace: "normal",
-                  wordBreak: "break-word",
-                },
+
                 render: ({ department }) => {
                   if (!department || department?.length === 0) {
                     return <span className="text-gray-400">-</span>;
@@ -906,8 +907,11 @@ const Job = () => {
                   return (
                     <div className="flex flex-wrap items-center gap-2">
                       {/* First department text */}
-                      <span className="text-sm  text-gray-700 dark:text-gray-300">
-                        {firstDept}
+                      <span
+                        title={firstDept}
+                        className="text-sm  text-gray-700 dark:text-gray-300"
+                      >
+                        {truncateText(firstDept)}
                       </span>
 
                       {/* Avatars */}
@@ -947,13 +951,13 @@ const Job = () => {
                 accessor: "college_name",
                 title: "College Name",
                 sortable: true,
-                cellsStyle: {
-                  whiteSpace: "normal",
-                  wordBreak: "break-word",
-                },
+
                 render: ({ college_name }) => (
-                  <span className="text-gray-600 dark:text-gray-400">
-                    {capitalizeFLetter(college_name || "-")}
+                  <span
+                    title={college_name}
+                    className="text-gray-600 dark:text-gray-400"
+                  >
+                    {truncateText(college_name)}
                   </span>
                 ),
               },
@@ -1011,7 +1015,7 @@ const Job = () => {
                       <Clock className="h-3 w-3" />
                     )}
                     {capitalizeFLetter(
-                      (row as any).is_approved ? "Approved" : "Pending",
+                      (row as any).is_approved ? "Approved" : "Pending"
                     ) || "-"}
                   </span>
                 ),
@@ -1041,10 +1045,7 @@ const Job = () => {
                 accessor: "total_applications",
                 title: "Applications",
                 sortable: true,
-                cellsStyle: {
-                  whiteSpace: "normal",
-                  wordBreak: "break-word",
-                },
+
                 render: ({ total_applications }) => (
                   <span className="text-gray-600 dark:text-gray-400">
                     {total_applications}
@@ -1195,7 +1196,7 @@ const Job = () => {
                         institutionDropdownList(
                           state.institutionPage + 1,
                           "",
-                          true,
+                          true
                         )
                       }
                       loading={state.institutionLoading}
@@ -1217,7 +1218,7 @@ const Job = () => {
                         searchTerm,
                         false,
                         institutionId,
-                        state.profile?.id,
+                        state.profile?.id
                       );
                     }}
                     loadMore={() => {
@@ -1231,7 +1232,7 @@ const Job = () => {
                           "",
                           true,
                           institutionId,
-                          state.profile?.id,
+                          state.profile?.id
                         );
                     }}
                     loading={state.collegeLoading}
@@ -1251,7 +1252,7 @@ const Job = () => {
                           searchTerm,
                           false,
                           collegeId,
-                          state.profile?.id,
+                          state.profile?.id
                         );
                     }}
                     loadMore={() => {
@@ -1263,7 +1264,7 @@ const Job = () => {
                           "",
                           true,
                           collegeId,
-                          state.profile?.id,
+                          state.profile?.id
                         );
                     }}
                     loading={state.departmentLoading}
@@ -1287,7 +1288,7 @@ const Job = () => {
                           searchTerm,
                           false,
                           collegeId,
-                          state.profile?.id,
+                          state.profile?.id
                         );
                     }}
                     loadMore={() => {
@@ -1299,7 +1300,7 @@ const Job = () => {
                           "",
                           true,
                           collegeId,
-                          state.profile?.id,
+                          state.profile?.id
                         );
                     }}
                     loading={state.departmentLoading}

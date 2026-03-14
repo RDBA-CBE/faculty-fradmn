@@ -19,6 +19,7 @@ import {
   capitalizeFLetter,
   Dropdown,
   showDeleteAlert,
+  truncateText,
   useSetState,
 } from "@/utils/function.utils";
 import Modal from "@/components/modal/modal.component";
@@ -202,7 +203,7 @@ const CollegeAndDepartment = () => {
   const loadCollegeFilterForInstitution = async (
     profileData,
     page = 1,
-    loadMore = false,
+    loadMore = false
   ) => {
     try {
       setState({ collegeFilterLoading: true });
@@ -235,7 +236,7 @@ const CollegeAndDepartment = () => {
       loadCollegeFilterForInstitution(
         state.profile,
         state.collegeFilterPage + 1,
-        true,
+        true
       );
     }
   };
@@ -312,7 +313,7 @@ const CollegeAndDepartment = () => {
     page,
     search = "",
     loadMore = false,
-    seletedInstitution = null,
+    seletedInstitution = null
   ) => {
     try {
       setState({ collegeLoading: true });
@@ -341,7 +342,7 @@ const CollegeAndDepartment = () => {
   const institutionDropdownList = async (
     page,
     search = "",
-    loadMore = false,
+    loadMore = false
   ) => {
     try {
       setState({ institutionLoading: true });
@@ -474,7 +475,7 @@ const CollegeAndDepartment = () => {
   const naac_accreditations = async (
     page = 1,
     search = "",
-    loadMore = false,
+    loadMore = false
   ) => {
     try {
       const body: any = {};
@@ -547,7 +548,7 @@ const CollegeAndDepartment = () => {
   const loadInstitutionFilterOptions = async (
     page,
     search = "",
-    loadMore = false,
+    loadMore = false
   ) => {
     try {
       setState({ institutionFilterLoading: true });
@@ -868,7 +869,7 @@ const CollegeAndDepartment = () => {
     page,
     search = "",
     loadMore = false,
-    selectedCollege = null,
+    selectedCollege = null
   ) => {
     try {
       setState({ deptHodLoading: true });
@@ -917,7 +918,7 @@ const CollegeAndDepartment = () => {
     showDeleteAlert(
       () => deleteRecord(row.id),
       () => Swal.fire("Cancelled", "Record is safe", "info"),
-      "Are you sure you want to delete this record?",
+      "Are you sure you want to delete this record?"
     );
   };
 
@@ -929,7 +930,7 @@ const CollegeAndDepartment = () => {
       () => {
         Swal.fire("Cancelled", "Your Records are safe :)", "info");
       },
-      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`,
+      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`
     );
   };
 
@@ -946,7 +947,7 @@ const CollegeAndDepartment = () => {
       }
     } catch (error) {
       Failure(
-        `Failed to delete ${state.activeTab.slice(0, -1)}. Please try again.`,
+        `Failed to delete ${state.activeTab.slice(0, -1)}. Please try again.`
       );
     }
   };
@@ -961,7 +962,7 @@ const CollegeAndDepartment = () => {
         }
       }
       Success(
-        `${state.selectedRecords.length} ${state.activeTab} deleted successfully!`,
+        `${state.selectedRecords.length} ${state.activeTab} deleted successfully!`
       );
       setState({ selectedRecords: [] });
       if (state.activeTab === "colleges") {
@@ -996,7 +997,7 @@ const CollegeAndDepartment = () => {
     } catch (rollbackError) {
       console.error("Rollback error:", rollbackError);
       Failure(
-        "Failed to cleanup created records. Please contact administrator.",
+        "Failed to cleanup created records. Please contact administrator."
       );
     }
   };
@@ -1105,7 +1106,7 @@ const CollegeAndDepartment = () => {
 
       if (state.nirf_category?.length > 0) {
         body.nirf_category_ids = state.nirf_category?.map(
-          (item) => item?.value,
+          (item) => item?.value
         );
       } else {
         body.nirf_category_ids = [];
@@ -1113,7 +1114,7 @@ const CollegeAndDepartment = () => {
 
       if (state.naac_accreditation?.length > 0) {
         body.naac_accreditation_ids = state.naac_accreditation?.map(
-          (item) => item?.value,
+          (item) => item?.value
         );
       } else {
         body.naac_accreditation_ids = [];
@@ -1168,8 +1169,11 @@ const CollegeAndDepartment = () => {
       title: "College Name",
       sortable: true,
       render: ({ college_name }) => (
-        <div className="font-medium text-gray-900 dark:text-white">
-          {college_name}
+        <div
+          title={college_name}
+          className="font-medium text-gray-900 dark:text-white"
+        >
+          {truncateText(college_name)}
         </div>
       ),
     },
@@ -1179,8 +1183,9 @@ const CollegeAndDepartment = () => {
       title: "Institution",
       sortable: true,
       render: ({ institution_name }) => (
-        <div className="font-medium text-gray-900 dark:text-white">
-          {institution_name}
+        <div title={institution_name} className="font-medium text-gray-900 dark:text-white">
+          {truncateText(institution_name)}
+
         </div>
       ),
     },
@@ -1190,8 +1195,9 @@ const CollegeAndDepartment = () => {
       title: "Email",
       sortable: true,
       render: ({ college_email }) => (
-        <span className="text-gray-600 dark:text-gray-400">
-          {college_email}
+        <span title={college_email} className="text-gray-600 dark:text-gray-400">
+          {truncateText(college_email)}
+
         </span>
       ),
     },
@@ -1278,8 +1284,9 @@ const CollegeAndDepartment = () => {
       title: "Department Name",
       sortable: true,
       render: ({ department_name }) => (
-        <div className="font-medium text-gray-900 dark:text-white">
-          {department_name}
+        <div  title={department_name} className="font-medium text-gray-900 dark:text-white">
+          {truncateText(department_name)}
+
         </div>
       ),
     },
@@ -1287,8 +1294,9 @@ const CollegeAndDepartment = () => {
       accessor: "hod",
       title: "Department Head",
       render: ({ department_head }) => (
-        <div className="text-gray-600 dark:text-gray-400">
-          {department_head}
+        <div title={department_head} className="text-gray-600 dark:text-gray-400">
+          {truncateText(department_head)}
+
         </div>
       ),
     },
@@ -1297,8 +1305,9 @@ const CollegeAndDepartment = () => {
       title: "Institution ",
       sortable: true,
       render: ({ institution_name }) => (
-        <div className="font-medium text-gray-900 dark:text-white">
-          {institution_name}
+        <div title={institution_name} className="font-medium text-gray-900 dark:text-white">
+          {truncateText(institution_name)}
+
         </div>
       ),
     },
@@ -1307,8 +1316,9 @@ const CollegeAndDepartment = () => {
       title: "College ",
       sortable: true,
       render: ({ college_name }) => (
-        <div className="font-medium text-gray-900 dark:text-white">
-          {college_name}
+        <div title={college_name} className="font-medium text-gray-900 dark:text-white">
+          {truncateText(college_name)}
+
         </div>
       ),
     },
@@ -1522,7 +1532,7 @@ const CollegeAndDepartment = () => {
             </h3>
             <div className="flex items-center gap-4">
               {state.selectedRecords.length > 0 && (
-               <button
+                <button
                   onClick={() => handleBulkDelete()}
                   className=" group relative inline-flex transform items-center gap-2 overflow-hidden rounded-md border border-red-500  px-3 py-1 text-red-500 shadow-lg transition-all duration-200 "
                 >
@@ -1685,7 +1695,7 @@ const CollegeAndDepartment = () => {
                       1,
                       searchTerm,
                       false,
-                      state.seletedInstitution,
+                      state.seletedInstitution
                     )
                   }
                   placeholder="Select College"
@@ -1696,7 +1706,7 @@ const CollegeAndDepartment = () => {
                       state.collegePage + 1,
                       "",
                       true,
-                      state.seletedInstitution,
+                      state.seletedInstitution
                     )
                   }
                   loading={state.collegeLoading}
@@ -1719,7 +1729,7 @@ const CollegeAndDepartment = () => {
                       1,
                       searchTerm,
                       false,
-                      state.college?.value,
+                      state.college?.value
                     )
                   }
                   placeholder="Select HOD"
@@ -1730,7 +1740,7 @@ const CollegeAndDepartment = () => {
                       state.deptHodPage + 1,
                       "",
                       true,
-                      state.college?.value,
+                      state.college?.value
                     )
                   }
                   loading={state.deptHodLoading}
@@ -1894,7 +1904,7 @@ const CollegeAndDepartment = () => {
                   onDeleteImage={(imageUrl) => {
                     setState({
                       college_logo: state.college_logo.filter(
-                        (img) => img !== imageUrl,
+                        (img) => img !== imageUrl
                       ),
                     });
                   }}

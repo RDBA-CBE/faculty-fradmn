@@ -206,7 +206,7 @@ const NIRFBand = () => {
           <DataTable
             noRecordsText="No NIRF Bands found"
             highlightOnHover
-            className="table-hover "
+            className="table-hover whitespace-nowrap"
             records={state.statusList}
             fetching={state.loading}
             customLoader={

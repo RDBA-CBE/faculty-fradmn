@@ -34,6 +34,7 @@ import {
   capitalizeFLetter,
   Dropdown,
   showDeleteAlert,
+  truncateText,
   useSetState,
 } from "@/utils/function.utils";
 import Modal from "@/components/modal/modal.component";
@@ -1411,7 +1412,7 @@ const Institution = () => {
           <DataTable
             noRecordsText="No institutions found"
             highlightOnHover
-            className="table-hover "
+            className="table-hover whitespace-nowrap"
             records={state.instutionList}
             fetching={state.loading}
             selectedRecords={state.instutionList.filter((record) =>
@@ -1454,13 +1455,9 @@ const Institution = () => {
                   </div>
                 ),
                 sortable: true,
-                // cellsStyle: {
-                //   whiteSpace: "normal",
-                //   wordBreak: "break-word",
-                // },
                 render: ({ institution_name }) => (
-                  <div className="font-medium text-gray-900 dark:text-white">
-                    {institution_name}
+                  <div className="font-medium text-gray-900 dark:text-white" title={institution_name}>
+                    {truncateText(institution_name,10)}
                   </div>
                 ),
               },
@@ -1473,8 +1470,9 @@ const Institution = () => {
                 ),
                 sortable: true,
                 render: ({ institution_email }) => (
-                  <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-200">
-                    {institution_email}
+                  <span title={institution_email} className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+                    {truncateText(institution_email,10)}
+
                   </span>
                 ),
               },

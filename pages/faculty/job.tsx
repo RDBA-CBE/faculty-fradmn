@@ -18,6 +18,7 @@ import {
   capitalizeFLetter,
   Dropdown,
   showDeleteAlert,
+  truncateText,
   useSetState,
 } from "@/utils/function.utils";
 import { Success, Failure } from "@/utils/function.utils";
@@ -146,7 +147,7 @@ const Job = () => {
         "",
         state?.profile?.college?.map((item) => item?.college_id),
         "",
-        state?.profile?.id,
+        state?.profile?.id
       );
     }
   }, [
@@ -186,7 +187,7 @@ const Job = () => {
           "",
           false,
           res?.college?.map((item) => item.college_id),
-          res?.id,
+          res?.id
         );
         jobList(
           1,
@@ -194,7 +195,7 @@ const Job = () => {
           // res?.college?.college_id,
           res?.college?.map((item) => item.college_id),
           "",
-          res?.id,
+          res?.id
         );
         userDropdownList(
           1,
@@ -202,7 +203,7 @@ const Job = () => {
           false,
           "hod",
           res?.college?.map((item) => item.college_id),
-          res?.id,
+          res?.id
         );
       } else if (res?.role == ROLES.HOD) {
         jobList(1, "", "", res?.department?.id, res?.id);
@@ -217,7 +218,7 @@ const Job = () => {
     institutionId = null,
     collegeId = null,
     deptId = null,
-    createdBy = null,
+    createdBy = null
   ) => {
     try {
       setState({ loading: true });
@@ -295,7 +296,7 @@ const Job = () => {
     search = "",
     loadMore = false,
     institutionId = null,
-    createdBy = null,
+    createdBy = null
   ) => {
     try {
       setState({ collegeLoading: true });
@@ -382,7 +383,7 @@ const Job = () => {
         state.instiutionFilter,
         state.collegeFilter,
         state.departmentFilter,
-        state?.profile?.id,
+        state?.profile?.id
       );
     } else {
       refetch(pageNumber);
@@ -411,7 +412,7 @@ const Job = () => {
     loadMore = false,
     role = null,
     collegeId = null,
-    created_by = null,
+    created_by = null
   ) => {
     try {
       setState({ userLoading: true });
@@ -445,7 +446,7 @@ const Job = () => {
     page = 1,
     search = "",
     loadMore = false,
-    createdBy = null,
+    createdBy = null
   ) => {
     try {
       setState({ institutionLoading: true });
@@ -475,7 +476,7 @@ const Job = () => {
     search = "",
     loadMore = false,
     collegeId = null,
-    createdBy = null,
+    createdBy = null
   ) => {
     try {
       setState({ departmentLoading: true });
@@ -577,7 +578,7 @@ const Job = () => {
         "",
         false,
         selectedOption?.value,
-        state?.profile?.id,
+        state?.profile?.id
       );
     }
   };
@@ -594,7 +595,7 @@ const Job = () => {
         "",
         false,
         selectedOption?.value,
-        state?.profile?.id,
+        state?.profile?.id
       );
     }
   };
@@ -634,7 +635,7 @@ const Job = () => {
         state.instiutionFilter,
         state.collegeFilter,
         state.departmentFilter,
-        state?.profile?.id,
+        state?.profile?.id
       );
     } catch (error) {
       Failure("Failed to update status");
@@ -645,7 +646,7 @@ const Job = () => {
     showDeleteAlert(
       () => deleteRecord(row?.id),
       () => Swal.fire("Cancelled", "Record is safe", "info"),
-      "Are you sure you want to delete this job?",
+      "Are you sure you want to delete this job?"
     );
   };
 
@@ -658,7 +659,7 @@ const Job = () => {
         state.instiutionFilter,
         state.collegeFilter,
         state.departmentFilter,
-        state?.profile?.id,
+        state?.profile?.id
       );
     } catch (error) {
       Failure("Failed to delete job");
@@ -669,7 +670,7 @@ const Job = () => {
     showDeleteAlert(
       () => bulkDeleteRecords(),
       () => Swal.fire("Cancelled", "Your Records are safe :)", "info"),
-      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`,
+      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`
     );
   };
 
@@ -685,7 +686,7 @@ const Job = () => {
         state.instiutionFilter,
         state.collegeFilter,
         state.departmentFilter,
-        state?.profile?.id,
+        state?.profile?.id
       );
     } catch (error) {
       Failure("Failed to delete jobs. Please try again.");
@@ -714,13 +715,13 @@ const Job = () => {
         Success(
           row.is_approved
             ? "Job unapproved successfully!"
-            : "Job approved successfully!",
+            : "Job approved successfully!"
         );
 
         refetch(state.page);
       } catch (error) {
         Failure(
-          row.is_approved ? "Failed to unapprove job" : "Failed to approve job",
+          row.is_approved ? "Failed to unapprove job" : "Failed to approve job"
         );
       }
     }
@@ -738,7 +739,7 @@ const Job = () => {
         // state.profile.college?.college_id,
         state.profile.college?.map((item) => item.college_id),
         "",
-        state.profile.id,
+        state.profile.id
       );
     } else if (state.profile.role == ROLES.HOD) {
       jobList(page, "", "", state.profile.department?.id, state.profile.id);
@@ -1230,7 +1231,7 @@ const Job = () => {
             records={state.jobList}
             fetching={state.loading}
             selectedRecords={state.jobList?.filter((record) =>
-              state.selectedRecords.includes(record.id),
+              state.selectedRecords.includes(record.id)
             )}
             onSelectedRecordsChange={(records) =>
               setState({ selectedRecords: records.map((r: any) => r.id) })
@@ -1252,7 +1253,7 @@ const Job = () => {
                 sortable: true,
                 render: ({ job_title }) => (
                   <div className=" text-gray-900 dark:text-white">
-                    {job_title}
+                    {truncateText(job_title)}
                   </div>
                 ),
               },
@@ -1277,6 +1278,7 @@ const Job = () => {
                       {/* First department text */}
                       <span className="text-sm  text-gray-700 dark:text-gray-300">
                         {firstDept}
+                        {truncateText(firstDept)}
                       </span>
 
                       {/* Avatars */}
@@ -1317,8 +1319,11 @@ const Job = () => {
                 title: "College",
                 sortable: true,
                 render: ({ college_name }) => (
-                  <span className="text-gray-600 dark:text-gray-400">
-                    {college_name || "-"}
+                  <span
+                    title={college_name}
+                    className="text-gray-600 dark:text-gray-400"
+                  >
+                    {truncateText(college_name)}
                   </span>
                 ),
               },
@@ -1372,7 +1377,7 @@ const Job = () => {
                       <Clock className="h-3 w-3" />
                     )}
                     {capitalizeFLetter(
-                      (row as any)?.is_approved ? "Approved" : "Pending",
+                      (row as any)?.is_approved ? "Approved" : "Pending"
                     ) || "-"}
                   </span>
                 ),
@@ -1511,7 +1516,7 @@ const Job = () => {
                 state.collegeFilter ||
                   state.profile?.college?.map((item) => item.college_id),
                 state.departmentFilter || state.profile?.department?.id,
-                state?.profile?.id,
+                state?.profile?.id
               );
             }}
             minHeight={200}
@@ -1579,7 +1584,7 @@ const Job = () => {
                         institutionDropdownList(
                           state.institutionPage + 1,
                           "",
-                          true,
+                          true
                         )
                       }
                       loading={state.institutionLoading}
@@ -1601,7 +1606,7 @@ const Job = () => {
                         searchTerm,
                         false,
                         institutionId,
-                        state.profile?.id,
+                        state.profile?.id
                       );
                     }}
                     loadMore={() => {
@@ -1615,7 +1620,7 @@ const Job = () => {
                           "",
                           true,
                           institutionId,
-                          state.profile?.id,
+                          state.profile?.id
                         );
                     }}
                     loading={state.collegeLoading}
@@ -1635,7 +1640,7 @@ const Job = () => {
                           searchTerm,
                           false,
                           collegeId,
-                          state.profile?.id,
+                          state.profile?.id
                         );
                     }}
                     loadMore={() => {
@@ -1647,7 +1652,7 @@ const Job = () => {
                           "",
                           true,
                           collegeId,
-                          state.profile?.id,
+                          state.profile?.id
                         );
                     }}
                     loading={state.departmentLoading}
@@ -1671,7 +1676,7 @@ const Job = () => {
                           searchTerm,
                           false,
                           collegeId,
-                          state.profile?.id,
+                          state.profile?.id
                         );
                     }}
                     loadMore={() => {
@@ -1683,7 +1688,7 @@ const Job = () => {
                           "",
                           true,
                           collegeId,
-                          state.profile?.id,
+                          state.profile?.id
                         );
                     }}
                     loading={state.departmentLoading}

@@ -21,6 +21,7 @@ import {
   showDeleteAlert,
   useSetState,
   formatScheduleDateTime,
+  truncateText,
 } from "@/utils/function.utils";
 import Modal from "@/components/modal/modal.component";
 import { Models } from "@/imports/models.import";
@@ -188,7 +189,7 @@ const Application = () => {
           state.profile?.institution?.id,
           null,
           null,
-          state.profile?.id,
+          state.profile?.id
         );
         loadJobList(state.profile?.institution?.id, null, null);
       } else if (role == ROLES.HR) {
@@ -198,7 +199,7 @@ const Application = () => {
           null,
           state?.profile?.college?.map((item) => item?.college_id),
           null,
-          state.profile?.id,
+          state.profile?.id
         );
         loadJobList(
           1,
@@ -206,7 +207,7 @@ const Application = () => {
           false,
           "",
           state?.profile?.college?.map((item) => item?.college_id),
-          null,
+          null
         );
       } else if (role === ROLES.HOD) {
         applicationList(
@@ -214,7 +215,7 @@ const Application = () => {
           null,
           null,
           state.profile?.department?.department_id,
-          state.profile?.id,
+          state.profile?.id
         );
         loadJobList(1, null, state.profile?.department?.department_id);
       }
@@ -247,7 +248,7 @@ const Application = () => {
           state.profile?.institution?.id,
           null,
           null,
-          state.profile?.id,
+          state.profile?.id
         );
         loadJobList(state.profile?.institution?.id, null, null);
       } else if (role == ROLES.HR) {
@@ -257,7 +258,7 @@ const Application = () => {
           null,
           state?.profile?.college?.map((item) => item?.college_id),
           null,
-          state.profile?.id,
+          state.profile?.id
         );
         loadJobList(
           1,
@@ -265,7 +266,7 @@ const Application = () => {
           false,
           "",
           state?.profile?.college?.map((item) => item?.college_id),
-          null,
+          null
         );
       } else if (role === ROLES.HOD) {
         applicationList(
@@ -273,7 +274,7 @@ const Application = () => {
           null,
           null,
           state.profile?.department?.department_id,
-          state.profile?.id,
+          state.profile?.id
         );
         loadJobList(1, null, state.profile?.department?.department_id);
       }
@@ -297,14 +298,14 @@ const Application = () => {
           "",
           false,
           res?.college?.map((item) => item?.college_id),
-          res.id,
+          res.id
         );
         applicationList(
           1,
           null,
           res?.college?.map((item) => item?.college_id),
           null,
-          res?.id,
+          res?.id
         );
       } else if (res?.role == ROLES.HOD) {
         applicationList(1, null, null, res?.department?.department_id, res?.id);
@@ -319,7 +320,7 @@ const Application = () => {
     institutionId = null,
     collegeId = null,
     deptId = null,
-    profileId = null,
+    profileId = null
   ) => {
     try {
       setState({ loading: true });
@@ -440,7 +441,7 @@ const Application = () => {
         state.profile?.institution?.id,
         null,
         null,
-        state.profile?.id,
+        state.profile?.id
       );
     } else if (role === ROLES.HR) {
       applicationList(
@@ -448,7 +449,7 @@ const Application = () => {
         null,
         state.profile?.college?.map((item) => item?.college_id),
         null,
-        state.profile?.id,
+        state.profile?.id
       );
     } else if (role === ROLES.HOD) {
       applicationList(
@@ -456,7 +457,7 @@ const Application = () => {
         null,
         null,
         state.profile?.department?.department_id,
-        state.profile?.id,
+        state.profile?.id
       );
     }
   };
@@ -472,7 +473,7 @@ const Application = () => {
           state.profile?.institution?.id,
           null,
           null,
-          state.profile?.id,
+          state.profile?.id
         );
       } else if (role === ROLES.HR) {
         applicationList(
@@ -480,7 +481,7 @@ const Application = () => {
           null,
           state.profile?.college?.map((item) => item?.college_id),
           null,
-          state.profile?.id,
+          state.profile?.id
         );
       } else if (role === ROLES.HOD) {
         applicationList(
@@ -488,7 +489,7 @@ const Application = () => {
           null,
           null,
           state.profile?.department?.department_id,
-          state.profile?.id,
+          state.profile?.id
         );
       }
     } catch (error) {
@@ -536,7 +537,7 @@ const Application = () => {
           state.profile?.institution?.id,
           null,
           null,
-          state.profile?.id,
+          state.profile?.id
         );
       } else if (role === ROLES.HR) {
         applicationList(
@@ -544,7 +545,7 @@ const Application = () => {
           null,
           state.profile?.college?.college_id,
           null,
-          state.profile?.id,
+          state.profile?.id
         );
       } else if (role === ROLES.HOD) {
         applicationList(
@@ -552,7 +553,7 @@ const Application = () => {
           null,
           null,
           state.profile?.department?.department_id,
-          state.profile?.id,
+          state.profile?.id
         );
       }
     } catch (error) {
@@ -585,7 +586,7 @@ const Application = () => {
           state.profile?.institution?.id,
           null,
           null,
-          state.profile?.id,
+          state.profile?.id
         );
       } else if (role === ROLES.HR) {
         applicationList(
@@ -593,7 +594,7 @@ const Application = () => {
           null,
           state.profile?.college?.map((item) => item?.college_id),
           null,
-          state.profile?.id,
+          state.profile?.id
         );
       } else if (role === ROLES.HOD) {
         applicationList(
@@ -601,7 +602,7 @@ const Application = () => {
           null,
           null,
           state.profile?.department?.department_id,
-          state.profile?.id,
+          state.profile?.id
         );
       }
     } catch (error) {
@@ -617,14 +618,14 @@ const Application = () => {
       () => {
         Swal.fire("Cancelled", "Your Record is safe :)", "info");
       },
-      "Are you sure want to delete record?",
+      "Are you sure want to delete record?"
     );
   };
 
   const institutionDropdownList = async (
     page,
     search = "",
-    loadMore = false,
+    loadMore = false
   ) => {
     try {
       setState({ institutionLoading: true });
@@ -652,7 +653,7 @@ const Application = () => {
     search = "",
     loadMore = false,
     institutionId = null,
-    createdBy = null,
+    createdBy = null
   ) => {
     try {
       setState({ collegeLoading: true });
@@ -687,7 +688,7 @@ const Application = () => {
     search = "",
     loadMore = false,
     collegeId = null,
-    createdBy = null,
+    createdBy = null
   ) => {
     try {
       setState({ departmentLoading: true });
@@ -835,7 +836,7 @@ const Application = () => {
         "",
         false,
         selectedOption.value,
-        state.profile?.id,
+        state.profile?.id
       );
     }
   };
@@ -853,7 +854,7 @@ const Application = () => {
         "",
         false,
         selectedOption.value,
-        state.profile?.id,
+        state.profile?.id
       );
     }
   };
@@ -921,7 +922,7 @@ const Application = () => {
     loadMore = false,
     institutionId = null,
     collegeId = null,
-    deptId = null,
+    deptId = null
   ) => {
     console.log("✌️loadJobList --->");
 
@@ -959,7 +960,7 @@ const Application = () => {
     page = 1,
     search = "",
     loadMore = false,
-    job = null,
+    job = null
   ) => {
     try {
       const body = {
@@ -992,7 +993,7 @@ const Application = () => {
     page = 1,
     search = "",
     loadMore = false,
-    deptId = null,
+    deptId = null
   ) => {
     try {
       setState({ panelMemberLoading: true });
@@ -1020,7 +1021,7 @@ const Application = () => {
     page = 1,
     search = "",
     loadMore = false,
-    deptIds,
+    deptIds
   ) => {
     try {
       setState({ applicantsLoading: true });
@@ -1056,7 +1057,7 @@ const Application = () => {
       const validation = {
         selectedJobs: state.selectedJobs.map((j) => j.value),
         selectedDepartments: state.selectedDepartments?.map(
-          (item) => item?.value,
+          (item) => item?.value
         ),
         interviewSlot: state.interviewSlot
           ? moment(state.interviewSlot).format("YYYY-MM-DD HH:mm")
@@ -1160,7 +1161,7 @@ const Application = () => {
       handleUpdateStatus("", "");
       if (state.appstatus?.label == "Rejected") {
         const filter = state.selectedRecords?.filter(
-          (item) => item != state.application?.id,
+          (item) => item != state.application?.id
         );
         setState({ selectedRecords: filter });
       }
@@ -1174,7 +1175,7 @@ const Application = () => {
   const bulkSelect = async () => {
     try {
       const responses = await Promise.all(
-        state.selectedRecords.map((id) => Models.application.details(id)),
+        state.selectedRecords.map((id) => Models.application.details(id))
       );
 
       const jobMap = new Map();
@@ -1616,13 +1617,13 @@ const Application = () => {
             records={state.applicationList}
             fetching={state.loading}
             selectedRecords={state.applicationList?.filter((record) =>
-              state.selectedRecords.includes(record.id),
+              state.selectedRecords.includes(record.id)
             )}
             onSelectedRecordsChange={(records) => {
               const currentPageIds = state.applicationList?.map((r) => r.id);
 
               const otherPageSelections = state.selectedRecords?.filter(
-                (id) => !currentPageIds.includes(id),
+                (id) => !currentPageIds.includes(id)
               );
 
               const newSelections = records?.map((r: any) => r.id);
@@ -1646,8 +1647,11 @@ const Application = () => {
                 accessor: "job_title",
                 title: "Title",
                 render: ({ job_title }) => (
-                  <div className="text-gray-600 dark:text-gray-400">
-                    {capitalizeFLetter(job_title)}
+                  <div
+                    title={job_title}
+                    className="text-gray-600 dark:text-gray-400"
+                  >
+                    {truncateText(job_title)}
                   </div>
                 ),
                 sortable: true,
@@ -1657,8 +1661,11 @@ const Application = () => {
                 title: "College",
                 sortable: true,
                 render: ({ college_name }) => (
-                  <div className="text-gray-600 dark:text-gray-400">
-                    {capitalizeFLetter(college_name)}
+                  <div
+                    title={college_name}
+                    className="text-gray-600 dark:text-gray-400"
+                  >
+                    {truncateText(college_name)}
                   </div>
                 ),
               },
@@ -1666,8 +1673,11 @@ const Application = () => {
                 accessor: "department_name",
                 title: "Department",
                 render: ({ department_name }) => (
-                  <div className="text-gray-600 dark:text-gray-400">
-                    {capitalizeFLetter(department_name)}
+                  <div
+                    title={department_name}
+                    className="text-gray-600 dark:text-gray-400"
+                  >
+                    {truncateText(department_name)}
                   </div>
                 ),
                 sortable: true,
@@ -1677,8 +1687,11 @@ const Application = () => {
                 title: "Faculty",
                 sortable: true,
                 render: ({ applicant_name }) => (
-                  <div className="font-medium text-gray-900 dark:text-white">
-                    {capitalizeFLetter(applicant_name)}
+                  <div
+                    title={applicant_name}
+                    className="font-medium text-gray-900 dark:text-white"
+                  >
+                    {truncateText(applicant_name)}
                   </div>
                 ),
               },
@@ -1687,8 +1700,11 @@ const Application = () => {
                 title: "Email",
                 sortable: true,
                 render: ({ applicant_email }) => (
-                  <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-200">
-                    {applicant_email}
+                  <span
+                    title={applicant_email}
+                    className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+                  >
+                    {truncateText(applicant_email)}
                   </span>
                 ),
               },
@@ -1811,7 +1827,7 @@ const Application = () => {
             onClick={bulkSelect}
             className="bg-dblue group relative inline-flex items-center gap-2 overflow-hidden rounded-xl px-6 py-3 font-medium text-white shadow-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-2xl"
           >
-            <div className="absolute inset-0 bg-dblue opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+            <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
 
             <UserCheck className="relative z-10 h-5 w-5" />
 
@@ -1871,7 +1887,7 @@ const Application = () => {
               </button>
               <button
                 onClick={handleStatusSubmit}
-                className="flex-1 rounded-lg bg-dblue px-4 py-2 text-white hover:shadow-lg"
+                className="bg-dblue flex-1 rounded-lg px-4 py-2 text-white hover:shadow-lg"
               >
                 Update Status
               </button>
@@ -2026,7 +2042,7 @@ const Application = () => {
                   state.submitting ? "cursor-not-allowed opacity-70" : ""
                 }`}
               >
-                <div className="absolute inset-0 bg-dblue opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+                <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
                 {state.submitting ? (
                   <IconLoader className="relative z-10 mr-2 h-4 w-4 animate-spin" />
                 ) : state.editId ? (
@@ -2101,7 +2117,7 @@ const Application = () => {
                     false,
                     state.profile?.insitution?.id,
                     state?.profile?.college?.map((item) => item?.college_id),
-                    state.profile?.department?.id,
+                    state.profile?.department?.id
                   );
                 }}
                 loadMore={() => {
@@ -2112,7 +2128,7 @@ const Application = () => {
                       false,
                       state.profile?.insitution?.id,
                       state?.profile?.college?.map((item) => item?.college_id),
-                      state.profile?.department?.id,
+                      state.profile?.department?.id
                     );
                 }}
                 isMulti
@@ -2146,7 +2162,7 @@ const Application = () => {
                     1,
                     searchTerm,
                     false,
-                    state.selectedJobs,
+                    state.selectedJobs
                   );
                 }}
                 loadMore={() => {
@@ -2155,7 +2171,7 @@ const Application = () => {
                       state.deptPage + 1,
                       "",
                       true,
-                      state.selectedJobs,
+                      state.selectedJobs
                     );
                 }}
                 isMulti
@@ -2180,7 +2196,7 @@ const Application = () => {
                     1,
                     searchTerm,
                     false,
-                    state.selectedDepartments,
+                    state.selectedDepartments
                   );
                 }}
                 loadMore={() => {
@@ -2189,7 +2205,7 @@ const Application = () => {
                       state.appPage + 1,
                       "",
                       false,
-                      state.selectedDepartments,
+                      state.selectedDepartments
                     );
                   }
                 }}
@@ -2217,7 +2233,7 @@ const Application = () => {
                     1,
                     searchTerm,
                     false,
-                    state.selectedDepartments,
+                    state.selectedDepartments
                   );
                 }}
                 loadMore={() => {
@@ -2226,7 +2242,7 @@ const Application = () => {
                       state.panelPage + 1,
                       "",
                       false,
-                      state.selectedDepartments,
+                      state.selectedDepartments
                     );
                   }
                 }}
@@ -2382,7 +2398,7 @@ const Application = () => {
                         <p className="text-xs text-gray-500">
                           {formatScheduleDateTime(
                             round.scheduled_date,
-                            round.scheduled_time,
+                            round.scheduled_time
                           )}
                         </p>
                       </div>
@@ -2610,7 +2626,7 @@ const Application = () => {
                         institutionDropdownList(
                           state.institutionPage + 1,
                           "",
-                          true,
+                          true
                         )
                       }
                       loading={state.institutionLoading}
@@ -2632,7 +2648,7 @@ const Application = () => {
                         searchTerm,
                         false,
                         institutionId,
-                        state.profile?.id,
+                        state.profile?.id
                       );
                     }}
                     loadMore={() => {
@@ -2646,7 +2662,7 @@ const Application = () => {
                           "",
                           true,
                           institutionId,
-                          state.profile?.id,
+                          state.profile?.id
                         );
                     }}
                     loading={state.collegeLoading}
@@ -2666,7 +2682,7 @@ const Application = () => {
                           searchTerm,
                           false,
                           collegeId,
-                          state.profile?.id,
+                          state.profile?.id
                         );
                     }}
                     loadMore={() => {
@@ -2678,7 +2694,7 @@ const Application = () => {
                           "",
                           true,
                           collegeId,
-                          state.profile?.id,
+                          state.profile?.id
                         );
                     }}
                     loading={state.departmentLoading}
