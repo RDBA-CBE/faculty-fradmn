@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 
 import Models from "@/imports/models.import";
 import { ROLES } from "@/utils/constant.utils";
+import CustomeDatePicker from "@/components/datePicker";
+import moment from "moment";
 import IconBriefcase from "@/components/Icon/IconBolt";
 import IconUsers from "@/components/Icon/IconUsers";
 import IconUser from "@/components/Icon/IconUser";
@@ -39,7 +41,7 @@ const Dashboard = () => {
 
   const isDark = useSelector(
     (state: IRootState) =>
-      state.themeConfig.theme === "dark" || state.themeConfig.isDarkMode
+      state.themeConfig.theme === "dark" || state.themeConfig.isDarkMode,
   );
 
   const isRtl =
@@ -48,6 +50,9 @@ const Dashboard = () => {
   const [isMounted, setIsMounted] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const [dashboard, setDashboard] = useState<any>(null);
+  const [activePeriod, setActivePeriod] = useState("6m");
+  const [fromDate, setFromDate] = useState<any>(null);
+  const [toDate, setToDate] = useState<any>(null);
 
   const [stats, setStats] = useState({
     activeJobs: 0,
@@ -68,10 +73,28 @@ const Dashboard = () => {
     fetchDashboard();
   }, []);
 
-  const fetchDashboard = async () => {
+  useEffect(() => {
+    if (activePeriod !== "custom") {
+      setFromDate(null);
+      setToDate(null);
+      fetchDashboard({ period: activePeriod });
+    }
+  }, [activePeriod]);
+
+  useEffect(() => {
+    if (fromDate && toDate) {
+      setActivePeriod("custom");
+      fetchDashboard({
+        from: moment(fromDate).format("YYYY-MM-DD"),
+        to: moment(toDate).format("YYYY-MM-DD"),
+      });
+    }
+  }, [fromDate, toDate]);
+
+  const fetchDashboard = async (params?: Record<string, string>) => {
     try {
       const profileRes = await Models.auth.profile();
-      const dashRes: any = await Models.dashboard.list();
+      const dashRes: any = await Models.dashboard.list(params ?? {});
 
       const data = dashRes?.data;
 
@@ -96,11 +119,22 @@ const Dashboard = () => {
 
   /* ---------------- TREND DATA ---------------- */
 
+  const formatBucketLabel = (bucket: string): string => {
+    if (/^\d{4}-W\d{2}$/.test(bucket)) {
+      // 1m: "2026-W10" → "Week 10"
+      return `Week ${bucket.split("-W")[1]}`;
+    }
+    if (/^\d{4}-\d{2}-\d{2}$/.test(bucket)) {
+      // 7d: "2026-03-08" → "Mar 08"
+      const d = new Date(bucket);
+      return `${MONTHS[d.getUTCMonth()]} ${String(d.getUTCDate()).padStart(2, "0")}`;
+    }
+    // 6m/1y: "September" → "September"
+    return bucket;
+  };
+
   const trendLabels =
-    dashboard?.trend?.map((t: any) => {
-      const date = new Date(t.bucket + "-01");
-      return MONTHS[date.getMonth()];
-    }) ?? [];
+    dashboard?.trend?.map((t: any) => formatBucketLabel(t.bucket)) ?? [];
 
   const jobsTrend = dashboard?.trend?.map((t: any) => t.jobs) ?? [];
   const appsTrend = dashboard?.trend?.map((t: any) => t.applications) ?? [];
@@ -120,6 +154,8 @@ const Dashboard = () => {
       { name: "Jobs", data: jobsTrend },
       { name: "Applications", data: appsTrend },
       { name: "College Registrations", data: collegeTrend },
+      { name: "Interviews Scheduled", data: interviewTrend },
+      { name: "Selected", data: decisionSelectedTrend },
       ...(isSuperAdmin
         ? [{ name: "Faculty Registrations", data: facultyTrend }]
         : []),
@@ -133,8 +169,8 @@ const Dashboard = () => {
       },
       stroke: { curve: "smooth", width: 2 },
       colors: isDark
-        ? ["#2196F3", "#E7515A", "#00ab55"]
-        : ["#1B55E2", "#E7515A", "#00ab55"],
+        ? ["#2196F3", "#E7515A", "#00ab55", "#e2a03f", "#4361ee"]
+        : ["#1B55E2", "#E7515A", "#00ab55", "#e2a03f", "#4361ee"],
       labels: trendLabels,
       xaxis: { labels: { style: { fontSize: "11px" } } },
       yaxis: {
@@ -244,7 +280,7 @@ const Dashboard = () => {
       color: "text-primary",
       bg: "bg-primary-light",
       icon: <IconBriefcase className="h-7 w-7" />,
-      href: "/faculty/job",
+      href: "/faculty/dashboard/job",
       sub: null,
     },
     {
@@ -253,7 +289,7 @@ const Dashboard = () => {
       color: "text-info",
       bg: "bg-info-light",
       icon: <IconUsers className="h-7 w-7" />,
-      href: "/faculty/application",
+      href: "/faculty/dashboard/applications",
       sub: null,
     },
     {
@@ -271,7 +307,7 @@ const Dashboard = () => {
       color: "text-warning",
       bg: "bg-warning-light",
       icon: <IconCalendar className="h-7 w-7" />,
-      href: "/faculty/interview",
+      href: "/faculty/dashboard/interview",
       sub: null,
     },
     {
@@ -280,13 +316,24 @@ const Dashboard = () => {
       color: "text-success",
       bg: "bg-success-light",
       icon: <IconChecks className="h-7 w-7" />,
-      href: "/faculty/application",
+      href: "/faculty/dashboard/selected-faculty",
       // sub: `✓ ${stats.decisionsSelected}  ✗ ${stats.decisionsRejected}`,
     },
   ];
 
+  const filterLables = [
+    { label: "Last 1 Year", value: "1y" },
+    { label: "6 Months", value: "6m" },
+    { label: "1 Month", value: "1m" },
+    { label: "Last 7 Days", value: "7d" },
+  ];
+
+  
+
+  console.log("activePeriod", activePeriod);
+
   return (
-    <div className="pt-5">
+    <div className="min-h-screen dark:from-gray-900 dark:to-gray-800">
       {/* Stat Cards */}
       <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-5">
         {statCards.map((card) => (
@@ -318,10 +365,52 @@ const Dashboard = () => {
         ))}
       </div>
 
+      {/* Filters */}
+      <div className="mb-6 flex flex-wrap items-center gap-2">
+        {filterLables?.map((p) => (
+          <button
+            key={p.value}
+            onClick={() => setActivePeriod(p.value)}
+            className={`rounded-lg border px-3 py-1.5 text-sm transition-colors ${
+              activePeriod === p.value
+                ? " bg-dblue text-white"
+                : "border-gray-300 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
+            }`}
+          >
+            {p.label}
+          </button>
+        ))}
+        <div className="flex items-center gap-2">
+          <CustomeDatePicker
+            value={fromDate}
+            placeholder="From Date"
+            onChange={(e) => setFromDate(e)}
+            showTimeSelect={false}
+          />
+          <CustomeDatePicker
+            value={toDate}
+            placeholder="To Date"
+            onChange={(e) => setToDate(e)}
+            showTimeSelect={false}
+          />
+          {(fromDate || toDate) && (
+            <button
+              onClick={() => {
+                setFromDate(null);
+                setToDate(null);
+              }}
+              className="text-xs text-red-500 hover:underline"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Row 1 */}
-      <div className="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <div className="panel">
-          <h5 className="mb-4 text-lg font-semibold">Trends Overview</h5>
+      <div className="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-3">
+        <div className="panel xl:col-span-2">
+          <h5 className="mb-4 text-lg font-semibold">Graph</h5>
 
           {isMounted && (
             <ReactApexChart
@@ -333,7 +422,7 @@ const Dashboard = () => {
           )}
         </div>
 
-        <div className="panel">
+        <div className="panel xl:col-span-1">
           <h5 className="mb-4 text-lg font-semibold">Colleges by Category</h5>
 
           {isMounted && (
@@ -348,7 +437,7 @@ const Dashboard = () => {
       </div>
 
       {/* Row 2 */}
-      <div className="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-2">
+      <div className="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-3">
         <div className="panel">
           <h5 className="mb-3 text-lg font-semibold">Interviews Scheduled</h5>
 
@@ -374,72 +463,24 @@ const Dashboard = () => {
             />
           )}
         </div>
-      </div>
 
-      {/* Super Admin Stats */}
-      {isSuperAdmin && dashboard?.super_admin && (
-        <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {(
-            [
-              {
-                label: "Total Jobs",
-                value: dashboard.super_admin.jobs,
-                color: "text-primary",
-              },
-              {
-                label: "Total Applications",
-                value: dashboard.super_admin.applications,
-                color: "text-info",
-              },
-              {
-                label: "College Registrations",
-                value: dashboard.super_admin.college_registrations,
-                color: "text-success",
-              },
-              {
-                label: "New Faculty Registrations",
-                value: dashboard.super_admin.new_faculty_registrations,
-                color: "text-warning",
-              },
-            ] as any[]
-          ).map((item) => (
-            <div key={item.label} className="panel rounded-lg p-4">
-              <div className={`text-2xl font-bold ${item.color}`}>
-                {item.value}
-              </div>
-              <div className="text-xs text-gray-500">{item.label}</div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Row 3 */}
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <div className="panel">
           <h5 className="mb-3 text-lg font-semibold">Application Funnel</h5>
 
-          {isMounted && (
+          {isMounted && dashboard?.application_funnel?.length > 0 && (
             <Funnel
-              data={[
-                { name: "Awareness", value: 252 },
-                { name: "Interest", value: 105 },
-                { name: "Consideration", value: 84 },
-                { name: "Evaluation", value: 72 },
-                { name: "Commitment", value: 19 },
-                { name: "Pre-sale", value: 0 },
-                { name: "Sale", value: 10 },
-              ]}
+            colors={["#f9741673", "#defb3c70","#f3b0abdb16", "#14b8a57e"]}
+              data={
+                dashboard.application_funnel.map((f: any) => ({
+                  name: f.stage,
+                  value: f.value,
+                }))
+              }
             />
-
-            // <ReactApexChart
-            //   series={funnelChart.series}
-            //   options={funnelChart.options}
-            //   type="bar"
-            //   height={350}
-            // />
           )}
         </div>
       </div>
+
     </div>
   );
 };

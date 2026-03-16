@@ -1,10 +1,42 @@
 import instance from "@/utils/axios.utils";
 
 const dashboard = {
-  list: () => {
+  list: (body) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `/dashboard/content?period=six_months`;
-     
+      // const query = params ? new URLSearchParams(params).toString() : "period=six_months";
+      // let url = `/dashboard/content`;
+      // if (body?.period) {
+      //   url += `?period=${encodeURIComponent(body.period)}`;
+      // } else {
+      //   if (body?.from) {
+      //     url += `&from=${encodeURIComponent(body.from)}`;
+      //   }
+
+      //   if (body.to) {
+      //     url = url + `&to=${body.to}`;
+      //   }
+      // }
+
+      let url = `/dashboard/content`;
+
+      if (body?.period) {
+        url += `?period=${encodeURIComponent(body.period)}`;
+      } else {
+        const params = [];
+
+        if (body?.from) {
+          params.push(`from=${encodeURIComponent(body.from)}`);
+        }
+
+        if (body?.to) {
+          params.push(`to=${encodeURIComponent(body.to)}`);
+        }
+
+        if (params.length) {
+          url += `?${params.join("&")}`;
+        }
+      }
+
       instance()
         .get(url)
         .then((res) => {
