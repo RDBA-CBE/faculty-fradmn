@@ -59,7 +59,7 @@ export const menuConfig = {
     //   type: "link",
     //   icon: "IconMenuDashboard",
     //   label: "dashboard",
-    //   href: "/",
+    //   href: "faculty/dashboard",
     // },
 
     {
@@ -172,7 +172,7 @@ export const menuConfig = {
     //   type: "link",
     //   icon: "IconMenuDashboard",
     //   label: "dashboard",
-    //   href: "/",
+    //   href: "faculty/dashboard",
     // },
 
     {
@@ -278,7 +278,7 @@ export const menuConfig = {
     //   type: "link",
     //   icon: "IconMenuDashboard",
     //   label: "dashboard",
-    //   href: "/",
+    //   href: "faculty/dashboard",
     // },
 
     {
@@ -410,12 +410,12 @@ export const menuConfig = {
 
 export const OwnmenuConfig = {
   super_admin: [
-    // {
-    //   type: "link",
-    //   icon: "IconMenuDashboard",
-    //   label: "dashboard",
-    //   href: "/",
-    // },
+    {
+      type: "link",
+      icon: "IconMenuDashboard",
+      label: "dashboard",
+      href: "/faculty/dashboard",
+    },
 
     {
       type: "link",
@@ -466,12 +466,12 @@ export const OwnmenuConfig = {
   ],
 
   institution_admin: [
-    // {
-    //   type: "link",
-    //   icon: "IconMenuDashboard",
-    //   label: "dashboard",
-    //   href: "/",
-    // },
+    {
+      type: "link",
+      icon: "IconMenuDashboard",
+      label: "dashboard",
+      href: "/faculty/dashboard",
+    },
 
     {
       type: "link",
@@ -508,12 +508,12 @@ export const OwnmenuConfig = {
   ],
 
   hr: [
-    // {
-    //   type: "link",
-    //   icon: "IconMenuDashboard",
-    //   label: "dashboard",
-    //   href: "/",
-    // },
+    {
+      type: "link",
+      icon: "IconMenuDashboard",
+      label: "dashboard",
+      href: "/faculty/dashboard",
+    },
 
     {
       type: "link",
@@ -550,12 +550,12 @@ export const OwnmenuConfig = {
   ],
 
   hod: [
-    // {
-    //   type: "link",
-    //   icon: "IconMenuDashboard",
-    //   label: "dashboard",
-    //   href: "/",
-    // },
+    {
+      type: "link",
+      icon: "IconMenuDashboard",
+      label: "dashboard",
+       href: "/faculty/dashboard",
+    },
     //   {
     //   type: "link",
     //   icon: "IconMenuNotes",

@@ -112,6 +112,7 @@ const Job = () => {
 
     errors: {},
     selectedRecords: [],
+    profile: null,
   });
 
   const debounceSearch = useDebounce(state.search, 500);
@@ -121,7 +122,6 @@ const Job = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    jobList(1);
     institutionDropdownList(1);
     profile();
     locationList(1);
@@ -133,7 +133,9 @@ const Job = () => {
   }, []);
 
   useEffect(() => {
-    jobList(1);
+    if (state.profile) {
+      jobList(1);
+    }
   }, [
     debounceSearch,
     state.statusFilter,
@@ -148,6 +150,7 @@ const Job = () => {
     state.priorityFilter,
     state.typeFilter,
     state.salaryFilter,
+    state.profile,
   ]);
 
   const profile = async () => {
@@ -159,8 +162,12 @@ const Job = () => {
         collegeDropdownList(1, "", false, "", res.id);
       } else if (res?.role == ROLES.INSTITUTION_ADMIN) {
         collegeDropdownList(1, "", false, res?.institution?.id, res.id);
+        setState({institutionFilter: {value: res?.institution?.id, label: res?.institution?.name}})
       } else if (res?.role == ROLES.HR) {
+        console.log("hello");
+        
         departmentDropdownList(1, "", false, res?.college?.college_id, res.id);
+        setState({collegeFilter: res?.college})
       }
     } catch (error) {
       console.error("Error fetching institutions:", error);
@@ -379,8 +386,12 @@ const Job = () => {
       setState({ departmentLoading: false });
     }
   };
+
+  console.log("state.collegeFilter", state.collegeFilter);
+  
   const bodyData = () => {
     const body: any = {};
+    
     const userId = localStorage.getItem("userId");
     if (state.search) {
       body.search = state.search;
@@ -391,8 +402,8 @@ const Job = () => {
     }
     // body.created_by = parseInt(userId);
 
-    if (state.collegeFilter?.value) {
-      body.college_id = state.collegeFilter.value;
+    if (state.collegeFilter) {
+      body.college_id = state.collegeFilter.map((item)=>item.college_id);
     }
     if (state.departmentFilter?.value) {
       body.department_id = state.departmentFilter.value;
@@ -660,16 +671,16 @@ const Job = () => {
           <div className="group relative"></div>
           {(() => {
             const activeFilters = [];
-            if (state.institutionFilter)
-              activeFilters.push({
-                key: "institutionFilter",
-                label: `Inst: ${state.institutionFilter.label}`,
-              });
-            if (state.collegeFilter)
-              activeFilters.push({
-                key: "collegeFilter",
-                label: `College: ${state.collegeFilter.label}`,
-              });
+            // if (state.institutionFilter)
+            //   activeFilters.push({
+            //     key: "institutionFilter",
+            //     label: `Inst: ${state.institutionFilter.label}`,
+            //   });
+            // if (state.collegeFilter)
+            //   activeFilters.push({
+            //     key: "collegeFilter",
+            //     label: `College: ${state.collegeFilter.label}`,
+            //   });
             if (state.departmentFilter)
               activeFilters.push({
                 key: "departmentFilter",

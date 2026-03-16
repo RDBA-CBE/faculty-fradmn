@@ -127,7 +127,10 @@ const Dashboard = () => {
     if (/^\d{4}-\d{2}-\d{2}$/.test(bucket)) {
       // 7d: "2026-03-08" → "Mar 08"
       const d = new Date(bucket);
-      return `${MONTHS[d.getUTCMonth()]} ${String(d.getUTCDate()).padStart(2, "0")}`;
+      return `${MONTHS[d.getUTCMonth()]} ${String(d.getUTCDate()).padStart(
+        2,
+        "0",
+      )}`;
     }
     // 6m/1y: "September" → "September"
     return bucket;
@@ -169,8 +172,8 @@ const Dashboard = () => {
       },
       stroke: { curve: "smooth", width: 2 },
       colors: isDark
-        ? ["#2196F3", "#E7515A", "#00ab55", "#e2a03f", "#4361ee"]
-        : ["#1B55E2", "#E7515A", "#00ab55", "#e2a03f", "#4361ee"],
+        ? ["#2196F3", "#E7515A", "#00ab55", "#e2a03f", "#d143ee", "#43eebb"]
+        : ["#1B55E2", "#E7515A", "#00ab55", "#e2a03f", "#d143ee", "#43eebb"],
       labels: trendLabels,
       xaxis: { labels: { style: { fontSize: "11px" } } },
       yaxis: {
@@ -192,7 +195,14 @@ const Dashboard = () => {
     options: {
       chart: { type: "donut", height: 260 },
       labels: pieLabels,
-      colors: ["#1B55E2", "#e2a03f", "#e7515a"],
+      colors: [
+        "#1B55E2",
+        "#e2a03f",
+        "#e7515a",
+        "#11380c",
+        "#d143ee",
+        "#43eebb",
+      ],
       dataLabels: { enabled: false },
       legend: { position: "bottom" },
     },
@@ -328,8 +338,6 @@ const Dashboard = () => {
     { label: "Last 7 Days", value: "7d" },
   ];
 
-  
-
   console.log("activePeriod", activePeriod);
 
   return (
@@ -423,7 +431,9 @@ const Dashboard = () => {
         </div>
 
         <div className="panel xl:col-span-1">
-          <h5 className="mb-4 text-lg font-semibold">Colleges by Category</h5>
+          <h5 className="mb-4 text-lg font-semibold">
+            Applications by Experience
+          </h5>
 
           {isMounted && (
             <ReactApexChart
@@ -442,12 +452,14 @@ const Dashboard = () => {
           <h5 className="mb-3 text-lg font-semibold">Interviews Scheduled</h5>
 
           {isMounted && (
-            <ReactApexChart
-              series={interviewChart.series}
-              options={interviewChart.options}
-              type="bar"
-              height={180}
-            />
+            <div className="flex flex-col justify-center py-10 h-full">
+              <ReactApexChart
+                series={interviewChart.series}
+                options={interviewChart.options}
+                type="bar"
+                height={300}
+              />
+            </div>
           )}
         </div>
 
@@ -455,32 +467,53 @@ const Dashboard = () => {
           <h5 className="mb-3 text-lg font-semibold">Decisions</h5>
 
           {isMounted && (
+             <div className="flex flex-col justify-center py-10 h-full">
             <ReactApexChart
               series={decisionChart.series}
               options={decisionChart.options}
               type="bar"
-              height={180}
+             height={300}
             />
+             </div>
           )}
         </div>
 
         <div className="panel">
-          <h5 className="mb-3 text-lg font-semibold">Application Funnel</h5>
+          <h5
+            className="mb-3 text-lg font-semibold"
+            style={{ wordWrap: "break-word" }}
+          >
+            Application Funnel
+          </h5>
+
+          {/* {isMounted && dashboard?.application_funnel?.length > 0 && (
+            <Funnel
+              data={
+                dashboard.application_funnel.map((f: any, index: any) => ({
+                  name: f.stage,
+                  value: f.value,
+                  fill: [
+                    "#f9741673",
+                    "#defb3c70",
+                    "#f3b0abdb",
+                    "#14b8a57e",
+                  ][index % 4],
+                }))
+              }
+            />
+          )} */}
 
           {isMounted && dashboard?.application_funnel?.length > 0 && (
             <Funnel
-            colors={["#f9741673", "#defb3c70","#f3b0abdb16", "#14b8a57e"]}
-              data={
-                dashboard.application_funnel.map((f: any) => ({
-                  name: f.stage,
-                  value: f.value,
-                }))
-              }
+              data={dashboard.application_funnel.map((f: any) => ({
+                name:
+                  f.selected !== undefined ? "Selected Applicants" : f.stage,
+                value: f.selected !== undefined ? f.selected : f.value,
+              }))}
             />
           )}
         </div>
       </div>
-
     </div>
   );
 };
