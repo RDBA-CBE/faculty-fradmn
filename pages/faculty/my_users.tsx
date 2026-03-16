@@ -18,6 +18,7 @@ import {
   capitalizeFLetter,
   Dropdown,
   showDeleteAlert,
+  truncateText,
   useSetState,
 } from "@/utils/function.utils";
 import Modal from "@/components/modal/modal.component";
@@ -1385,8 +1386,11 @@ const Users = () => {
         title: "Name",
         sortable: true,
         render: ({ username }) => (
-          <div className="font-medium text-gray-900 dark:text-white">
-            {username}
+          <div
+            title={username}
+            className="font-medium text-gray-900 dark:text-white"
+          >
+            {truncateText(username)}
           </div>
         ),
       },
@@ -1395,7 +1399,9 @@ const Users = () => {
         title: "Email",
         sortable: true,
         render: ({ email }) => (
-          <span className="text-gray-600 dark:text-gray-400">{email}</span>
+          <span title={email} className="text-gray-600 dark:text-gray-400">
+            {truncateText(email)}
+          </span>
         ),
       },
       {
@@ -1421,8 +1427,11 @@ const Users = () => {
         sortable: true,
 
         render: (row: any) => (
-          <div className="text-gray-600 dark:text-gray-400">
-            {row?.institution}
+          <div
+            title={row?.institution}
+            className="text-gray-600 dark:text-gray-400"
+          >
+            {truncateText(row?.institution)}
           </div>
         ),
       });
@@ -1448,17 +1457,17 @@ const Users = () => {
           const hiddenDept = otherDept?.slice(maxShow);
 
           return (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 max-w-[200px] overflow-hidden">
               {/* First department text */}
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                {firstDept}
+              <span title={firstDept} className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {truncateText(firstDept)}
               </span>
 
               {/* Avatars */}
               <div className="flex items-center -space-x-2">
                 {visibleDept?.map((dept: string, index: number) => (
                   <div key={index} className="group relative">
-                    <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-dblue text-xs font-semibold text-white dark:border-gray-900">
+                    <div className="bg-dblue flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white text-xs font-semibold text-white dark:border-gray-900">
                       {dept?.slice(0, 2)?.toUpperCase()}
                     </div>
 
@@ -1511,15 +1520,15 @@ const Users = () => {
           return (
             <div className="flex items-center gap-2">
               {/* First department text */}
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                {firstDept}
+              <span title={firstDept} className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {truncateText(firstDept)}
               </span>
 
               {/* Avatars */}
               <div className="flex items-center -space-x-2">
                 {visibleDept?.map((dept: string, index: number) => (
                   <div key={index} className="group relative">
-                    <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-dblue text-xs font-semibold text-white dark:border-gray-900">
+                    <div className="bg-dblue flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white text-xs font-semibold text-white dark:border-gray-900">
                       {dept?.slice(0, 2)?.toUpperCase()}
                     </div>
 
@@ -1554,8 +1563,11 @@ const Users = () => {
         title: "Department",
         sortable: true,
         render: (row: any) => (
-          <div className="text-gray-600 dark:text-gray-400">
-            {row?.department}
+          <div
+            title={row?.department}
+            className="text-gray-600 dark:text-gray-400"
+          >
+            {truncateText(row?.department)}
           </div>
         ),
       });
@@ -1588,9 +1600,7 @@ const Users = () => {
               href={`${FRONTEND_URL}profile/${row?.id}`}
               target="_blank"
               className={`flex items-center justify-center rounded-lg transition-all duration-200 ${
-                row.status === "active"
-                  ? " text-green-600 "
-                  : "text-red-600 "
+                row.status === "active" ? " text-green-600 " : "text-red-600 "
               }`}
               title={"View"}
             >
@@ -1737,7 +1747,7 @@ const Users = () => {
             Filters
           </h3>
         </div> */}
-        <div className="flex flex-wrap gap-4 items-center">
+        <div className="flex flex-wrap items-center gap-4">
           <div className="group relative w-fit">
             <TextInput
               placeholder={`Search ${getTabLabel().toLowerCase()}...`}
@@ -1757,7 +1767,7 @@ const Users = () => {
                 <>
                   {state.profile?.role === ROLES.SUPER_ADMIN && (
                     <CustomSelect
-                    className="!w-fit"
+                      className="!w-fit"
                       options={state.institutionList}
                       value={state.superAdminInstitutionFilter}
                       onChange={handlesuperAdminInstitutionChange}
@@ -1784,7 +1794,7 @@ const Users = () => {
                   />
                   {state.activeTab == "hod" && (
                     <CustomSelect
-                    className="!w-fit"
+                      className="!w-fit"
                       options={state.superAdminDepartmentList}
                       value={state.superAdminDepartmentFilter}
                       onChange={handlesuperAdminDepartmentChange}
@@ -1863,7 +1873,7 @@ const Users = () => {
             </h3>
             <div className="flex items-center gap-4">
               {state.selectedRecords.length > 0 && (
-               <button
+                <button
                   onClick={() => handleBulkDelete()}
                   className=" group relative inline-flex transform items-center gap-2 overflow-hidden rounded-md border border-red-500  px-3 py-1 text-red-500 shadow-lg transition-all duration-200 "
                 >
@@ -1940,7 +1950,7 @@ const Users = () => {
         renderComponent={() => (
           <div className="relative">
             <div className="mb-8 text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-dblue dark:from-blue-900 dark:to-purple-900">
+              <div className="bg-dblue mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full dark:from-blue-900 dark:to-purple-900">
                 {state.editId ? (
                   <IconEdit className="h-8 w-8 text-white dark:text-blue-400" />
                 ) : (
@@ -1969,11 +1979,11 @@ const Users = () => {
               <button
                 onClick={handleSubmit}
                 disabled={state.submitting}
-                className={`group relative inline-flex items-center justify-center overflow-hidden rounded-lg bg-dblue px-8 py-2 text-sm font-medium text-white shadow-lg transition-all duration-200 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                className={`bg-dblue group relative inline-flex items-center justify-center overflow-hidden rounded-lg px-8 py-2 text-sm font-medium text-white shadow-lg transition-all duration-200 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
                   state.submitting ? "cursor-not-allowed opacity-70" : ""
                 }`}
               >
-                <div className="absolute inset-0 bg-dblue opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+                <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
                 {state.submitting ? (
                   <IconLoader className="relative z-10 mr-2 h-4 w-4 animate-spin" />
                 ) : (

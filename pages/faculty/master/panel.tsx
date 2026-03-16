@@ -379,7 +379,7 @@ const Category = () => {
           <DataTable
             noRecordsText="No panel member found"
             highlightOnHover
-            className="table-hover "
+            className="table-hover whitespace-nowrap"
             records={state.panelList}
             fetching={state.loading}
             selectedRecords={state.panelList?.filter((record) =>

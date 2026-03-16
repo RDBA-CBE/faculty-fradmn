@@ -2116,7 +2116,7 @@ const CollegeAndDepartment = () => {
           <DataTable
             noRecordsText={`No ${state.activeTab} found`}
             highlightOnHover
-            className="table-hover "
+            className="table-hover whitespace-nowrap"
             records={
               state.activeTab === "colleges"
                 ? state.collegeList || []

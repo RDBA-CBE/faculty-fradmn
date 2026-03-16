@@ -20,6 +20,7 @@ import {
   capitalizeFLetter,
   formatScheduleDateTime,
   showDeleteAlert,
+  truncateText,
   useSetState,
 } from "@/utils/function.utils";
 import Modal from "@/components/modal/modal.component";
@@ -1377,7 +1378,7 @@ const Application = () => {
           <DataTable
             noRecordsText="No applications found"
             highlightOnHover
-            className="table-hover "
+            className="table-hover whitespace-nowrap"
             records={state.applicationList}
             fetching={state.loading}
             selectedRecords={state.applicationList?.filter((record) =>
@@ -1411,8 +1412,10 @@ const Application = () => {
                 title: "Title",
                 sortable: true,
                 render: ({ job_title }) => (
-                  <div className="text-gray-600 dark:text-gray-400">
-                    {capitalizeFLetter(job_title)}
+                  <div title={job_title} className="text-gray-600 dark:text-gray-400">
+                                        {truncateText(job_title)}
+                    
+
                   </div>
                 ),
               },
@@ -1422,8 +1425,10 @@ const Application = () => {
                 title: "College",
                 sortable: true,
                 render: ({ college_name }) => (
-                  <div className="text-gray-600 dark:text-gray-400">
-                    {capitalizeFLetter(college_name)}
+                  <div title={college_name} className="text-gray-600 dark:text-gray-400">
+                    {truncateText(college_name)}
+
+
                   </div>
                 ),
               },
@@ -1431,8 +1436,9 @@ const Application = () => {
                 accessor: "department_name",
                 title: "Department",
                 render: ({ department_name }) => (
-                  <div className="text-gray-600 dark:text-gray-400">
-                    {capitalizeFLetter(department_name)}
+                  <div title={department_name} className="text-gray-600 dark:text-gray-400">
+                    {truncateText(department_name)}
+
                   </div>
                 ),
                 sortable: true,
@@ -1442,8 +1448,9 @@ const Application = () => {
                 title: "Faculty",
                 sortable: true,
                 render: ({ applicant_name }) => (
-                  <div className="font-medium text-gray-900 dark:text-white">
-                    {capitalizeFLetter(applicant_name)}
+                  <div title={applicant_name} className="font-medium text-gray-900 dark:text-white">
+                    {truncateText(applicant_name)}
+
                   </div>
                 ),
               },
@@ -1453,8 +1460,9 @@ const Application = () => {
                 sortable: true,
 
                 render: ({ applicant_email }) => (
-                  <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-200">
-                    {applicant_email}
+                  <span title={applicant_email} className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+                    {truncateText(applicant_email)}
+
                   </span>
                 ),
               },
