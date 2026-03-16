@@ -18,6 +18,7 @@ import {
   capitalizeFLetter,
   Dropdown,
   showDeleteAlert,
+  truncateText,
   useSetState,
 } from "@/utils/function.utils";
 import Modal from "@/components/modal/modal.component";
@@ -783,7 +784,7 @@ const Job = () => {
           <DataTable
             noRecordsText="No jobs found"
             highlightOnHover
-            className="table-hover "
+            className="table-hover whitespace-nowrap"
             records={state.jobList}
             fetching={state.loading}
             selectedRecords={state.jobList?.filter((record) =>
@@ -808,8 +809,8 @@ const Job = () => {
                 title: "Title",
                 sortable: true,
                 render: ({ job_title }) => (
-                  <div className=" text-gray-900 dark:text-white">
-                    {capitalizeFLetter(job_title)}
+                  <div className=" text-gray-900 dark:text-white" title={job_title}>
+                    {truncateText(job_title)}
                   </div>
                 ),
               },
@@ -836,8 +837,8 @@ const Job = () => {
                   return (
                     <div className="flex flex-wrap items-center gap-2">
                       {/* First department text */}
-                      <span className="text-sm  text-gray-700 dark:text-gray-300">
-                        {firstDept}
+                      <span className="text-sm  text-gray-700 dark:text-gray-300" title={firstDept}>
+                        {truncateText(firstDept)}
                       </span>
 
                       {/* Avatars */}
@@ -849,8 +850,8 @@ const Job = () => {
                             </div>
 
                             {/* Tooltip */}
-                            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
-                              {capitalizeFLetter(dept)}
+                            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100" title={dept}>
+                              {truncateText(dept)}
                             </div>
                           </div>
                         ))}
@@ -882,8 +883,8 @@ const Job = () => {
                   wordBreak: "break-word",
                 },
                 render: ({ college_name }) => (
-                  <span className="text-gray-600 dark:text-gray-400">
-                    {capitalizeFLetter(college_name || "-")}
+                  <span className="text-gray-600 dark:text-gray-400" title={college_name}>
+                    {truncateText(college_name || "-")}
                   </span>
                 ),
               },

@@ -1613,7 +1613,7 @@ const Application = () => {
           <DataTable
             noRecordsText="No applications found"
             highlightOnHover
-            className="table-hover"
+            className="table-hover whitespace-nowrap"
             records={state.applicationList}
             fetching={state.loading}
             selectedRecords={state.applicationList?.filter((record) =>

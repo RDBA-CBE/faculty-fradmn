@@ -204,7 +204,7 @@ const Location = () => {
           <DataTable
             noRecordsText="No locations found"
             highlightOnHover
-            className="table-hover"
+            className="table-hover whitespace-nowrap"
             records={state.locationList}
             fetching={state.loading}
             customLoader={

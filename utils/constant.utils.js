@@ -550,12 +550,12 @@ export const OwnmenuConfig = {
   ],
 
   hod: [
-    {
-      type: "link",
-      icon: "IconMenuDashboard",
-      label: "dashboard",
-       href: "/faculty/dashboard",
-    },
+    // {
+    //   type: "link",
+    //   icon: "IconMenuDashboard",
+    //   label: "dashboard",
+    //    href: "/faculty/dashboard",
+    // },
     //   {
     //   type: "link",
     //   icon: "IconMenuNotes",

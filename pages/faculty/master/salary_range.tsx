@@ -207,7 +207,7 @@ const SalaryRange = () => {
           <DataTable
             noRecordsText="No salary ranges found"
             highlightOnHover
-            className="table-hover"
+            className="table-hover whitespace-nowrap"
             records={state.salaryRangeList}
             fetching={state.loading}
             customLoader={

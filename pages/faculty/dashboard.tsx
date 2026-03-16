@@ -287,8 +287,9 @@ const Dashboard = () => {
     {
       label: "Active Jobs",
       value: stats.activeJobs,
-      color: "text-primary",
+      color: "text-dblue",
       bg: "bg-primary-light",
+      mainbg:"bg-blue-100",
       icon: <IconBriefcase className="h-7 w-7" />,
       href: "/faculty/dashboard/job",
       sub: null,
@@ -296,8 +297,9 @@ const Dashboard = () => {
     {
       label: "Applications",
       value: stats.applications,
-      color: "text-info",
+      color: "text-orange-600",
       bg: "bg-info-light",
+      mainbg:"bg-orange-100",
       icon: <IconUsers className="h-7 w-7" />,
       href: "/faculty/dashboard/applications",
       sub: null,
@@ -305,8 +307,9 @@ const Dashboard = () => {
     {
       label: "Colleges",
       value: stats.colleges,
-      color: "text-indigo-600",
+      color: "text-[#dd22cc]",
       bg: "bg-indigo-100",
+      mainbg:"bg-[#d2c1f7f2]",
       icon: <IconUser className="h-7 w-7" />,
       href: null,
       sub: null,
@@ -314,8 +317,9 @@ const Dashboard = () => {
     {
       label: "Interviews Scheduled",
       value: stats.interviews,
-      color: "text-warning",
+      color: "text-pink-600",
       bg: "bg-warning-light",
+      mainbg:"bg-pink-100",
       icon: <IconCalendar className="h-7 w-7" />,
       href: "/faculty/dashboard/interview",
       sub: null,
@@ -323,8 +327,9 @@ const Dashboard = () => {
     {
       label: "Selected Faculties",
       value: stats.decisionsSelected,
-      color: "text-success",
-      bg: "bg-success-light",
+      color: "text-green-600",
+      bg: "bg-white/60",
+      mainbg:"bg-green-100",
       icon: <IconChecks className="h-7 w-7" />,
       href: "/faculty/dashboard/selected-faculty",
       // sub: `✓ ${stats.decisionsSelected}  ✗ ${stats.decisionsRejected}`,
@@ -351,7 +356,7 @@ const Dashboard = () => {
               card.href
                 ? "cursor-pointer transition-shadow hover:shadow-md"
                 : ""
-            }`}
+            } ${card.mainbg}`}
             onClick={() => card.href && router.push(card.href)}
           >
             <div className="flex items-center gap-3">
