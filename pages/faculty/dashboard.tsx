@@ -423,7 +423,7 @@ const Dashboard = () => {
       {/* Row 1 */}
       <div className="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-3">
         <div className="panel xl:col-span-2">
-          <h5 className="mb-4 text-lg font-semibold">Graph</h5>
+          <h5 className="mb-4 text-lg font-semibold">Jobs, Applications & Registrations Overview</h5>
 
           {isMounted && (
             <ReactApexChart
@@ -485,7 +485,7 @@ const Dashboard = () => {
 
         <div className="panel">
           <h5
-            className="mb-3 text-lg font-semibold"
+            className="mb-6 text-lg font-semibold"
             style={{ wordWrap: "break-word" }}
           >
             Application Funnel
@@ -512,7 +512,7 @@ const Dashboard = () => {
             <Funnel
               data={dashboard.application_funnel.map((f: any) => ({
                 name:
-                  f.selected !== undefined ? "Selected Applicants" : f.stage,
+                  f.selected !== undefined ? "Selected" : f.stage,
                 value: f.selected !== undefined ? f.selected : f.value,
               }))}
             />
