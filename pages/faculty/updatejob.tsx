@@ -186,9 +186,9 @@ console.log('✌️res --->', res);
                 }))
               : [],
 
-          deadline: moment(res?.deadline).format("YYYY-MM-DD") || "",
-          startDate: moment(res?.start_date).format("YYYY-MM-DD") || "",
-          endDate: moment(res?.last_date).format("YYYY-MM-DD") || "",
+          deadline:res?.deadline? moment(res?.deadline).format("YYYY-MM-DD") : null,
+          startDate:res?.start_date? moment(res?.start_date).format("YYYY-MM-DD"):null,
+          endDate: res?.last_date?moment(res?.last_date).format("YYYY-MM-DD") :null,
           numberOfOpenings: res?.number_of_openings || "",
           qualification: res?.qualification || "",
           experience: {
@@ -578,9 +578,9 @@ console.log('✌️res --->', res);
         salary: state.salary?.value,
 
         priority: state.priority?.value,
-        deadline: state.deadline,
-        startDate: state.startDate,
-        endDate: state.endDate,
+        deadline: state.deadline?state.deadline:null,
+        startDate: state.startDate?state.startDate:null,
+        endDate: state.endDate?state.endDate:null,
 
         experience: state.experience?.value,
         qualification: state.qualification,
@@ -605,10 +605,10 @@ console.log('✌️res --->', res);
         location_ids: state.location?.map((item) => item?.value),
 
         number_of_openings: Number(state.numberOfOpenings),
-        last_date: moment(state.endDate).format("YYYY-MM-DD"),
+        last_date:state.endDate? moment(state.endDate).format("YYYY-MM-DD"):null,
         // job_status_id: state.job_status?.value,
-        deadline: moment(state.deadline).format("YYYY-MM-DD"),
-        start_date: moment(state.startDate).format("YYYY-MM-DD"),
+        deadline: state.deadline?moment(state.deadline).format("YYYY-MM-DD"):null,
+        start_date: state.startDate?moment(state.startDate).format("YYYY-MM-DD"):null,
         responsibility: keyResponsibilityData,
 
         is_approved:
@@ -1229,8 +1229,7 @@ console.log('✌️res --->', res);
                   onChange={(e) =>
                     handleFieldChange("startDate", e.target.value)
                   }
-                  error={state.error?.startDate}
-                  required
+                 
                 />
 
                 <TextInput
@@ -1239,9 +1238,7 @@ console.log('✌️res --->', res);
                   title="End Date"
                   value={state.endDate}
                   onChange={(e) => handleFieldChange("endDate", e.target.value)}
-                  error={state.error?.endDate}
                   min={state.startDate}
-                  required
                 />
 
                 <TextInput
@@ -1252,10 +1249,8 @@ console.log('✌️res --->', res);
                   onChange={(e) =>
                     handleFieldChange("deadline", e.target.value)
                   }
-                  error={state.error?.deadline}
                   min={state.startDate}
                   max={state.endDate}
-                  required
                 />
 
                 <TextInput
@@ -1267,8 +1262,6 @@ console.log('✌️res --->', res);
                   onChange={(e) =>
                     handleFieldChange("numberOfOpenings", e.target.value)
                   }
-                  error={state.error?.numberOfOpenings}
-                  required
                 />
 
                 {/* <TextInput
@@ -1420,9 +1413,7 @@ console.log('✌️res --->', res);
                 onChange={(e) =>
                   handleFieldChange("description", e.target.value)
                 }
-                error={state.error?.description}
                 rows={10}
-                required
               />
             </div>
           </div>

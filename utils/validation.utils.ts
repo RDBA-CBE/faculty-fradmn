@@ -199,9 +199,9 @@ export const CreateNewJob = Yup.object().shape({
   salary: Yup.string().required("Salary range is required"),
 
   priority: Yup.string().required("Job urgency is required"),
-  deadline: Yup.string().required("Deadline is required"),
-  startDate: Yup.string().required("Start date is required"),
-  endDate: Yup.string().required("End date is required"),
+  // deadline: Yup.string().required("Deadline is required"),
+  // startDate: Yup.string().required("Start date is required"),
+  // endDate: Yup.string().required("End date is required"),
 
   experience: Yup.string().required("Experience is required"),
   qualification: Yup.string().required("Qualification is required"),
@@ -234,7 +234,7 @@ export const CreateNewJob = Yup.object().shape({
   //   })
   //   .required("Key responsibilities are required"),
 
-  description: Yup.string().required("Job description is required"),
+  // description: Yup.string().required("Job description is required"),
 
   applyType: Yup.string().required("Apply type is required"),
 

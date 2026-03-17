@@ -469,9 +469,9 @@ export default function Newjob() {
         salary: state.salary?.value,
 
         priority: state.priority?.value,
-        deadline: state.deadline,
-        startDate: state.startDate,
-        endDate: state.endDate,
+        // deadline: state.deadline,
+        // startDate: state.startDate,
+        // endDate: state.endDate,
 
         experience: state.experience?.value,
         qualification: state.qualification,
@@ -487,7 +487,7 @@ export default function Newjob() {
 
       const body: any = {
         job_title: capitalizeFLetter(state.title),
-        job_description: capitalizeFLetter(state.description),
+        job_description: state.description?capitalizeFLetter(state.description):"",
 
         job_type_id: state.jobType?.value,
         experiences: state.experience?.value,
@@ -496,10 +496,10 @@ export default function Newjob() {
         location_ids: state.location?.map((item) => item?.value),
 
         number_of_openings: Number(state.numberOfOpenings),
-        last_date: moment(state.endDate).format("YYYY-MM-DD"),
+        last_date: state.endDate?moment(state.endDate).format("YYYY-MM-DD"):"",
         // job_status_id: state.job_status?.value,
-        deadline: moment(state.deadline).format("YYYY-MM-DD"),
-        start_date: moment(state.startDate).format("YYYY-MM-DD"),
+        deadline: state.deadline?moment(state.deadline).format("YYYY-MM-DD"):"",
+        start_date: state.startDate?moment(state.startDate).format("YYYY-MM-DD"):"",
         responsibility: keyResponsibilityData,
 
         is_approved: state.profile?.role == ROLES.HR ? true : false,
@@ -1104,8 +1104,6 @@ export default function Newjob() {
                   onChange={(e) =>
                     handleFieldChange("startDate", e.target.value)
                   }
-                  error={state.error?.startDate}
-                  required
                 />
 
                 <TextInput
@@ -1114,9 +1112,7 @@ export default function Newjob() {
                   title="End Date"
                   value={state.endDate}
                   onChange={(e) => handleFieldChange("endDate", e.target.value)}
-                  error={state.error?.endDate}
                   min={state.startDate}
-                  required
                 />
 
                 <TextInput
@@ -1127,10 +1123,8 @@ export default function Newjob() {
                   onChange={(e) =>
                     handleFieldChange("deadline", e.target.value)
                   }
-                  error={state.error?.deadline}
                   min={state.startDate}
                   max={state.endDate}
-                  required
                 />
 
                 <TextInput
@@ -1293,9 +1287,7 @@ export default function Newjob() {
                 onChange={(e) =>
                   handleFieldChange("description", e.target.value)
                 }
-                error={state.error?.description}
                 rows={10}
-                required
               />
             </div>
           </div>
