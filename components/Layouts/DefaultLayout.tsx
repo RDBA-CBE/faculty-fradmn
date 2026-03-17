@@ -104,10 +104,11 @@ const DefaultLayout = ({ children }: PropsWithChildren) => {
                 <div className={`${themeConfig.navbar} main-container min-h-screen text-black dark:text-white-dark`}>
                     {/* BEGIN SIDEBAR */}
                     <SidebarDynamic />
+                    <Header />
                     {/* END SIDEBAR */}
                     <div className="main-content flex flex-col min-h-screen">
                         {/* BEGIN TOP NAVBAR */}
-                        <Header />
+                        
                         {/* END TOP NAVBAR */}
 
                         {/* BEGIN CONTENT AREA */}

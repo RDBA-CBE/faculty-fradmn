@@ -91,7 +91,7 @@
   }
   .sidebar .nav-item > button.active,
   .sidebar .nav-item > a.active {
-    @apply bg-[#fff] text-black dark:bg-[#181f32] dark:text-white-dark;
+    @apply bg-[#ededf8] text-black dark:bg-[#181f32] dark:text-white-dark;
   }
 
   .sidebar .nav-item > button.active > div > span,
@@ -855,3 +855,14 @@ h6 {
   background-color: #1E3786;
   color: #fff;
 }
+
+.toggle-sidebar .side-arrow-icon{
+  display: none !important;
+}
+
+/* .sidebar .nav-item > a.active .sidebar-icon{
+  color:#fff !important;
+}
+.sidebar .nav-item > a.active span{
+  color: #fff;
+} */

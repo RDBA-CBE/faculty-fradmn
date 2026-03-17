@@ -86,7 +86,7 @@ const SidebarDynamic = () => {
             >
               <div className="flex items-center">
                 {Icon && (
-                  <Icon className="shrink-0 !text-[#1E3786]" />
+                  <Icon className="shrink-0 !text-[#1E3786] sidebar-icon" />
                 )}
                 <span className="text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3">
                   {t(item.label)}
@@ -157,13 +157,13 @@ const SidebarDynamic = () => {
   return (
     <div className={semidark ? "dark" : ""}>
       <nav
-        className={`sidebar fixed bottom-0 top-0 z-50 h-full min-h-screen w-[230px]  transition-all duration-300  ${
+        className={`sidebar fixed bottom-0 top-0 z-50 h-full lg:max-h-[calc(100vh-57px)] w-[230px] lg:top-[57px]  transition-all duration-300  ${
           semidark ? "text-white-dark" : ""
         }`}
       >
-        <div className="h-full bg-lblue dark:bg-black  border-r border-lblue">
+        <div className="h-full bg-[#fff] dark:bg-black  border-r border-lblue">
           {/* Logo */}
-          <div className="flex items-center justify-between px-2 py-3">
+          <div className="flex items-center justify-between px-2 py-3 block lg:hidden">
             <Link href="/" className="main-logo flex shrink-0 items-center ">
             <div></div>
               <img
@@ -171,9 +171,7 @@ const SidebarDynamic = () => {
                 src="/assets/images/faculty-logo.png"
                 alt="logo"
               />
-              {/* <span className="align-middle text-lg font-semibold dark:text-white-light lg:inline ltr:ml-1.5 rtl:mr-1.5">
-                {t("Faculty Pro")}
-              </span> */}
+             
             </Link>
             <button
               type="button"
