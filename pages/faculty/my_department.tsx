@@ -15,6 +15,7 @@ import {
   capitalizeFLetter,
   Dropdown,
   showDeleteAlert,
+  truncateText,
   useSetState,
 } from "@/utils/function.utils";
 import Modal from "@/components/modal/modal.component";
@@ -644,8 +645,8 @@ const CollegeAndDepartment = () => {
       title: "Department Name",
       sortable: true,
       render: ({ department_name }) => (
-        <div className="font-medium text-gray-900 dark:text-white">
-          {department_name}
+        <div className="font-medium text-gray-900 dark:text-white" title={department_name}>
+          {truncateText(department_name)}
         </div>
       ),
     },
@@ -654,8 +655,8 @@ const CollegeAndDepartment = () => {
       title: "Department Head",
       sortable: true,
       render: ({ department_head }) => (
-        <div className="text-gray-600 dark:text-gray-400">
-          {department_head}
+        <div className="text-gray-600 dark:text-gray-400"  title={department_head}>
+          {truncateText(department_head)}
         </div>
       ),
     },
@@ -664,8 +665,8 @@ const CollegeAndDepartment = () => {
       title: "Institution",
       sortable: true,
       render: ({ institution_name }) => (
-        <div className="font-medium text-gray-900 dark:text-white">
-          {institution_name}
+        <div className="font-medium text-gray-900 dark:text-white" title={institution_name}>
+          {truncateText(institution_name)}
         </div>
       ),
     },
@@ -675,8 +676,8 @@ const CollegeAndDepartment = () => {
       title: "College ",
       sortable: true,
       render: ({ college_name }) => (
-        <div className="font-medium text-gray-900 dark:text-white">
-          {college_name}
+        <div className="font-medium text-gray-900 dark:text-white" title={college_name}>
+          {truncateText(college_name)}
         </div>
       ),
     },
@@ -819,7 +820,7 @@ const CollegeAndDepartment = () => {
           <DataTable
             noRecordsText={`No ${state.activeTab} found`}
             highlightOnHover
-            className="table-hover"
+            className="table-hover whitespace-nowrap"
             records={state.deptList || []}
             fetching={state.loading}
             selectedRecords={(state.deptList || []).filter((record) =>

@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { setPageTitle } from "../../store/themeConfigSlice";
-import { capitalizeFLetter, useSetState } from "@/utils/function.utils";
+import { capitalizeFLetter, truncateText, useSetState } from "@/utils/function.utils";
 import { Models } from "@/imports/models.import";
 import { Failure } from "@/utils/function.utils";
 import IconLoader from "@/components/Icon/IconLoader";
@@ -401,7 +401,7 @@ const JobDetails = () => {
           <DataTable
             noRecordsText="No applicants yet"
             highlightOnHover
-            className="table-hover"
+            className="table-hover whitespace-nowrap"
             records={state.applicantList}
             fetching={state.applicantLoading}
             customLoader={
@@ -414,8 +414,8 @@ const JobDetails = () => {
                 accessor: "name",
                 title: "Name",
                 render: (row: any) => (
-                  <div className=" text-gray-900 dark:text-white">
-                    {row?.first_name} {row?.last_name}
+                  <div className=" text-gray-900 dark:text-white" title={`${row?.first_name} ${row?.last_name}`}>
+                    {truncateText(`${row?.first_name} ${row?.last_name}`)}
                   </div>
                 ),
               },
@@ -424,7 +424,7 @@ const JobDetails = () => {
                 title: "Email",
                 render: (row: any) => (
                   <span className="text-gray-600 dark:text-gray-400">
-                    {row?.email}
+                    {truncateText(row?.email)}
                   </span>
                 ),
               },

@@ -208,7 +208,7 @@ const Job_Urgency = () => {
           <DataTable
             noRecordsText="No experiences found"
             highlightOnHover
-            className="table-hover"
+            className="table-hover whitespace-nowrap"
             records={state.experienceList}
             fetching={state.loading}
             customLoader={

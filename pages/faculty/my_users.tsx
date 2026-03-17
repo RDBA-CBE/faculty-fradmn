@@ -1895,7 +1895,7 @@ const Users = () => {
           <DataTable
             noRecordsText={`No ${getTabLabel().toLowerCase()} found`}
             highlightOnHover
-            className="table-hover"
+            className="table-hover whitespace-nowrap"
             records={state.userList}
             fetching={state.loading}
             selectedRecords={state.userList.filter((record) =>
