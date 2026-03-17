@@ -133,6 +133,26 @@ const Dashboard = () => {
       )}`;
     }
     // 6m/1y: "September" → "September"
+    const fullMonths = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    const monthIndex = fullMonths.findIndex(
+      (m) => m.toLowerCase() === bucket.toLowerCase()
+    );
+    if (monthIndex !== -1) {
+      return MONTHS[monthIndex];
+    }
     return bucket;
   };
 
