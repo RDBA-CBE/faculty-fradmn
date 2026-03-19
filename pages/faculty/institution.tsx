@@ -39,6 +39,7 @@ import { Success, Failure } from "@/utils/function.utils";
 import useDebounce from "@/hook/useDebounce";
 import Swal from "sweetalert2";
 import { GENDER_OPTION } from "@/utils/constant.utils";
+import PrivateRouter from "@/hook/privateRouter";
 
 const Institution = () => {
   const dispatch = useDispatch();
@@ -2184,4 +2185,4 @@ const Institution = () => {
   );
 };
 
-export default Institution;
+export default PrivateRouter(Institution);

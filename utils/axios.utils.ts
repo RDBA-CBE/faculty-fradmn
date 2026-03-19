@@ -22,17 +22,38 @@ const processQueue = (error: any, token: string | null = null) => {
   failedQueue = [];
 };
 
+let isSessionExpiredHandled = false;
+
+// const showTokenExpiredAlert = () => {
+//   const userConfirmed = window.confirm(
+//     "Your token has expired. Click OK to log in again."
+//   );
+
+//   if (userConfirmed) {
+//     localStorage.clear();
+//     window.location.href = "/auth/signin";
+//   } else {
+//     setTimeout(() => {
+//       localStorage.clear();
+//       window.location.href = "/auth/signin";
+//     }, 1000);
+//   }
+// };
+
 const showTokenExpiredAlert = () => {
+  if (isSessionExpiredHandled) return; // 🚨 prevent multiple alerts
+  isSessionExpiredHandled = true;
+
   const userConfirmed = window.confirm(
-    "Your token has expired. Click OK to log in again."
+    "Your token has expired. Click OK to log in again.",
   );
 
+  localStorage.clear();
+
   if (userConfirmed) {
-    localStorage.clear();
     window.location.href = "/auth/signin";
   } else {
     setTimeout(() => {
-      localStorage.clear();
       window.location.href = "/auth/signin";
     }, 1000);
   }
@@ -53,7 +74,7 @@ export const instance = (): AxiosInstance => {
       }
       return config;
     },
-    (error: AxiosError) => Promise.reject(error)
+    (error: AxiosError) => Promise.reject(error),
   );
 
   api.interceptors.response.use(
@@ -62,7 +83,8 @@ export const instance = (): AxiosInstance => {
       const originalRequest: any = error.config;
 
       if (
-        error.response?.data?.error === "authorization header missing" ||  error.response?.data?.error === "unauthorized" &&
+        (error.response?.data?.error === "authorization header missing" ||
+          error.response?.data?.error === "invalid or expired token") &&
         !originalRequest._retry
       ) {
         originalRequest._retry = true;
@@ -93,7 +115,7 @@ export const instance = (): AxiosInstance => {
               `${BACKEND_URL}auth/jwt/token/refresh/`,
               {
                 refresh: refreshToken,
-              }
+              },
             );
 
             const { access, refresh } = response.data;
@@ -106,7 +128,10 @@ export const instance = (): AxiosInstance => {
             processQueue(null, access);
             resolve(api!(originalRequest));
           } catch (err) {
-            if (err.response?.data?.error === "authorization header missing") {
+            if (
+              err.response?.data?.error === "authorization header missing" ||
+              err.response?.data?.error === "invalid or expired token"
+            ) {
               showTokenExpiredAlert();
             } else {
               processQueue(err, null);
@@ -121,7 +146,7 @@ export const instance = (): AxiosInstance => {
       }
 
       return Promise.reject(error);
-    }
+    },
   );
 
   return api;

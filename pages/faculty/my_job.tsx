@@ -53,6 +53,7 @@ import { useRouter } from "next/navigation";
 import { JOB_STATUS, ROLES } from "@/utils/constant.utils";
 import LogCard from "@/components/logCard";
 import { MdApproval } from "react-icons/md";
+import PrivateRouter from "@/hook/privateRouter";
 
 const Job = () => {
   const dispatch = useDispatch();
@@ -1366,4 +1367,4 @@ const Job = () => {
   );
 };
 
-export default Job;
+export default PrivateRouter(Job);
