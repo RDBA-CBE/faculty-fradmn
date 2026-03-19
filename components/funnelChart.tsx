@@ -8,8 +8,9 @@ export default function Funnel(props: any) {
   const colors = [
     "#a3ddff",
     "#edfaa2",
+    "#2ee6477e",
     "#f76c62",
-    "#14b8a57e",
+    
     "#e5e7eb", // empty row color
   ];
 
