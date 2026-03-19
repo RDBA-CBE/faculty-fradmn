@@ -53,15 +53,10 @@ const LoginBoxed = () => {
       localStorage.setItem("refresh", res.refresh);
       localStorage.setItem("userId", res.user?.id);
       localStorage.setItem("role", res.user?.role);
-      // router.replace("/");
-      if (res.user?.role == ROLES.SUPER_ADMIN) {
-        router.replace("/faculty/my_institution");
-      } else if (res.user?.role == ROLES.INSTITUTION_ADMIN) {
-        router.replace("/faculty/institute_college_and_department");
-      } else if (res.user?.role == ROLES.HR) {
-        router.replace("/faculty/my_department");
-      } else if (res.user?.role == ROLES.HOD) {
+      if (res.user?.role == ROLES.HOD) {
         router.replace("/faculty/my_job");
+      }else{
+        router.replace("/");
       }
 
       setState({ btnLoading: false });

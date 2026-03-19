@@ -62,7 +62,7 @@ export const instance = (): AxiosInstance => {
       const originalRequest: any = error.config;
 
       if (
-        error.response?.data?.error === "invalid or expired token" ||  error.response?.data?.error === "unauthorized" &&
+        error.response?.data?.error === "authorization header missing" ||  error.response?.data?.error === "unauthorized" &&
         !originalRequest._retry
       ) {
         originalRequest._retry = true;
@@ -106,7 +106,7 @@ export const instance = (): AxiosInstance => {
             processQueue(null, access);
             resolve(api!(originalRequest));
           } catch (err) {
-            if (err.response?.data?.code === "token_not_valid") {
+            if (err.response?.data?.error === "authorization header missing") {
               showTokenExpiredAlert();
             } else {
               processQueue(err, null);
