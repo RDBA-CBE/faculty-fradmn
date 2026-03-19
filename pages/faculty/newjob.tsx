@@ -466,7 +466,7 @@ export default function Newjob() {
         college: state.college,
         department: state.department,
 
-        salary: state.salary?.value,
+        // salary: state.salary?.value,
 
         priority: state.priority?.value,
         // deadline: state.deadline,
@@ -1072,7 +1072,7 @@ export default function Newjob() {
                   onChange={(option) => handleFieldChange("salary", option)}
                   error={state.error?.salary}
                   isClearable={true}
-                  required
+                  // required
                 />
 
                 {/* <CustomSelect

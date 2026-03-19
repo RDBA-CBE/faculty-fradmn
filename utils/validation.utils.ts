@@ -196,7 +196,7 @@ export const CreateNewJob = Yup.object().shape({
     .min(1, "At least one Department is required")
     .required("Department is required")
     .nullable(true),
-  salary: Yup.string().required("Salary range is required"),
+  // salary: Yup.string().required("Salary range is required"),
 
   priority: Yup.string().required("Job urgency is required"),
   // deadline: Yup.string().required("Deadline is required"),
