@@ -15,6 +15,7 @@ import IconUser from "@/components/Icon/IconUser";
 import IconCalendar from "@/components/Icon/IconCalendar";
 import IconChecks from "@/components/Icon/IconChecks";
 import Funnel from "@/components/funnelChart";
+import PrivateRouter from "@/hook/privateRouter";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -565,4 +566,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default PrivateRouter(Dashboard);
