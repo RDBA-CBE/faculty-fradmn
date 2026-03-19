@@ -236,6 +236,9 @@ const Users = () => {
     }
   };
 
+  console.log("college", state?.college);
+  
+
   const userList = async (page) => {
     try {
       setState({ loading: true });
@@ -759,6 +762,9 @@ const Users = () => {
   };
 
   const handleEdit = (row) => {
+
+    console.log("row",row);
+    
     setState({
       editId: row.id,
       showModal: true,
@@ -804,13 +810,13 @@ const Users = () => {
       }
       if (row?.collegeData) {
         setState({
-          college: row?.collegeData?.length > 0 ? row?.collegeData[0] : null,
+          college: row?.collegeData,
         });
         hrCollegeList(
           1,
           "",
           false,
-          row?.collegeData?.length > 0 ? row?.collegeData[0] : null
+          row?.institutionData
         );
       }
     }
