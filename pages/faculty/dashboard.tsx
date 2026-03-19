@@ -531,11 +531,34 @@ const Dashboard = () => {
 
           {isMounted && dashboard?.application_funnel?.length > 0 && (
             <Funnel
-              data={dashboard.application_funnel.map((f: any) => ({
-                name:
-                  f.selected !== undefined ? "Selected" : f.stage,
-                value: f.selected !== undefined ? f.selected : f.value,
-              }))}
+              data={dashboard.application_funnel.reduce(
+                (acc: any[], f: any) => {
+                  if (f.selected !== undefined || f.rejected !== undefined) {
+                    if (f.selected !== undefined) {
+                      acc.push({
+                        name: "Selected",
+                        value: f.selected,
+                        fill: "#e7515a",
+                      });
+                    }
+                    if (f.rejected !== undefined) {
+                      acc.push({
+                        name: "Rejected",
+                        value: f.rejected,
+                        fill: "#00ab55",
+                      });
+                    }
+                  } else {
+                    acc.push({
+                      name: f.stage,
+                      value: f.value,
+                      fill: ["#4361ee", "#2196f3", "#e2a03f"][acc.length % 3],
+                    });
+                  }
+                  return acc;
+                },
+                []
+              )}
             />
           )}
         </div>
