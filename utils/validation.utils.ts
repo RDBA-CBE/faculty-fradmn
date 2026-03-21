@@ -198,6 +198,11 @@ export const CreateNewJob = Yup.object().shape({
     .nullable(true),
   // salary: Yup.string().required("Salary range is required"),
 
+  jobRole: Yup.array()
+  .min(1, "At least one job role is required")
+  .required("Job role is required")
+  .nullable(true),
+
   priority: Yup.string().required("Job urgency is required"),
   // deadline: Yup.string().required("Deadline is required"),
   // startDate: Yup.string().required("Start date is required"),
@@ -317,4 +322,15 @@ export const single_interview = Yup.object().shape({
   roundName: Yup.string().required("Round name is required"),
 
   interviewStatus: Yup.string().required("Interview status is required"),
+});
+
+
+
+export const master_dept = Yup.object().shape({
+  name: Yup.string().required("Name is required"),
+  short_name: Yup.string().required("Short name is required"),
+});
+
+export const master_job_role = Yup.object().shape({
+  role_name: Yup.string().required("Name is required"),
 });

@@ -1411,12 +1411,14 @@ const Application = () => {
                 accessor: "job_title",
                 title: "Title",
                 sortable: true,
-                render: ({ job_title }) => (
-                  <div title={job_title} className="text-gray-600 dark:text-gray-400">
-                                        {truncateText(job_title)}
-                    
-
-                  </div>
+                render: (row) => (
+                  <Link
+                    href={`/faculty/application_detail?id=${row?.id}`}
+                    title={row?.job_title}
+                    className="text-gray-600 dark:text-gray-400"
+                  >
+                    {truncateText(row?.job_title)}
+                  </Link>
                 ),
               },
 
@@ -1425,10 +1427,11 @@ const Application = () => {
                 title: "College",
                 sortable: true,
                 render: ({ college_name }) => (
-                  <div title={college_name} className="text-gray-600 dark:text-gray-400">
+                  <div
+                    title={college_name}
+                    className="text-gray-600 dark:text-gray-400"
+                  >
                     {truncateText(college_name)}
-
-
                   </div>
                 ),
               },
@@ -1436,9 +1439,11 @@ const Application = () => {
                 accessor: "department_name",
                 title: "Department",
                 render: ({ department_name }) => (
-                  <div title={department_name} className="text-gray-600 dark:text-gray-400">
+                  <div
+                    title={department_name}
+                    className="text-gray-600 dark:text-gray-400"
+                  >
                     {truncateText(department_name)}
-
                   </div>
                 ),
                 sortable: true,
@@ -1448,9 +1453,11 @@ const Application = () => {
                 title: "Faculty",
                 sortable: true,
                 render: ({ applicant_name }) => (
-                  <div title={applicant_name} className="font-medium text-gray-900 dark:text-white">
+                  <div
+                    title={applicant_name}
+                    className="font-medium text-gray-900 dark:text-white"
+                  >
                     {truncateText(applicant_name)}
-
                   </div>
                 ),
               },
@@ -1460,9 +1467,11 @@ const Application = () => {
                 sortable: true,
 
                 render: ({ applicant_email }) => (
-                  <span title={applicant_email} className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+                  <span
+                    title={applicant_email}
+                    className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+                  >
                     {truncateText(applicant_email)}
-
                   </span>
                 ),
               },
@@ -1585,7 +1594,7 @@ const Application = () => {
             onClick={bulkSelect}
             className="bg-dblue group relative inline-flex items-center gap-2 overflow-hidden rounded-xl px-6 py-3 font-medium text-white shadow-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-2xl"
           >
-            <div className="absolute inset-0 bg-dblue opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+            <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
 
             <UserCheck className="relative z-10 h-5 w-5" />
 
@@ -1644,7 +1653,7 @@ const Application = () => {
               </button>
               <button
                 onClick={handleStatusSubmit}
-                className="flex-1 rounded-lg bg-dblue px-4 py-2 text-white hover:shadow-lg"
+                className="bg-dblue flex-1 rounded-lg px-4 py-2 text-white hover:shadow-lg"
               >
                 Update Status
               </button>

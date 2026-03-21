@@ -101,6 +101,7 @@ export default function Newjob() {
     skillList(1);
     tagList(1);
     fetchExperience(1);
+    jobRoleList(1)
   }, []);
 
   useEffect(() => {
@@ -214,16 +215,26 @@ export default function Newjob() {
     }
   };
 
-  // const jobStatusList = async (page = 1) => {
-  //   try {
-  //     setState({ categoryLoading: true });
-  //     const res: any = await Models.job.job_status();
-  //     const dropdown = Dropdown(res?.results, "name");
-  //     setState({ jobStatusLoading: false, jobStatusList: dropdown });
-  //   } catch (error) {
-  //     setState({ categoryLoading: false });
-  //   }
-  // };
+  const jobRoleList = async (page = 1, search = "", loadMore = false) => {
+    try {
+      setState({ jobRoleLoading: true });
+      const body: any = {};
+      if (search) body.search = search;
+      const res: any = await Models.master.role_list(body, page);
+      const dropdown = res?.results?.map((item: any) => ({
+        value: item.id,
+        label: item.role_name,
+      }));
+      setState({
+        jobRoleList: loadMore ? [...state.jobRoleList, ...dropdown] : dropdown,
+        jobRoleNext: res?.next,
+        jobRolePage: page,
+        jobRoleLoading: false,
+      });
+    } catch {
+      setState({ jobRoleLoading: false });
+    }
+  };
 
   const skillList = async (page = 1) => {
     try {
@@ -297,14 +308,13 @@ export default function Newjob() {
   };
 
   const fetchDepartments = async (collegeId: number, page = 1) => {
-    console.log("✌️collegeId --->", collegeId);
     try {
       const res: any = await Models.department.list(page, {
         college: collegeId,
       });
       const options = res?.results?.map((item: any) => ({
         value: item.id,
-        label: item.department_name,
+        label: item.short_name,
       }));
       setState({
         departmentList:
@@ -482,12 +492,15 @@ export default function Newjob() {
         isCollegeEmail: state.isCollegeEmail,
         alternativeEmail: state.alternativeEmail,
         applyLink: state.applyLink,
+        jobRole: state.jobRole
       };
       await CreateNewJob.validate(validation, { abortEarly: false });
 
       const body: any = {
         job_title: capitalizeFLetter(state.title),
-        job_description: state.description?capitalizeFLetter(state.description):"",
+        job_description: state.description
+          ? capitalizeFLetter(state.description)
+          : "",
 
         job_type_id: state.jobType?.value,
         experiences: state.experience?.value,
@@ -496,10 +509,16 @@ export default function Newjob() {
         location_ids: state.location?.map((item) => item?.value),
 
         number_of_openings: Number(state.numberOfOpenings),
-        last_date: state.endDate?moment(state.endDate).format("YYYY-MM-DD"):"",
+        last_date: state.endDate
+          ? moment(state.endDate).format("YYYY-MM-DD")
+          : "",
         // job_status_id: state.job_status?.value,
-        deadline: state.deadline?moment(state.deadline).format("YYYY-MM-DD"):"",
-        start_date: state.startDate?moment(state.startDate).format("YYYY-MM-DD"):"",
+        deadline: state.deadline
+          ? moment(state.deadline).format("YYYY-MM-DD")
+          : "",
+        start_date: state.startDate
+          ? moment(state.startDate).format("YYYY-MM-DD")
+          : "",
         responsibility: keyResponsibilityData,
 
         is_approved: state.profile?.role == ROLES.HR ? true : false,
@@ -618,9 +637,7 @@ export default function Newjob() {
         <div className=" pb-4 ">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="page-ti text-transparent">
-                Create Job Posting
-              </h1>
+              <h1 className="page-ti text-transparent">Create Job Posting</h1>
               <p className="mt-1 text-sm text-gray-500">
                 {" "}
                 Post a new opportunity
@@ -820,11 +837,27 @@ export default function Newjob() {
                   value={state.location}
                   onChange={(option) => handleFieldChange("location", option)}
                   placeholder="Select location"
-                  title="Select location"
+                  title="Select Location"
                   required
                   isClearable={true}
                   error={state.error?.location}
                   loading={state.locationLoading}
+                  isMulti={true}
+                />
+                <CustomSelect
+                  options={state.jobRoleList}
+                  value={state.jobRole}
+                  onChange={(option) => handleFieldChange("jobRole", option)}
+                  placeholder="Select job role"
+                  title="Select Job Role"
+                  required
+                  isClearable={true}
+                  error={state.error?.jobRole}
+                  loading={state.jobRoleLoading}
+                  onSearch={(searchTerm) => jobRoleList(1, searchTerm)}
+                  loadMore={() =>
+                    state.jobRoleNext && jobRoleList(state.jobRolePage + 1, "", true)
+                  }
                   isMulti={true}
                 />
               </div>
@@ -1342,7 +1375,7 @@ export default function Newjob() {
             </button>
             <button
               type="button"
-              className="w-full rounded-lg bg-dblue px-8 py-2 font-semibold text-white shadow-lg transition-all hover:from-purple-700 hover:to-blue-700 hover:shadow-xl sm:w-auto"
+              className="bg-dblue w-full rounded-lg px-8 py-2 font-semibold text-white shadow-lg transition-all hover:from-purple-700 hover:to-blue-700 hover:shadow-xl sm:w-auto"
               onClick={() => handleSubmit()}
             >
               Create Job

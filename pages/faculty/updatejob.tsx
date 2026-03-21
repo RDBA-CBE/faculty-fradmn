@@ -97,11 +97,11 @@ export default function Newjob() {
     salaryRangeList(1);
     priorityList(1);
     typeList();
-    // jobStatusList();
     categoryList(1);
     skillList(1);
     tagList(1);
     fetchExperience(1);
+    jobRoleList();
   }, []);
 
   useEffect(() => {
@@ -113,7 +113,7 @@ export default function Newjob() {
   const profile = async () => {
     try {
       const res: any = await Models.auth.profile();
-console.log('✌️res --->', res);
+      console.log("✌️res --->", res);
       setState({ profile: res });
 
       if (res?.role == ROLES.INSTITUTION_ADMIN) {
@@ -144,7 +144,6 @@ console.log('✌️res --->', res);
       console.error("Error fetching institutions:", error);
     }
   };
-
 
   const getJobDetails = async (profileResponse) => {
     try {
@@ -186,9 +185,15 @@ console.log('✌️res --->', res);
                 }))
               : [],
 
-          deadline:res?.deadline? moment(res?.deadline).format("YYYY-MM-DD") : null,
-          startDate:res?.start_date? moment(res?.start_date).format("YYYY-MM-DD"):null,
-          endDate: res?.last_date?moment(res?.last_date).format("YYYY-MM-DD") :null,
+          deadline: res?.deadline
+            ? moment(res?.deadline).format("YYYY-MM-DD")
+            : null,
+          startDate: res?.start_date
+            ? moment(res?.start_date).format("YYYY-MM-DD")
+            : null,
+          endDate: res?.last_date
+            ? moment(res?.last_date).format("YYYY-MM-DD")
+            : null,
           numberOfOpenings: res?.number_of_openings || "",
           qualification: res?.qualification || "",
           experience: {
@@ -324,16 +329,26 @@ console.log('✌️res --->', res);
     }
   };
 
-  // const jobStatusList = async (page = 1) => {
-  //   try {
-  //     setState({ categoryLoading: true });
-  //     const res: any = await Models.job.job_status();
-  //     const dropdown = Dropdown(res?.results, "name");
-  //     setState({ jobStatusLoading: false, jobStatusList: dropdown });
-  //   } catch (error) {
-  //     setState({ categoryLoading: false });
-  //   }
-  // };
+  const jobRoleList = async (page = 1, search = "", loadMore = false) => {
+    try {
+      setState({ jobRoleLoading: true });
+      const body: any = {};
+      if (search) body.search = search;
+      const res: any = await Models.master.role_list(body, page);
+      const dropdown = res?.results?.map((item: any) => ({
+        value: item.id,
+        label: item.role_name,
+      }));
+      setState({
+        jobRoleList: loadMore ? [...state.jobRoleList, ...dropdown] : dropdown,
+        jobRoleNext: res?.next,
+        jobRolePage: page,
+        jobRoleLoading: false,
+      });
+    } catch {
+      setState({ jobRoleLoading: false });
+    }
+  };
 
   const skillList = async (page = 1) => {
     try {
@@ -411,7 +426,7 @@ console.log('✌️res --->', res);
       });
       const options = res?.results?.map((item: any) => ({
         value: item.id,
-        label: item.department_name,
+        label: item.short_name,
       }));
       setState({
         departmentList:
@@ -578,9 +593,9 @@ console.log('✌️res --->', res);
         // salary: state.salary?.value,
 
         priority: state.priority?.value,
-        deadline: state.deadline?state.deadline:null,
-        startDate: state.startDate?state.startDate:null,
-        endDate: state.endDate?state.endDate:null,
+        deadline: state.deadline ? state.deadline : null,
+        startDate: state.startDate ? state.startDate : null,
+        endDate: state.endDate ? state.endDate : null,
 
         experience: state.experience?.value,
         qualification: state.qualification,
@@ -591,6 +606,7 @@ console.log('✌️res --->', res);
         isCollegeEmail: state.isCollegeEmail,
         alternativeEmail: state.alternativeEmail,
         applyLink: state.applyLink,
+        jobRole: state.jobRole,
       };
       await CreateNewJob.validate(validation, { abortEarly: false });
 
@@ -605,10 +621,16 @@ console.log('✌️res --->', res);
         location_ids: state.location?.map((item) => item?.value),
 
         number_of_openings: Number(state.numberOfOpenings),
-        last_date:state.endDate? moment(state.endDate).format("YYYY-MM-DD"):null,
+        last_date: state.endDate
+          ? moment(state.endDate).format("YYYY-MM-DD")
+          : null,
         // job_status_id: state.job_status?.value,
-        deadline: state.deadline?moment(state.deadline).format("YYYY-MM-DD"):null,
-        start_date: state.startDate?moment(state.startDate).format("YYYY-MM-DD"):null,
+        deadline: state.deadline
+          ? moment(state.deadline).format("YYYY-MM-DD")
+          : null,
+        start_date: state.startDate
+          ? moment(state.startDate).format("YYYY-MM-DD")
+          : null,
         responsibility: keyResponsibilityData,
 
         is_approved:
@@ -737,9 +759,7 @@ console.log('✌️res --->', res);
         <div className="pb-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="page-ti text-transparent">
-                Update Job Posting
-              </h1>
+              <h1 className="page-ti text-transparent">Update Job Posting</h1>
               <p className="mt-1 text-sm text-gray-500">Update a opportunity</p>
             </div>
           </div>
@@ -942,6 +962,23 @@ console.log('✌️res --->', res);
                   isClearable={true}
                   error={state.error?.location}
                   loading={state.locationLoading}
+                  isMulti={true}
+                />
+                <CustomSelect
+                  options={state.jobRoleList}
+                  value={state.jobRole}
+                  onChange={(option) => handleFieldChange("jobRole", option)}
+                  placeholder="Select job role"
+                  title="Select Job Role"
+                  required
+                  isClearable={true}
+                  error={state.error?.jobRole}
+                  loading={state.jobRoleLoading}
+                  onSearch={(searchTerm) => jobRoleList(1, searchTerm)}
+                  loadMore={() =>
+                    state.jobRoleNext &&
+                    jobRoleList(state.jobRolePage + 1, "", true)
+                  }
                   isMulti={true}
                 />
               </div>
@@ -1229,7 +1266,6 @@ console.log('✌️res --->', res);
                   onChange={(e) =>
                     handleFieldChange("startDate", e.target.value)
                   }
-                 
                 />
 
                 <TextInput
@@ -1543,7 +1579,7 @@ console.log('✌️res --->', res);
             </button>
             <button
               type="button"
-              className="w-full rounded-lg bg-dblue px-8 py-2 font-semibold text-white shadow-lg transition-all hover:from-purple-700 hover:to-blue-700 hover:shadow-xl sm:w-auto"
+              className="bg-dblue w-full rounded-lg px-8 py-2 font-semibold text-white shadow-lg transition-all hover:from-purple-700 hover:to-blue-700 hover:shadow-xl sm:w-auto"
               onClick={() => handleSubmit()}
               disabled={state.btnLoading}
             >

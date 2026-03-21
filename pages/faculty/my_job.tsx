@@ -54,6 +54,7 @@ import { JOB_STATUS, ROLES } from "@/utils/constant.utils";
 import LogCard from "@/components/logCard";
 import { MdApproval } from "react-icons/md";
 import PrivateRouter from "@/hook/privateRouter";
+import Link from "next/link";
 
 const Job = () => {
   const dispatch = useDispatch();
@@ -864,6 +865,7 @@ const Job = () => {
             onSelectedRecordsChange={(records) =>
               setState({ selectedRecords: records.map((r: any) => r.id) })
             }
+         
             customLoader={
               <div className="flex items-center justify-center py-12">
                 <div className="flex items-center gap-3">
@@ -879,13 +881,14 @@ const Job = () => {
                 accessor: "job_title",
                 title: "Title",
                 sortable: true,
-                render: ({ job_title }) => (
-                  <div
-                    title={job_title}
-                    className=" text-gray-900 dark:text-white"
+                render: (row) => (
+                  <Link
+                  href={`/faculty/job_details?id=${row?.id}`}
+                    title={row?.job_title}
+                    className=" text-gray-900 dark:text-white cursor-pointer"
                   >
-                    {truncateText(job_title)}
-                  </div>
+                    {truncateText(row?.job_title)}
+                  </Link>
                 ),
               },
               {
@@ -963,41 +966,6 @@ const Job = () => {
                 ),
               },
 
-              // {
-              //   accessor: "job_type",
-              //   title: "Type",
-              //   render: ({ job_type }) => (
-              //     <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs  text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-              //       {job_type?.replace("_", " ") || "-"}
-              //     </span>
-              //   ),
-              // },
-              // {
-              //   accessor: "experiences",
-              //   title: "Experience",
-              //   cellsStyle: {
-              //     whiteSpace: "normal",
-              //     wordBreak: "break-word",
-              //   },
-              //   render: ({ experiences }) => (
-              //     <span className="text-gray-600 dark:text-gray-400">
-              //       {capitalizeFLetter(experiences?.label || "-")}
-              //     </span>
-              //   ),
-              // },
-              // {
-              //   accessor: "number_of_openings",
-              //   title: "Openings",
-              //   cellsStyle: {
-              //     whiteSpace: "normal",
-              //     wordBreak: "break-word",
-              //   },
-              //   render: ({ number_of_openings }) => (
-              //     <span className="text-gray-600 dark:text-gray-400">
-              //       {number_of_openings || "-"}
-              //     </span>
-              //   ),
-              // },
               {
                 accessor: "job_status",
                 title: "Status",
@@ -1079,7 +1047,9 @@ const Job = () => {
                     </button>
                     {/* {state.profile?.role == ROLES.HR && ( */}
                     <button
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
+
                         // if (state.profile?.role == ROLES.HR) {
                         handleApprove(row);
                         // }
@@ -1096,7 +1066,10 @@ const Job = () => {
                     </button>
                     {/* )} */}
                     <button
-                      onClick={() => handleLog(row)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleLog(row);
+                      }}
                       className="flex items-center justify-center rounded-lg  text-purple-600 "
                       title="Logs"
                     >
@@ -1104,7 +1077,10 @@ const Job = () => {
                     </button>
 
                     <button
-                      onClick={() => handleEdit(row)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit(row);
+                      }}
                       className="flex  items-center justify-center rounded-lg text-blue-600 "
                       title="Edit"
                     >
@@ -1112,7 +1088,11 @@ const Job = () => {
                     </button>
 
                     <button
-                      onClick={() => handleDelete(row)}
+                      onClickCapture={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(row);
+                      }}
                       className="flex  items-center justify-center rounded-lg  text-red-600 "
                       title="Delete"
                     >

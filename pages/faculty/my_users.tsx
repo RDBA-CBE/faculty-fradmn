@@ -1678,7 +1678,7 @@ const Users = () => {
               Manage {getTabLabel().toLowerCase()} users and their information
             </p>
           </div>
-          {/* {state.activeTab !== ROLES.APPLICANT && ( */}
+       {state.activeTab !== ROLES.APPLICANT && ( 
           <button
             onClick={() => setState({ showModal: true })}
             className="bg-dblue group relative inline-flex transform items-center gap-2 overflow-hidden rounded-lg px-4 py-2  text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
@@ -1687,7 +1687,7 @@ const Users = () => {
             <IconPlus className="relative z-10 h-5 w-5" />
             <span className="relative z-10">Add {getTabLabel()}</span>
           </button>
-          {/* )} */}
+      )}
         </div>
       </div>
 
@@ -1740,7 +1740,7 @@ const Users = () => {
                   : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
               }`}
             >
-              Faculty
+              Job Seeker
             </button>
           </div>
         </div>

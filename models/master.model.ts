@@ -625,7 +625,7 @@ const master = {
     let promise = new Promise((resolve, reject) => {
       let url = `interview-panels/?page=${page}`;
       if (body?.search) url += `&search=${encodeURIComponent(body.search)}`;
-      if (body?.department_id) url += `&department_id=${(body.department_id)}`;
+      if (body?.department_id) url += `&department_id=${body.department_id}`;
 
       instance()
         .get(url)
@@ -668,6 +668,115 @@ const master = {
     let promise = new Promise((resolve, reject) => {
       instance()
         .delete(`interview-panels/${id}/`)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+
+  dept_list: (body, page = 1) => {
+    let promise = new Promise((resolve, reject) => {
+      let url = `department-masters/?page=${page}`;
+      if (body?.search) url += `&search=${encodeURIComponent(body.search)}`;
+      if (body?.department_id) url += `&department_id=${body.department_id}`;
+      if (body?.ordering) url += `&ordering=${body.ordering}`;
+      if (body?.is_approved == "Yes") url += `&is_approved=${true}`;
+
+      instance()
+        .get(url)
+        .then((res) => {
+          resolve(res.data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            reject(error.response.message);
+          } else {
+            reject(error);
+          }
+        });
+    });
+
+    return promise;
+  },
+
+  create_dept: (data: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .post("department-masters/", data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+
+  update_dept: (data: any, id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .patch(`department-masters/${id}/`, data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+
+  delete_dept: (id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .delete(`department-masters/${id}/`)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+
+  role_list: (body, page = 1) => {
+    let promise = new Promise((resolve, reject) => {
+      let url = `job-roles/?page=${page}`;
+      if (body?.search) url += `&search=${encodeURIComponent(body.search)}`;
+      if (body?.department_id) url += `&department_id=${body.department_id}`;
+      if (body?.ordering) url += `&ordering=${body.ordering}`;
+
+      instance()
+        .get(url)
+        .then((res) => {
+          resolve(res.data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            reject(error.response.message);
+          } else {
+            reject(error);
+          }
+        });
+    });
+
+    return promise;
+  },
+
+  create_role: (data: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .post("job-roles/", data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+
+  update_role: (data: any, id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .patch(`job-roles/${id}/`, data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+
+  delete_role: (id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .delete(`job-roles/${id}/`)
         .then((res) => resolve(res.data))
         .catch((error) => reject(error.response || error));
     });

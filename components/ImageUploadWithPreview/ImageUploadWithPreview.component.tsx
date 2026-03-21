@@ -218,7 +218,7 @@ const UpdatePropertyImagePreview: React.FC<ImageUploadProps> = ({
   /* UI */
   /* ---------------------------------- */
   return (
-    <div className="w-full">
+    <div className="w-full ">
       <div
         className={`cursor-pointer rounded-lg border-2 border-dashed p-8 text-center transition ${
           isDragging
@@ -246,7 +246,7 @@ const UpdatePropertyImagePreview: React.FC<ImageUploadProps> = ({
           className="hidden"
         />
 
-        <Upload className="mx-auto mb-4 h-12 w-12 text-blue-500" />
+        <Upload className="mx-auto mb-4 h-5 w-15 text-blue-500" />
 
         <p className="text-lg font-semibold text-gray-700">{title}</p>
         <p className="text-sm text-gray-500">

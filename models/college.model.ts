@@ -60,6 +60,7 @@ const college_dept = {
           resolve(res.data);
         })
         .catch((error) => {
+console.log('✌️error --->', error);
           if (error.response) {
             reject(error.response);
           } else {
@@ -128,6 +129,7 @@ const college_dept = {
     });
     return promise;
   },
+
 };
 
 export default college_dept;

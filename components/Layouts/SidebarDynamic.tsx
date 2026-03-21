@@ -86,7 +86,7 @@ const SidebarDynamic = () => {
             >
               <div className="flex items-center">
                 {Icon && (
-                  <Icon className="shrink-0 !text-[#1E3786] sidebar-icon" />
+                  <Icon className="sidebar-icon shrink-0 !text-[#1E3786]" />
                 )}
                 <span className="text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3">
                   {t(item.label)}
@@ -108,9 +108,7 @@ const SidebarDynamic = () => {
               onClick={() => toggleMenu(item.key)}
             >
               <div className="flex items-center">
-                {Icon && (
-                  <Icon className="shrink-0 !text-[#1E3786]" />
-                )}
+                {Icon && <Icon className="shrink-0 !text-[#1E3786]" />}
                 <span className="text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3">
                   {t(item.label)}
                 </span>
@@ -157,21 +155,20 @@ const SidebarDynamic = () => {
   return (
     <div className={semidark ? "dark" : ""}>
       <nav
-        className={`sidebar fixed bottom-0 top-0 z-50 h-full lg:max-h-[calc(100vh-57px)] w-[230px] lg:top-[57px]  transition-all duration-300  ${
+        className={`sidebar fixed bottom-0 top-0 z-50 h-full w-[230px] transition-all duration-300  lg:top-[57px] lg:max-h-[calc(100vh-57px)]  ${
           semidark ? "text-white-dark" : ""
         }`}
       >
-        <div className="h-full bg-[#fff] dark:bg-black  border-r border-lblue">
+        <div className="border-lblue h-full border-r  bg-[#fff] dark:bg-black">
           {/* Logo */}
-          <div className="flex items-center justify-between px-2 py-3 block lg:hidden">
+          <div className="block flex items-center justify-between px-2 py-3 lg:hidden">
             <Link href="/" className="main-logo flex shrink-0 items-center ">
-            <div></div>
+              <div></div>
               <img
-                className="ml-[5px] w-[160px] h-[30px] flex-none"
+                className="ml-[5px] h-[30px] w-[160px] flex-none"
                 src="/assets/images/faculty-logo.png"
                 alt="logo"
               />
-             
             </Link>
             <button
               type="button"
@@ -184,47 +181,14 @@ const SidebarDynamic = () => {
 
           {/* Menu */}
           <PerfectScrollbar className="relative h-[calc(100vh-80px)]">
-            <div className="px-4 py-2">
-              {group !=ROLES.HOD &&
-              <button
-                onClick={() => setShowOwn(!showOwn)}
-                className="flex w-full items-center justify-between"
-              >
-                <span className="align-middle text-lg font-semibold  dark:text-white-light">
-                  {t("Own")}
-                </span>
-                <IconCaretDown
-                  className={`transition-transform ${!showOwn ? "-rotate-90" : ""}`}
-                />
-              </button>
-              }
-            </div>
+        
             <AnimateHeight duration={300} height={showOwn ? "auto" : 0}>
               <ul className="relative space-y-0.5 p-4 py-0 font-semibold">
                 {getOwnMenu()?.length > 0 && renderMenu(getOwnMenu())}
               </ul>
             </AnimateHeight>
-            <div className="px-4 py-2">
-            {group !=ROLES.HOD &&
-
-              <button
-                onClick={() => setShowTeam(!showTeam)}
-                className="flex w-full items-center justify-between"
-              >
-                <span className="align-middle text-lg font-semibold dark:text-white-light">
-                  {t("Team")}
-                </span>
-                <IconCaretDown
-                  className={`transition-transform ${!showTeam ? "-rotate-90" : ""}`}
-                />
-              </button>
-}
-            </div>
-            <AnimateHeight duration={300} height={showTeam ? "auto" : 0}>
-              <ul className="relative space-y-0.5 p-4 py-0 font-semibold">
-                {getUserMenu()?.length > 0 && renderMenu(getUserMenu())}
-              </ul>
-            </AnimateHeight>
+           
+            
           </PerfectScrollbar>
         </div>
       </nav>

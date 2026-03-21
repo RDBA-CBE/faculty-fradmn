@@ -12,7 +12,7 @@ import IconTrash from "@/components/Icon/IconTrash";
 import IconEye from "@/components/Icon/IconEye";
 import IconEyeOff from "@/components/Icon/IconEyeOff";
 import IconLoader from "@/components/Icon/IconLoader";
-import { GraduationCap, BookOpen, UserCheck } from "lucide-react";
+import { GraduationCap, BookOpen, UserCheck, ChevronDown, ChevronUp } from "lucide-react";
 import Pagination from "@/components/pagination/pagination";
 import { buildFormData, Dropdown, showDeleteAlert, useSetState } from "@/utils/function.utils";
 import Modal from "@/components/modal/modal.component";
@@ -27,6 +27,9 @@ import {
 } from "@/utils/validation.utils";
 import PrivateRouter from "@/hook/privateRouter";
 import IconEdit from "@/components/Icon/IconEdit";
+import NumberInput from "@/components/FormFields/NumberInputs.component";
+import CheckboxInput from "@/components/FormFields/CheckBoxInput.component";
+import DynamicAchievementInput from "@/components/DynamicAchievementInput";
 
 const CollegeAndDepartment = () => {
   const dispatch = useDispatch();
@@ -89,6 +92,20 @@ const CollegeAndDepartment = () => {
 
     errors: {},
     editId: null,
+
+    // Department master dropdown
+    deptMasterList: [],
+    deptMasterLoading: false,
+    deptMasterPage: 1,
+    deptMasterNext: null,
+    selectedDeptMaster: null,
+
+    // Department extra fields
+    isNBAAccreditation: false,
+    dept_intake_per_year: "",
+    recent_dept_achievements: [],
+    dept_summary: "",
+    deptAccordionOpen: false,
   });
 
   const steps = [
@@ -120,6 +137,7 @@ const CollegeAndDepartment = () => {
     } else {
       deptList(1);
       collegeDropdownList(1); // Load colleges for dropdown
+      loadDeptMasterList(1);
     }
   }, [state.activeTab]);
 
@@ -130,6 +148,25 @@ const CollegeAndDepartment = () => {
       deptList(1);
     }
   }, [debounceSearch, state.statusFilter, state.sortBy]);
+
+  const loadDeptMasterList = async (page = 1, search = "", loadMore = false) => {
+    try {
+      setState({ deptMasterLoading: true });
+      const res: any = await Models.master.dept_list({ search }, page);
+      const dropdown = res?.results?.map((item) => ({
+        value: item.id,
+        label: item.name || item.department_name,
+      }));
+      setState({
+        deptMasterLoading: false,
+        deptMasterPage: page,
+        deptMasterList: loadMore ? [...state.deptMasterList, ...dropdown] : dropdown,
+        deptMasterNext: res?.next,
+      });
+    } catch (error) {
+      setState({ deptMasterLoading: false });
+    }
+  };
 
   const institutionList = async (page, search = "", loadMore = false) => {
     try {
@@ -340,6 +377,12 @@ const CollegeAndDepartment = () => {
       showHODConfirmPassword: false,
       errors: {},
       editId: null,
+      selectedDeptMaster: null,
+      isNBAAccreditation: false,
+      dept_intake_per_year: "",
+      recent_dept_achievements: [],
+      dept_summary: "",
+      deptAccordionOpen: false,
     });
   };
 
@@ -1123,6 +1166,69 @@ const CollegeAndDepartment = () => {
           required
         />
       </div>
+
+      {/* Department Master Dropdown */}
+      <CustomSelect
+        title="Department"
+        placeholder="Select Department"
+        options={state.deptMasterList}
+        value={state.selectedDeptMaster}
+        onChange={(e) => {
+          setState({ selectedDeptMaster: e, deptAccordionOpen: !!e });
+        }}
+        onSearch={(searchTerm) => loadDeptMasterList(1, searchTerm)}
+        loadMore={() =>
+          state.deptMasterNext && loadDeptMasterList(state.deptMasterPage + 1, "", true)
+        }
+        loading={state.deptMasterLoading}
+        isClearable
+      />
+
+      {/* Accordion - shown only when department is selected */}
+      {state.selectedDeptMaster && (
+        <div className="rounded-lg border border-gray-200 dark:border-gray-700">
+          <button
+            type="button"
+            onClick={() => setState({ deptAccordionOpen: !state.deptAccordionOpen })}
+            className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300"
+          >
+            <span>More Details</span>
+            {state.deptAccordionOpen ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </button>
+          {state.deptAccordionOpen && (
+            <div className="space-y-4 border-t border-gray-200 px-4 py-4 dark:border-gray-700">
+              <CheckboxInput
+                checked={state.isNBAAccreditation}
+                onChange={() => setState({ isNBAAccreditation: !state.isNBAAccreditation })}
+                label="NBA Accreditation"
+              />
+              <NumberInput
+                title="Intake Per Year"
+                value={state.dept_intake_per_year}
+                onChange={(e) => handleFormChange("dept_intake_per_year", e.target.value)}
+                placeholder="Intake Per Year"
+              />
+              <DynamicAchievementInput
+                title="Achievements"
+                placeholder="Enter achievements"
+                defaultValue={state.recent_dept_achievements}
+                onChange={(data: any) => setState({ recent_dept_achievements: data })}
+              />
+              <TextArea
+                title="Summary"
+                placeholder="Enter department summary"
+                value={state.dept_summary}
+                onChange={(e) => handleFormChange("dept_summary", e.target.value)}
+                rows={3}
+              />
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 
@@ -1438,7 +1544,10 @@ const CollegeAndDepartment = () => {
             </p>
           </div>
           <button
-            onClick={() => setState({ showModal: true })}
+            onClick={() => {
+            setState({ showModal: true });
+            if (state.activeTab === "departments") loadDeptMasterList(1);
+          }}
             className="group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-dblue px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
           >
             <div className="absolute inset-0 bg-dblue opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>

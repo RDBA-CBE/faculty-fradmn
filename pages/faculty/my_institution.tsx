@@ -25,7 +25,7 @@ import {
   ToggleLeft,
   ToggleRight,
   Hourglass,
-  SlidersHorizontal
+  SlidersHorizontal,
 } from "lucide-react";
 import Pagination from "@/components/pagination/pagination";
 import PrimaryButton from "@/components/FormFields/PrimaryButton.component";
@@ -196,7 +196,7 @@ const Institution = () => {
     { id: 3, name: "Create HR", icon: UserCheck, required: false },
     { id: 4, name: "College", icon: GraduationCap, required: false },
     { id: 5, name: "Department HOD", icon: UserCheck, required: false },
-    { id: 6, name: "Department", icon: BookOpen, required: false },
+    // { id: 6, name: "Department", icon: BookOpen, required: false },
   ];
 
   const genderOptions = [
@@ -577,13 +577,11 @@ const Institution = () => {
 
             if (state.newImages?.length > 0) {
               collegeBody.college_logo = state.newImages[0];
-            }else{
+            } else {
               collegeBody.college_logo = null;
-      
             }
 
-            const formData=buildFormData(collegeBody)
-
+            const formData = buildFormData(collegeBody);
 
             const collegeRes: any = await Models.college.create(formData);
             createdRecords.collegeId = collegeRes?.id;
@@ -870,12 +868,11 @@ const Institution = () => {
 
             if (state.newImages?.length > 0) {
               collegeBody.college_logo = state.newImages[0];
-            }else{
+            } else {
               collegeBody.college_logo = null;
-      
             }
-            const formData=buildFormData(collegeBody)
-            console.log('✌️collegeBody --->', collegeBody);
+            const formData = buildFormData(collegeBody);
+            console.log("✌️collegeBody --->", collegeBody);
 
             const collegeRes: any = await Models.college.create(formData);
             createdRecords.collegeId = collegeRes?.id;
@@ -1347,9 +1344,7 @@ const Institution = () => {
       <div className="mb-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
-            <h1 className="page-ti text-transparent">
-              Institution Management
-            </h1>
+            <h1 className="page-ti text-transparent">Institution Management</h1>
             <p className="text-gray-600 dark:text-gray-400">
               Manage and organize educational institutions
             </p>
@@ -1367,7 +1362,6 @@ const Institution = () => {
 
       {/* Filters Section */}
       <div className="mb-5 rounded-2xl  backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
-        
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <div className="group relative">
             <TextInput
@@ -1440,7 +1434,7 @@ const Institution = () => {
                   </div>
                 ),
                 sortable: true,
-                
+
                 render: ({ institution_code }) => (
                   <span className="inline-flex items-center justify-center rounded-full bg-blue-100 px-4 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                     {institution_code}
@@ -1456,8 +1450,11 @@ const Institution = () => {
                 ),
                 sortable: true,
                 render: ({ institution_name }) => (
-                  <div className="font-medium text-gray-900 dark:text-white" title={institution_name}>
-                    {truncateText(institution_name,10)}
+                  <div
+                    className="font-medium text-gray-900 dark:text-white"
+                    title={institution_name}
+                  >
+                    {truncateText(institution_name, 10)}
                   </div>
                 ),
               },
@@ -1470,9 +1467,11 @@ const Institution = () => {
                 ),
                 sortable: true,
                 render: ({ institution_email }) => (
-                  <span title={institution_email} className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-200">
-                    {truncateText(institution_email,10)}
-
+                  <span
+                    title={institution_email}
+                    className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+                  >
+                    {truncateText(institution_email, 10)}
                   </span>
                 ),
               },
@@ -1586,11 +1585,12 @@ const Institution = () => {
       </div>
 
       <Modal
+      maxWidth="max-w-5xl"
         open={state.showModal}
         close={handleCloseModal}
         addHeader="Institution Setup Wizard"
         renderComponent={() => (
-          <div className="w-full max-w-4xl">
+          <div className="w-full">
             <style jsx>{`
               .scrollbar-hide {
                 -ms-overflow-style: none;
@@ -1601,10 +1601,10 @@ const Institution = () => {
               }
             `}</style>
             {/* Progress Header */}
-            <div className=" border-b py-6">
+            <div className=" border-b py-1">
               {/* <h2 className="text-2xl font-bold mb-4">Institution Setup Wizard</h2> */}
               <div className="scrollbar-hide overflow-x-auto">
-                <div className="flex min-w-max items-center justify-between px-4">
+                <div className="flex min-w-max items-center justify-between ">
                   {steps.map((step, index) => (
                     <div
                       key={step.id}
@@ -1613,12 +1613,12 @@ const Institution = () => {
                     >
                       <div
                         className={`
-                        flex h-10 w-10 items-center justify-center rounded-full text-sm font-medium
+                        flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium
                         ${
                           isStepCompleted(step.id)
-                            ? "bg-green-500 text-white"
+                            ? "bg--500 text-white"
                             : state.currentStep === step.id
-                            ? "bg-dblue text-white"
+                            ? "bg-blue text-white"
                             : isStepAccessible(step.id)
                             ? "bg-gray-200 text-gray-600"
                             : "bg-gray-100 text-gray-400"
@@ -1628,7 +1628,7 @@ const Institution = () => {
                         {isStepCompleted(step.id) ? (
                           "✓"
                         ) : (
-                          <step.icon className="h-5 w-5" />
+                          <step.icon className="h-4 w-4" />
                         )}
                       </div>
                       <span className="ml-2 whitespace-nowrap text-sm font-medium">
@@ -1650,9 +1650,9 @@ const Institution = () => {
             </div>
 
             {/* Step Content */}
-            <div className="min-h-[400px] p-6">
+            <div className="min-h-[400px] pt-3 ">
               {state.currentStep === 1 && (
-                <div className="space-y-6">
+                <div className="space-y-3">
                   <h3 className="text-lg font-semibold">Institution Details</h3>
                   <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                     <TextInput
@@ -1713,11 +1713,9 @@ const Institution = () => {
               )}
 
               {state.currentStep === 2 && (
-                <div className="space-y-6">
+                <div className="space-y-3">
                   <h3 className="text-lg font-semibold">Institution Admin</h3>
-                  <p className="text-sm text-gray-600">
-                    Create an admin user for this institution
-                  </p>
+                
                   <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                     <TextInput
                       title="Username"
@@ -1946,58 +1944,66 @@ const Institution = () => {
               )}
 
               {state.currentStep === 4 && (
-                <div className="space-y-6">
-                  <h3 className="text-lg font-semibold">Create College</h3>
+                <div>
+
+                <div className="w-full space-y-3">
+                <h3 className="text-lg font-semibold">Create College</h3>
+
                   <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                    <UpdatePropertyImagePreview
-                      existingImages={state.college_logo}
-                      onImagesChange={(newImages) => setState({ newImages })}
-                      onDeleteImage={(imageUrl) => {
-                        setState({
-                          college_logo: state.college_logo.filter(
-                            (img) => img !== imageUrl
-                          ),
-                        });
-                      }}
-                      maxFiles={1}
-                      title="College Logo"
-                      description="Upload college logo (JPEG or PNG)"
-                      validateDimensions={false}
-                      isSingleImage={true}
-                    />
-                    <TextInput
-                      title="College Name"
-                      placeholder="Enter college name"
-                      value={state.college_name}
-                      onChange={(e) =>
-                        handleFormChange("college_name", e.target.value)
-                      }
-                      error={state.errors.college_name}
-                      required
-                    />
-                    <CustomSelect
-                      title="College Type"
-                      options={state.college_type_list}
-                      value={state.college_type}
-                      onChange={(selectedOption) =>
-                        handleFormChange("college_type", selectedOption)
-                      }
-                      isMulti={true}
-                      placeholder="College Type"
-                      error={state.errors.college_type}
-                    />
-                    <TextInput
-                      title="Email Address"
-                      type="email"
-                      placeholder="college@example.com"
-                      value={state.college_email}
-                      onChange={(e) =>
-                        handleFormChange("college_email", e.target.value)
-                      }
-                      error={state.errors.college_email}
-                      required
-                    />
+                    <div>
+                      <UpdatePropertyImagePreview
+                        existingImages={state.college_logo}
+                        onImagesChange={(newImages) => setState({ newImages })}
+                        onDeleteImage={(imageUrl) => {
+                          setState({
+                            college_logo: state.college_logo.filter(
+                              (img) => img !== imageUrl
+                            ),
+                          });
+                        }}
+                        maxFiles={1}
+                        title="College Logo"
+                        description="Upload college logo (JPEG or PNG)"
+                        validateDimensions={false}
+                        isSingleImage={true}
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <TextInput
+                        title="College Name"
+                        placeholder="Enter college name"
+                        value={state.college_name}
+                        onChange={(e) =>
+                          handleFormChange("college_name", e.target.value)
+                        }
+                        error={state.errors.college_name}
+                        required
+                      />
+                      <CustomSelect
+                        title="College Type"
+                        options={state.college_type_list}
+                        value={state.college_type}
+                        onChange={(selectedOption) =>
+                          handleFormChange("college_type", selectedOption)
+                        }
+                        isMulti={true}
+                        placeholder="College Type"
+                        error={state.errors.college_type}
+                      />
+                      <TextInput
+                        title="Email Address"
+                        type="email"
+                        placeholder="college@example.com"
+                        value={state.college_email}
+                        onChange={(e) =>
+                          handleFormChange("college_email", e.target.value)
+                        }
+                        error={state.errors.college_email}
+                        required
+                      />
+                    </div>
                   </div>
+
                   <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                     <TextInput
                       title="College Code"
@@ -2092,6 +2098,7 @@ const Institution = () => {
                     }
                     rows={3}
                   />
+                </div>
                 </div>
               )}
 
@@ -2200,7 +2207,7 @@ const Institution = () => {
                 </div>
               )}
 
-              {state.currentStep === 6 && (
+              {/* {state.currentStep === 6 && (
                 <div className="space-y-6">
                   <h3 className="text-lg font-semibold">Create Department</h3>
                   <TextInput
@@ -2250,18 +2257,9 @@ const Institution = () => {
                     }
                     rows={3}
                   />
-                  {/* <TextInput
-                   // title='Department Code'
-                    // placeholder='Enter department code'
-                    // value={state.department_code}
-                    // onChange={e =>
-                    //   handleFormChange('department_code', e.target.value)
-                    // }
-                    // error={state.errors.department_code}
-                    // required
-                   /> */}
+                
                 </div>
-              )}
+              )} */}
             </div>
 
             {/* Navigation Footer */}
@@ -2293,7 +2291,7 @@ const Institution = () => {
                   <button
                     onClick={handleFinalSubmit}
                     disabled={state.submitting1}
-                    className="rounded-lg bg-dblue px-6 py-2 text-white"
+                    className="bg-dblue rounded-lg px-6 py-2 text-white"
                   >
                     {state.submitting1 ? "Creating..." : "Submit"}
                   </button>
@@ -2302,14 +2300,14 @@ const Institution = () => {
                   <button
                     onClick={() => handleStepComplete(state.currentStep)}
                     disabled={state.submitting}
-                    className="rounded-lg bg-dblue px-6 py-2 text-white hover:bg-dblue disabled:opacity-50"
+                    className="bg-dblue hover:bg-dblue rounded-lg px-6 py-2 text-white disabled:opacity-50"
                   >
                     {state.submitting ? "Creating..." : "Create & Next"}
                   </button>
                 ) : (
                   <button
                     onClick={handleFinishWizard}
-                    className="rounded-lg bg-dblue px-6 py-2 text-white"
+                    className="bg-dblue rounded-lg px-6 py-2 text-white"
                   >
                     Finish Setup
                   </button>
@@ -2396,7 +2394,7 @@ const Institution = () => {
                 </button>
                 <button
                   onClick={() => handleUpdate()}
-                  className="rounded-lg bg-dblue px-6 py-2 text-white"
+                  className="bg-dblue rounded-lg px-6 py-2 text-white"
                 >
                   {state.btnLoading ? "Updating..." : "Update"}
                 </button>
