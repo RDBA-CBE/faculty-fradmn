@@ -881,7 +881,7 @@ const Job = () => {
                 accessor: "job_title",
                 title: "Title",
                 sortable: true,
-                render: (row) => (
+                render: (row:any) => (
                   <Link
                   href={`/faculty/job_details?id=${row?.id}`}
                     title={row?.job_title}
