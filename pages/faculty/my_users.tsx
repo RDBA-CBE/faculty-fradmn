@@ -1686,21 +1686,21 @@ const Users = () => {
           )}
 
           {state.activeTab == "applicant" && !row?.reveal_name && (
-            <button
-              onClick={() =>
-                setState({
-                  isOpenInterest: true,
-                  message: "",
-                  applicantName: row?.username,
-                  applicantId: row?.id,
-                })
-              }
-              className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
-              title="send interest"
-            >
-              <Heart className="h-4 w-4" />
-            </button>
-          )}
+          <button
+            onClick={() =>
+              setState({
+                isOpenInterest: true,
+                message: "",
+                applicantName: row?.username,
+                applicantId: row?.id,
+              })
+            }
+            className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
+            title="send interest"
+          >
+            <Heart className="h-4 w-4" />
+          </button>
+         )}
           {state.activeTab !== "applicant" && (
             <>
               <button
@@ -1750,7 +1750,14 @@ const Users = () => {
       const res = await Models.application.send_interest(body);
       Success("Interest sent successfully!");
       handleCloseModal();
+      setState({ sendLoading: false });
     } catch (error) {
+      if (error?.data?.error) {
+        Failure(error?.data?.error);
+      }
+      console.log("✌️error --->", error);
+      setState({ sendLoading: false });
+
       console.log("✌️error --->", error);
     }
   };

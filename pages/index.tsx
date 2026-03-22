@@ -377,6 +377,17 @@ const Dashboard = () => {
       href: "/faculty/dashboard/selected-faculty",
       // sub: `✓ ${stats.decisionsSelected}  ✗ ${stats.decisionsRejected}`,
     },
+
+    {
+      label: "Job Seekers",
+      value: stats.decisionsSelected,
+      color: "text-green-600",
+      bg: "bg-white/60",
+      mainbg:"bg-green-100",
+      icon: <IconChecks className="h-7 w-7" />,
+      href: "/faculty/dashboard/selected-faculty",
+      // sub: `✓ ${stats.decisionsSelected}  ✗ ${stats.decisionsRejected}`,
+    },
   ];
 
   const filterLables = [
