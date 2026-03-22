@@ -134,6 +134,12 @@ const auth = {
         url += `&ordering=${encodeURIComponent(body.ordering)}`;
       }
 
+      if (body?.active_job_seeker == "Yes") {
+        url += `&active_job_seeker=${encodeURIComponent(true)}`;
+      }
+
+
+      
       instance()
         .get(url)
         .then((res) => {

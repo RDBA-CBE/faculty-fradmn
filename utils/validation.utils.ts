@@ -334,3 +334,11 @@ export const master_dept = Yup.object().shape({
 export const master_job_role = Yup.object().shape({
   role_name: Yup.string().required("Name is required"),
 });
+
+
+
+export const user_interview = Yup.object().shape({
+  interviewSlot: Yup.string().required("Interview date is required"),
+  roundName: Yup.string().required("Round name is required"),
+
+});

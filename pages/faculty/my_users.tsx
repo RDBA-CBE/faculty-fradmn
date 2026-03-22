@@ -29,6 +29,12 @@ import { CreateUser } from "@/utils/validation.utils";
 import Swal from "sweetalert2";
 import { FRONTEND_URL, GENDER_OPTION, ROLES } from "@/utils/constant.utils";
 import CheckboxInput from "@/components/FormFields/CheckBoxInput.component";
+import { CalendarCheck, Clock, Heart } from "lucide-react";
+import TextArea from "@/components/FormFields/TextArea.component";
+import CustomeDatePicker from "@/components/datePicker";
+import moment from "moment";
+import Utils from "@/imports/utils.import";
+import * as Yup from "yup";
 
 const Users = () => {
   const dispatch = useDispatch();
@@ -108,6 +114,9 @@ const Users = () => {
     superAdminDepartmentLoading: false,
     superAdminDepartmentPage: 1,
     superAdminDepartmentNext: null,
+    isOpenInterest: false,
+    showInterviewModal: false,
+    requestForChange: false,
   });
 
   const statusOptions = [
@@ -237,7 +246,6 @@ const Users = () => {
   };
 
   console.log("college", state?.college);
-  
 
   const userList = async (page) => {
     try {
@@ -278,6 +286,7 @@ const Users = () => {
         deptData: item?.department
           ? { label: item?.department?.name, value: item?.department?.id }
           : null,
+        reveal_name: item?.reveal_name,
       }));
 
       setState({
@@ -317,11 +326,16 @@ const Users = () => {
           body.department_id = state.superAdminDepartmentFilter.value;
         }
 
-        if (state.ownRecord) {
-          body.created_by = userId;
-          body.team = "No";
+        if (state.activeTab === ROLES.APPLICANT) {
+          body.active_job_seeker = "Yes";
         } else {
-          body.team = "Yes";
+          if (state.ownRecord) {
+            body.created_by = userId;
+            body.team = "No";
+          } else {
+            body.created_by = userId;
+            body.team = "Yes";
+          }
         }
       }
     }
@@ -329,8 +343,7 @@ const Users = () => {
     if (state.profile?.role === ROLES.INSTITUTION_ADMIN) {
       if (
         // state.activeTab == "hr" ||
-        state.activeTab == "hod" ||
-        state.activeTab == "applicant"
+        state.activeTab == "hod"
       ) {
         if (state.superAdminCollegeFilter?.value) {
           body.college_id = state.superAdminCollegeFilter.value;
@@ -347,17 +360,25 @@ const Users = () => {
           body.institution_id = state.profile?.institution?.id;
         }
       } else {
-        body.created_by = userId;
-        body.team = "No";
+        if (state.activeTab === ROLES.APPLICANT) {
+          body.active_job_seeker = "Yes";
+        } else {
+          body.created_by = userId;
+          body.team = "No";
+        }
       }
     }
     console.log("✌️bodyDATATA --->", body);
 
     if (state.profile?.role === ROLES.HR) {
-      if (state.activeTab == "hod" || state.activeTab == "applicant") {
+      if (state.activeTab == "hod") {
         body.created_by = userId;
         body.team = "No";
+
         // body.college_id = state.profile?.college?.map((item)=> item?.college_id);
+      }
+      if (state.activeTab === ROLES.APPLICANT) {
+        body.active_job_seeker = "Yes";
       }
     }
 
@@ -368,6 +389,10 @@ const Users = () => {
       } else {
         body.team = "Yes";
         body.department_id = state.profile?.department?.department_id;
+      }
+
+      if (state.activeTab === ROLES.APPLICANT) {
+        body.active_job_seeker = "Yes";
       }
     }
 
@@ -747,6 +772,10 @@ const Users = () => {
       selectedHODInstitution: null,
       selectedHODCollege: null,
       selectedHRInstitution: null,
+      isOpenInterest: false,
+      applicantName: "",
+      sendLoading: false,
+      message: "",
     });
     profile(false);
   };
@@ -762,9 +791,8 @@ const Users = () => {
   };
 
   const handleEdit = (row) => {
+    console.log("row", row);
 
-    console.log("row",row);
-    
     setState({
       editId: row.id,
       showModal: true,
@@ -812,12 +840,7 @@ const Users = () => {
         setState({
           college: row?.collegeData,
         });
-        hrCollegeList(
-          1,
-          "",
-          false,
-          row?.institutionData
-        );
+        hrCollegeList(1, "", false, row?.institutionData);
       }
     }
   };
@@ -1386,36 +1409,68 @@ const Users = () => {
   );
 
   const getColumns = (): any[] => {
+    const isAnonymous = (row: any) =>
+      state.activeTab === "applicant" && !row?.reveal_name;
+
+    const safeUser = (row: any) => {
+      if (!isAnonymous(row)) return row;
+
+      return {
+        ...row,
+        username: "Anonymous Faculty",
+        email: null,
+        phone: null,
+      };
+    };
+
     const baseColumns = [
       {
         accessor: "username",
         title: "Name",
         sortable: true,
-        render: ({ username }) => (
-          <div
-            title={username}
-            className="font-medium text-gray-900 dark:text-white"
-          >
-            {truncateText(username)}
-          </div>
-        ),
+        render: (row: any) => {
+          const user = safeUser(row);
+
+          return (
+            <div
+              title={user.username}
+              className={`font-medium ${
+                isAnonymous(row)
+                  ? "italic text-gray-400"
+                  : "text-gray-900 dark:text-white"
+              }`}
+            >
+              {truncateText(user.username)}
+            </div>
+          );
+        },
       },
       {
         accessor: "email",
         title: "Email",
         sortable: true,
-        render: ({ email }) => (
-          <span title={email} className="text-gray-600 dark:text-gray-400">
-            {truncateText(email)}
-          </span>
-        ),
+        render: (row: any) => {
+          const user = safeUser(row);
+
+          return (
+            <span className="text-gray-600 dark:text-gray-400">
+              {user.email ? truncateText(user.email) : "Hidden"}
+            </span>
+          );
+        },
       },
       {
         accessor: "phone",
         title: "Phone",
-        render: ({ phone }) => (
-          <div className="text-gray-600 dark:text-gray-400">{phone}</div>
-        ),
+        render: (row: any) => {
+          const user = safeUser(row);
+
+          return (
+            <div className="text-gray-600 dark:text-gray-400">
+              {user.phone || "Hidden"}
+            </div>
+          );
+        },
       },
 
       // {
@@ -1463,9 +1518,12 @@ const Users = () => {
           const hiddenDept = otherDept?.slice(maxShow);
 
           return (
-            <div className="flex items-center gap-2 max-w-[200px] overflow-hidden">
+            <div className="flex max-w-[200px] items-center gap-2 overflow-hidden">
               {/* First department text */}
-              <span title={firstDept} className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <span
+                title={firstDept}
+                className="text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
                 {truncateText(firstDept)}
               </span>
 
@@ -1526,7 +1584,10 @@ const Users = () => {
           return (
             <div className="flex items-center gap-2">
               {/* First department text */}
-              <span title={firstDept} className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <span
+                title={firstDept}
+                className="text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
                 {truncateText(firstDept)}
               </span>
 
@@ -1613,6 +1674,33 @@ const Users = () => {
               <IconEye className="h-4 w-4" />
             </a>
           )}
+
+          {state.activeTab == "applicant" && row?.reveal_name && (
+            <button
+              onClick={() => handleSheduleInterview(row)}
+              className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
+              title="Interview schedule"
+            >
+              <CalendarCheck className="h-4 w-4" />
+            </button>
+          )}
+
+          {state.activeTab == "applicant" && !row?.reveal_name && (
+            <button
+              onClick={() =>
+                setState({
+                  isOpenInterest: true,
+                  message: "",
+                  applicantName: row?.username,
+                  applicantId: row?.id,
+                })
+              }
+              className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
+              title="send interest"
+            >
+              <Heart className="h-4 w-4" />
+            </button>
+          )}
           {state.activeTab !== "applicant" && (
             <>
               <button
@@ -1622,22 +1710,6 @@ const Users = () => {
               >
                 <IconEdit className="h-4 w-4" />
               </button>
-
-              {/* <button
-            onClick={() => handleToggleStatus(row)}
-            className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-200 ${
-              row.status === "active"
-                ? "bg-green-100 text-green-600 hover:bg-green-200"
-                : "bg-red-100 text-red-600 hover:bg-red-200"
-            }`}
-            title={row.status === "active" ? "Deactivate" : "Activate"}
-          >
-            {row.status === "active" ? (
-              <IconEye className="h-4 w-4" />
-            ) : (
-              <IconEyeOff className="h-4 w-4" />
-            )}
-          </button> */}
             </>
           )}
           <button
@@ -1665,6 +1737,93 @@ const Users = () => {
     return "Faculty";
   };
 
+  const sendInterest = async () => {
+    try {
+      setState({ sendLoading: true });
+
+      const body = {
+        message: capitalizeFLetter(state.message),
+        applicant_id: state.applicantId,
+        sender_id: state.profile?.id,
+      };
+
+      const res = await Models.application.send_interest(body);
+      Success("Interest sent successfully!");
+      handleCloseModal();
+    } catch (error) {
+      console.log("✌️error --->", error);
+    }
+  };
+
+  const handleSheduleInterview = (row) => {
+    setState({
+      showInterviewModal: true,
+      applicant: {
+        label: row?.username,
+        value: row.id,
+      },
+    });
+    console.log("✌️row --->", row);
+  };
+
+  const createInterview = async () => {
+    try {
+      setState({ submitting: true });
+
+      const validation = {
+        interviewSlot: state.interviewSlot
+          ? moment(state.interviewSlot).format("YYYY-MM-DD HH:mm")
+          : "",
+        roundName: state.roundName,
+      };
+
+      await Utils.Validation.user_interview.validate(validation, {
+        abortEarly: false,
+      });
+
+      const body = {
+        scheduled_date: moment(state.interviewSlot).format("YYYY-MM-DD HH:mm"),
+        applicant_id: state.applicant?.value,
+        response_from_applicant: state.requestForChange,
+        round_name: state.roundName,
+        status: "Scheduled",
+        interview_link: state.interview_link ?? "",
+        sender_id: state.profile?.id,
+      };
+      console.log("✌️body --->", body);
+
+      // await Models.interview.create_user_interview(body);
+      // Success("Interview schedule created successfully!");
+      // setState({
+      //   showInterviewModal: false,
+      //   errors: {},
+      //   selectedApplicants: [],
+      //   interviewSlot: "",
+      //   roundName: "",
+      //   requestForChange: false,
+      //   interviewStatus: null,
+      //   submitting: false,
+      //   interview_link: "",
+      //   selectedRecords: [],
+      // });
+      // profile();
+    } catch (error) {
+      console.log("✌️error --->", error);
+      if (error instanceof Yup.ValidationError) {
+        const validationErrors = {};
+        error.inner.forEach((err) => {
+          validationErrors[err.path] = err?.message;
+        });
+        console.log("✌️errors --->", validationErrors);
+
+        setState({ errors: validationErrors, submitting: false });
+      } else {
+        Failure(error?.error);
+        setState({ submitting: false });
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen dark:from-gray-900 dark:to-gray-800">
       {/* Header Section */}
@@ -1678,16 +1837,16 @@ const Users = () => {
               Manage {getTabLabel().toLowerCase()} users and their information
             </p>
           </div>
-       {state.activeTab !== ROLES.APPLICANT && ( 
-          <button
-            onClick={() => setState({ showModal: true })}
-            className="bg-dblue group relative inline-flex transform items-center gap-2 overflow-hidden rounded-lg px-4 py-2  text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
-          >
-            <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
-            <IconPlus className="relative z-10 h-5 w-5" />
-            <span className="relative z-10">Add {getTabLabel()}</span>
-          </button>
-      )}
+          {state.activeTab !== ROLES.APPLICANT && (
+            <button
+              onClick={() => setState({ showModal: true })}
+              className="bg-dblue group relative inline-flex transform items-center gap-2 overflow-hidden rounded-lg px-4 py-2  text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+            >
+              <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+              <IconPlus className="relative z-10 h-5 w-5" />
+              <span className="relative z-10">Add {getTabLabel()}</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -1910,6 +2069,9 @@ const Users = () => {
             onSelectedRecordsChange={(records) =>
               setState({ selectedRecords: records.map((r: any) => r.id) })
             }
+            isRecordSelectable={(record: any) =>
+              state.activeTab === ROLES.APPLICANT ? record.is_interested : true
+            }
             customLoader={
               <div className="flex items-center justify-center py-12">
                 <div className="flex items-center gap-3">
@@ -1949,13 +2111,15 @@ const Users = () => {
 
       {/* Modal */}
       <Modal
+        closeIcon
+        subTitle={`${state.editId ? "Update" : "Add New"} ${getTabLabel()}`}
         open={state.showModal}
         close={handleCloseModal}
         isFullWidth={false}
         maxWidth="max-w-2xl"
         renderComponent={() => (
           <div className="relative">
-            <div className="mb-8 text-center">
+            {/* <div className="mb-8 text-center">
               <div className="bg-dblue mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full dark:from-blue-900 dark:to-purple-900">
                 {state.editId ? (
                   <IconEdit className="h-8 w-8 text-white dark:text-blue-400" />
@@ -1970,7 +2134,7 @@ const Users = () => {
                 Fill in the details to {state.editId ? "update" : "create"}{" "}
                 {getTabLabel().toLowerCase()}
               </p>
-            </div>
+            </div> */}
 
             {renderForm()}
 
@@ -2003,6 +2167,166 @@ const Users = () => {
                     : "Create"}{" "}
                   {getTabLabel()}
                 </span>
+              </button>
+            </div>
+          </div>
+        )}
+      />
+
+      <Modal
+        subTitle={`Send Interest (${state.applicantName})`}
+        closeIcon
+        open={state.isOpenInterest}
+        close={handleCloseModal}
+        isFullWidth={false}
+        maxWidth="max-w-2xl"
+        renderComponent={() => (
+          <div className="relative">
+            <TextArea
+              title="Message"
+              placeholder="Enter message"
+              value={state.message}
+              onChange={(e) => handleFormChange("message", e.target.value)}
+            />
+
+            <div className="mt-8 flex flex-col-reverse gap-3 border-t border-gray-200 pt-6 dark:border-gray-700 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={handleCloseModal}
+                className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-2 text-sm font-medium text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => sendInterest()}
+                disabled={state.sendLoading}
+                className={`bg-dblue group relative inline-flex items-center justify-center overflow-hidden rounded-lg px-8 py-2 text-sm font-medium text-white shadow-lg transition-all duration-200 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                  state.submitting ? "cursor-not-allowed opacity-70" : ""
+                }`}
+              >
+                <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+                {state.sendLoading ? (
+                  <IconLoader className="relative z-10 mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  "Send"
+                )}
+                <span className="relative z-10"></span>
+              </button>
+            </div>
+          </div>
+        )}
+      />
+
+      <Modal
+        subTitle={`Create Interview Schedule (${state.applicant?.label})`}
+        closeIcon
+        open={state.showInterviewModal}
+        close={() =>
+          setState({
+            showInterviewModal: false,
+            errors: {},
+            selectedJobs: [],
+            selectedDepartments: [],
+            selectedApplicants: [],
+            panelMembers: [],
+            interviewSlot: "",
+            roundName: "",
+            requestForChange: false,
+            interviewStatus: null,
+          })
+        }
+        renderComponent={() => (
+          <div className="">
+            <div className="space-y-5">
+              <TextInput
+                title="Round Name"
+                placeholder="Enter round name (e.g., Technical Round 1)"
+                value={state.roundName}
+                onChange={(e) =>
+                  setState({
+                    roundName: e.target.value,
+                    errors: { ...state.errors, roundName: "" },
+                  })
+                }
+                error={state.errors?.roundName}
+                required
+              />
+              <CustomeDatePicker
+                title="Interview Slot"
+                value={state.interviewSlot}
+                placeholder="Choose From"
+                onChange={(e) =>
+                  setState({
+                    interviewSlot: e,
+                    errors: { ...state.errors, interviewSlot: "" },
+                  })
+                }
+                showTimeSelect={true}
+                required
+                usePortal={false}
+                minDate={new Date()}
+                error={state.errors?.interviewSlot}
+              />
+
+              <TextInput
+                title="Interview Link"
+                placeholder="Enter interview link (e.g., https://example.com/interview)"
+                value={state.interview_link}
+                onChange={(e) =>
+                  setState({
+                    interview_link: e.target.value,
+                    errors: { ...state.errors, interview_link: "" },
+                  })
+                }
+                error={state.errors?.interview_link}
+              />
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="requestForChange"
+                  checked={state.requestForChange}
+                  onChange={(e) =>
+                    setState({ requestForChange: e.target.checked })
+                  }
+                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <label
+                  htmlFor="requestForChange"
+                  className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Request for Change
+                </label>
+              </div>
+            </div>
+
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() =>
+                  setState({
+                    showInterviewModal: false,
+                    errors: {},
+                    selectedJobs: [],
+                    selectedDepartments: [],
+                    selectedApplicants: [],
+                    panelMembers: [],
+                    interviewSlot: "",
+                    roundName: "",
+                    requestForChange: false,
+                    interviewStatus: null,
+                    interview_link: "",
+                  })
+                }
+                className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => createInterview()}
+                disabled={state.submitting}
+                className="flex-1 rounded-lg bg-gradient-to-r from-green-600 to-teal-600 px-4 py-2 text-white hover:shadow-lg disabled:opacity-50"
+              >
+                {state.submitting ? "Creating..." : "Create Schedule"}
               </button>
             </div>
           </div>

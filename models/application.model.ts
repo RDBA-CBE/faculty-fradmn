@@ -161,6 +161,27 @@ const application = {
     });
     return promise;
   },
+
+  send_interest: (data: any) => {
+    let promise = new Promise((resolve, reject) => {
+      let url = `users/interested/`;
+      instance()
+        .post(url, data)
+        .then((res) => {
+          resolve(res.data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            reject(error.response);
+          } else {
+            reject(error);
+          }
+        });
+    });
+    return promise;
+  },
+
+  
 };
 
 export default application;

@@ -128,6 +128,63 @@ const interview = {
     });
     return promise;
   },
+
+  create_user_interview: (data: any) => {
+    let promise = new Promise((resolve, reject) => {
+      let url = `interview-slots/`;
+      instance()
+        .post(url, data)
+        .then((res) => {
+          resolve(res.data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            reject(error.response);
+          } else {
+            reject(error);
+          }
+        });
+    });
+    return promise;
+  },
+
+  view_user_interview: (data: any) => {
+    let promise = new Promise((resolve, reject) => {
+      let url = `interview-slots/`;
+      instance()
+        .post(url, data)
+        .then((res) => {
+          resolve(res.data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            reject(error.response);
+          } else {
+            reject(error);
+          }
+        });
+    });
+    return promise;
+  },
+
+  delete_user_interview: (data: any) => {
+    let promise = new Promise((resolve, reject) => {
+      let url = `interview-slots/`;
+      instance()
+        .post(url, data)
+        .then((res) => {
+          resolve(res.data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            reject(error.response);
+          } else {
+            reject(error);
+          }
+        });
+    });
+    return promise;
+  },
 };
 
 export default interview;
