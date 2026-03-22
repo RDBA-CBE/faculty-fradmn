@@ -2,14 +2,12 @@ import instance from "@/utils/axios.utils";
 
 const master = {
   // Category APIs
-  category_list: (body: any = {}) => {
+  category_list: (body: any = {}, page = 1) => {
     let promise = new Promise((resolve, reject) => {
-      let url = "job-categories/";
-      if (body?.search) url += `?search=${encodeURIComponent(body.search)}`;
+      let url = `job-categories/?page=${page}`;
+      if (body?.search) url += `&search=${encodeURIComponent(body.search)}`;
       if (body?.ordering)
-        url += `${body.search ? "&" : "?"}ordering=${encodeURIComponent(
-          body.ordering
-        )}`;
+        url += `&ordering=${encodeURIComponent(body.ordering)}`;
       instance()
         .get(url)
         .then((res) => resolve(res.data))

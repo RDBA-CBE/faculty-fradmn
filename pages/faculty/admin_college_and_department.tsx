@@ -255,6 +255,7 @@ const CollegeAndDepartment = () => {
         department: item?.department_extras,
         is_legacy: item.is_legacy,
         short_name: item?.short_name,
+        category:item?.job_categories
       }));
 
       setState({
@@ -307,6 +308,29 @@ const CollegeAndDepartment = () => {
         hrLoading: false,
         hrPage: page,
         hrNext: res?.next,
+      });
+    } catch (error) {
+      setState({ hrLoading: false });
+      // console.error("Error fetching HR users:", error);
+    }
+  };
+
+  const categoryList = async (page = 1, search = "", loadMore = false) => {
+    try {
+      setState({ catLoading: true });
+      const body = {
+        search,
+      };
+      const res: any = await Models.master.category_list(body,page);
+
+      const dropdown = Dropdown(res?.results, "name");
+      setState({
+        categoryOption: loadMore
+          ? [...state.categoryOption, ...dropdown]
+          : dropdown,
+        catLoading: false,
+        catPage: page,
+        catNext: res?.next,
       });
     } catch (error) {
       setState({ hrLoading: false });
@@ -714,6 +738,7 @@ const CollegeAndDepartment = () => {
       college_logo: null,
       institution: null,
       department_name: "",
+      category:[],
       // department_code: "",
       department_email: "",
       department_phone: "",
@@ -864,6 +889,17 @@ const CollegeAndDepartment = () => {
         });
       } else {
         setState({ naac_accreditation: [] });
+      }
+
+      if (row.category?.length > 0) {
+        setState({
+          category: row.category?.map((item) => ({
+            value: item?.id,
+            label: item?.name,
+          })),
+        });
+      } else {
+        setState({ category: [] });
       }
 
       if (row?.department?.length > 0) {
@@ -1682,6 +1718,14 @@ const CollegeAndDepartment = () => {
         collegeBody.department_master_ids = state.departmentData?.map(
           (item) => item?.dept?.value
         );
+      } else {
+        collegeBody.department_master_ids = [];
+      }
+
+      if (state.category?.length > 0) {
+        collegeBody.job_category_ids = state.category?.map((item) => item?.value);
+      } else {
+        collegeBody.job_category_ids = [];
       }
 
       const collegeformData = buildFormData(collegeBody);
@@ -1780,6 +1824,14 @@ const CollegeAndDepartment = () => {
         body.department_master_ids = state.departmentData?.map(
           (item) => item?.dept?.value
         );
+      } else {
+        body.department_master_ids = [];
+      }
+
+      if (state.category?.length > 0) {
+        body.job_category_ids = state.category?.map((item) => item?.value);
+      } else {
+        body.job_category_ids = [];
       }
       console.log("✌️body --->", body);
 
@@ -1787,9 +1839,7 @@ const CollegeAndDepartment = () => {
       const formData = buildFormData(body);
       const res: any = await Models.college.update(formData, state.editId);
       const newDept = state.departmentData?.filter((item) => !item?.id);
-      console.log("✌️newDept --->", newDept);
       const updateDept = state.departmentData?.filter((item) => item?.id);
-      console.log("✌️updateDept --->", updateDept);
 
       if (newDept?.length > 0) {
         await Promise.all(
@@ -1944,7 +1994,7 @@ const CollegeAndDepartment = () => {
 
   const renderCollegeForm = () => (
     <>
-      <div className=" grid grid-cols-1 items-center gap-4 pb-3 lg:grid-cols-4">
+      <div className=" grid grid-cols-1 gap-4 pb-3 lg:grid-cols-4">
         <CustomSelect
           options={state.institutionList}
           value={state.institution}
@@ -2059,6 +2109,25 @@ const CollegeAndDepartment = () => {
           loading={state.hrLoading}
           title="Assign HR"
         />
+
+        <CustomSelect
+          options={state.categoryOption}
+          value={state.category}
+          onChange={(selectedOption) => {
+            setState({
+              category: selectedOption,
+            });
+          }}
+          onSearch={(searchTerm) => categoryList(1, searchTerm)}
+          placeholder="Select category"
+          isClearable={true}
+          isMulti={true}
+          loadMore={() =>
+            state.catNext && categoryList(state.catPage + 1, "", true)
+          }
+          loading={state.catLoading}
+          title="Select category"
+        />
         <TextArea
           title="Address"
           placeholder="Enter college address"
@@ -2068,11 +2137,13 @@ const CollegeAndDepartment = () => {
           rows={3}
           required
         />
-        <CheckboxInput
-          checked={state.is_legacy}
-          onChange={(e) => setState({ is_legacy: !state.is_legacy })}
-          label="Is Legacy"
-        />
+        <div className="mt-7">
+          <CheckboxInput
+            checked={state.is_legacy}
+            onChange={(e) => setState({ is_legacy: !state.is_legacy })}
+            label="Is Legacy"
+          />
+        </div>
       </div>
 
       <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-1 ">

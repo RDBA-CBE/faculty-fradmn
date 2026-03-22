@@ -2,6 +2,8 @@ import {
   buildFormData,
   capitalizeFLetter,
   Dropdown,
+  Failure,
+  objIsEmpty,
   Success,
   toISO,
   useSetState,
@@ -231,6 +233,13 @@ export default function Newjob() {
                 }))
               : [],
           is_approved: res?.is_approved,
+          jobRole:
+            res?.roles?.length > 0
+              ? res?.roles?.map((role: any) => ({
+                  value: role?.id,
+                  label: role?.role_name,
+                }))
+              : [],
         });
         if (res?.job_image) {
           setState({
@@ -286,14 +295,26 @@ export default function Newjob() {
     }
   };
 
-  const categoryList = async (page = 1) => {
+  const categoryList = async (page = 1, search = "", loadMore = false) => {
     try {
-      setState({ categoryLoading: true });
-      const res: any = await Models.job.job_category();
+      setState({ catLoading: true });
+      const body = {
+        search,
+      };
+      const res: any = await Models.master.category_list(body, page);
+
       const dropdown = Dropdown(res?.results, "name");
-      setState({ categoryLoading: false, categoryList: dropdown });
+      setState({
+        categoryOption: loadMore
+          ? [...state.categoryOption, ...dropdown]
+          : dropdown,
+        catLoading: false,
+        catPage: page,
+        catNext: res?.next,
+      });
     } catch (error) {
-      setState({ categoryLoading: false });
+      setState({ hrLoading: false });
+      // console.error("Error fetching HR users:", error);
     }
   };
 
@@ -681,6 +702,18 @@ export default function Newjob() {
         body.alternative_email = "";
       }
 
+      if (state.category?.value) {
+        body.category_ids = [state.category?.value];
+      } else {
+        body.category_ids = [];
+      }
+
+      if (state.jobRole?.length > 0) {
+        body.role_ids = state.jobRole?.map((item) => item?.value);
+      } else {
+        body.role_ids = [];
+      }
+
       console.log("✌️body --->", body);
       const formData: any = buildFormData(body);
 
@@ -704,6 +737,9 @@ export default function Newjob() {
           errors[error.path] = error.message;
         });
         console.log("✌️errors --->", errors);
+        if (!objIsEmpty(errors)) {
+          Failure("Fill all details");
+        }
 
         setState({ error: errors });
       }
@@ -980,6 +1016,24 @@ export default function Newjob() {
                     jobRoleList(state.jobRolePage + 1, "", true)
                   }
                   isMulti={true}
+                />
+
+                <CustomSelect
+                  options={state.categoryOption}
+                  value={state.category}
+                  onChange={(selectedOption) => {
+                    setState({
+                      category: selectedOption,
+                    });
+                  }}
+                  onSearch={(searchTerm) => categoryList(1, searchTerm)}
+                  placeholder="Select category"
+                  isClearable={true}
+                  loadMore={() =>
+                    state.catNext && categoryList(state.catPage + 1, "", true)
+                  }
+                  loading={state.catLoading}
+                  title="Select category"
                 />
               </div>
             </div>

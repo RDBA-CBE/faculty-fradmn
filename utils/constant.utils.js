@@ -121,10 +121,10 @@ export const menuConfig = {
           href: "/faculty/master/job_urgency",
         },
 
-        // {
-        //   label: "Category",
-        //   href: "/faculty/master/category",
-        // },
+        {
+          label: "Category",
+          href: "/faculty/master/category",
+        },
 
         {
           label: "Location",
@@ -426,7 +426,7 @@ export const OwnmenuConfig = {
     {
       type: "link",
       icon: "IconMenuNotes",
-      label: "Colleges",
+      label: "Colleges & Departments",
       href: "/faculty/admin_college_and_department",
     },
 
@@ -481,7 +481,7 @@ export const OwnmenuConfig = {
         },
 
         {
-          label: "Job Category",
+          label: "Category",
           href: "/faculty/master/category",
         },
 
@@ -512,7 +512,7 @@ export const OwnmenuConfig = {
         },
 
         {
-          label: "College Category",
+          label: "College Type",
           href: "/faculty/master/college_type",
         },
         {

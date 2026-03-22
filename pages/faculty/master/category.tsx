@@ -9,20 +9,31 @@ import IconTrash from "@/components/Icon/IconTrash";
 import IconLoader from "@/components/Icon/IconLoader";
 import IconEdit from "@/components/Icon/IconEdit";
 import Pagination from "@/components/pagination/pagination";
-import { showDeleteAlert, useSetState } from "@/utils/function.utils";
+import {
+  capitalizeFLetter,
+  Dropdown,
+  showDeleteAlert,
+  useSetState,
+} from "@/utils/function.utils";
 import Modal from "@/components/modal/modal.component";
 import { Models } from "@/imports/models.import";
 import { Success, Failure } from "@/utils/function.utils";
 import useDebounce from "@/hook/useDebounce";
 import Swal from "sweetalert2";
 import PrivateRouter from "@/hook/privateRouter";
+import CustomPhoneInput from "@/components/phoneInput";
+import * as Yup from "yup";
+import Utils from "@/imports/utils.import";
+import { ROLES } from "@/utils/constant.utils";
+import CustomSelect from "@/components/FormFields/CustomSelect.component";
+import CheckboxInput from "@/components/FormFields/CheckBoxInput.component";
 
 const Category = () => {
   const dispatch = useDispatch();
   const [state, setState] = useSetState({
     page: 1,
     pageSize: 10,
-    categoryList: [],
+    experienceList: [],
     count: 0,
     search: "",
     showModal: false,
@@ -33,13 +44,15 @@ const Category = () => {
     name: "",
     errors: {},
     editId: null,
+    selectedRecords: [],
+    decision_maker: false,
   });
 
   const debounceSearch = useDebounce(state.search, 500);
 
   useEffect(() => {
     dispatch(setPageTitle("Category Management"));
-    categoryList(1);
+    // categoryList(1);
   }, [dispatch]);
 
   useEffect(() => {
@@ -52,10 +65,12 @@ const Category = () => {
       const body: any = {};
       if (state.search) body.search = state.search;
       if (state.sortBy) {
-        body.ordering = state.sortOrder === "desc" ? `-${state.sortBy}` : state.sortBy;
+        body.ordering =
+          state.sortOrder === "desc" ? `-${state.sortBy}` : state.sortBy;
       }
 
       const res: any = await Models.master.category_list(body);
+      console.log("✌️res --->", res);
       const tableData = res?.results?.map((item) => ({
         id: item?.id,
         name: item?.name,
@@ -100,6 +115,33 @@ const Category = () => {
       () => Swal.fire("Cancelled", "Record is safe", "info"),
       "Are you sure you want to delete this category?"
     );
+  };
+
+  const handleBulkDelete = () => {
+    showDeleteAlert(
+      () => {
+        bulkDeleteRecords();
+      },
+      () => {
+        Swal.fire("Cancelled", "Your Records are safe :)", "info");
+      },
+      `Are you sure want to delete ${state.selectedRecords?.length} record(s)?`
+    );
+  };
+
+  const bulkDeleteRecords = async () => {
+    try {
+      for (const id of state.selectedRecords) {
+        await Models.master.delete_category(id);
+      }
+      Success(
+        `${state.selectedRecords?.length} Category deleted successfully!`
+      );
+      setState({ selectedRecords: [] });
+      categoryList(state.page);
+    } catch (error) {
+      Failure("Failed to delete category. Please try again.");
+    }
   };
 
   const deleteRecord = async (id: number) => {
@@ -150,69 +192,94 @@ const Category = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-3 dark:from-gray-900 dark:to-gray-800">
-      <div className="mb-8">
+    <div className="min-h-screen dark:from-gray-900 dark:to-gray-800">
+      {/* Header Section */}
+      <div className="mb-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
-            <h1 className="page-ti text-transparent">
-              Category Management
-            </h1>
+            <h1 className="page-ti text-transparent">Category Management</h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Manage job categories
+              Manage Category
             </p>
           </div>
           <button
             onClick={() => setState({ showModal: true })}
-            className="group relative inline-flex transform items-center gap-2 overflow-hidden rounded-xl bg-dblue px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+            className="bg-dblue group relative inline-flex transform items-center gap-2 overflow-hidden rounded-lg px-4 py-2  text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
           >
-            <div className="absolute inset-0 bg-dblue opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+            <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
             <IconPlus className="relative z-10 h-5 w-5" />
             <span className="relative z-10">Add Category</span>
           </button>
         </div>
       </div>
 
-      <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
-        <div className="mb-4 flex items-center gap-2">
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-            Filters
-          </h3>
-        </div>
+      <div className="mb-5 rounded-2xl  backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <TextInput
-            placeholder="Search categories..."
-            value={state.search}
-            onChange={(e) => setState({ search: e.target.value })}
-            icon={<IconSearch className="h-4 w-4" />}
-          />
+          <div className="group relative">
+            <TextInput
+              placeholder="Search category..."
+              value={state.search}
+              onChange={(e) => setState({ search: e.target.value })}
+              icon={<IconSearch className="h-4 w-4" />}
+              className="transition-all duration-200 focus:shadow-lg group-hover:shadow-md"
+            />
+          </div>
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
-        <div className="border-b border-gray-200 p-6 dark:border-gray-700">
+      <div className="overflow-hidden rounded-lg   backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
+        <div className="mb-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-              Categories List
+            <h3 className="text-lg font-bold text-gray-800 dark:text-white">
+              Category Management
             </h3>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              {state.count} records found
+            <div className="flex items-center gap-4">
+              {state.selectedRecords?.length > 0 && (
+                <button
+                  onClick={() => handleBulkDelete()}
+                  className=" group relative inline-flex transform items-center gap-2 overflow-hidden rounded-md border border-red-500  px-3 py-1 text-red-500 shadow-lg transition-all duration-200 "
+                >
+                  <div className=" absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+                  <IconTrash className="h-4 w-4" />
+                  <span className="relative z-10 text-[13px]">
+                    Delete ({state.selectedRecords?.length})
+                  </span>
+                </button>
+                // <button
+                //   // onClick={handleBulkDelete}
+                //   className="flex items-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+                // >
+                //   <IconTrash className="h-4 w-4" />
+                //   Delete ({state.selectedRecords.length})
+                // </button>
+              )}
+              <div className="text-sm text-black ">
+                {state.count} records found
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* <div className="overflow-x-auto"> */}
+        <div className="overflow-x-auto border border-gray-200 bg-white">
           <DataTable
-            noRecordsText="No categories found"
+            noRecordsText="No category found"
             highlightOnHover
             className="table-hover whitespace-nowrap"
             records={state.categoryList}
             fetching={state.loading}
+            selectedRecords={state.categoryList?.filter((record) =>
+              state.selectedRecords?.includes(record.id)
+            )}
+            onSelectedRecordsChange={(records) =>
+              setState({ selectedRecords: records.map((r) => r.id) })
+            }
             customLoader={
               <div className="flex items-center justify-center py-12">
                 <div className="flex items-center gap-3">
                   <IconLoader className="h-6 w-6 animate-spin text-blue-600" />
                   <span className="text-gray-600 dark:text-gray-400">
-                    Loading categories...
+                    Loading category...
                   </span>
                 </div>
               </div>
@@ -220,7 +287,7 @@ const Category = () => {
             columns={[
               {
                 accessor: "name",
-                title: "Category Name",
+                title: "Name",
                 sortable: true,
                 render: ({ name }) => (
                   <div className="font-medium text-gray-900 dark:text-white">
@@ -233,17 +300,17 @@ const Category = () => {
                 title: "Actions",
                 textAlignment: "center",
                 render: (row: any) => (
-                  <div className="flex items-center justify-center gap-2">
+                  <div className="flex items-center justify-center gap-3">
                     <button
                       onClick={() => handleEdit(row)}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 transition-all duration-200 hover:bg-blue-200"
+                      className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200  dark:text-blue-400"
                       title="Edit"
                     >
                       <IconEdit className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(row)}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600 transition-all duration-200 hover:bg-red-200"
+                      className="flex items-center justify-center rounded-lg  text-red-600 transition-all duration-200  "
                       title="Delete"
                     >
                       <IconTrash className="h-4 w-4" />
@@ -262,7 +329,7 @@ const Category = () => {
                 sortOrder: direction,
                 page: 1,
               });
-              categoryList(1);
+              // categoryList(1);
             }}
             minHeight={200}
           />
@@ -279,22 +346,13 @@ const Category = () => {
       </div>
 
       <Modal
+      closeIcon
+      subTitle= {state.editId ? "Update Category" : "Add New Category"} 
         open={state.showModal}
         close={handleCloseModal}
         renderComponent={() => (
           <div className="relative">
-            <div className="mb-8 text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-dblue dark:from-blue-900 dark:to-purple-900">
-                {state.editId ? (
-                  <IconEdit className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-                ) : (
-                  <IconPlus className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-                )}
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {state.editId ? "Update" : "Add New"} Category
-              </h2>
-            </div>
+            
 
             <div className="space-y-6">
               <TextInput
