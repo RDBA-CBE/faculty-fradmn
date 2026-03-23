@@ -115,6 +115,10 @@ const Job = () => {
 
     errors: {},
     selectedRecords: [],
+    sortingFilter: {
+      value: 1,
+      label: "Own Records",
+    },
   });
 
   const debounceSearch = useDebounce(state.search, 500);
@@ -124,7 +128,6 @@ const Job = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    jobList(1);
     institutionDropdownList(1);
     profile();
     locationList(1);
@@ -136,7 +139,7 @@ const Job = () => {
   }, []);
 
   useEffect(() => {
-    jobList(1);
+    if (state.profile) callJobListByRole(1);
   }, [
     debounceSearch,
     state.statusFilter,
@@ -151,6 +154,8 @@ const Job = () => {
     state.priorityFilter,
     state.typeFilter,
     state.salaryFilter,
+    state.sortingFilter,
+    state.profile,
   ]);
 
   const profile = async () => {
@@ -165,16 +170,34 @@ const Job = () => {
       } else if (res?.role == ROLES.HR) {
         departmentDropdownList(1, "", false, res?.college?.college_id, res.id);
       }
+      callJobListByRole(1, res);
     } catch (error) {
       console.error("Error fetching institutions:", error);
     }
   };
 
-  const jobList = async (page) => {
+  const callJobListByRole = (page: number, profileData?: any) => {
+    const p = profileData ?? state.profile;
+    const role = p?.role;
+    if (role === ROLES.SUPER_ADMIN) jobList(page, null, null);
+    else if (role === ROLES.INSTITUTION_ADMIN)
+      jobList(page, p?.institution?.id, null);
+    else if (role === ROLES.HR)
+      jobList(
+        page,
+        null,
+        p?.college?.map((c: any) => c.college_id)
+      );
+    else jobList(page, null, null);
+  };
+
+  const jobList = async (page, insId = null, colId = null) => {
     try {
       setState({ loading: true });
 
       const body = bodyData();
+      if (insId) body.institution_id = insId;
+      if (colId) body.college_id = colId;
       const res: any = await Models.job.list(page, body);
 
       const tableData = res?.results?.map((item) => ({
@@ -392,7 +415,6 @@ const Job = () => {
     if (state.institutionFilter?.value) {
       body.institution_id = state.institutionFilter.value;
     }
-    body.created_by = parseInt(userId);
 
     if (state.collegeFilter?.value) {
       body.college_id = state.collegeFilter.value;
@@ -422,7 +444,19 @@ const Job = () => {
     if (state.statusFilter?.value) {
       body.status = state.statusFilter.value;
     }
-    body.team = "No";
+
+    if (state.sortingFilter?.value) {
+      if (state.sortingFilter?.value == 1) {
+        body.team = "No";
+        body.created_by = parseInt(userId);
+      } else {
+        body.created_by = parseInt(userId);
+
+        body.team = "Yes";
+      }
+    }
+
+    // body.team = "No";
     if (state.sortBy) {
       body.ordering =
         state.sortOrder === "desc" ? `-${state.sortBy}` : state.sortBy;
@@ -432,7 +466,7 @@ const Job = () => {
 
   const handlePageChange = (pageNumber: number) => {
     setState({ page: pageNumber });
-    jobList(pageNumber);
+    callJobListByRole(pageNumber);
   };
 
   const handleInstitutionChange = (selectedOption: any) => {
@@ -732,6 +766,22 @@ const Job = () => {
             onChange={(e) => setState({ end_date: e })}
             showTimeSelect={false}
           />
+          <CustomSelect
+            options={[
+              {
+                value: 1,
+                label: "Own Records",
+              },
+              {
+                value: 2,
+                label: "Not Own Records",
+              },
+            ]}
+            value={state.sortingFilter}
+            onChange={(e) => setState({ sortingFilter: e })}
+            placeholder={"Own Records"}
+            isClearable={false}
+          />
           <button
             onClick={() => setState({ showFilterModal: true })}
             className="flex items-center gap-4 rounded-lg border bg-white p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 "
@@ -865,7 +915,6 @@ const Job = () => {
             onSelectedRecordsChange={(records) =>
               setState({ selectedRecords: records.map((r: any) => r.id) })
             }
-         
             customLoader={
               <div className="flex items-center justify-center py-12">
                 <div className="flex items-center gap-3">
@@ -881,11 +930,11 @@ const Job = () => {
                 accessor: "job_title",
                 title: "Title",
                 sortable: true,
-                render: (row:any) => (
+                render: (row: any) => (
                   <Link
-                  href={`/faculty/job_details?id=${row?.id}`}
+                    href={`/faculty/job_details?id=${row?.id}`}
                     title={row?.job_title}
-                    className=" text-gray-900 dark:text-white cursor-pointer"
+                    className=" cursor-pointer text-gray-900 dark:text-white"
                   >
                     {truncateText(row?.job_title)}
                   </Link>

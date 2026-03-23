@@ -166,6 +166,10 @@ const Application = () => {
     isOpenRound: false,
     expandedRounds: {},
     selectedRecords: [],
+    sortingFilter: {
+      value: 1,
+      label: "Own Records",
+    },
   });
 
   const debounceSearch = useDebounce(state.search, 500);
@@ -195,7 +199,7 @@ const Application = () => {
       } else if (role === ROLES.INSTITUTION_ADMIN) {
         applicationList(
           1,
-          state.profile?.institution?.institution?.id,
+          state.profile?.institution?.id,
           null,
           null,
           state.profile?.id
@@ -232,6 +236,7 @@ const Application = () => {
     state.priorityFilter,
     state.typeFilter,
     state.salaryFilter,
+    state.sortingFilter,
   ]);
 
   const profile = async () => {
@@ -304,6 +309,8 @@ const Application = () => {
     try {
       setState({ loading: true });
       const body = bodyData();
+      console.log("✌️institutionId --->", institutionId);
+
       if (institutionId) {
         body.institution = institutionId;
       }
@@ -313,10 +320,19 @@ const Application = () => {
       if (deptId) {
         body.department = deptId;
       }
-      if (profileId) {
-        body.created_by = profileId;
+      // if (profileId) {
+      //   body.created_by = profileId;
+      // }
+      if (state.sortingFilter?.value) {
+        if (state.sortingFilter?.value == 1) {
+          body.team = "No";
+          body.created_by = profileId;
+        } else {
+          body.created_by = profileId;
+          body.team = "Yes";
+        }
       }
-      body.team = "No";
+      // body.team = "No";
 
       const res: any = await Models.application.list(page, body);
 
@@ -1063,9 +1079,9 @@ const Application = () => {
         application: res,
         loading: false,
         appstatus: row?.application_status,
+        isOpenRound:true
       });
 
-      setState({ isOpenRound: true });
     } catch (error) {
       console.log("✌️error --->", error);
     }
@@ -1262,6 +1278,23 @@ const Application = () => {
             placeholder="Choose To "
             onChange={(e) => setState({ end_date: e })}
             showTimeSelect={false}
+          />
+
+          <CustomSelect
+            options={[
+              {
+                value: 1,
+                label: "Own Records",
+              },
+              {
+                value: 2,
+                label: "Not Own Records",
+              },
+            ]}
+            value={state.sortingFilter}
+            onChange={(e) => setState({ sortingFilter: e })}
+            placeholder={"Own Records"}
+            isClearable={false}
           />
           <button
             onClick={() => setState({ showFilterModal: true })}

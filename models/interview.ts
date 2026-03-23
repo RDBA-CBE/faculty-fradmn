@@ -129,9 +129,32 @@ const interview = {
     return promise;
   },
 
+  user_interview_list: (data: any) => {
+    let promise = new Promise((resolve, reject) => {
+      let url = `users/interview_shot_users/`;
+      if (data?.applicant_id) {
+        url += `?applicant_id=${data.applicant_id}`;
+      }
+      instance()
+        .get(url)
+        .then((res) => {
+          resolve(res.data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            reject(error.response);
+          } else {
+            reject(error);
+          }
+        });
+    });
+    return promise;
+  },
+
+
   create_user_interview: (data: any) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `interview-slots/`;
+      let url = `users/interview_shot_users/`;
       instance()
         .post(url, data)
         .then((res) => {
@@ -150,7 +173,7 @@ const interview = {
 
   view_user_interview: (data: any) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `interview-slots/`;
+      let url = `users/interview_shot_users/`;
       instance()
         .post(url, data)
         .then((res) => {
@@ -169,7 +192,7 @@ const interview = {
 
   delete_user_interview: (data: any) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `interview-slots/`;
+      let url = `users/interview_shot_users/`;
       instance()
         .post(url, data)
         .then((res) => {

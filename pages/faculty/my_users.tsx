@@ -17,6 +17,7 @@ import {
   buildFormData,
   capitalizeFLetter,
   Dropdown,
+  formatScheduleDateTime,
   showDeleteAlert,
   truncateText,
   useSetState,
@@ -29,7 +30,13 @@ import { CreateUser } from "@/utils/validation.utils";
 import Swal from "sweetalert2";
 import { FRONTEND_URL, GENDER_OPTION, ROLES } from "@/utils/constant.utils";
 import CheckboxInput from "@/components/FormFields/CheckBoxInput.component";
-import { CalendarCheck, Clock, Heart } from "lucide-react";
+import {
+  CalendarCheck,
+  Clock,
+  Heart,
+  MessageSquare,
+  UserCheck,
+} from "lucide-react";
 import TextArea from "@/components/FormFields/TextArea.component";
 import CustomeDatePicker from "@/components/datePicker";
 import moment from "moment";
@@ -117,6 +124,11 @@ const Users = () => {
     isOpenInterest: false,
     showInterviewModal: false,
     requestForChange: false,
+    sortingFilter: {
+      value: 1,
+      label: "Own Record",
+    },
+    isOpenRound: false,
   });
 
   const statusOptions = [
@@ -138,6 +150,12 @@ const Users = () => {
     if (state.profile) {
       userList(1);
     }
+    setState({
+      sortingFilter: {
+        value: 1,
+        label: "Own Record",
+      },
+    });
   }, [state.activeTab, state.profile]);
 
   useEffect(() => {
@@ -163,6 +181,7 @@ const Users = () => {
     state.superAdminCollegeFilter,
     state.superAdminInstitutionFilter,
     state.superAdminDepartmentFilter,
+    state.sortingFilter,
   ]);
 
   const profile = async (isTabChange = true) => {
@@ -329,13 +348,23 @@ const Users = () => {
         if (state.activeTab === ROLES.APPLICANT) {
           body.active_job_seeker = "Yes";
         } else {
-          if (state.ownRecord) {
-            body.created_by = userId;
-            body.team = "No";
-          } else {
-            body.created_by = userId;
-            body.team = "Yes";
+          if (state.sortingFilter?.value) {
+            if (state.sortingFilter?.value == 1) {
+              body.team = "No";
+              body.created_by = userId;
+            } else {
+              body.team = "Yes";
+              body.created_by = userId;
+            }
           }
+
+          // if (state.ownRecord) {
+          //   body.created_by = userId;
+          //   body.team = "No";
+          // } else {
+          //   body.created_by = userId;
+          //   body.team = "Yes";
+          // }
         }
       }
     }
@@ -352,19 +381,33 @@ const Users = () => {
         if (state.superAdminDepartmentFilter?.value) {
           body.department_id = state.superAdminDepartmentFilter.value;
         }
-        if (state.ownRecord) {
-          body.created_by = userId;
-          body.team = "No";
-        } else {
-          body.team = "Yes";
-          body.institution_id = state.profile?.institution?.id;
+
+        if (state.sortingFilter?.value) {
+          if (state.sortingFilter?.value == 1) {
+            body.team = "No";
+            body.created_by = userId;
+            body.institution_id = state.profile?.institution?.id;
+          } else {
+            body.team = "Yes";
+            body.institution_id = state.profile?.institution?.id;
+            body.created_by = userId;
+          }
         }
       } else {
         if (state.activeTab === ROLES.APPLICANT) {
           body.active_job_seeker = "Yes";
         } else {
-          body.created_by = userId;
-          body.team = "No";
+          if (state.sortingFilter?.value) {
+            if (state.sortingFilter?.value == 1) {
+              body.team = "No";
+              body.created_by = userId;
+            } else {
+              body.team = "Yes";
+              body.created_by = userId;
+            }
+          }
+          // body.created_by = userId;
+          // body.team = "No";
         }
       }
     }
@@ -1674,6 +1717,15 @@ const Users = () => {
               <IconEye className="h-4 w-4" />
             </a>
           )}
+          {state.activeTab == "applicant" && (
+            <button
+              onClick={() => handleRound(row)}
+              className="flex  items-center justify-center rounded-lg  text-pink-600 transition-all duration-200 "
+              title="Interview Round"
+            >
+              <MessageSquare className="h-4 w-4" />
+            </button>
+          )}
 
           {state.activeTab == "applicant" && row?.reveal_name && (
             <button
@@ -1686,21 +1738,21 @@ const Users = () => {
           )}
 
           {state.activeTab == "applicant" && !row?.reveal_name && (
-          <button
-            onClick={() =>
-              setState({
-                isOpenInterest: true,
-                message: "",
-                applicantName: row?.username,
-                applicantId: row?.id,
-              })
-            }
-            className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
-            title="send interest"
-          >
-            <Heart className="h-4 w-4" />
-          </button>
-         )}
+            <button
+              onClick={() =>
+                setState({
+                  isOpenInterest: true,
+                  message: "",
+                  applicantName: row?.username,
+                  applicantId: row?.id,
+                })
+              }
+              className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
+              title="send interest"
+            >
+              <Heart className="h-4 w-4" />
+            </button>
+          )}
           {state.activeTab !== "applicant" && (
             <>
               <button
@@ -1799,20 +1851,20 @@ const Users = () => {
       };
       console.log("✌️body --->", body);
 
-      // await Models.interview.create_user_interview(body);
-      // Success("Interview schedule created successfully!");
-      // setState({
-      //   showInterviewModal: false,
-      //   errors: {},
-      //   selectedApplicants: [],
-      //   interviewSlot: "",
-      //   roundName: "",
-      //   requestForChange: false,
-      //   interviewStatus: null,
-      //   submitting: false,
-      //   interview_link: "",
-      //   selectedRecords: [],
-      // });
+      const res = await Models.interview.create_user_interview(body);
+      Success("Interview schedule created successfully!");
+      setState({
+        showInterviewModal: false,
+        errors: {},
+        selectedApplicants: [],
+        interviewSlot: "",
+        roundName: "",
+        requestForChange: false,
+        interviewStatus: null,
+        submitting: false,
+        interview_link: "",
+        selectedRecords: [],
+      });
       // profile();
     } catch (error) {
       console.log("✌️error --->", error);
@@ -1828,6 +1880,26 @@ const Users = () => {
         Failure(error?.error);
         setState({ submitting: false });
       }
+    }
+  };
+
+  const handleRound = async (row) => {
+    console.log("✌️row --->", row);
+    try {
+      const body = {
+        applicant_id: row?.id,
+      };
+      const res:any = await Models.interview.user_interview_list(body);
+      console.log("handleRound --->", res);
+
+      setState({
+        interview_round_list: res?.items,
+        loading: false,
+        appstatus: row?.application_status,
+        isOpenRound: true,
+      });
+    } catch (error) {
+      console.log("✌️error --->", error);
     }
   };
 
@@ -1898,16 +1970,18 @@ const Users = () => {
                 HOD
               </button>
             )}
-            <button
-              onClick={() => handleTabChange("applicant")}
-              className={`rounded-md px-2 py-1 text-sm font-medium transition-all duration-200 ${
-                state.activeTab === "applicant"
-                  ? "bg-lyellow text-black shadow-sm dark:bg-gray-700 dark:text-blue-400"
-                  : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-              }`}
-            >
-              Job Seeker
-            </button>
+            {state.profile?.role == ROLES.HR && (
+              <button
+                onClick={() => handleTabChange("applicant")}
+                className={`rounded-md px-2 py-1 text-sm font-medium transition-all duration-200 ${
+                  state.activeTab === "applicant"
+                    ? "bg-lyellow text-black shadow-sm dark:bg-gray-700 dark:text-blue-400"
+                    : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                }`}
+              >
+                Job Seeker
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -1978,7 +2052,7 @@ const Users = () => {
                       disabled={!state.superAdminCollegeFilter}
                     />
                   )}
-                  {((state.profile?.role === ROLES.SUPER_ADMIN &&
+                  {/* {((state.profile?.role === ROLES.SUPER_ADMIN &&
                     state.activeTab != "institution_admin") ||
                     (state.profile?.role === ROLES.INSTITUTION_ADMIN &&
                       state.activeTab != "hr")) && (
@@ -1993,11 +2067,32 @@ const Users = () => {
                           superAdminDepartmentFilter: null,
                         })
                       }
+                    /> */}
+                  {((state.profile?.role === ROLES.SUPER_ADMIN &&
+                    state.activeTab != "institution_admin") ||
+                    (state.profile?.role === ROLES.INSTITUTION_ADMIN &&
+                      state.activeTab != "hr")) && (
+                    <CustomSelect
+                      options={[
+                        {
+                          value: 1,
+                          label: "Own Record",
+                        },
+                        {
+                          value: 2,
+                          label: "Not Own Record",
+                        },
+                      ]}
+                      value={state.sortingFilter}
+                      className="!w-fit"
+                      onChange={(e) => setState({ sortingFilter: e })}
+                      placeholder={"Own Record"}
+                      isClearable={false}
                     />
                   )}
                 </>
               )}
-              {state.profile?.role === ROLES.HR &&
+              {/* {state.profile?.role === ROLES.HR &&
                 state.activeTab == "applicant" && (
                   <CheckboxInput
                     label="Own Record"
@@ -2011,26 +2106,26 @@ const Users = () => {
                       })
                     }
                   />
-                )}
+                )} */}
             </>
           )}
 
-          {state.profile?.role === ROLES.HR &&
+          {/* {state.profile?.role === ROLES.HR &&
             state.activeTab == "applicant" && (
               <CheckboxInput
                 label="Own Record"
                 checked={state.ownRecord}
                 onChange={(e) => setState({ ownRecord: e })}
               />
-            )}
+            )} */}
 
-          {state.profile?.role === ROLES.HOD && (
+          {/* {state.profile?.role === ROLES.HOD && (
             <CheckboxInput
               label="Own Record"
               checked={state.ownRecord}
               onChange={(e) => setState({ ownRecord: e })}
             />
-          )}
+          )} */}
 
           {/* </div> */}
         </div>
@@ -2076,9 +2171,10 @@ const Users = () => {
             onSelectedRecordsChange={(records) =>
               setState({ selectedRecords: records.map((r: any) => r.id) })
             }
-            isRecordSelectable={(record: any) =>
-              state.activeTab === ROLES.APPLICANT ? record.is_interested : true
-            }
+            // isRecordSelectable={(record: any) =>
+            //   state.activeTab === ROLES.APPLICANT ? record.is_interested : true
+            // }
+
             customLoader={
               <div className="flex items-center justify-center py-12">
                 <div className="flex items-center gap-3">
@@ -2115,6 +2211,24 @@ const Users = () => {
           />
         </div>
       </div>
+
+      {state.selectedRecords?.length > 0 &&
+        state.activeTab == ROLES.APPLICANT && (
+          <div className="fixed bottom-6 right-9 z-50">
+            <button
+              // onClick={bulkSelect}
+              className="bg-dblue group relative inline-flex items-center gap-2 overflow-hidden rounded-xl px-6 py-3 font-medium text-white shadow-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-2xl"
+            >
+              <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+
+              <UserCheck className="relative z-10 h-5 w-5" />
+
+              <span className="relative z-10">
+                Interview Schedule ({state.selectedRecords.length})
+              </span>
+            </button>
+          </div>
+        )}
 
       {/* Modal */}
       <Modal
@@ -2331,11 +2445,105 @@ const Users = () => {
               <button
                 onClick={() => createInterview()}
                 disabled={state.submitting}
-                className="flex-1 rounded-lg bg-gradient-to-r from-green-600 to-teal-600 px-4 py-2 text-white hover:shadow-lg disabled:opacity-50"
+                className="bg-dblue  flex-1 rounded-lg px-4 py-2 text-white hover:shadow-lg disabled:opacity-50"
               >
                 {state.submitting ? "Creating..." : "Create Schedule"}
               </button>
+
+              {/* <button
+                onClick={() => createInterview()}
+                className="bg-dblue group relative inline-flex items-center gap-2 overflow-hidden rounded-xl px-6 py-3 font-medium text-white shadow-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-2xl"
+              >
+                <div 
+                className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+
+                <UserCheck className="relative z-10 h-5 w-5" />
+
+                <span className="relative z-10">
+                  {state.submitting ? "Creating..." : "Create Schedule"}
+                </span>
+              </button> */}
             </div>
+          </div>
+        )}
+      />
+
+      <Modal
+        subTitle="Interview Rounds"
+        open={state.isOpenRound}
+        close={() => setState({ isOpenRound: false })}
+        closeIcon={() => setState({ isOpenRound: false })}
+        padding="px-0 py-5"
+        renderComponent={() => (
+          <div className="flex h-[75vh] flex-col">
+            {/* Scrollable Content */}
+            <div className="flex-1 space-y-6 overflow-y-auto px-4">
+              {/* Candidate */}
+              {/* <div className="rounded-lg border bg-gray-50 p-4">
+                <h3 className="text-lg font-semibold">
+                  {state.application?.first_name} {state.application?.last_name}
+                </h3>
+                <p className="text-sm text-gray-500">
+                  {state.application?.email} • {state.application?.phone}
+                </p>
+              </div> */}
+
+              {/* Rounds */}
+              <div className="space-y-4 pb-6">
+                {state.interview_round_list?.map((round) => (
+                  <div
+                    key={round.id}
+                    className="rounded-lg border bg-white px-3 py-2 shadow-sm"
+                  >
+                    {/* Round Header */}
+                    <div className=" flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold">
+                          {capitalizeFLetter(round.round_name)}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {formatScheduleDateTime(
+                            round.scheduled_date,
+                            round.scheduled_time
+                          )}
+                        </p>
+                      </div>
+
+                      <span
+                        className={`rounded px-3 py-1 text-xs font-semibold ${
+                          round.status === "completed"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-yellow-100 text-yellow-700"
+                        }`}
+                      >
+                        {capitalizeFLetter(round.status)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Fixed Bottom Section */}
+            {/* <div className="sticky bottom-0 border-t bg-white p-4">
+              <div className="flex items-end gap-3">
+                <div className="flex-1">
+                  <CustomSelect
+                    options={state.applicationStatusList}
+                    value={state.appstatus}
+                    onChange={(e) => setState({ appstatus: e })}
+                    placeholder="Select final status"
+                  />
+                </div>
+
+                <button
+                  // onClick={() => updateStatus()}
+                  className="bg-dblue rounded px-5 py-2 text-white"
+                >
+                  Update Status
+                </button>
+              </div>
+            </div> */}
           </div>
         )}
       />
