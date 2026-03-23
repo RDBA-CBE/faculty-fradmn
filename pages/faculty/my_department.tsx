@@ -29,6 +29,7 @@ import DynamicAchievementInput from "@/components/DynamicAchievementInput";
 import CheckboxInput from "@/components/FormFields/CheckBoxInput.component";
 import NumberInput from "@/components/FormFields/NumberInputs.component";
 import TextArea from "@/components/FormFields/TextArea.component";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 const CollegeAndDepartment = () => {
   const dispatch = useDispatch();
@@ -61,6 +62,10 @@ const CollegeAndDepartment = () => {
     total_strength: "",
     recent_achievements: [],
     recent_dept_achievements: [],
+    sortingFilter: {
+      value: 1,
+      label: "Own Department",
+    },
   });
 
   const debounceSearch = useDebounce(state.search, 500);
@@ -68,73 +73,72 @@ const CollegeAndDepartment = () => {
   useEffect(() => {
     dispatch(setPageTitle("Departments"));
     profile();
+    master_department();
+
     // loadInstitutionOptions(1);
   }, [dispatch]);
 
   useEffect(() => {
-    deptList(1);
-  }, [debounceSearch, state.institutionFilter, state.sortBy]);
+    if (state.profile) deptList(1);
+  }, [
+    debounceSearch,
+    state.institutionFilter,
+    state.sortBy,
+    state.sortingFilter,
+    state.profile,
+  ]);
 
   const profile = async () => {
     try {
       const res: any = await Models.auth.profile();
-      console.log("✌️res --->", res);
+      console.log("profile --->", res);
       setState({
         profile: res,
         profile_institution: res?.institution,
         profile_college: res?.college,
+        collegeList: res?.college?.map((item) => ({
+          value: item?.college_id,
+          label: item?.college_name,
+        })),
       });
+      const collegeIds = res?.college?.map((c: any) => c.college_id);
+      deptList(1, collegeIds);
     } catch (error) {
       console.error("Error fetching profile:", error);
     }
   };
 
-  // Institution filter handlers
-  // const loadInstitutionOptions = async (page, search = "", loadMore = false) => {
-  //   try {
-  //     setState({ institutionLoading: true });
-  //     const body = { search };
-  //     const res: any = await Models.institution.list(page, body);
-  //     const dropdown = Dropdown(res?.results, "institution_name");
+  const master_department = async (page = 1, search = "", loadMore = false) => {
+    try {
+      const body: any = {};
+      if (search) {
+        body.search = search;
+      }
+      body.is_approved = "Yes";
 
-  //     setState({
-  //       institutionLoading: false,
-  //       institutionPage: page,
-  //       institutionOptions: loadMore
-  //         ? [...state.institutionOptions, ...dropdown]
-  //         : dropdown,
-  //       institutionNext: res?.next,
-  //     });
-  //   } catch (error) {
-  //     console.error("Error loading institution options:", error);
-  //     setState({ institutionLoading: false });
-  //   }
-  // };
+      const res: any = await Models.master.dept_list(body, page);
+      console.log("✌️res --->", res);
+      const dropdown = Dropdown(res?.results, "short_name");
+      setState({
+        master_department: dropdown,
+      });
+    } catch (error) {
+      console.log("✌️error --->", error);
+    }
+  };
 
-  // const handleInstitutionChange = (selectedOption) => {
-  //   setState({ institutionFilter: selectedOption, page: 1 });
-  // };
-
-  // const handleInstitutionSearch = (searchTerm) => {
-  //   loadInstitutionOptions(1, searchTerm);
-  // };
-
-  // const handleLoadMoreInstitutions = () => {
-  //   if (state.institutionNext) {
-  //     loadInstitutionOptions(state.institutionPage + 1, "", true);
-  //   }
-  // };
-
-  const deptList = async (page) => {
+  const deptList = async (page, collegeId = null) => {
     try {
       setState({ loading: true });
       const body = collegeBodyData();
+      const colleges =
+        collegeId ?? state.profile?.college?.map((c: any) => c.college_id);
+      if (colleges) body.college = colleges;
       const res: any = await Models.department.list(page, body);
-      console.log("deptList --->", res);
 
       const tableData = res?.results?.map((item) => ({
         id: item?.id,
-        department_name: item?.department_name,
+        department_name: item?.short_name,
         department_code: item?.department_code,
         department_email: item?.department_email,
         department_phone: item?.department_phone,
@@ -150,6 +154,11 @@ const CollegeAndDepartment = () => {
         dept_summary: item?.summary,
         recent_dept_achievements: item?.recent_achievements,
         isNBAAccreditation: item?.nba_accreditation,
+        department_extras:
+          item?.department_extras?.length > 0
+            ? [item.department_extras?.[0]]
+            : null,
+        short_name: item?.short_name,
       }));
 
       setState({
@@ -165,16 +174,18 @@ const CollegeAndDepartment = () => {
     }
   };
 
-  const collegeDropdownList = async (page, search = "", loadMore = false) => {
+  const collegeDropdownList = async (
+    page,
+    search = "",
+    loadMore = false,
+    seletedInstitution = null
+  ) => {
     try {
       setState({ collegeLoading: true });
       const body: any = { search };
-      if (state.profile?.institution) {
-        body.institution = state.profile?.institution?.id;
+      if (seletedInstitution) {
+        body.institution = seletedInstitution?.value;
       }
-
-      // body.created_by = state.profile?.id;
-      // body.team = "No";
 
       const res: any = await Models.college.list(page, body);
       const dropdown = Dropdown(res?.results, "college_name");
@@ -188,7 +199,7 @@ const CollegeAndDepartment = () => {
         collegeNext: res?.next,
       });
     } catch (error) {
-      console.error("Error fetching colleges:", error);
+      // console.error("Error fetching colleges:", error);
       setState({ collegeLoading: false });
     }
   };
@@ -209,6 +220,16 @@ const CollegeAndDepartment = () => {
       dept_summary: "",
       recent_dept_achievements: [],
       isNBAAccreditation: false,
+
+      department: null,
+      departmentData: [],
+      newImages: [],
+      is_legacy: false,
+      short_name: "",
+      departmentsData: [],
+      departments: [],
+      editDeptId: false,
+      college: null,
     });
   };
 
@@ -230,10 +251,21 @@ const CollegeAndDepartment = () => {
       body.search = state.search;
     }
 
-    if (userId) {
-      body.created_by = userId;
+    if (state.sortingFilter?.value) {
+      if (state.sortingFilter?.value == 1) {
+        body.team = "No";
+        body.created_by = userId;
+      } else {
+        body.created_by = userId;
+
+        body.team = "Yes";
+      }
     }
-    body.team = "No";
+
+    // if (userId) {
+    //   body.created_by = userId;
+    // }
+    // body.team = "No";
 
     if (state.sortBy) {
       body.ordering =
@@ -247,6 +279,7 @@ const CollegeAndDepartment = () => {
 
     setState({
       editId: row.id,
+      editDeptId: row?.id,
       showModal: true,
       department_name: row.department_name,
       department_code: row.department_code,
@@ -274,6 +307,31 @@ const CollegeAndDepartment = () => {
     }
     if (row?.college_id) {
       deptHodDropdownList(1, "", false, row?.college_id);
+    }
+
+    if (row?.department_extras?.length > 0) {
+      const departmentsData = row.department_extras.map((item, i) => ({
+        dept: [
+          {
+            value: item?.department_master?.id,
+            label: item?.department_master?.short_name,
+          },
+        ],
+        intake_per_year: item?.intake_per_year || "",
+        isNBAAccreditation: item?.nba_accreditation || false,
+        summary: item?.summary || "",
+        recent_achievements: item?.recent_achievements || [],
+        open: i == 0,
+        id: item?.id,
+      }));
+      setState({
+        departments: row.department_extras.map((item, i) => ({
+          value: item?.department_master?.id,
+          label: item?.department_master?.short_name,
+        })),
+        departmentsData,
+        open: true,
+      });
     }
   };
 
@@ -444,7 +502,7 @@ const CollegeAndDepartment = () => {
         body.college_id = selectedCollege;
       }
 
-      body.role="hod"
+      body.role = "hod";
 
       const res: any = await Models.auth.userList(page, body);
       const dropdown = Dropdown(res?.results, "username");
@@ -463,93 +521,131 @@ const CollegeAndDepartment = () => {
     }
   };
 
+  const handleDeptSubmit = async () => {
+    try {
+      if (state.editDeptId) {
+        await Promise.all(
+          state.departmentsData.map((item) => {
+            const deptBody = {
+              college_id: state.college?.value,
+              department_master_id: item.dept.value,
+              intake_per_year: Number(item.intake_per_year) || 0,
+              summary: capitalizeFLetter(item.summary),
+              recent_achievements: item.recent_achievements,
+              nba_accreditation: item.isNBAAccreditation,
+            };
+            console.log("✌️deptBody --->", deptBody);
+
+            return Models.department.update_dept_extra_data_each_college(
+              deptBody,
+              item?.id
+            );
+          })
+        );
+        Success("Department updated successfully");
+      } else {
+        const body = {
+          college_id: state.college?.value,
+          master_ids: state.departmentsData?.map((item) => item?.dept?.value),
+          institution_id: state.profile?.institution?.id,
+        };
+
+        console.log("✌️body --->", body);
+
+        const res = await Models.department.create_new(body);
+        console.log("✌️res --->", res);
+
+        await Promise.all(
+          state.departmentsData.map((item) => {
+            const deptBody = {
+              college_id: state.college?.value,
+              department_master_id: item.dept.value,
+              intake_per_year: Number(item.intake_per_year) || 0,
+              summary: capitalizeFLetter(item.summary),
+              recent_achievements: item.recent_achievements,
+              nba_accreditation: item.isNBAAccreditation,
+            };
+            console.log("✌️deptBody --->", deptBody);
+
+            return Models.department.create_dept_extra_data_each_college(
+              deptBody
+            );
+          })
+        );
+
+        Success("Department created successfully");
+      }
+      deptList(1);
+      handleCloseModal();
+    } catch (error) {
+      if (error?.response?.data) {
+        const apiErrors = {};
+        Object.keys(error.response.data).forEach((field) => {
+          if (Array.isArray(error.response.data[field])) {
+            apiErrors[field] = error.response.data[field][0];
+          } else {
+            apiErrors[field] = error.response.data[field];
+          }
+        });
+        setState({ errors: apiErrors });
+        return;
+      }
+      Failure(error?.data?.error || "Operation failed. Please try again.");
+    } finally {
+      setState({ submitting: false });
+    }
+  };
+
   const renderDepartmentForm = () => (
-    <div className="space-y-6">
-      <>
-        <TextInput
-          title="Institution"
-          placeholder="Institution"
-          value={state.profile_institution?.name}
-          onChange={(e) => {}}
-          disabled
-        />
-        {state.profile?.college?.length > 0 ? (
+    <>
+      <div className="grid grid-cols-3 gap-6 pb-4">
+        {!state.editDeptId && (
           <CustomSelect
-            options={
-              state.profile?.college?.map((col) => ({
-                value: col?.college_id,
-                label: col?.college_name,
-              })) || []
-            }
+            options={state.collegeList}
             value={state.college}
             onChange={(selectedOption) => {
-              if (selectedOption) {
-                deptHodDropdownList(1, "", false, selectedOption?.value);
-                setState({
-                  deptHod: null,
-                });
-              } else {
-                setState({
-                  deptHod: null,
-                  errors: { ...state.errors, deptHod: "" },
-                });
-              }
               setState({
                 college: selectedOption,
                 errors: { ...state.errors, college: "" },
               });
             }}
-            // onSearch={(searchTerm) => collegeDropdownList(1, searchTerm)}
             placeholder="Select College"
             isClearable={true}
-            // loadMore={() =>
-            //   state.collegeNext &&
-            //   collegeDropdownList(state.collegePage + 1, "", true)
-            // }
-            // loading={state.collegeLoading}
+            loading={state.collegeLoading}
             title="Select College"
             error={state.errors.college}
             required
           />
-        ) : (
-          <TextInput
-            title="Select College"
-            placeholder="College"
-            value={state.profile_college?.college_name}
-            onChange={(e) => {}}
-            disabled
-          />
         )}
-        {/* <CustomSelect
-          options={state.collegeDropdownList}
-          value={state.college}
-          onChange={selectedOption =>
-            setState({
-              college: selectedOption,
-              errors: { ...state.errors, college: '' }
-            })
-          }
-          onSearch={searchTerm =>
-            collegeDropdownList(1, searchTerm, state.profile_institution)
-          }
-          placeholder='Select College'
-          isClearable={true}
-          loadMore={() =>
-            state.collegeNext &&
-            collegeDropdownList(
-              state.collegePage + 1,
-              '',
-              true,
-              state.profile_institution
-            )
-          }
-          loading={state.collegeLoading}
-          title='Select College'
-          error={state.errors.college}
-          required
-        /> */}
-
         <CustomSelect
+          title="Department"
+          options={state.master_department}
+          value={state.departments}
+          onChange={(selectedOption: any) => {
+            const existing = state.departmentData;
+            const updated = (selectedOption || []).map((opt, i) => {
+              const prev = existing?.find((d) => d.dept?.value === opt.value);
+              return (
+                prev || {
+                  dept: opt,
+                  intake_per_year: "",
+                  isNBAAccreditation: false,
+                  summary: "",
+                  recent_achievements: [],
+                  open: true,
+                }
+              );
+            });
+            setState({
+              departments: selectedOption,
+              departmentsData: updated,
+            });
+          }}
+          isMulti={true}
+          placeholder="Select department"
+          disabled={state.editDeptId}
+        />
+        {/* <CustomSelect
           options={state.deptHodDropdownList}
           value={state.deptHod}
           onChange={(selectedOption) =>
@@ -575,58 +671,96 @@ const CollegeAndDepartment = () => {
           loading={state.deptHodLoading}
           title="Select HOD"
           error={state.errors.deptHod}
-        />
-      </>
-      <div className="grid grid-cols-1 gap-6 ">
-        <TextInput
-          title="Department Name"
-          placeholder="Enter department name"
-          value={state.department_name}
-          onChange={(e) => handleFormChange("department_name", e.target.value)}
-          error={state.errors.department_name}
-          required
-        />
-        {/* <TextInput
-          title="Department Code"
-          placeholder="Enter department code"
-          value={state.department_code}
-          onChange={(e) => handleFormChange("department_code", e.target.value)}
-          error={state.errors.department_code}
-          required
+          disabled={!state.college}
         /> */}
-
-        <CheckboxInput
-          checked={state.isNBAAccreditation}
-          onChange={(e) =>
-            setState({ isNBAAccreditation: !state.isNBAAccreditation })
-          }
-          label="NBA Accreditation"
-        />
-
-        <NumberInput
-          title="Intake Per Year"
-          value={state.dept_intake_per_year}
-          onChange={(e) =>
-            handleFormChange("dept_intake_per_year", e.target.value)
-          }
-          placeholder="Intake Per Year"
-        />
-
-        <DynamicAchievementInput
-          title="Achivements"
-          placeholder="Enter achivessments"
-          defaultValue={state.recent_dept_achievements}
-          onChange={(data: any) => setState({ recent_dept_achievements: data })}
-        />
-        <TextArea
-          title="Summary"
-          placeholder="Enter department summary"
-          value={state.dept_summary}
-          onChange={(e) => handleFormChange("dept_summary", e.target.value)}
-          rows={3}
-        />
       </div>
-    </div>
+      <div className=" ">
+        {state.departmentsData?.map((item, index) => (
+          <div
+            key={item.dept.value}
+            className="mb-3 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700"
+          >
+            <div
+              className="flex cursor-pointer items-center justify-between bg-gray-50 px-4 py-2 dark:bg-gray-700"
+              onClick={() => {
+                const updated = [...state.departmentsData];
+                updated[index] = { ...updated[index], open: !item.open };
+                setState({ departmentsData: updated });
+              }}
+            >
+              <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                {item.dept.label}
+              </span>
+              {item.open ? (
+                <ChevronUp className="h-4 w-4 text-gray-500" />
+              ) : (
+                <ChevronDown className="h-4 w-4 text-gray-500" />
+              )}
+            </div>
+            {item.open && (
+              <div className="grid grid-cols-2 gap-3 px-3 py-3 ">
+                <NumberInput
+                  title="Intake Per Year"
+                  value={item.intake_per_year}
+                  onChange={(e) => {
+                    const updated = [...state.departmentsData];
+                    updated[index] = {
+                      ...updated[index],
+                      intake_per_year: e.target.value,
+                    };
+                    setState({ departmentsData: updated });
+                  }}
+                  placeholder="Intake Per Year"
+                />
+
+                <div className="lg:mt-8">
+                  <CheckboxInput
+                    checked={item.isNBAAccreditation}
+                    onChange={() => {
+                      const updated = [...state.departmentsData];
+                      updated[index] = {
+                        ...updated[index],
+                        isNBAAccreditation: !item.isNBAAccreditation,
+                      };
+                      setState({ departmentsData: updated });
+                    }}
+                    label="NBA Accreditation"
+                  />
+                </div>
+                <TextArea
+                  title="Summary"
+                  placeholder="Enter department summary"
+                  value={item.summary}
+                  onChange={(e) => {
+                    const updated = [...state.departmentsData];
+                    updated[index] = {
+                      ...updated[index],
+                      summary: e.target.value,
+                    };
+                    setState({ departmentsData: updated });
+                  }}
+                  rows={3}
+                />
+                <DynamicAchievementInput
+                  title="Achievements"
+                  placeholder="Enter achievements"
+                  defaultValue={item.recent_achievements}
+                  onChange={(data: any) => {
+                    const updated = [...state.departmentsData];
+                    updated[index] = {
+                      ...updated[index],
+                      recent_achievements: data,
+                    };
+                    setState({ departmentsData: updated });
+                  }}
+                  grid={false}
+                />
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </>
   );
 
   const departmentColumns = [
@@ -645,8 +779,11 @@ const CollegeAndDepartment = () => {
       title: "Department Name",
       sortable: true,
       render: ({ department_name }) => (
-        <div className="font-medium text-gray-900 dark:text-white" title={department_name}>
-          {truncateText(department_name)}
+        <div
+          className="font-medium text-gray-900 dark:text-white"
+          title={department_name}
+        >
+          {department_name}
         </div>
       ),
     },
@@ -655,7 +792,10 @@ const CollegeAndDepartment = () => {
       title: "Department Head",
       sortable: true,
       render: ({ department_head }) => (
-        <div className="text-gray-600 dark:text-gray-400"  title={department_head}>
+        <div
+          className="text-gray-600 dark:text-gray-400"
+          title={department_head}
+        >
           {truncateText(department_head)}
         </div>
       ),
@@ -665,7 +805,10 @@ const CollegeAndDepartment = () => {
       title: "Institution",
       sortable: true,
       render: ({ institution_name }) => (
-        <div className="font-medium text-gray-900 dark:text-white" title={institution_name}>
+        <div
+          className="font-medium text-gray-900 dark:text-white"
+          title={institution_name}
+        >
           {truncateText(institution_name)}
         </div>
       ),
@@ -676,7 +819,10 @@ const CollegeAndDepartment = () => {
       title: "College ",
       sortable: true,
       render: ({ college_name }) => (
-        <div className="font-medium text-gray-900 dark:text-white" title={college_name}>
+        <div
+          className="font-medium text-gray-900 dark:text-white"
+          title={college_name}
+        >
           {truncateText(college_name)}
         </div>
       ),
@@ -737,9 +883,7 @@ const CollegeAndDepartment = () => {
       <div className="mb-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
-            <h1 className="page-ti text-transparent">
-              Departments
-            </h1>
+            <h1 className="page-ti text-transparent">Departments</h1>
             <p className="text-gray-600 dark:text-gray-400">
               Manage departments
             </p>
@@ -759,7 +903,6 @@ const CollegeAndDepartment = () => {
 
       {/* Filters Section */}
       <div className="mb-5 rounded-2xl  backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
-        
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <div className="group relative">
             <TextInput
@@ -768,6 +911,34 @@ const CollegeAndDepartment = () => {
               onChange={(e) => setState({ search: e.target.value })}
               icon={<IconSearch className="h-4 w-4" />}
               className="transition-all duration-200 focus:shadow-lg group-hover:shadow-md"
+            />
+          </div>
+          <div className="group relative z-50">
+            <CustomSelect
+              options={[
+                {
+                  value: 1,
+                  label:
+                    state.activeTab === "colleges"
+                      ? "Own College"
+                      : "Own Department",
+                },
+                {
+                  value: 2,
+                  label:
+                    state.activeTab === "colleges"
+                      ? "Not Own College"
+                      : "Not Own Department",
+                },
+              ]}
+              value={state.sortingFilter}
+              onChange={(e) => setState({ sortingFilter: e })}
+              placeholder={
+                state.activeTab === "colleges"
+                  ? "Own College"
+                  : "Own Department"
+              }
+              isClearable={false}
             />
           </div>
           {/* <div className="group relative z-50">
@@ -795,16 +966,16 @@ const CollegeAndDepartment = () => {
             </h3>
             <div className="flex items-center gap-4">
               {state.selectedRecords.length > 0 && (
-               <button
-                                 onClick={() => handleBulkDelete()}
-                                 className=" group relative inline-flex transform items-center gap-2 overflow-hidden rounded-md border border-red-500  px-3 py-1 text-red-500 shadow-lg transition-all duration-200 "
-                               >
-                                 <div className=" absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
-                                 <IconTrash className="h-4 w-4" />
-                                 <span className="relative z-10 text-[13px]">
-                                   Delete ({state.selectedRecords?.length})
-                                 </span>
-                               </button>
+                <button
+                  onClick={() => handleBulkDelete()}
+                  className=" group relative inline-flex transform items-center gap-2 overflow-hidden rounded-md border border-red-500  px-3 py-1 text-red-500 shadow-lg transition-all duration-200 "
+                >
+                  <div className=" absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+                  <IconTrash className="h-4 w-4" />
+                  <span className="relative z-10 text-[13px]">
+                    Delete ({state.selectedRecords?.length})
+                  </span>
+                </button>
               )}
               <div className="text-sm text-black ">
                 {state.activeTab === "colleges"
@@ -850,8 +1021,10 @@ const CollegeAndDepartment = () => {
                 sortOrder: direction,
                 page: 1,
               });
-
-              deptList(1);
+              deptList(
+                1,
+                state.profile?.college?.map((c: any) => c.college_id)
+              );
             }}
             minHeight={200}
           />
@@ -868,7 +1041,7 @@ const CollegeAndDepartment = () => {
       </div>
 
       {/* Modal */}
-      <Modal
+      {/* <Modal
         open={state.showModal}
         close={handleCloseModal}
         addHeader={"Add Department"}
@@ -883,12 +1056,12 @@ const CollegeAndDepartment = () => {
                 display: none;
               }
             `}</style>
-            {/* Progress Header */}
 
-            {/* Step Content */}
+
+   
             <div className="min-h-[300px]">{renderDepartmentForm()}</div>
 
-            {/* Navigation Footer */}
+  
             <div className="flex justify-between border-t p-6">
               <div className="flex w-full justify-end gap-4">
                 <button
@@ -913,7 +1086,53 @@ const CollegeAndDepartment = () => {
             </div>
           </div>
         )}
+      /> */}
+
+      <Modal
+        // isFullWidth
+        maxWidth="max-w-7xl"
+        // closeIcon={true}
+        closeIcon
+        open={state.showModal}
+        close={handleCloseModal}
+        subTitle={state.editDeptId ? "Update Department" : "Add New Department"}
+        renderComponent={() => (
+          <div className="w-full ">
+            <style jsx>{`
+              .scrollbar-hide {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+              }
+              .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+              }
+            `}</style>
+
+            <div className="">{renderDepartmentForm()}</div>
+
+            {/* Navigation Footer */}
+            <div className="flex items-center justify-between border-t pt-3">
+              <div className="flex w-full justify-end gap-4">
+                <button
+                  onClick={() => handleCloseModal()}
+                  disabled={state.submitting}
+                  className="rounded-lg border px-6 py-2 text-black hover:bg-green-600 disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleDeptSubmit()}
+                  disabled={state.submitting}
+                  className="bg-dblue hover:bg-dblue rounded-lg px-6 py-2 text-white disabled:opacity-50"
+                >
+                  {state.submitting ? "Creating..." : "Submit"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       />
+
       <Modal
         open={state.showEditModal}
         close={handleCloseModal}
@@ -948,7 +1167,7 @@ const CollegeAndDepartment = () => {
                 <button
                   onClick={() => handleSubmit()}
                   disabled={state.submitting}
-                  className="rounded-lg bg-dblue px-6 py-2 text-white hover:bg-dblue disabled:opacity-50"
+                  className="bg-dblue hover:bg-dblue rounded-lg px-6 py-2 text-white disabled:opacity-50"
                 >
                   {state.submitting ? "Updating..." : "Update College"}
                 </button>
