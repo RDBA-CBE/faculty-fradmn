@@ -368,7 +368,7 @@ const Job = () => {
       }
       body.team = "No";
       const res: any = await Models.department.list(page, body);
-      const dropdown = Dropdown(res?.results, "department_name");
+      const dropdown = Dropdown(res?.results, "short_name");
 
       setState({
         departmentLoading: false,

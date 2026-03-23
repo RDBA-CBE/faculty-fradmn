@@ -553,7 +553,7 @@ const Users = () => {
 
       const dropdown = res?.results?.map((item) => ({
         value: item?.id,
-        label: item?.department_name,
+        label: item?.short_name,
       }));
       console.log("✌️dropdown --->", dropdown);
 
@@ -688,7 +688,7 @@ const Users = () => {
       }
 
       const res: any = await Models.department.list(page, body);
-      const dropdown = Dropdown(res?.results, "department_name");
+      const dropdown = Dropdown(res?.results, "short_name");
 
       setState({
         departmentLoading: false,
@@ -724,7 +724,7 @@ const Users = () => {
       console.log("✌️body --->", body);
 
       const res: any = await Models.department.list(page, body);
-      const dropdown = Dropdown(res?.results, "department_name");
+      const dropdown = Dropdown(res?.results, "short_name");
 
       setState({
         departmentLoading: false,

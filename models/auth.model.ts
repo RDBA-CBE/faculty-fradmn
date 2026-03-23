@@ -113,7 +113,6 @@ const auth = {
       if (body?.department_id) {
         url = url + `&department_id=${body.department_id}`;
       }
-
       if (body?.institution_id) {
         url = url + `&institution_id=${body.institution_id}`;
       }

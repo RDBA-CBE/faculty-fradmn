@@ -14,9 +14,6 @@ const job = {
       if (body.role) {
         url = url + `&role=${body.role}`;
       }
-      if (body?.search) {
-        url = url + `&search=${body.search}`;
-      }
       if (body?.college_id) {
         url = url + `&college=${body.college_id}`;
       }

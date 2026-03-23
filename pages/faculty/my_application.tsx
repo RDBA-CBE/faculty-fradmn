@@ -651,7 +651,7 @@ const Application = () => {
       const res: any = await Models.department.list(page, body);
       const dropdown = res?.results?.map((item) => ({
         value: item.id,
-        label: item.department_name,
+        label: item.short_name,
       }));
       setState({
         departmentLoading: false,

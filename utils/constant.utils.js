@@ -414,7 +414,7 @@ export const OwnmenuConfig = {
       type: "link",
       icon: "IconMenuDashboard",
       label: "dashboard",
-      href: "/faculty/dashboard",
+      href: "/",
     },
 
     {
@@ -536,7 +536,7 @@ export const OwnmenuConfig = {
       type: "link",
       icon: "IconMenuDashboard",
       label: "dashboard",
-      href: "/faculty/dashboard",
+      href: "/",
     },
 
     {
@@ -639,7 +639,7 @@ export const OwnmenuConfig = {
       type: "link",
       icon: "IconMenuDashboard",
       label: "dashboard",
-      href: "/faculty/dashboard",
+      href: "/",
     },
 
     {
@@ -739,7 +739,7 @@ export const OwnmenuConfig = {
     //   type: "link",
     //   icon: "IconMenuDashboard",
     //   label: "dashboard",
-    //    href: "/faculty/dashboard",
+    //    href: "/",
     // },
     //   {
     //   type: "link",
