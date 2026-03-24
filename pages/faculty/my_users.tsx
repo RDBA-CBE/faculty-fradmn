@@ -244,7 +244,7 @@ const Users = () => {
 
       if (res?.role === ROLES.HR) {
         if (isTabChange) {
-          setState({ activeTab: ROLES.HOD });
+          setState({ activeTab: ROLES.APPLICANT });
         }
         setState({
           profile_institution: res?.institution?.name,
@@ -253,6 +253,11 @@ const Users = () => {
             label: res?.college?.college_name,
           },
         });
+        jobList(
+          1,
+          "",
+          res?.college?.map((item) => item?.college_id)
+        );
         // superAdminDepartmentList(1, "", false, res?.college?.college_id);
       }
 
@@ -308,6 +313,8 @@ const Users = () => {
           ? { label: item?.department?.name, value: item?.department?.id }
           : null,
         reveal_name: item?.reveal_name,
+        current_location:item?.current_location,
+        current_position:item?.current_position,
       }));
 
       setState({
@@ -326,7 +333,12 @@ const Users = () => {
     const userId = localStorage.getItem("userId");
 
     if (state.search) {
-      body.search = state.search;
+      if (state.activeTab === ROLES.APPLICANT) {
+        body.search = state.search;
+        body.reveal_name = "Yes";
+      } else {
+        body.search = state.search;
+      }
     }
 
     if (state.profile?.role === ROLES.SUPER_ADMIN) {
@@ -665,8 +677,33 @@ const Users = () => {
     }
   };
 
-  console.log("state.collegeList", state.collegeList);
-  console.log("state.college", state.college);
+  const jobList = async (page, search = "", colId = null) => {
+    console.log("✌️colId --->", colId);
+    try {
+      setState({ loading: true });
+
+      const body = bodyData();
+      if (colId) body.college_id = colId;
+      if (search) body.search = search;
+      const res: any = await Models.job.list(page, body);
+      const dropdown = res?.results?.map((item) => ({
+        value: item?.id,
+        label: item?.roles?.[0]?.role_name,
+      }));
+
+      setState({
+        loading: false,
+        page,
+        count: res?.count,
+        jobList: dropdown,
+        next: res?.next,
+        prev: res?.previous,
+      });
+    } catch (error) {
+      setState({ loading: false });
+      Failure("Failed to fetch jobs");
+    }
+  };
 
   const hodInstitutionList = async (page, search = "", loadMore = false) => {
     try {
@@ -821,6 +858,7 @@ const Users = () => {
       applicantName: "",
       sendLoading: false,
       message: "",
+      interestJob:""
     });
     profile(false);
   };
@@ -1502,41 +1540,67 @@ const Users = () => {
           );
         },
       },
-      {
-        accessor: "email",
-        title: "Email",
-        sortable: true,
-        render: (row: any) => {
-          const user = safeUser(row);
 
-          return (
-            <span className="text-gray-600 dark:text-gray-400">
-              {user.email ? truncateText(user.email) : "Hidden"}
-            </span>
-          );
-        },
-      },
-      {
-        accessor: "phone",
-        title: "Phone",
-        render: (row: any) => {
-          const user = safeUser(row);
+      ...(state.activeTab == ROLES.APPLICANT
+        ? [
+            {
+              accessor: "current_location",
+              title: "Location",
+              render: (row: any) => (
+                <div className="text-gray-600 dark:text-gray-400">
+                  {row?.current_location || "-"}
+           
+                </div>
+              ),
+            },
+            {
+              accessor: "experience",
+              title: "Experience",
+              render: (row: any) => (
+                <div className="text-gray-600 dark:text-gray-400">
+                  {row?.experience || "-"}
+                </div>
+              ),
+            },
+            {
+              accessor: "current_position",
+              title: "Current Position",
+              render: (row: any) => (
+                <div className="text-gray-600 dark:text-gray-400">
+                  {row?.current_position || "-"}
+                </div>
+              ),
+            },
+          ]
+        : [
+            {
+              accessor: "email",
+              title: "Email",
+              sortable: true,
+              render: (row: any) => {
+                const user = safeUser(row);
 
-          return (
-            <div className="text-gray-600 dark:text-gray-400">
-              {user.phone || "Hidden"}
-            </div>
-          );
-        },
-      },
+                return (
+                  <span className="text-gray-600 dark:text-gray-400">
+                    {user.email ? truncateText(user.email) : "Hidden"}
+                  </span>
+                );
+              },
+            },
+            {
+              accessor: "phone",
+              title: "Phone",
+              render: (row: any) => {
+                const user = safeUser(row);
 
-      // {
-      //   accessor: "institution",
-      //   title: "Institution",
-      //   render: ({ institution }) => (
-      //     <div className="text-gray-600 dark:text-gray-400">{institution}</div>
-      //   ),
-      // },
+                return (
+                  <div className="text-gray-600 dark:text-gray-400">
+                    {user.phone || "Hidden"}
+                  </div>
+                );
+              },
+            },
+          ]),
     ];
     if (state.activeTab !== "applicant") {
       baseColumns.push({
@@ -1731,7 +1795,7 @@ const Users = () => {
               <IconEye className="h-4 w-4" />
             </a>
           )}
-          {state.activeTab == "applicant" && (
+          {state.activeTab == "applicant" && row?.is_interested && (
             <button
               onClick={() => handleRound(row)}
               className="flex  items-center justify-center rounded-lg  text-pink-600 transition-all duration-200 "
@@ -1800,7 +1864,7 @@ const Users = () => {
       return "Institution Admin";
     if (state.activeTab === "hr") return "HR";
     if (state.activeTab === "hod") return "HOD";
-    return "Faculty";
+    return "Job Seeker";
   };
 
   const sendInterest = async () => {
@@ -1811,6 +1875,8 @@ const Users = () => {
         message: capitalizeFLetter(state.message),
         applicant_id: state.applicantId,
         sender_id: state.profile?.id,
+        job_id: state.interestJob?.value,
+        hr_interview_status:"Sent Interest"
       };
 
       const res = await Models.application.send_interest(body);
@@ -1972,7 +2038,7 @@ const Users = () => {
                 HR
               </button>
             )}
-            {state.profile?.role != ROLES.HOD && (
+            {/* {state.profile?.role != ROLES.HOD && (
               <button
                 onClick={() => handleTabChange("hod")}
                 className={`rounded-md px-2 py-1 text-sm font-medium transition-all duration-200 ${
@@ -1983,8 +2049,8 @@ const Users = () => {
               >
                 HOD
               </button>
-            )}
-            {state.profile?.role == ROLES.HR && (
+            )} */}
+            {/* {state.profile?.role == ROLES.HR && (
               <button
                 onClick={() => handleTabChange("applicant")}
                 className={`rounded-md px-2 py-1 text-sm font-medium transition-all duration-200 ${
@@ -1995,7 +2061,7 @@ const Users = () => {
               >
                 Job Seeker
               </button>
-            )}
+            )} */}
           </div>
         </div>
       )}
@@ -2179,12 +2245,12 @@ const Users = () => {
             className="table-hover whitespace-nowrap"
             records={state.userList}
             fetching={state.loading}
-            selectedRecords={state.userList.filter((record) =>
-              state.selectedRecords.includes(record.id)
-            )}
-            onSelectedRecordsChange={(records) =>
-              setState({ selectedRecords: records.map((r: any) => r.id) })
-            }
+            // selectedRecords={state.userList.filter((record) =>
+            //   state.selectedRecords.includes(record.id)
+            // )}
+            // onSelectedRecordsChange={(records) =>
+            //   setState({ selectedRecords: records.map((r: any) => r.id) })
+            // }
             // isRecordSelectable={(record: any) =>
             //   state.activeTab === ROLES.APPLICANT ? record.is_interested : true
             // }
@@ -2324,6 +2390,31 @@ const Users = () => {
               onChange={(e) => handleFormChange("message", e.target.value)}
             />
 
+            <CustomSelect
+              title="Select Job"
+              options={state.jobList}
+              value={state.interestJob}
+              onChange={(e) => setState({ interestJob: e })}
+              placeholder="Select job"
+              isClearable={true}
+              onSearch={(searchTerm) => {
+                jobList(
+                  1,
+                  searchTerm,
+                  state.profile?.college?.map((item) => item?.college_id)
+                );
+              }}
+              loadMore={() => {
+                state.jobNext &&
+                  jobList(
+                    state.jobPage + 1,
+                    "",
+                    state.profile?.college?.map((item) => item?.college_id)
+                  );
+              }}
+              loading={state.jobLoading}
+            />
+
             <div className="mt-8 flex flex-col-reverse gap-3 border-t border-gray-200 pt-6 dark:border-gray-700 sm:flex-row sm:justify-end">
               <button
                 type="button"
@@ -2339,7 +2430,7 @@ const Users = () => {
                   state.submitting ? "cursor-not-allowed opacity-70" : ""
                 }`}
               >
-                <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+                <div className="bg-dblue absolute opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
                 {state.sendLoading ? (
                   <IconLoader className="relative z-10 mr-2 h-4 w-4 animate-spin" />
                 ) : (

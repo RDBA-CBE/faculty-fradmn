@@ -67,7 +67,7 @@ const application = {
       if (body?.salary_range) {
         url = url + `&salary_range_id=${body.salary_range}`;
       }
-    
+
       instance()
         .get(url)
         .then((res) => {
@@ -180,8 +180,6 @@ const application = {
     });
     return promise;
   },
-
-  
 };
 
 export default application;

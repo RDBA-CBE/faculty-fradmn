@@ -165,10 +165,10 @@ export default function Newjob() {
             value: res?.job_type_obj?.id,
             label: res?.job_type_obj?.name,
           },
-          salary: {
+          salary: res?.salary_range_obj?{
             value: res?.salary_range_obj?.id,
             label: res?.salary_range_obj?.name,
-          },
+          }:null,
           job_status: {
             value: res?.job_status_obj?.id,
             label: res?.job_status_obj?.name,
@@ -233,13 +233,20 @@ export default function Newjob() {
                 }))
               : [],
           is_approved: res?.is_approved,
+          // jobRole:
+          //   res?.roles?.length > 0
+          //     ? res?.roles?.map((role: any) => ({
+          //         value: role?.id,
+          //         label: role?.role_name,
+          //       }))
+          //     : [],
           jobRole:
-            res?.roles?.length > 0
-              ? res?.roles?.map((role: any) => ({
-                  value: role?.id,
-                  label: role?.role_name,
-                }))
-              : [],
+          res?.roles?.length > 0
+            ? {
+                value: res?.roles?.[0]?.id,
+                label: res?.roles?.[0]?.role_name,
+              }
+            : [],
         });
         if (res?.job_image) {
           setState({
@@ -627,8 +634,10 @@ export default function Newjob() {
         isCollegeEmail: state.isCollegeEmail,
         alternativeEmail: state.alternativeEmail,
         applyLink: state.applyLink,
-        jobRole: state.jobRole,
+        jobRole: state.jobRole?.value,
       };
+      console.log('✌️validation --->', validation);
+      
       await CreateNewJob.validate(validation, { abortEarly: false });
 
       const body: any = {
@@ -708,8 +717,8 @@ export default function Newjob() {
         body.category_ids = [];
       }
 
-      if (state.jobRole?.length > 0) {
-        body.role_ids = state.jobRole?.map((item) => item?.value);
+      if (state.jobRole?.value) {
+        body.role_ids = [state.jobRole?.value]
       } else {
         body.role_ids = [];
       }
@@ -977,7 +986,7 @@ export default function Newjob() {
             </div>
             <div className="space-y-5 p-6">
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                <TextInput
+                {/* <TextInput
                   name="title"
                   type="text"
                   title="Job Title"
@@ -999,7 +1008,7 @@ export default function Newjob() {
                   error={state.error?.location}
                   loading={state.locationLoading}
                   isMulti={true}
-                />
+                /> */}
                 <CustomSelect
                   options={state.jobRoleList}
                   value={state.jobRole}
@@ -1015,7 +1024,6 @@ export default function Newjob() {
                     state.jobRoleNext &&
                     jobRoleList(state.jobRolePage + 1, "", true)
                   }
-                  isMulti={true}
                 />
 
                 <CustomSelect

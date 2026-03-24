@@ -45,15 +45,24 @@ export const Failure = (message: string) => {
   });
 };
 
-export const truncateText = (text: string, maxLength: number = 10) => {
+export const truncateText = (
+  text: string,
+  maxLength: number = 10,
+  cap = true
+) => {
   if (!text) return "";
 
   const capitalized =
     text?.charAt(0).toUpperCase() + text?.slice(1)?.toLowerCase();
-
-  return capitalized.length > maxLength
-    ? capitalized?.substring(0, maxLength) + "..."
-    : capitalized;
+  if (cap) {
+    return text?.length > maxLength
+      ? text?.substring(0, maxLength) + "..."
+      : text;
+  } else {
+    return capitalized.length > maxLength
+      ? capitalized?.substring(0, maxLength) + "..."
+      : capitalized;
+  }
 };
 
 export const showDeleteAlert = (onConfirm, onCancel, title) => {
@@ -192,7 +201,7 @@ export const urlToFile = async (url, filename = null) => {
 
     if (!response.ok) {
       throw new Error(
-        `Failed to fetch image: ${response.status} ${response.statusText}`,
+        `Failed to fetch image: ${response.status} ${response.statusText}`
       );
     }
 
@@ -337,7 +346,7 @@ export const formatTimeRange = (date, time, intervalMinutes) => {
   const end = moment(start).add(intervalMinutes, "minutes");
 
   return `${start.format("MMMM D, YYYY")} at ${start.format(
-    "h:mm A",
+    "h:mm A"
   )} - ${end.format("h:mm A")}`;
 };
 
@@ -487,7 +496,7 @@ export const getTime = (startDate, startTime) => {
     hours,
     minutes,
     seconds,
-    milliseconds,
+    milliseconds
   );
   return combinedDate;
 };
@@ -567,7 +576,7 @@ export const formatToINRS = (price: number | string): string => {
 
 export const formatPriceRange = (
   minPrice: number | string | null,
-  maxPrice: number | string | null,
+  maxPrice: number | string | null
 ): string => {
   if (minPrice === null && maxPrice === null) {
     return "Price on request";

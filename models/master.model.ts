@@ -91,12 +91,12 @@ const master = {
   },
 
   // Location APIs
-  location_list: (body: any = {}) => {
+  location_list: (page=1,body: any = {}) => {
     let promise = new Promise((resolve, reject) => {
-      let url = "job-locations/";
-      if (body?.search) url += `?search=${encodeURIComponent(body.search)}`;
+      let url = `job-locations/?page=${page}`;
+      if (body?.search) url += `&search=${encodeURIComponent(body.search)}`;
       if (body?.ordering)
-        url += `${body.search ? "&" : "?"}ordering=${encodeURIComponent(
+        url += `&ordering=${encodeURIComponent(
           body.ordering
         )}`;
       instance()

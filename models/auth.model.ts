@@ -103,6 +103,10 @@ const auth = {
       if (body.role) {
         url = url + `&role=${body.role}`;
       }
+
+      if (body.reveal_name == "Yes") {
+        url = url + `&reveal_name=${true}`;
+      }
       if (body?.search) {
         url = url + `&search=${body.search}`;
       }

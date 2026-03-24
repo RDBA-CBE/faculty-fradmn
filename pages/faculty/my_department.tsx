@@ -86,6 +86,7 @@ const CollegeAndDepartment = () => {
     state.sortBy,
     state.sortingFilter,
     state.profile,
+    state.filterCollege
   ]);
 
   const profile = async () => {
@@ -131,9 +132,14 @@ const CollegeAndDepartment = () => {
     try {
       setState({ loading: true });
       const body = collegeBodyData();
+
+      if(state.filterCollege){
+        body.college=state.filterCollege?.value
+      }else{
       const colleges =
         collegeId ?? state.profile?.college?.map((c: any) => c.college_id);
       if (colleges) body.college = colleges;
+    }
       const res: any = await Models.department.list(page, body);
 
       const tableData = res?.results?.map((item) => ({
@@ -173,6 +179,7 @@ const CollegeAndDepartment = () => {
       Failure("Failed to fetch departments");
     }
   };
+  console.log("✌️deptList --->", state.deptList);
 
   const collegeDropdownList = async (
     page,
@@ -251,16 +258,18 @@ const CollegeAndDepartment = () => {
       body.search = state.search;
     }
 
-    if (state.sortingFilter?.value) {
-      if (state.sortingFilter?.value == 1) {
-        body.team = "No";
-        body.created_by = userId;
-      } else {
-        body.created_by = userId;
+   
 
-        body.team = "Yes";
-      }
-    }
+    // if (state.sortingFilter?.value) {
+    //   if (state.sortingFilter?.value == 1) {
+    //     body.team = "No";
+    //     body.created_by = userId;
+    //   } else {
+    //     body.created_by = userId;
+
+    //     body.team = "Yes";
+    //   }
+    // }
 
     // if (userId) {
     //   body.created_by = userId;
@@ -778,55 +787,53 @@ const CollegeAndDepartment = () => {
       accessor: "department_name",
       title: "Department Name",
       sortable: true,
-      render: ({ department_name }) => (
+      render: (row) => (
         <div
-          className="font-medium text-gray-900 dark:text-white"
-          title={department_name}
+          onClick={() => handleEdit(row)}
+          className="cursor-pointer font-medium text-gray-900 dark:text-white"
+          title={row?.department_name}
         >
-          {department_name}
+          {row?.department_name}
         </div>
       ),
     },
     {
-      accessor: "hod",
-      title: "Department Head",
+      accessor: "intake_per_year",
+      title: "Intake Per Year",
       sortable: true,
-      render: ({ department_head }) => (
-        <div
-          className="text-gray-600 dark:text-gray-400"
-          title={department_head}
-        >
-          {truncateText(department_head)}
+      render: (row) => (
+        <div className="text-gray-600 dark:text-gray-400">
+          {row?.department_extras?.[0]?.intake_per_year}
         </div>
       ),
     },
     {
-      accessor: "institution_name",
-      title: "Institution",
+      accessor: "nba_accreditation",
+      title: "NBA Accreditation",
       sortable: true,
-      render: ({ institution_name }) => (
+      render: (row) => (
         <div
           className="font-medium text-gray-900 dark:text-white"
-          title={institution_name}
+          // title={row?.department_extras?.nba_accreditation}
         >
-          {truncateText(institution_name)}
+          {row?.department_extras?.[0]?.nba_accreditation ? "Yes" : "No"}
         </div>
       ),
     },
 
-    {
-      accessor: "college_name",
-      title: "College ",
-      sortable: true,
-      render: ({ college_name }) => (
-        <div
-          className="font-medium text-gray-900 dark:text-white"
-          title={college_name}
-        >
-          {truncateText(college_name)}
-        </div>
-      ),
-    },
+    // {
+    //   accessor: "college_name",
+    //   title: "College ",
+    //   sortable: true,
+    //   render: ({ college_name }) => (
+    //     <div
+    //       className="font-medium text-gray-900 dark:text-white"
+    //       title={college_name}
+    //     >
+    //       {truncateText(college_name)}
+    //     </div>
+    //   ),
+    // },
 
     {
       accessor: "total_jobs",
@@ -888,14 +895,14 @@ const CollegeAndDepartment = () => {
               Manage departments
             </p>
           </div>
-          <button
+          {/* <button
             onClick={() => setState({ showModal: true })}
             className="bg-dblue group relative inline-flex transform items-center gap-2 overflow-hidden rounded-lg px-4 py-2  text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
           >
             <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
             <IconPlus className="relative z-10 h-5 w-5" />
             <span className="relative z-10">Add Department</span>
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -913,7 +920,14 @@ const CollegeAndDepartment = () => {
               className="transition-all duration-200 focus:shadow-lg group-hover:shadow-md"
             />
           </div>
-          <div className="group relative z-50">
+
+          <CustomSelect
+            options={state.collegeList}
+            value={state.filterCollege}
+            onChange={(e) => setState({ filterCollege: e })}
+            placeholder={"Select College"}
+          />
+          {/* <div className="group relative z-50">
             <CustomSelect
               options={[
                 {
@@ -940,7 +954,7 @@ const CollegeAndDepartment = () => {
               }
               isClearable={false}
             />
-          </div>
+          </div> */}
           {/* <div className="group relative z-50">
             <CustomSelect
               options={state.institutionOptions}

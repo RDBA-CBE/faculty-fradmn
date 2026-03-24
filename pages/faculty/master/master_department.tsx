@@ -109,11 +109,13 @@ const Master_department = () => {
   };
 
   const handleEdit = (row) => {
+    console.log("✌️row --->", row);
     setState({
       editId: row?.id,
       showModal: true,
       name: row.name,
       short_name: row.short_name,
+      is_approved: row?.is_approved,
     });
   };
 
@@ -139,7 +141,7 @@ const Master_department = () => {
     try {
       setState({ submitting: true });
 
-      const body = {
+      const body: any = {
         name: capitalizeFLetter(state.name),
         short_name: capitalizeFLetter(state.short_name),
       };
@@ -150,7 +152,7 @@ const Master_department = () => {
         await Models.master.update_dept(body, state.editId);
         Success("Department updated successfully");
       } else {
-        await Models.master.create_dept(body);
+        (body.is_approved = true), await Models.master.create_dept(body);
         Success("Department created successfully");
       }
 
@@ -166,7 +168,7 @@ const Master_department = () => {
 
         setState({ errors: validationErrors, submitting: false });
       } else {
-        Failure(error?.error);
+        Failure(error?.data?.error);
         setState({ submitting: false });
       }
     }

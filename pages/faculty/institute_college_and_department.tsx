@@ -2075,13 +2075,13 @@ const CollegeAndDepartment = () => {
           rows={3}
           required
         />
-        <div className="mt-7">
+        {/* <div className="mt-7">
           <CheckboxInput
             checked={state.is_legacy}
             onChange={(e) => setState({ is_legacy: !state.is_legacy })}
             label="Is Legacy"
           />
-        </div>
+        </div> */}
       </div>
 
       <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-1 ">
@@ -2790,7 +2790,7 @@ const CollegeAndDepartment = () => {
       </div>
 
       {/* Tabs */}
-      <div className="mb-4">
+      {/* <div className="mb-4">
         <div className="inline-flex rounded-lg bg-white p-1 dark:bg-gray-800">
           <button
             onClick={() => handleTabChange("colleges")}
@@ -2813,7 +2813,7 @@ const CollegeAndDepartment = () => {
             Departments
           </button>
         </div>
-      </div>
+      </div> */}
 
       {/* Filters Section */}
       <div className="mb-5 rounded-2xl  backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">

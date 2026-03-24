@@ -54,7 +54,6 @@ import TextArea from "@/components/FormFields/TextArea.component";
 import Utils from "@/imports/utils.import";
 import * as Yup from "yup";
 
-
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
 });
@@ -260,6 +259,7 @@ const Dashboard = () => {
   ];
 
   const profiles = async () => {
+    console.log("✌️profiles --->");
     try {
       const res: any = await Models.auth.profile();
       setState({ profile: res });
@@ -280,9 +280,10 @@ const Dashboard = () => {
           applicationList(1, null, null, null, res?.id);
         else if (res?.role == ROLES.INSTITUTION_ADMIN)
           applicationList(1, instId, null, null, res?.id);
-        else if (res?.role == ROLES.HR)
+        else if (res?.role == ROLES.HR) {
           applicationList(1, null, colleges, null, res?.id);
-        else if (res?.role == ROLES.HOD)
+          jobFilterList(1, "", colleges);
+        } else if (res?.role == ROLES.HOD)
           applicationList(1, null, null, deptId, res?.id);
       } else if (state.activeCard === 3) {
         if (res?.role == ROLES.SUPER_ADMIN) userList(1, null, null, null);
@@ -352,6 +353,8 @@ const Dashboard = () => {
           ? { label: item?.department?.name, value: item?.department?.id }
           : null,
         reveal_name: item?.reveal_name,
+        current_location: item?.current_location,
+        current_position: item?.current_position,
       }));
 
       setState({
@@ -503,6 +506,34 @@ const Dashboard = () => {
     }
   };
 
+  const jobFilterList = async (page, search = "", colId = null) => {
+    console.log("✌️colId --->", colId);
+    try {
+      setState({ loading: true });
+
+      const body = bodyData();
+      if (colId) body.college_id = colId;
+      if (search) body.search = search;
+      const res: any = await Models.job.list(page, body);
+      const dropdown = res?.results?.map((item) => ({
+        value: item?.id,
+        label: item?.roles?.[0]?.role_name,
+      }));
+
+      setState({
+        loading: false,
+        jobPage:page,
+        jobFiltercount: res?.count,
+        jobFilterList: dropdown,
+        jobFilternext: res?.next,
+        jobFilterprev: res?.previous,
+      });
+    } catch (error) {
+      setState({ loading: false });
+      Failure("Failed to fetch jobs");
+    }
+  };
+
   const collegeDropdownList = async (
     page,
     search = "",
@@ -600,13 +631,26 @@ const Dashboard = () => {
       setState({ applicationStatusLoading: true });
       const res: any = await Models.master.application_status_list();
       const dropdown = res?.find((item) => item.name == "Interview Scheduled");
-      applicationList(
-        1,
-        state.profile?.institution?.id,
-        null,
-        null,
-        dropdown?.id
-      );
+      const role = state.profile?.role;
+      const colleges = state.profile?.college?.map((c: any) => c.college_id);
+      const instId = state.profile?.institution?.id;
+      const deptId = state.profile?.department?.department_id;
+
+      if (role === ROLES.SUPER_ADMIN)
+        applicationList(1, null, null, null, state.profile?.id, dropdown?.id);
+      else if (role === ROLES.INSTITUTION_ADMIN)
+        applicationList(1, instId, null, null, state.profile?.id, dropdown?.id);
+      else if (role === ROLES.HR)
+        applicationList(
+          1,
+          null,
+          colleges,
+          null,
+          state.profile?.id,
+          dropdown?.id
+        );
+      else if (role === ROLES.HOD)
+        applicationList(1, null, null, deptId, state.profile?.id, dropdown?.id);
     } catch (error) {
       setState({ applicationStatusLoading: false });
     }
@@ -1130,6 +1174,9 @@ const Dashboard = () => {
         message: capitalizeFLetter(state.message),
         applicant_id: state.applicantId,
         sender_id: state.profile?.id,
+        job_id: state.interestJob?.value,
+        hr_interview_status:"Sent Interest"
+
       };
 
       const res = await Models.application.send_interest(body);
@@ -1140,6 +1187,8 @@ const Dashboard = () => {
         message: "",
         applicantName: "",
         applicantId: "",
+        job_id:"",
+        hr_interview_status:""
       });
     } catch (error) {
       if (error?.data?.error) {
@@ -1157,63 +1206,63 @@ const Dashboard = () => {
     }
   };
 
-   const createInterview = async () => {
-      try {
-        setState({ submitting: true });
-  
-        const validation = {
-          interviewSlot: state.interviewSlot
-            ? moment(state.interviewSlot).format("YYYY-MM-DD HH:mm")
-            : "",
-          roundName: state.roundName,
-        };
-  
-        await Utils.Validation.user_interview.validate(validation, {
-          abortEarly: false,
+  const createInterview = async () => {
+    try {
+      setState({ submitting: true });
+
+      const validation = {
+        interviewSlot: state.interviewSlot
+          ? moment(state.interviewSlot).format("YYYY-MM-DD HH:mm")
+          : "",
+        roundName: state.roundName,
+      };
+
+      await Utils.Validation.user_interview.validate(validation, {
+        abortEarly: false,
+      });
+
+      const body = {
+        scheduled_date: moment(state.interviewSlot).format("YYYY-MM-DD HH:mm"),
+        applicant_id: state.applicant?.value,
+        response_from_applicant: state.requestForChange,
+        round_name: state.roundName,
+        status: "Scheduled",
+        interview_link: state.interview_link ?? "",
+        sender_id: state.profile?.id,
+      };
+      console.log("✌️body --->", body);
+
+      const res = await Models.interview.create_user_interview(body);
+      Success("Interview schedule created successfully!");
+      setState({
+        showInterviewModal: false,
+        errors: {},
+        selectedApplicants: [],
+        interviewSlot: "",
+        roundName: "",
+        requestForChange: false,
+        interviewStatus: null,
+        submitting: false,
+        interview_link: "",
+        selectedRecords: [],
+      });
+      // profile();
+    } catch (error) {
+      console.log("✌️error --->", error);
+      if (error instanceof Yup.ValidationError) {
+        const validationErrors = {};
+        error.inner.forEach((err) => {
+          validationErrors[err.path] = err?.message;
         });
-  
-        const body = {
-          scheduled_date: moment(state.interviewSlot).format("YYYY-MM-DD HH:mm"),
-          applicant_id: state.applicant?.value,
-          response_from_applicant: state.requestForChange,
-          round_name: state.roundName,
-          status: "Scheduled",
-          interview_link: state.interview_link ?? "",
-          sender_id: state.profile?.id,
-        };
-        console.log("✌️body --->", body);
-  
-        const res = await Models.interview.create_user_interview(body);
-        Success("Interview schedule created successfully!");
-        setState({
-          showInterviewModal: false,
-          errors: {},
-          selectedApplicants: [],
-          interviewSlot: "",
-          roundName: "",
-          requestForChange: false,
-          interviewStatus: null,
-          submitting: false,
-          interview_link: "",
-          selectedRecords: [],
-        });
-        // profile();
-      } catch (error) {
-        console.log("✌️error --->", error);
-        if (error instanceof Yup.ValidationError) {
-          const validationErrors = {};
-          error.inner.forEach((err) => {
-            validationErrors[err.path] = err?.message;
-          });
-          console.log("✌️errors --->", validationErrors);
-  
-          setState({ errors: validationErrors, submitting: false });
-        } else {
-          Failure(error?.error);
-          setState({ submitting: false });
-        }
+        console.log("✌️errors --->", validationErrors);
+
+        setState({ errors: validationErrors, submitting: false });
+      } else {
+        Failure(error?.error);
+        setState({ submitting: false });
       }
-    };
+    }
+  };
 
   return (
     <div className="min-h-screen dark:from-gray-900 dark:to-gray-800">
@@ -1316,12 +1365,16 @@ const Dashboard = () => {
               placeholder="Choose From"
               onChange={(e) => setState({ start_date: e })}
               showTimeSelect={false}
+              usePortal={true}
+              popperPlacement="bottom-start"
             />
             <CustomeDatePicker
               value={state.end_date}
               placeholder="Choose To "
               onChange={(e) => setState({ end_date: e })}
               showTimeSelect={false}
+              usePortal={true}
+              popperPlacement="bottom-start"
             />
 
             {/* <button
@@ -1610,31 +1663,31 @@ const Dashboard = () => {
                     },
                   },
                   {
-                    accessor: "email",
-                    title: "Email",
-                    sortable: true,
-                    render: (row: any) => {
-                      const user = safeUser(row);
-
-                      return (
-                        <span className="text-gray-600 dark:text-gray-400">
-                          {user.email ? truncateText(user.email) : "Hidden"}
-                        </span>
-                      );
-                    },
+                    accessor: "current_location",
+                    title: "Location",
+                    render: (row: any) => (
+                      <div className="text-gray-600 dark:text-gray-400">
+                        {row?.current_location || "-"}
+                      </div>
+                    ),
                   },
                   {
-                    accessor: "phone",
-                    title: "Phone",
-                    render: (row: any) => {
-                      const user = safeUser(row);
-
-                      return (
-                        <div className="text-gray-600 dark:text-gray-400">
-                          {user.phone || "Hidden"}
-                        </div>
-                      );
-                    },
+                    accessor: "experience",
+                    title: "Experience",
+                    render: (row: any) => (
+                      <div className="text-gray-600 dark:text-gray-400">
+                        {row?.experience || "-"}
+                      </div>
+                    ),
+                  },
+                  {
+                    accessor: "current_position",
+                    title: "Current Position",
+                    render: (row: any) => (
+                      <div className="text-gray-600 dark:text-gray-400">
+                        {row?.current_position || "-"}
+                      </div>
+                    ),
                   },
                   {
                     accessor: "actions",
@@ -2431,6 +2484,30 @@ const Dashboard = () => {
               value={state.message}
               onChange={(e) => handleFormChange("message", e.target.value)}
             />
+            <CustomSelect
+              title="Select Job"
+              options={state.jobFilterList}
+              value={state.interestJob}
+              onChange={(e) => setState({ interestJob: e })}
+              placeholder="Select job"
+              isClearable={true}
+              onSearch={(searchTerm) => {
+                jobFilterList(
+                  1,
+                  searchTerm,
+                  state.profile?.college?.map((item) => item?.college_id)
+                );
+              }}
+              loadMore={() => {
+                state.jobFilternext &&
+                jobFilterList(
+                    state.jobPage + 1,
+                    "",
+                    state.profile?.college?.map((item) => item?.college_id)
+                  );
+              }}
+              loading={state.jobLoading}
+            />
 
             <div className="mt-8 flex flex-col-reverse gap-3 border-t border-gray-200 pt-6 dark:border-gray-700 sm:flex-row sm:justify-end">
               <button
@@ -2467,7 +2544,7 @@ const Dashboard = () => {
         )}
       />
 
-<Modal
+      <Modal
         subTitle={`Create Interview Schedule (${state.applicant?.label})`}
         closeIcon
         open={state.showInterviewModal}

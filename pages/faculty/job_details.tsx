@@ -2,7 +2,11 @@ import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { setPageTitle } from "../../store/themeConfigSlice";
-import { capitalizeFLetter, truncateText, useSetState } from "@/utils/function.utils";
+import {
+  capitalizeFLetter,
+  truncateText,
+  useSetState,
+} from "@/utils/function.utils";
 import { Models } from "@/imports/models.import";
 import { Failure } from "@/utils/function.utils";
 import IconLoader from "@/components/Icon/IconLoader";
@@ -123,7 +127,11 @@ const JobDetails = () => {
             <div className="rounded-lg border bg-white p-6  dark:bg-gray-800">
               <div className="flex items-start justify-between">
                 <div>
-                  <h1 className="page-ti mb-4">{job?.job_title}</h1>
+                  <h1 className="page-ti mb-4">
+                    {capitalizeFLetter(
+                      job?.roles?.length > 0 ? job?.roles?.[0]?.role_name : ""
+                    )}
+                  </h1>
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-gray-600 dark:text-gray-400">
                     <div className="flex items-center gap-2">
                       <Building2 className="text-dyellow h-4 w-4" />
@@ -159,7 +167,7 @@ const JobDetails = () => {
                   ) : (
                     <Clock className="h-4 w-4" />
                   )}
-                  {job?.is_approved ? "Approved" : "Pending Approval"}
+                  {job?.is_approved ? "Approved" : "Pending"}
                 </span>
                 <span
                   className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs  ${
@@ -414,7 +422,10 @@ const JobDetails = () => {
                 accessor: "name",
                 title: "Name",
                 render: (row: any) => (
-                  <div className=" text-gray-900 dark:text-white" title={`${row?.first_name} ${row?.last_name}`}>
+                  <div
+                    className=" text-gray-900 dark:text-white"
+                    title={`${row?.first_name} ${row?.last_name}`}
+                  >
                     {truncateText(`${row?.first_name} ${row?.last_name}`)}
                   </div>
                 ),

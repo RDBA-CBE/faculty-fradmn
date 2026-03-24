@@ -156,6 +156,7 @@ const Job = () => {
     state.salaryFilter,
     state.sortingFilter,
     state.profile,
+    state.filterCollege,
   ]);
 
   const profile = async () => {
@@ -168,7 +169,13 @@ const Job = () => {
       } else if (res?.role == ROLES.INSTITUTION_ADMIN) {
         collegeDropdownList(1, "", false, res?.institution?.id, res.id);
       } else if (res?.role == ROLES.HR) {
-        departmentDropdownList(1, "", false, res?.college?.college_id, res.id);
+        setState({
+          collegeList: res?.college?.map((item) => ({
+            value: item?.college_id,
+            label: item?.college_name,
+          })),
+        });
+        departmentDropdownList(1, "", false, res?.college?.map((item)=>item?.college_id));
       }
       callJobListByRole(1, res);
     } catch (error) {
@@ -197,12 +204,14 @@ const Job = () => {
 
       const body = bodyData();
       if (insId) body.institution_id = insId;
-      if (colId) body.college_id = colId;
+      if (state.filterCollege) {
+        body.college_id = state.filterCollege?.value;
+      } else if (colId) body.college_id = colId;
       const res: any = await Models.job.list(page, body);
 
       const tableData = res?.results?.map((item) => ({
         id: item.id,
-        job_title: item.job_title,
+        job_title: item.roles?.length > 0 ? item?.roles?.[0]?.role_name : "",
         job_description: item.job_description,
 
         college_name: item?.college?.name,
@@ -389,7 +398,7 @@ const Job = () => {
       if (createdBy) {
         body.created_by = createdBy;
       }
-      body.team = "No";
+      // body.team = "No";
       const res: any = await Models.department.list(page, body);
       const dropdown = Dropdown(res?.results, "short_name");
 
@@ -716,10 +725,11 @@ const Job = () => {
           </div>
         </div>
         <div
-         onClick={() =>
-          setState({ statusFilter:{ value: "pending", label: "Pending" } })
-        }
-        className="cursor-pointer  rounded-lg border border-gray-200 bg-yellow-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
+          onClick={() =>
+            setState({ statusFilter: { value: "pending", label: "Pending" } })
+          }
+          className="cursor-pointer  rounded-lg border border-gray-200 bg-yellow-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700"
+        >
           <div className="flex items-center gap-5">
             <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
               <Hourglass className="h-10 w-10 text-yellow-600" />
@@ -735,7 +745,7 @@ const Job = () => {
             </div>
           </div>
         </div>
-        <div className="rounded-lg border border-gray-200 bg-red-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
+        {/* <div className="rounded-lg border border-gray-200 bg-red-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
           <div className="flex items-center gap-5">
             <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
               <Clock className="h-10 w-10 text-red-600" />
@@ -751,7 +761,7 @@ const Job = () => {
               </p>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Filters Section */}
@@ -763,18 +773,46 @@ const Job = () => {
             onChange={(e) => setState({ search: e.target.value })}
             icon={<IconSearch className="h-4 w-4" />}
           />
-          <CustomeDatePicker
-            value={state.start_date}
-            placeholder="Choose From"
-            onChange={(e) => setState({ start_date: e })}
-            showTimeSelect={false}
+
+          <CustomSelect
+            options={state.collegeList}
+            value={state.filterCollege}
+            onChange={(e) => setState({ filterCollege: e })}
+            placeholder={"Select College"}
           />
-          <CustomeDatePicker
-            value={state.end_date}
-            placeholder="Choose To "
-            onChange={(e) => setState({ end_date: e })}
-            showTimeSelect={false}
+
+          <CustomSelect
+            options={state.departmentList}
+            value={state.departmentFilter}
+            onChange={handleDepartmentChange}
+            placeholder="Select department"
+            isClearable={true}
+            onSearch={(searchTerm) => {
+              const collegeId = state.collegeFilter?.value;
+              collegeId &&
+                departmentDropdownList(
+                  1,
+                  searchTerm,
+                  false,
+                  collegeId,
+                  state.profile?.id
+                );
+            }}
+            loadMore={() => {
+              const collegeId = state.collegeFilter?.value;
+              state.departmentNext &&
+                collegeId &&
+                departmentDropdownList(
+                  state.departmentPage + 1,
+                  "",
+                  true,
+                  collegeId,
+                  state.profile?.id
+                );
+            }}
+            loading={state.departmentLoading}
           />
+
           <CustomSelect
             options={[
               {
@@ -1311,7 +1349,7 @@ const Job = () => {
                   />
                 </>
               )}
-              {state.profile?.role == ROLES.HR && (
+              {/* {state.profile?.role == ROLES.HR && (
                 <>
                   <CustomSelect
                     options={state.departmentList}
@@ -1345,7 +1383,19 @@ const Job = () => {
                     loading={state.departmentLoading}
                   />
                 </>
-              )}
+              )} */}
+              <CustomeDatePicker
+                value={state.start_date}
+                placeholder="Choose From"
+                onChange={(e) => setState({ start_date: e })}
+                showTimeSelect={false}
+              />
+              <CustomeDatePicker
+                value={state.end_date}
+                placeholder="Choose To "
+                onChange={(e) => setState({ end_date: e })}
+                showTimeSelect={false}
+              />
 
               <CustomSelect
                 options={state.locationList}

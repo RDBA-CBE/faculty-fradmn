@@ -47,7 +47,10 @@ export default function Newjob() {
     college: null,
     department: null,
     jobType: null,
-    salary: "",
+    salary: {
+      value: 8,
+      label: "As per college norms",
+    },
     deadline: "",
     startDate: "",
     endDate: "",
@@ -509,8 +512,9 @@ export default function Newjob() {
         isCollegeEmail: state.isCollegeEmail,
         alternativeEmail: state.alternativeEmail,
         applyLink: state.applyLink,
-        jobRole: state.jobRole,
+        jobRole: state.jobRole?.value,
       };
+
       await CreateNewJob.validate(validation, { abortEarly: false });
 
       const body: any = {
@@ -589,8 +593,8 @@ export default function Newjob() {
         body.category_ids = [];
       }
 
-      if (state.jobRole?.length > 0) {
-        body.role_ids = state.jobRole?.map((item) => item?.value);
+      if (state.jobRole) {
+        body.role_ids = [state.jobRole?.value];
       } else {
         body.role_ids = [];
       }
@@ -606,6 +610,7 @@ export default function Newjob() {
       router.back();
       setState({ btnLoading: false });
     } catch (err: any) {
+      console.log("✌️err --->", err);
       if (err?.inner) {
         const errors: any = {};
         err.inner.forEach((error: any) => {
@@ -617,6 +622,8 @@ export default function Newjob() {
         }
 
         setState({ error: errors });
+      } else if (err?.data?.error) {
+        Failure(err?.data?.error);
       }
       setState({ btnLoading: false });
     }
@@ -853,7 +860,7 @@ export default function Newjob() {
             </div>
             <div className="space-y-5 p-6">
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                <TextInput
+                {/* <TextInput
                   name="title"
                   type="text"
                   title="Job Title"
@@ -875,7 +882,7 @@ export default function Newjob() {
                   error={state.error?.location}
                   loading={state.locationLoading}
                   isMulti={true}
-                />
+                /> */}
                 <CustomSelect
                   options={state.jobRoleList}
                   value={state.jobRole}
@@ -891,7 +898,7 @@ export default function Newjob() {
                     state.jobRoleNext &&
                     jobRoleList(state.jobRolePage + 1, "", true)
                   }
-                  isMulti={true}
+                  // isMulti={true}
                 />
 
                 <CustomSelect
