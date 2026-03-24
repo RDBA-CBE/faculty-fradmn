@@ -208,7 +208,7 @@ const Job = () => {
         college_name: item?.college?.name,
         department:
           item?.department?.length > 0
-            ? item?.department?.map((d) => d?.name)
+            ? item?.department?.map((d) => d?.short_name)
             : [],
         // department_name:)  item?.department?.name || "-",
 
@@ -227,7 +227,7 @@ const Job = () => {
         is_approved: item?.is_approved,
 
         total_applications: item?.total_applications,
-
+short_name:item?.college?.short_name || "-",
         college_id: item?.college?.id,
         department_id: item?.department?.id,
       }));
@@ -964,13 +964,13 @@ const Job = () => {
                         title={firstDept}
                         className="text-sm  text-gray-700 dark:text-gray-300"
                       >
-                        {truncateText(firstDept)}
+                        {(firstDept)}
                       </span>
 
                       {/* Avatars */}
                       <div className="flex items-center -space-x-2">
                         {visibleDept?.map((dept: string, index: number) => (
-                          <div key={index} className="group relative">
+                          <div key={index} className="group relative z-10">
                             <div className="bg-dblue flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white text-xs  text-white dark:border-gray-900">
                               {dept?.slice(0, 2)?.toUpperCase()}
                             </div>
@@ -1005,12 +1005,12 @@ const Job = () => {
                 title: "College Name",
                 sortable: true,
 
-                render: ({ college_name }) => (
+                render: ({ short_name }) => (
                   <span
-                    title={college_name}
+                    title={short_name}
                     className="text-gray-600 dark:text-gray-400"
                   >
-                    {truncateText(college_name)}
+                    {(short_name)}
                   </span>
                 ),
               },

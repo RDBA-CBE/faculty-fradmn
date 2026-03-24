@@ -309,7 +309,7 @@ export default function Newjob() {
       });
       const options = res?.results?.map((item: any) => ({
         value: item.id,
-        label: item.college_name,
+        label: item.short_name,
       }));
       setState({
         collegeList: page === 1 ? options : [...state.collegeList, ...options],

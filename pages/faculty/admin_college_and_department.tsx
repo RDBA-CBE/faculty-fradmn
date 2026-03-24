@@ -191,6 +191,7 @@ const CollegeAndDepartment = () => {
     naac_accreditations();
     nirf_band(), nirf_category();
     master_department();
+    categoryList()
   }, [dispatch]);
 
   useEffect(() => {

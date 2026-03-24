@@ -169,6 +169,69 @@ const Dashboard = () => {
     // state.activeCard,
   ]);
 
+  const card3 =
+    state.profile?.role === ROLES.INSTITUTION_ADMIN ||
+    state.profile?.role === ROLES.SUPER_ADMIN
+      ? {
+          id: 3,
+          label: "Colleges",
+          value: stats.colleges,
+          color: "text-[#dd22cc]",
+          bg: "bg-indigo-100",
+          mainbg: "bg-[#d2c1f7f2]",
+          icon: <IconUser className="h-7 w-7" />,
+          href: null,
+          sub: null,
+        }
+      : {
+          id: 3,
+          label: "Out Reached",
+          value: stats.colleges,
+          color: "text-[#dd22cc]",
+          bg: "bg-indigo-100",
+          mainbg: "bg-[#d2c1f7f2]",
+          icon: <IconUser className="h-7 w-7" />,
+          href: "/faculty/dashboard/job",
+          sub: null,
+        };
+
+  const statCards = [
+    {
+      id: 1,
+      label: "Applications",
+      value: stats.applications,
+      color: "text-orange-600",
+      bg: "bg-info-light",
+      mainbg: "bg-orange-100",
+      icon: <IconUsers className="h-7 w-7" />,
+      href: "/faculty/dashboard/applications",
+      sub: null,
+    },
+    {
+      id: 2,
+      label: "Interviews Scheduled",
+      value: stats.interviews,
+      color: "text-pink-600",
+      bg: "bg-warning-light",
+      mainbg: "bg-pink-100",
+      icon: <IconCalendar className="h-7 w-7" />,
+      href: "/faculty/dashboard/interview",
+      sub: null,
+    },
+    card3,
+    {
+      id: 4,
+      label: "Active Jobs",
+      value: stats.activeJobs,
+      color: "text-dblue",
+      bg: "bg-primary-light",
+      mainbg: "bg-blue-100",
+      icon: <IconBriefcase className="h-7 w-7" />,
+      href: "/faculty/dashboard/job",
+      sub: null,
+    },
+  ];
+
   const profiles = async () => {
     try {
       const res: any = await Models.auth.profile();
@@ -364,7 +427,7 @@ const Dashboard = () => {
       }
 
       body.status = "approved";
-console.log('✌️body ssss--->', body);
+      console.log("✌️body ssss--->", body);
       const res: any = await Models.job.list(page, body);
 
       const tableData = res?.results?.map((item) => ({
@@ -735,78 +798,6 @@ console.log('✌️body ssss--->', body);
 
   /* ---------------- STAT CARDS ---------------- */
 
-  const statCards = [
-    {
-      id: 1,
-      label: "Applications",
-      value: stats.applications,
-      color: "text-orange-600",
-      bg: "bg-info-light",
-      mainbg: "bg-orange-100",
-      icon: <IconUsers className="h-7 w-7" />,
-      href: "/faculty/dashboard/applications",
-      sub: null,
-    },
-    {
-      id: 2,
-
-      label: "Interviews Scheduled",
-      value: stats.interviews,
-      color: "text-pink-600",
-      bg: "bg-warning-light",
-      mainbg: "bg-pink-100",
-      icon: <IconCalendar className="h-7 w-7" />,
-      href: "/faculty/dashboard/interview",
-      sub: null,
-    },
-    {
-      id: 3,
-
-      label: "Out Reached",
-      value: stats.colleges,
-      color: "text-[#dd22cc]",
-      bg: "bg-indigo-100",
-      mainbg: "bg-[#d2c1f7f2]",
-      icon: <IconUser className="h-7 w-7" />,
-      href: "/faculty/dashboard/job",
-      sub: null,
-    },
-    {
-      id: 4,
-
-      label: "Active Jobs",
-      value: stats.activeJobs,
-      color: "text-dblue",
-      bg: "bg-primary-light",
-      mainbg: "bg-blue-100",
-      icon: <IconBriefcase className="h-7 w-7" />,
-      href: "/faculty/dashboard/job",
-      sub: null,
-    },
-
-    // {
-    //   label: "Selected Faculties",
-    //   value: stats.decisionsSelected,
-    //   color: "text-green-600",
-    //   bg: "bg-white/60",
-    //   mainbg:"bg-green-100",
-    //   icon: <IconChecks className="h-7 w-7" />,
-    //   href: "/faculty/dashboard/selected-faculty",
-    //   // sub: `✓ ${stats.decisionsSelected}  ✗ ${stats.decisionsRejected}`,
-    // },
-
-    // {
-    //   label: "Job Seekers",
-    //   value: stats.decisionsSelected,
-    //   color: "text-green-600",
-    //   bg: "bg-white/60",
-    //   mainbg:"bg-green-100",
-    //   icon: <IconChecks className="h-7 w-7" />,
-    //   href: "/faculty/dashboard/selected-faculty",
-    //   // sub: `✓ ${stats.decisionsSelected}  ✗ ${stats.decisionsRejected}`,
-    // },
-  ];
-
   const filterLables = [
     { label: "Last 1 Year", value: "1y" },
     { label: "6 Months", value: "6m" },
@@ -1019,46 +1010,55 @@ console.log('✌️body ssss--->', body);
         <div className="mb-5 rounded-2xl backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
           <div className="flex items-center justify-between gap-5">
             <TextInput
-              placeholder={state.activeCard == 1 || state.activeCard == 2?"Search applications...":state.activeCard == 3 ? "Search faculty...":"Search jobs..."}
+              placeholder={
+                state.activeCard == 1 || state.activeCard == 2
+                  ? "Search applications..."
+                  : state.activeCard == 3
+                  ? "Search faculty..."
+                  : "Search jobs..."
+              }
               value={state.search}
               onChange={(e) => setState({ search: e.target.value })}
               icon={<IconSearch className="h-4 w-4" />}
             />
-            <CustomSelect
-              options={state.collegeList}
-              value={state.collegeFilter}
-              onChange={handleCollegeChange}
-              placeholder="Select college"
-              isClearable={true}
-              onSearch={(searchTerm) => {
-                const institutionId =
-                  state.profile?.role === ROLES.SUPER_ADMIN
-                    ? state.institutionFilter?.value
-                    : null;
-                collegeDropdownList(
-                  1,
-                  searchTerm,
-                  false,
-                  institutionId,
-                  state.profile?.id
-                );
-              }}
-              loadMore={() => {
-                const institutionId =
-                  state.profile?.role === ROLES.SUPER_ADMIN
-                    ? state.institutionFilter?.value
-                    : state.profile?.institution?.id;
-                state.collegeNext &&
-                  collegeDropdownList(
-                    state.collegePage + 1,
-                    "",
-                    true,
-                    institutionId,
-                    state.profile?.id
-                  );
-              }}
-              loading={state.collegeLoading}
-            />
+            {state.profile?.role != ROLES.HR &&
+              state.profile?.role != ROLES.HOD && (
+                <CustomSelect
+                  options={state.collegeList}
+                  value={state.collegeFilter}
+                  onChange={handleCollegeChange}
+                  placeholder="Select college"
+                  isClearable={true}
+                  onSearch={(searchTerm) => {
+                    const institutionId =
+                      state.profile?.role === ROLES.SUPER_ADMIN
+                        ? state.institutionFilter?.value
+                        : null;
+                    collegeDropdownList(
+                      1,
+                      searchTerm,
+                      false,
+                      institutionId,
+                      state.profile?.id
+                    );
+                  }}
+                  loadMore={() => {
+                    const institutionId =
+                      state.profile?.role === ROLES.SUPER_ADMIN
+                        ? state.institutionFilter?.value
+                        : state.profile?.institution?.id;
+                    state.collegeNext &&
+                      collegeDropdownList(
+                        state.collegePage + 1,
+                        "",
+                        true,
+                        institutionId,
+                        state.profile?.id
+                      );
+                  }}
+                  loading={state.collegeLoading}
+                />
+              )}
             <CustomeDatePicker
               value={state.start_date}
               placeholder="Choose From"
@@ -1157,7 +1157,7 @@ console.log('✌️body ssss--->', body);
         <DataTable
           noRecordsText="No applications found"
           highlightOnHover
-          className="table-hover whitespace-nowrap mb-4"
+          className="table-hover mb-4 whitespace-nowrap"
           records={
             state.activeCard == 1 || state.activeCard == 2
               ? state.applicationList
@@ -1196,12 +1196,17 @@ console.log('✌️body ssss--->', body);
                     accessor: "job_title",
                     title: "Title",
                     sortable: true,
-                    render: ({ job_title }) => (
+                    render: (row: any) => (
                       <div
-                        className="text-gray-600 dark:text-gray-400"
-                        title={job_title}
+                        onClick={() => {
+                          router.push(
+                            `faculty/application_detail?id=${row?.id}`
+                          );
+                        }}
+                        className="cursor-pointer text-gray-600 dark:text-gray-400"
+                        title={row?.job_title}
                       >
-                        {truncateText(job_title)}
+                        {truncateText(row?.job_title)}
                       </div>
                     ),
                   },
@@ -1438,12 +1443,17 @@ console.log('✌️body ssss--->', body);
                     accessor: "job_title",
                     title: "Title",
                     sortable: true,
-                    render: ({ job_title }) => (
+                    render: (row:any) => (
                       <div
-                        className=" text-gray-900 dark:text-white"
-                        title={job_title}
+                      onClick={() => {
+                        router.push(
+                          `faculty/job_details?id=${row?.id}`
+                        );
+                      }}
+                        className="cursor-pointer text-gray-900 dark:text-white"
+                        title={row?.job_title}
                       >
-                        {truncateText(job_title)}
+                        {truncateText(row?.job_title)}
                       </div>
                     ),
                   },
@@ -1635,16 +1645,16 @@ console.log('✌️body ssss--->', body);
           minHeight={200}
         />
       </div>
-{state.count>10 &&
-      <div className="border-t border-gray-200 p-6 dark:border-gray-700">
-        <Pagination
-          activeNumber={handlePageChange}
-          totalPage={state.count}
-          currentPages={state.page}
-          pageSize={state.pageSize}
-        />
-      </div>
-    }
+      {state.count > 10 && (
+        <div className="border-t border-gray-200 p-6 dark:border-gray-700">
+          <Pagination
+            activeNumber={handlePageChange}
+            totalPage={state.count}
+            currentPages={state.page}
+            pageSize={state.pageSize}
+          />
+        </div>
+      )}
       {/* Filters */}
       <div className="mb-6 flex flex-wrap items-center gap-2">
         {filterLables?.map((p) => (

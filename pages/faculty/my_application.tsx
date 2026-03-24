@@ -335,6 +335,7 @@ const Application = () => {
       // body.team = "No";
 
       const res: any = await Models.application.list(page, body);
+console.log('✌️res --->', res);
 
       const tableData = res?.results?.map((item) => ({
         applicant_name: `${item?.first_name} ${item?.last_name}`,
@@ -352,8 +353,8 @@ const Application = () => {
           value: item?.application_status?.id,
           label: item?.application_status?.name,
         },
-        college_name: item?.job_detail?.college?.name,
-        department_name: item?.department?.department_name,
+        college_name: item?.job_detail?.college?.short_name,
+        department_name: item?.department?.short_name,
         interview_status:
           item?.interview_slots?.length > 0
             ? item?.interview_slots[item?.interview_slots.length - 1]?.status
@@ -1464,7 +1465,7 @@ const Application = () => {
                     title={college_name}
                     className="text-gray-600 dark:text-gray-400"
                   >
-                    {truncateText(college_name)}
+                    {(college_name)}
                   </div>
                 ),
               },
@@ -1476,7 +1477,7 @@ const Application = () => {
                     title={department_name}
                     className="text-gray-600 dark:text-gray-400"
                   >
-                    {truncateText(department_name)}
+                    {(department_name)}
                   </div>
                 ),
                 sortable: true,

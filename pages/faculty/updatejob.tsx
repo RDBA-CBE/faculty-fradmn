@@ -139,7 +139,7 @@ export default function Newjob() {
           //   label: res?.college?.college_name,
           // },
         });
-        fetchDepartments(res?.college?.college_id, 1);
+        fetchDepartments(res?.college?.map((item)=>item?.college_id), 1);
       }
       getJobDetails(res);
     } catch (error) {
@@ -178,12 +178,12 @@ export default function Newjob() {
             value: res?.institution?.id,
             label: res?.institution?.name,
           },
-          college: { value: res?.college?.id, label: res?.college?.name },
+          college: { value: res?.college?.id, label: res?.college?.short_name },
           department:
             res?.department?.length > 0
               ? res?.department?.map((dept: any) => ({
                   value: dept?.id,
-                  label: dept?.name,
+                  label: dept?.short_name,
                 }))
               : [],
 
@@ -1188,7 +1188,7 @@ export default function Newjob() {
                         title="College"
                         options={state.profile?.college?.map((item: any) => ({
                           value: item.college_id,
-                          label: item.college_name,
+                          label: item.short_name,
                         }))}
                         value={state.college}
                         onChange={(option) =>
