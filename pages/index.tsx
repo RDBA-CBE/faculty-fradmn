@@ -51,6 +51,9 @@ import Modal from "@/components/modal/modal.component";
 import Swal from "sweetalert2";
 import IconHistory from "@/components/Icon/IconHistory";
 import TextArea from "@/components/FormFields/TextArea.component";
+import Utils from "@/imports/utils.import";
+import * as Yup from "yup";
+
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -107,7 +110,18 @@ const Dashboard = () => {
     activeCard: 1,
     isOpenRound: false,
     showStatusModal: false,
-    isOpenInterest:false
+    isOpenInterest: false,
+    showInterviewModal: false,
+    errors: {},
+    selectedJobs: [],
+    selectedDepartments: [],
+    selectedApplicants: [],
+    panelMembers: [],
+    interviewSlot: "",
+    roundName: "",
+    requestForChange: false,
+    interviewStatus: null,
+    interview_link: "",
   });
 
   const debounceSearch = useDebounce(state.search, 500);
@@ -1098,7 +1112,6 @@ const Dashboard = () => {
     }
   };
 
-
   const handleFormChange = (field, value) => {
     setState({
       [field]: value,
@@ -1109,39 +1122,96 @@ const Dashboard = () => {
     });
   };
 
+  const sendInterest = async () => {
+    try {
+      setState({ sendLoading: true });
 
-   const sendInterest = async () => {
+      const body = {
+        message: capitalizeFLetter(state.message),
+        applicant_id: state.applicantId,
+        sender_id: state.profile?.id,
+      };
+
+      const res = await Models.application.send_interest(body);
+      Success("Interest sent successfully!");
+      setState({ sendLoading: false });
+      setState({
+        isOpenInterest: false,
+        message: "",
+        applicantName: "",
+        applicantId: "",
+      });
+    } catch (error) {
+      if (error?.data?.error) {
+        Failure(error?.data?.error);
+      }
+      console.log("✌️error --->", error);
+      setState({ sendLoading: false });
+      setState({
+        isOpenInterest: false,
+        message: "",
+        applicantName: "",
+        applicantId: "",
+      });
+      console.log("✌️error --->", error);
+    }
+  };
+
+   const createInterview = async () => {
       try {
-        setState({ sendLoading: true });
+        setState({ submitting: true });
   
-        const body = {
-          message: capitalizeFLetter(state.message),
-          applicant_id: state.applicantId,
-          sender_id: state.profile?.id,
+        const validation = {
+          interviewSlot: state.interviewSlot
+            ? moment(state.interviewSlot).format("YYYY-MM-DD HH:mm")
+            : "",
+          roundName: state.roundName,
         };
   
-        const res = await Models.application.send_interest(body);
-        Success("Interest sent successfully!");
-        setState({ sendLoading: false });
+        await Utils.Validation.user_interview.validate(validation, {
+          abortEarly: false,
+        });
+  
+        const body = {
+          scheduled_date: moment(state.interviewSlot).format("YYYY-MM-DD HH:mm"),
+          applicant_id: state.applicant?.value,
+          response_from_applicant: state.requestForChange,
+          round_name: state.roundName,
+          status: "Scheduled",
+          interview_link: state.interview_link ?? "",
+          sender_id: state.profile?.id,
+        };
+        console.log("✌️body --->", body);
+  
+        const res = await Models.interview.create_user_interview(body);
+        Success("Interview schedule created successfully!");
         setState({
-          isOpenInterest: false,
-          message: "",
-          applicantName: "",
-          applicantId:"",
-        })
+          showInterviewModal: false,
+          errors: {},
+          selectedApplicants: [],
+          interviewSlot: "",
+          roundName: "",
+          requestForChange: false,
+          interviewStatus: null,
+          submitting: false,
+          interview_link: "",
+          selectedRecords: [],
+        });
+        // profile();
       } catch (error) {
-        if (error?.data?.error) {
-          Failure(error?.data?.error);
+        console.log("✌️error --->", error);
+        if (error instanceof Yup.ValidationError) {
+          const validationErrors = {};
+          error.inner.forEach((err) => {
+            validationErrors[err.path] = err?.message;
+          });
+          console.log("✌️errors --->", validationErrors);
+  
+          setState({ errors: validationErrors, submitting: false });
+        } else {
+          Failure(error?.error);
+          setState({ submitting: false });
         }
-        console.log("✌️error --->", error);
-        setState({ sendLoading: false });
-        setState({
-          isOpenInterest: false,
-          message: "",
-          applicantName: "",
-          applicantId:"",
-        })
-        console.log("✌️error --->", error);
       }
     };
 
@@ -1586,7 +1656,15 @@ const Dashboard = () => {
 
                         {row?.reveal_name ? (
                           <button
-                            // onClick={() => handleSheduleInterview(row)}
+                            onClick={() => {
+                              setState({
+                                showInterviewModal: true,
+                                applicant: {
+                                  label: row?.username,
+                                  value: row.id,
+                                },
+                              });
+                            }}
                             className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
                             title="Interview schedule"
                           >
@@ -2331,17 +2409,17 @@ const Dashboard = () => {
         )}
       />
 
-<Modal
+      <Modal
         subTitle={`Send Interest (${state.applicantName})`}
         closeIcon
         open={state.isOpenInterest}
-        close={()=>{
+        close={() => {
           setState({
             isOpenInterest: false,
             message: "",
             applicantName: "",
-            applicantId:"",
-          })
+            applicantId: "",
+          });
         }}
         isFullWidth={false}
         maxWidth="max-w-2xl"
@@ -2357,13 +2435,13 @@ const Dashboard = () => {
             <div className="mt-8 flex flex-col-reverse gap-3 border-t border-gray-200 pt-6 dark:border-gray-700 sm:flex-row sm:justify-end">
               <button
                 type="button"
-                onClick={()=>{
+                onClick={() => {
                   setState({
                     isOpenInterest: false,
                     message: "",
                     applicantName: "",
-                    applicantId:"",
-                  })
+                    applicantId: "",
+                  });
                 }}
                 className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-2 text-sm font-medium text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
               >
@@ -2384,6 +2462,136 @@ const Dashboard = () => {
                 )}
                 <span className="relative z-10"></span>
               </button>
+            </div>
+          </div>
+        )}
+      />
+
+<Modal
+        subTitle={`Create Interview Schedule (${state.applicant?.label})`}
+        closeIcon
+        open={state.showInterviewModal}
+        close={() =>
+          setState({
+            showInterviewModal: false,
+            errors: {},
+            selectedJobs: [],
+            selectedDepartments: [],
+            selectedApplicants: [],
+            panelMembers: [],
+            interviewSlot: "",
+            roundName: "",
+            requestForChange: false,
+            interviewStatus: null,
+          })
+        }
+        renderComponent={() => (
+          <div className="">
+            <div className="space-y-5">
+              <TextInput
+                title="Round Name"
+                placeholder="Enter round name (e.g., Technical Round 1)"
+                value={state.roundName}
+                onChange={(e) =>
+                  setState({
+                    roundName: e.target.value,
+                    errors: { ...state.errors, roundName: "" },
+                  })
+                }
+                error={state.errors?.roundName}
+                required
+              />
+              <CustomeDatePicker
+                title="Interview Slot"
+                value={state.interviewSlot}
+                placeholder="Choose From"
+                onChange={(e) =>
+                  setState({
+                    interviewSlot: e,
+                    errors: { ...state.errors, interviewSlot: "" },
+                  })
+                }
+                showTimeSelect={true}
+                required
+                usePortal={false}
+                minDate={new Date()}
+                error={state.errors?.interviewSlot}
+              />
+
+              <TextInput
+                title="Interview Link"
+                placeholder="Enter interview link (e.g., https://example.com/interview)"
+                value={state.interview_link}
+                onChange={(e) =>
+                  setState({
+                    interview_link: e.target.value,
+                    errors: { ...state.errors, interview_link: "" },
+                  })
+                }
+                error={state.errors?.interview_link}
+              />
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="requestForChange"
+                  checked={state.requestForChange}
+                  onChange={(e) =>
+                    setState({ requestForChange: e.target.checked })
+                  }
+                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <label
+                  htmlFor="requestForChange"
+                  className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Request for Change
+                </label>
+              </div>
+            </div>
+
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() =>
+                  setState({
+                    showInterviewModal: false,
+                    errors: {},
+                    selectedJobs: [],
+                    selectedDepartments: [],
+                    selectedApplicants: [],
+                    panelMembers: [],
+                    interviewSlot: "",
+                    roundName: "",
+                    requestForChange: false,
+                    interviewStatus: null,
+                    interview_link: "",
+                  })
+                }
+                className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => createInterview()}
+                disabled={state.submitting}
+                className="bg-dblue  flex-1 rounded-lg px-4 py-2 text-white hover:shadow-lg disabled:opacity-50"
+              >
+                {state.submitting ? "Creating..." : "Create Schedule"}
+              </button>
+
+              {/* <button
+                onClick={() => createInterview()}
+                className="bg-dblue group relative inline-flex items-center gap-2 overflow-hidden rounded-xl px-6 py-3 font-medium text-white shadow-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-2xl"
+              >
+                <div 
+                className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+
+                <UserCheck className="relative z-10 h-5 w-5" />
+
+                <span className="relative z-10">
+                  {state.submitting ? "Creating..." : "Create Schedule"}
+                </span>
+              </button> */}
             </div>
           </div>
         )}
