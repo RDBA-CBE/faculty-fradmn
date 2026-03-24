@@ -1475,12 +1475,23 @@ const Users = () => {
         sortable: true,
         render: (row: any) => {
           const user = safeUser(row);
-
-          return (
+          return state.activeTab == ROLES.APPLICANT ? (
+            <a
+              title={user.username}
+              href={`${FRONTEND_URL}profile/${row?.id}`}
+              target="_blank"
+              className={`cursor-pointer font-medium ${
+                isAnonymous(row)
+                  ? "italic text-gray-400"
+                  : "text-gray-900 dark:text-white"
+              }`}
+            >
+              {truncateText(user.username)}
+            </a>
+          ) : (
             <div
               title={user.username}
-           
-              className={`font-medium ${
+              className={` font-medium ${
                 isAnonymous(row)
                   ? "italic text-gray-400"
                   : "text-gray-900 dark:text-white"
@@ -1712,7 +1723,7 @@ const Users = () => {
             <a
               href={`${FRONTEND_URL}profile/${row?.id}`}
               target="_blank"
-              className={`flex items-center justify-center rounded-lg transition-all duration-200 ${
+              className={`flex cursor-pointer items-center justify-center rounded-lg transition-all duration-200 ${
                 row.status === "active" ? " text-green-600 " : "text-red-600 "
               }`}
               title={"View"}
