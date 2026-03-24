@@ -227,7 +227,7 @@ const Job = () => {
         is_approved: item?.is_approved,
 
         total_applications: item?.total_applications,
-short_name:item?.college?.short_name || "-",
+        short_name: item?.college?.short_name || "-",
         college_id: item?.college?.id,
         department_id: item?.department?.id,
       }));
@@ -694,7 +694,12 @@ short_name:item?.college?.short_name || "-",
             </div>
           </div>
         </div>
-        <div className="rounded-lg border border-gray-200 bg-green-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
+        <div
+          onClick={() =>
+            setState({ statusFilter: { value: "approved", label: "Approved" } })
+          }
+          className="cursor-pointer rounded-lg border border-gray-200 bg-green-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700"
+        >
           <div className="flex items-center gap-5 ">
             <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
               <CheckCircle className="h-10 w-10 text-green-600" />
@@ -710,7 +715,11 @@ short_name:item?.college?.short_name || "-",
             </div>
           </div>
         </div>
-        <div className="rounded-lg border border-gray-200 bg-yellow-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
+        <div
+         onClick={() =>
+          setState({ statusFilter:{ value: "pending", label: "Pending" } })
+        }
+        className="cursor-pointer  rounded-lg border border-gray-200 bg-yellow-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
           <div className="flex items-center gap-5">
             <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
               <Hourglass className="h-10 w-10 text-yellow-600" />
@@ -964,7 +973,7 @@ short_name:item?.college?.short_name || "-",
                         title={firstDept}
                         className="text-sm  text-gray-700 dark:text-gray-300"
                       >
-                        {(firstDept)}
+                        {firstDept}
                       </span>
 
                       {/* Avatars */}
@@ -1010,7 +1019,7 @@ short_name:item?.college?.short_name || "-",
                     title={short_name}
                     className="text-gray-600 dark:text-gray-400"
                   >
-                    {(short_name)}
+                    {short_name}
                   </span>
                 ),
               },

@@ -379,6 +379,7 @@ const Application = () => {
     }
   };
 
+
   const bodyData = () => {
     const body: any = {};
     if (state.search) {
@@ -516,7 +517,7 @@ const Application = () => {
         applicationList(
           state.page,
           null,
-          state.profile?.college?.college_id,
+          state.profile?.college?.map((item)=>item?.college_id),
           null,
           state.profile?.id
         );
@@ -1189,7 +1190,19 @@ const Application = () => {
 
       {/* Stats Cards */}
       <div className="mb-6 flex gap-4">
-        <div className="rounded-lg border border-gray-200 bg-blue-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
+        <div
+          onClick={() =>
+            setState({
+              institutionFilter: null,
+              collegeFilter: null,
+              departmentFilter: null,
+              start_date: null,
+              end_date: null,
+              selectedStatus: null,
+            })
+          }
+          className="cursor-pointer rounded-lg border border-gray-200 bg-blue-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700"
+        >
           <div className="flex items-center gap-5">
             <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
               <FileText className="text-dblue h-10 w-10" />
@@ -1206,7 +1219,12 @@ const Application = () => {
           </div>
         </div>
 
-        <div className="rounded-lg border border-gray-200 bg-yellow-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
+        <div
+          onClick={() =>
+            setState({ selectedStatus: { value: 5, label: "Applied" } })
+          }
+          className="cursor-pointer rounded-lg border border-gray-200 bg-yellow-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700"
+        >
           <div className="flex items-center gap-5">
             <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
               <Clock className="h-10 w-10 text-yellow-600" />
@@ -1214,7 +1232,8 @@ const Application = () => {
 
             <div className="flex flex-col">
               <p className="text-2xl  leading-none text-gray-900 dark:text-white">
-                {state.applications_by_status?.applied || 0}
+                {state.applications_by_status?.applied || state.applications_by_status?.Applied || 
+ 0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Applied
@@ -1223,7 +1242,12 @@ const Application = () => {
           </div>
         </div>
 
-        <div className="rounded-lg border border-gray-200 bg-green-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
+        <div
+          onClick={() =>
+            setState({ selectedStatus: { value: 4, label: "Selected" } })
+          }
+          className="cursor-pointer rounded-lg border border-gray-200 bg-green-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700"
+        >
           <div className="flex items-center gap-5">
             <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
               <CheckCircle className="h-10 w-10 text-green-600" />
@@ -1240,7 +1264,14 @@ const Application = () => {
           </div>
         </div>
 
-        <div className="rounded-lg border border-gray-200 bg-indigo-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
+        <div
+          onClick={() =>
+            setState({
+              selectedStatus: { value: 6, label: "Interview Scheduled" },
+            })
+          }
+          className="cursor-pointer rounded-lg border border-gray-200 bg-indigo-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700"
+        >
           <div className="flex items-center gap-5">
             <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
               <Clock className="h-10 w-10 text-indigo-600" />

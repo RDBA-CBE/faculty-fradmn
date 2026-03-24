@@ -137,7 +137,7 @@ export default function Newjob() {
           setState({
             college: {
               value: res?.college?.college_id,
-              label: res?.college?.college_name,
+              label: res?.college?.short_name,
             },
           });
         }
@@ -283,9 +283,12 @@ export default function Newjob() {
     }
   };
 
-  const fetchInstitutions = async (page = 1) => {
+  const fetchInstitutions = async (page = 1, search = "") => {
     try {
-      const res: any = await Models.institution.list(page, {});
+      const body = {
+        search,
+      };
+      const res: any = await Models.institution.list(page, body);
       const options = res?.results?.map((item: any) => ({
         value: item.id,
         label: item.institution_name,
@@ -609,7 +612,9 @@ export default function Newjob() {
           errors[error.path] = error.message;
         });
         console.log("✌️errors --->", errors);
-        if(!objIsEmpty(errors)){Failure("Fill all details")}
+        if (!objIsEmpty(errors)) {
+          Failure("Fill all details");
+        }
 
         setState({ error: errors });
       }
@@ -945,6 +950,9 @@ export default function Newjob() {
                         handleFieldChange("institution", option)
                       }
                       placeholder="Select institution"
+                      onSearch={(e) =>
+                        fetchInstitutions(state.institutionPage + 1, e)
+                      }
                       error={state.error?.institution}
                       loadMore={() =>
                         state.institutionHasMore &&
@@ -1058,7 +1066,7 @@ export default function Newjob() {
                         title="College"
                         options={state.profile?.college?.map((item: any) => ({
                           value: item.college_id,
-                          label: item.college_name,
+                          label: item.short_name,
                         }))}
                         value={state.college}
                         onChange={(option) =>
