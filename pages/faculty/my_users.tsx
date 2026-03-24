@@ -42,9 +42,11 @@ import CustomeDatePicker from "@/components/datePicker";
 import moment from "moment";
 import Utils from "@/imports/utils.import";
 import * as Yup from "yup";
+import { useRouter } from "next/navigation";
 
 const Users = () => {
   const dispatch = useDispatch();
+  const router = useRouter();
   const [state, setState] = useSetState({
     activeTab: "institution_admin",
     page: 1,
@@ -1477,6 +1479,7 @@ const Users = () => {
           return (
             <div
               title={user.username}
+           
               className={`font-medium ${
                 isAnonymous(row)
                   ? "italic text-gray-400"
@@ -1889,7 +1892,7 @@ const Users = () => {
       const body = {
         applicant_id: row?.id,
       };
-      const res:any = await Models.interview.user_interview_list(body);
+      const res: any = await Models.interview.user_interview_list(body);
       console.log("handleRound --->", res);
 
       setState({

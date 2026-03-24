@@ -17,8 +17,12 @@ import IconChecks from "@/components/Icon/IconChecks";
 import Funnel from "@/components/funnelChart";
 import PrivateRouter from "@/hook/privateRouter";
 import {
+  buildFormData,
   capitalizeFLetter,
   Failure,
+  formatScheduleDateTime,
+  showDeleteAlert,
+  Success,
   truncateText,
   useSetState,
 } from "@/utils/function.utils";
@@ -43,6 +47,10 @@ import CustomSelect from "@/components/FormFields/CustomSelect.component";
 import useDebounce from "@/hook/useDebounce";
 import IconEdit from "@/components/Icon/IconEdit";
 import IconTrash from "@/components/Icon/IconTrash";
+import Modal from "@/components/modal/modal.component";
+import Swal from "sweetalert2";
+import IconHistory from "@/components/Icon/IconHistory";
+import TextArea from "@/components/FormFields/TextArea.component";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -91,11 +99,15 @@ const Dashboard = () => {
     decisions: 0,
     decisionsSelected: 0,
     decisionsRejected: 0,
+    outreached: 0,
   });
 
   const [state, setState] = useSetState({
     selectedRecords: [],
     activeCard: 1,
+    isOpenRound: false,
+    showStatusModal: false,
+    isOpenInterest:false
   });
 
   const debounceSearch = useDebounce(state.search, 500);
@@ -108,6 +120,7 @@ const Dashboard = () => {
     setIsMounted(true);
     fetchDashboard();
     profiles();
+    applicationStatus();
   }, []);
 
   useEffect(() => {
@@ -186,7 +199,7 @@ const Dashboard = () => {
       : {
           id: 3,
           label: "Out Reached",
-          value: stats.colleges,
+          value: stats.outreached,
           color: "text-[#dd22cc]",
           bg: "bg-indigo-100",
           mainbg: "bg-[#d2c1f7f2]",
@@ -385,8 +398,8 @@ const Dashboard = () => {
           value: item?.application_status?.id,
           label: item?.application_status?.name,
         },
-        college_name: item?.job_detail?.college?.name,
-        department_name: item?.department?.department_name,
+        college_name: item?.job_detail?.college?.short_name,
+        department_name: item?.department?.short_name,
         interview_status:
           item?.interview_slots?.length > 0
             ? item?.interview_slots[item?.interview_slots.length - 1]?.status
@@ -435,10 +448,10 @@ const Dashboard = () => {
         job_title: item.job_title,
         job_description: item.job_description,
 
-        college_name: item?.college?.name,
+        college_name: item?.college?.short_name,
         department:
           item?.department?.length > 0
-            ? item?.department?.map((d) => d?.name)
+            ? item?.department?.map((d) => d?.short_name)
             : [],
         // department_name:)  item?.department?.name || "-",
 
@@ -561,6 +574,7 @@ const Dashboard = () => {
         decisions: data?.top_cards?.decisions?.value ?? 0,
         decisionsSelected: data?.top_cards?.decisions?.selected ?? 0,
         decisionsRejected: data?.top_cards?.decisions?.rejected ?? 0,
+        outreached: data?.top_cards?.outreached?.value ?? 0,
       });
     } catch (err) {
       console.error(err);
@@ -579,6 +593,23 @@ const Dashboard = () => {
         null,
         dropdown?.id
       );
+    } catch (error) {
+      setState({ applicationStatusLoading: false });
+    }
+  };
+
+  const applicationStatus = async () => {
+    try {
+      setState({ applicationStatusLoading: true });
+      const res: any = await Models.master.application_status_list();
+      const dropdown = res?.map((item) => ({
+        value: item.id,
+        label: item.name,
+      }));
+      setState({
+        applicationStatusLoading: false,
+        applicationStatusList: dropdown,
+      });
     } catch (error) {
       setState({ applicationStatusLoading: false });
     }
@@ -873,7 +904,7 @@ const Dashboard = () => {
         applicationList(
           state.page,
           null,
-          state.profile?.college?.college_id,
+          state.profile?.college?.map((item) => item?.college_id),
           null,
           state.profile?.id
         );
@@ -962,6 +993,157 @@ const Dashboard = () => {
       phone: null,
     };
   };
+
+  const updateStatus = async () => {
+    try {
+      setState({ btnLoading: true });
+      const body = {
+        status: state.appstatus?.label,
+      };
+      const res = await Models.application.update(body, state.application?.id);
+      Success("Application status updated successfully!");
+      setState({ btnLoading: false, isOpenRound: false });
+      handleUpdateStatus("", "");
+      fetchDashboard();
+    } catch (error) {
+      setState({ btnLoading: false, isOpenRound: false });
+
+      console.log("✌️error --->", error);
+    }
+  };
+
+  const handleStatusSubmit = async () => {
+    try {
+      if (!state.selectedStatus) {
+        Failure("Please select a status");
+        return;
+      }
+      const body = {
+        status: state.selectedStatus.label,
+      };
+      await Models.application.update(body, state.selectedApplication?.id);
+      Success("Application status updated successfully!");
+      setState({
+        showStatusModal: false,
+        selectedApplication: null,
+        selectedStatus: null,
+      });
+      handleUpdateStatus("", "");
+      fetchDashboard();
+    } catch (error) {
+      Failure("Failed to update status. Please try again.");
+    }
+  };
+
+  const handleApprove = async (row: any) => {
+    const result = await Swal.fire({
+      title: row.is_approved ? "Unapprove Job?" : "Approve Job?",
+      text: row.is_approved
+        ? "Are you sure you want to unapprove this job?"
+        : "Are you sure you want to approve this job?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#1E3786",
+      cancelButtonColor: "#d33",
+      confirmButtonText: row.is_approved
+        ? "Yes, unapprove it!"
+        : "Yes, approve it!",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const formData = buildFormData({ is_approved: !row.is_approved });
+        await Models.job.update(formData, row?.id);
+        Success(
+          row.is_approved
+            ? "Job unapproved successfully!"
+            : "Job approved successfully!"
+        );
+        jobList(
+          state.page,
+          null,
+          state.profile?.college?.map((c: any) => c.college_id),
+          null
+        );
+        fetchDashboard();
+      } catch (error) {
+        Failure(
+          row.is_approved ? "Failed to unapprove job" : "Failed to approve job"
+        );
+      }
+    }
+  };
+
+  const handleDelete = (row) => {
+    showDeleteAlert(
+      () => deleteRecord(row?.id),
+      () => Swal.fire("Cancelled", "Record is safe", "info"),
+      "Are you sure you want to delete this job?"
+    );
+  };
+
+  const deleteRecord = async (id: number) => {
+    try {
+      await Models.job.delete(id);
+      Success("Job deleted successfully!");
+      jobList(
+        state.page,
+        null,
+        state.profile?.college?.map((c: any) => c.college_id),
+        null
+      );
+      fetchDashboard();
+    } catch (error) {
+      Failure("Failed to delete job");
+    }
+  };
+
+
+  const handleFormChange = (field, value) => {
+    setState({
+      [field]: value,
+      errors: {
+        ...state.errors,
+        [field]: "",
+      },
+    });
+  };
+
+
+   const sendInterest = async () => {
+      try {
+        setState({ sendLoading: true });
+  
+        const body = {
+          message: capitalizeFLetter(state.message),
+          applicant_id: state.applicantId,
+          sender_id: state.profile?.id,
+        };
+  
+        const res = await Models.application.send_interest(body);
+        Success("Interest sent successfully!");
+        setState({ sendLoading: false });
+        setState({
+          isOpenInterest: false,
+          message: "",
+          applicantName: "",
+          applicantId:"",
+        })
+      } catch (error) {
+        if (error?.data?.error) {
+          Failure(error?.data?.error);
+        }
+        console.log("✌️error --->", error);
+        setState({ sendLoading: false });
+        setState({
+          isOpenInterest: false,
+          message: "",
+          applicantName: "",
+          applicantId:"",
+        })
+        console.log("✌️error --->", error);
+      }
+    };
 
   return (
     <div className="min-h-screen dark:from-gray-900 dark:to-gray-800">
@@ -1166,25 +1348,25 @@ const Dashboard = () => {
               : state.jobList
           }
           fetching={state.loading}
-          selectedRecords={state.applicationList?.filter((record) =>
-            state.selectedRecords.includes(record.id)
-          )}
-          onSelectedRecordsChange={(records) => {
-            const currentPageIds = state.applicationList?.map((r: any) => r.id);
-            const otherPageSelections = state.selectedRecords?.filter(
-              (id) => !currentPageIds.includes(id)
-            );
-            const newSelections = records?.map((r: any) => r.id);
-            setState({
-              selectedRecords: [...otherPageSelections, ...newSelections],
-            });
-          }}
+          // selectedRecords={state.applicationList?.filter((record) =>
+          //   state.selectedRecords.includes(record.id)
+          // )}
+          // onSelectedRecordsChange={(records) => {
+          //   const currentPageIds = state.applicationList?.map((r: any) => r.id);
+          //   const otherPageSelections = state.selectedRecords?.filter(
+          //     (id) => !currentPageIds.includes(id)
+          //   );
+          //   const newSelections = records?.map((r: any) => r.id);
+          //   setState({
+          //     selectedRecords: [...otherPageSelections, ...newSelections],
+          //   });
+          // }}
           customLoader={
             <div className="flex items-center justify-center py-12">
               <div className="flex items-center gap-3">
                 <IconLoader className="h-6 w-6 animate-spin text-blue-600" />
                 <span className="text-gray-600 dark:text-gray-400">
-                  Loading applications...
+                  Loading ...
                 </span>
               </div>
             </div>
@@ -1220,7 +1402,7 @@ const Dashboard = () => {
                         className="text-gray-600 dark:text-gray-400"
                         title={college_name}
                       >
-                        {truncateText(college_name)}
+                        {college_name}
                       </div>
                     ),
                   },
@@ -1232,7 +1414,7 @@ const Dashboard = () => {
                         className="text-gray-600 dark:text-gray-400"
                         title={department_name}
                       >
-                        {truncateText(department_name)}
+                        {department_name}
                       </div>
                     ),
                     sortable: true,
@@ -1341,19 +1523,19 @@ const Dashboard = () => {
                     sortable: true,
                     render: (row: any) => {
                       const user = safeUser(row);
-                      console.log("✌️isAnonymous --->", isAnonymous(row));
-
                       return (
-                        <div
+                        <a
+                          href={`${FRONTEND_URL}profile/${row?.id}`}
+                          target="_blank"
                           title={user.username}
-                          className={`font-medium ${
+                          className={`cursor-pointer font-medium ${
                             isAnonymous(row)
                               ? "italic text-gray-400"
                               : "text-gray-900 dark:text-white"
                           }`}
                         >
                           {truncateText(user.username)}
-                        </div>
+                        </a>
                       );
                     },
                   },
@@ -1443,13 +1625,11 @@ const Dashboard = () => {
                     accessor: "job_title",
                     title: "Title",
                     sortable: true,
-                    render: (row:any) => (
+                    render: (row: any) => (
                       <div
-                      onClick={() => {
-                        router.push(
-                          `faculty/job_details?id=${row?.id}`
-                        );
-                      }}
+                        onClick={() => {
+                          router.push(`faculty/job_details?id=${row?.id}`);
+                        }}
                         className="cursor-pointer text-gray-900 dark:text-white"
                         title={row?.job_title}
                       >
@@ -1484,7 +1664,7 @@ const Dashboard = () => {
                             className="text-sm  text-gray-700 dark:text-gray-300"
                             title={firstDept}
                           >
-                            {truncateText(firstDept)}
+                            {firstDept}
                           </span>
 
                           {/* Avatars */}
@@ -1500,7 +1680,7 @@ const Dashboard = () => {
                                   className="absolute bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100"
                                   title={dept}
                                 >
-                                  {truncateText(dept)}
+                                  {dept}
                                 </div>
                               </div>
                             ))}
@@ -1536,7 +1716,7 @@ const Dashboard = () => {
                         className="text-gray-600 dark:text-gray-400"
                         title={college_name}
                       >
-                        {truncateText(college_name || "-")}
+                        {college_name || "-"}
                       </span>
                     ),
                   },
@@ -1624,6 +1804,59 @@ const Dashboard = () => {
                           title="View"
                         >
                           <IconEye className="h-4 w-4" />
+                        </button>
+                        {/* {state.profile?.role == ROLES.HR && ( */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+
+                            // if (state.profile?.role == ROLES.HR) {
+                            handleApprove(row);
+                            // }
+                          }}
+                          // onClick={() => handleToggleStatus(row)}
+                          className={`flex items-center justify-center rounded-lg ${
+                            row?.job_status === "published"
+                              ? "text-red-600 "
+                              : " text-green-600 "
+                          }`}
+                          title={"Job Status"}
+                        >
+                          <CheckCircle className="h-4 w-4" />
+                        </button>
+                        {/* )} */}
+                        {/* <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleLog(row);
+                          }}
+                          className="flex items-center justify-center rounded-lg  text-purple-600 "
+                          title="Logs"
+                        >
+                          <IconHistory className="h-4 w-4" />
+                        </button> */}
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(`/faculty/updatejob?id=${row.id}`);
+                          }}
+                          className="flex  items-center justify-center rounded-lg text-blue-600 "
+                          title="Edit"
+                        >
+                          <IconEdit className="h-4 w-4" />
+                        </button>
+
+                        <button
+                          onClickCapture={(e) => e.stopPropagation()}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(row);
+                          }}
+                          className="flex  items-center justify-center rounded-lg  text-red-600 "
+                          title="Delete"
+                        >
+                          <IconTrash className="h-4 w-4" />
                         </button>
                       </div>
                     ),
@@ -1821,6 +2054,340 @@ const Dashboard = () => {
           )}
         </div>
       </div>
+
+      <Modal
+        subTitle="Interview Rounds"
+        open={state.isOpenRound}
+        close={() => setState({ isOpenRound: false })}
+        closeIcon={() => setState({ isOpenRound: false })}
+        padding="px-0 py-5"
+        renderComponent={() => (
+          <div className="flex h-[75vh] flex-col">
+            {/* Scrollable Content */}
+            <div className="flex-1 space-y-6 overflow-y-auto px-4">
+              {/* Candidate */}
+              <div className="rounded-lg border bg-gray-50 p-4">
+                <h3 className="text-lg font-semibold">
+                  {state.application?.first_name} {state.application?.last_name}
+                </h3>
+                <p className="text-sm text-gray-500">
+                  {state.application?.email} • {state.application?.phone}
+                </p>
+              </div>
+
+              {/* Rounds */}
+              <div className="space-y-4 pb-6">
+                {state.application?.interview_slots?.map((round) => (
+                  <div
+                    key={round.id}
+                    className="rounded-lg border bg-white p-4 shadow-sm"
+                  >
+                    {/* Round Header */}
+                    <div className="mb-3 flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold">
+                          {capitalizeFLetter(round.round_name)}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {formatScheduleDateTime(
+                            round.scheduled_date,
+                            round.scheduled_time
+                          )}
+                        </p>
+                      </div>
+
+                      <span
+                        className={`rounded px-3 py-1 text-xs font-semibold ${
+                          round.status === "completed"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-yellow-100 text-yellow-700"
+                        }`}
+                      >
+                        {capitalizeFLetter(round.status)}
+                      </span>
+                    </div>
+
+                    {/* Feedback List */}
+                    <div className="space-y-2">
+                      {round.panels?.map((panel) => {
+                        const feedback = panel?.feedbacks?.[0];
+                        return (
+                          <div
+                            key={panel.id}
+                            className="flex items-start justify-between rounded border bg-gray-50 p-3"
+                          >
+                            <div>
+                              <p className="text-sm">{panel.name}</p>
+
+                              {/* {panel?.feedbacks?.[0]?.feedback_text && (
+                              <p className="mt-1 text-sm text-gray-700">
+                                {capitalizeFLetter(
+                                  panel.feedbacks[0].feedback_text
+                                )}
+                              </p>
+                            )} */}
+
+                              {feedback && (
+                                <div className="mt-3 space-y-2 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm dark:border-gray-700 dark:bg-gray-900">
+                                  {feedback.is_same_as_applicant !==
+                                    undefined && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Same As Applicant :
+                                      </span>{" "}
+                                      {feedback.is_same_as_applicant
+                                        ? "Yes"
+                                        : "No"}
+                                    </p>
+                                  )}
+
+                                  {feedback.academic_record_remark && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Academic Record :
+                                      </span>{" "}
+                                      {feedback.academic_record_remark}
+                                    </p>
+                                  )}
+
+                                  {feedback.experience_remark && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Experience :
+                                      </span>{" "}
+                                      {feedback.experience_remark}
+                                    </p>
+                                  )}
+
+                                  {feedback.knowledge_rating && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Knowledge Rating :
+                                      </span>{" "}
+                                      {feedback.knowledge_rating}
+                                    </p>
+                                  )}
+
+                                  {feedback.knowledge_detail && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Knowledge Detail :
+                                      </span>{" "}
+                                      {feedback.knowledge_detail}
+                                    </p>
+                                  )}
+
+                                  {feedback.communication_skills_rating && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Communication Rating :
+                                      </span>{" "}
+                                      {feedback.communication_skills_rating}
+                                    </p>
+                                  )}
+
+                                  {feedback.communication_skills_comment && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Communication Comment :
+                                      </span>{" "}
+                                      {feedback.communication_skills_comment}
+                                    </p>
+                                  )}
+
+                                  {feedback.attitude_rating && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Attitude Rating :
+                                      </span>{" "}
+                                      {feedback.attitude_rating}
+                                    </p>
+                                  )}
+
+                                  {feedback.attitude_comment && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Attitude Comment :
+                                      </span>{" "}
+                                      {feedback.attitude_comment}
+                                    </p>
+                                  )}
+
+                                  {feedback.overall_assessment_rating && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Overall Assessment :
+                                      </span>{" "}
+                                      {feedback.overall_assessment_rating}
+                                    </p>
+                                  )}
+
+                                  {feedback.overall_assessment_remark && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Overall Remark :
+                                      </span>{" "}
+                                      {feedback.overall_assessment_remark}
+                                    </p>
+                                  )}
+
+                                  {feedback.position_recommendation && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Position Recommendation :
+                                      </span>{" "}
+                                      {feedback.position_recommendation}
+                                    </p>
+                                  )}
+
+                                  {feedback.recommendation_comments && (
+                                    <p>
+                                      <span className="font-semibold">
+                                        Recommendation Comment :
+                                      </span>{" "}
+                                      {feedback.recommendation_comments}
+                                    </p>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Fixed Bottom Section */}
+            <div className="sticky bottom-0 border-t bg-white p-4">
+              <div className="flex items-end gap-3">
+                <div className="flex-1">
+                  <CustomSelect
+                    options={state.applicationStatusList}
+                    value={state.appstatus}
+                    onChange={(e) => setState({ appstatus: e })}
+                    placeholder="Select final status"
+                  />
+                </div>
+
+                <button
+                  onClick={() => updateStatus()}
+                  className="bg-dblue rounded px-5 py-2 text-white"
+                >
+                  Update Status
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      />
+
+      <Modal
+        subTitle="Update Application Status"
+        closeIcon
+        open={state.showStatusModal}
+        close={() =>
+          setState({
+            showStatusModal: false,
+            selectedApplication: null,
+            selectedStatus: null,
+          })
+        }
+        renderComponent={() => (
+          <div className="p-6">
+            <div className="mb-6">
+              <CustomSelect
+                options={state.applicationStatusList}
+                value={state.selectedStatus}
+                onChange={(e) => setState({ selectedStatus: e })}
+                placeholder="Select status"
+                loading={state.applicationStatusLoading}
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() =>
+                  setState({
+                    showStatusModal: false,
+                    selectedApplication: null,
+                    selectedStatus: null,
+                  })
+                }
+                className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleStatusSubmit}
+                className="bg-dblue flex-1 rounded-lg px-4 py-2 text-white hover:shadow-lg"
+              >
+                Update Status
+              </button>
+            </div>
+          </div>
+        )}
+      />
+
+<Modal
+        subTitle={`Send Interest (${state.applicantName})`}
+        closeIcon
+        open={state.isOpenInterest}
+        close={()=>{
+          setState({
+            isOpenInterest: false,
+            message: "",
+            applicantName: "",
+            applicantId:"",
+          })
+        }}
+        isFullWidth={false}
+        maxWidth="max-w-2xl"
+        renderComponent={() => (
+          <div className="relative">
+            <TextArea
+              title="Message"
+              placeholder="Enter message"
+              value={state.message}
+              onChange={(e) => handleFormChange("message", e.target.value)}
+            />
+
+            <div className="mt-8 flex flex-col-reverse gap-3 border-t border-gray-200 pt-6 dark:border-gray-700 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={()=>{
+                  setState({
+                    isOpenInterest: false,
+                    message: "",
+                    applicantName: "",
+                    applicantId:"",
+                  })
+                }}
+                className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-2 text-sm font-medium text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => sendInterest()}
+                disabled={state.sendLoading}
+                className={`bg-dblue group relative inline-flex items-center justify-center overflow-hidden rounded-lg px-8 py-2 text-sm font-medium text-white shadow-lg transition-all duration-200 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                  state.submitting ? "cursor-not-allowed opacity-70" : ""
+                }`}
+              >
+                <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+                {state.sendLoading ? (
+                  <IconLoader className="relative z-10 mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  "Send"
+                )}
+                <span className="relative z-10"></span>
+              </button>
+            </div>
+          </div>
+        )}
+      />
     </div>
   );
 };

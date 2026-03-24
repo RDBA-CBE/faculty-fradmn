@@ -335,7 +335,7 @@ const Application = () => {
       // body.team = "No";
 
       const res: any = await Models.application.list(page, body);
-console.log('✌️res --->', res);
+      console.log("✌️res --->", res);
 
       const tableData = res?.results?.map((item) => ({
         applicant_name: `${item?.first_name} ${item?.last_name}`,
@@ -1080,9 +1080,8 @@ console.log('✌️res --->', res);
         application: res,
         loading: false,
         appstatus: row?.application_status,
-        isOpenRound:true
+        isOpenRound: true,
       });
-
     } catch (error) {
       console.log("✌️error --->", error);
     }
@@ -1465,7 +1464,7 @@ console.log('✌️res --->', res);
                     title={college_name}
                     className="text-gray-600 dark:text-gray-400"
                   >
-                    {(college_name)}
+                    {college_name}
                   </div>
                 ),
               },
@@ -1477,7 +1476,7 @@ console.log('✌️res --->', res);
                     title={department_name}
                     className="text-gray-600 dark:text-gray-400"
                   >
-                    {(department_name)}
+                    {department_name}
                   </div>
                 ),
                 sortable: true,
@@ -1640,6 +1639,8 @@ console.log('✌️res --->', res);
       )}
 
       <Modal
+        subTitle="Update Application Status"
+        closeIcon
         open={state.showStatusModal}
         close={() =>
           setState({
@@ -1650,18 +1651,6 @@ console.log('✌️res --->', res);
         }
         renderComponent={() => (
           <div className="p-6">
-            <div className="mb-6 text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900 dark:to-blue-900">
-                <UserCheck className="h-8 w-8 text-purple-600 dark:text-purple-400" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Update Application Status
-              </h2>
-              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                Select a new status for this application
-              </p>
-            </div>
-
             <div className="mb-6">
               <CustomSelect
                 options={state.applicationStatusList}
