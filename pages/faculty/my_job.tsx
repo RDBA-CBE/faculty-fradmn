@@ -634,7 +634,7 @@ const Job = () => {
     try {
       await Models.job.delete(id);
       Success("Job deleted successfully!");
-      jobList(state.page);
+      jobList(state.page,null,state.profile?.college?.map((item)=>item?.college_id));
     } catch (error) {
       Failure("Failed to delete job");
     }
