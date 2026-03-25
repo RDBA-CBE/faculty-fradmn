@@ -674,10 +674,9 @@ const master = {
     let promise = new Promise((resolve, reject) => {
       let url = `department-masters/?page=${page}`;
 
-      
-
       if (body?.search) url += `&search=${encodeURIComponent(body.search)}`;
-      if (body.pagination = "No") url += `&pagination=${encodeURIComponent(false)}`;
+      if (body?.pagination === "No") url += `&pagination=false`;
+      if (body?.pagination === "Yes") url += `&pagination=true`;
 
       if (body?.department_id) url += `&department_id=${body.department_id}`;
       if (body?.ordering) url += `&ordering=${body.ordering}`;

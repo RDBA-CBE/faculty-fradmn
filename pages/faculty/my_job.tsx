@@ -195,6 +195,13 @@ const Job = () => {
     return { institutionId: null, collegeIds: null };
   };
 
+  const getDeptCollegeIds = () => {
+    if (state.profile?.role === ROLES.HR) {
+      return state.profile?.college?.map((c: any) => c.college_id);
+    }
+    return state.filterCollege?.value ? [state.filterCollege.value] : null;
+  };
+
   const callJobListByRole = (page: number, profileData?: any) => {
     const p = profileData ?? state.profile;
     const role = p?.role;
@@ -395,25 +402,16 @@ const Job = () => {
     page,
     search = "",
     loadMore = false,
-    collegeId = null,
-    createdBy = null
+    collegeIds = null
   ) => {
     try {
       setState({ departmentLoading: true });
       const body: any = { search };
-
-      if (collegeId) {
-        body.college = collegeId;
-      } else if (state.profile?.role === "hr") {
-        body.college = state.profile?.college?.college_id;
+      if (collegeIds?.length > 0) {
+        body.college = collegeIds;
       }
-      if (createdBy) {
-        body.created_by = createdBy;
-      }
-      // body.team = "No";
       const res: any = await Models.department.list(page, body);
       const dropdown = Dropdown(res?.results, "short_name");
-
       setState({
         departmentLoading: false,
         departmentPage: page,
@@ -547,15 +545,8 @@ const Job = () => {
       departmentList: [],
       page: 1,
     });
-
     if (selectedOption?.value) {
-      departmentDropdownList(
-        1,
-        "",
-        false,
-        selectedOption.value,
-        state.profile?.id
-      );
+      departmentDropdownList(1, "", false, [selectedOption.value]);
     }
   };
 
@@ -828,27 +819,14 @@ const Job = () => {
             placeholder="Select department"
             isClearable={true}
             onSearch={(searchTerm) => {
-              const collegeId = state.collegeFilter?.value;
-              collegeId &&
-                departmentDropdownList(
-                  1,
-                  searchTerm,
-                  false,
-                  collegeId,
-                  state.profile?.id
-                );
+              const ids = getDeptCollegeIds();
+              if (ids) departmentDropdownList(1, searchTerm, false, ids);
             }}
             loadMore={() => {
-              const collegeId = state.collegeFilter?.value;
-              state.departmentNext &&
-                collegeId &&
-                departmentDropdownList(
-                  state.departmentPage + 1,
-                  "",
-                  true,
-                  collegeId,
-                  state.profile?.id
-                );
+              if (state.departmentNext) {
+                const ids = getDeptCollegeIds();
+                if (ids) departmentDropdownList(state.departmentPage + 1, "", true, ids);
+              }
             }}
             loading={state.departmentLoading}
           />

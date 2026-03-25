@@ -71,7 +71,7 @@ const Master_department = () => {
         body.ordering =
           state.sortOrder === "desc" ? `-${state.sortBy}` : state.sortBy;
       }
-
+      body.pagination = "Yes"
       const res: any = await Models.master.dept_list(body, page);
       console.log("✌️res --->", res);
 
