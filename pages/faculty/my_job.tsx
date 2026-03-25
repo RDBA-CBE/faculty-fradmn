@@ -1161,7 +1161,7 @@ const Job = () => {
                       <CheckCircle className="h-4 w-4" />
                     </button>
                     {/* )} */}
-                    <button
+                    {/* <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleLog(row);
@@ -1170,7 +1170,7 @@ const Job = () => {
                       title="Logs"
                     >
                       <IconHistory className="h-4 w-4" />
-                    </button>
+                    </button> */}
 
                     <button
                       onClick={(e) => {

@@ -518,7 +518,9 @@ export default function Newjob() {
       await CreateNewJob.validate(validation, { abortEarly: false });
 
       const body: any = {
-        job_title: capitalizeFLetter(state.title),
+        // job_title: capitalizeFLetter(state.title),
+        job_title: state.jobRole?.label,
+
         job_description: state.description
           ? capitalizeFLetter(state.description)
           : "",

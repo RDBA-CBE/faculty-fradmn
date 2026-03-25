@@ -635,13 +635,15 @@ export default function Newjob() {
         alternativeEmail: state.alternativeEmail,
         applyLink: state.applyLink,
         jobRole: state.jobRole?.value,
+        job_title: state.jobRole?.label,
+
       };
       console.log('✌️validation --->', validation);
       
       await CreateNewJob.validate(validation, { abortEarly: false });
 
       const body: any = {
-        job_title: capitalizeFLetter(state.title),
+        // job_title: capitalizeFLetter(state.title),
         job_description: capitalizeFLetter(state.description),
 
         job_type_id: state.jobType?.value,
@@ -649,6 +651,7 @@ export default function Newjob() {
         qualification: capitalizeFLetter(state.qualification),
         salary_range_id: state.salary?.value,
         location_ids: state.location?.map((item) => item?.value),
+        job_title: state.jobRole?.label,
 
         number_of_openings: Number(state.numberOfOpenings),
         last_date: state.endDate
