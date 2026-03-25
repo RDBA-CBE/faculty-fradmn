@@ -598,7 +598,7 @@ const Job = () => {
             ? "Job unapproved successfully!"
             : "Job approved successfully!"
         );
-        jobList(state.page);
+        callJobListByRole(state.page)
       } catch (error) {
         Failure(
           row.is_approved ? "Failed to unapprove job" : "Failed to approve job"
