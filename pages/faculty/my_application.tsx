@@ -556,7 +556,7 @@ const Application = () => {
         applicationList(
           state.page,
           null,
-          state.profile?.college?.college_id,
+          state.profile?.college?.map((item)=>item?.college_id),
           null,
           state.profile?.id
         );
