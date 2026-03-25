@@ -457,7 +457,6 @@ export const OwnmenuConfig = {
     //   href: "/faculty/hod_management",
     // },
 
-   
     {
       type: "submenu",
       icon: "IconMenuCharts",
@@ -539,7 +538,18 @@ export const OwnmenuConfig = {
       label: "dashboard",
       href: "/",
     },
-
+    {
+      type: "link",
+      icon: "IconMenuForms",
+      label: "Job Postings",
+      href: "/faculty/my_job",
+    },
+    {
+      type: "link",
+      icon: "IconMenuTables",
+      label: "Applications",
+      href: "/faculty/my_application",
+    },
     {
       type: "link",
       icon: "IconMenuNotes",
@@ -553,19 +563,6 @@ export const OwnmenuConfig = {
       href: "/faculty/my_users",
     },
 
-    {
-      type: "link",
-      icon: "IconMenuForms",
-      label: "Job Postings",
-      href: "/faculty/my_job",
-    },
-
-    {
-      type: "link",
-      icon: "IconMenuTables",
-      label: "Applications",
-      href: "/faculty/my_application",
-    },
     {
       type: "submenu",
       icon: "IconMenuCharts",
@@ -589,10 +586,10 @@ export const OwnmenuConfig = {
           href: "/faculty/master/job_urgency",
         },
 
-        // {
-        //   label: "Category",
-        //   href: "/faculty/master/category",
-        // },
+        {
+          label: "Category",
+          href: "/faculty/master/category",
+        },
 
         {
           label: "Location",
@@ -654,7 +651,7 @@ export const OwnmenuConfig = {
       label: "Job Seekers",
       href: "/faculty/my_users",
     },
-    
+
     {
       type: "link",
       icon: "IconMenuTables",
@@ -667,9 +664,6 @@ export const OwnmenuConfig = {
       label: "Departments",
       href: "/faculty/my_department",
     },
- 
-
-  
 
     {
       type: "submenu",

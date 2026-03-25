@@ -165,22 +165,34 @@ const Job = () => {
       setState({ profile: res });
       console.log("✌️profile --->", res);
       if (res?.role == ROLES.SUPER_ADMIN) {
-        collegeDropdownList(1, "", false, "", res.id);
+        collegeDropdownList(1, "", false, null);
       } else if (res?.role == ROLES.INSTITUTION_ADMIN) {
-        collegeDropdownList(1, "", false, res?.institution?.id, res.id);
+        collegeDropdownList(1, "", false, res?.institution?.id);
       } else if (res?.role == ROLES.HR) {
-        setState({
-          collegeList: res?.college?.map((item) => ({
-            value: item?.college_id,
-            label: item?.college_name,
-          })),
-        });
-        departmentDropdownList(1, "", false, res?.college?.map((item)=>item?.college_id));
+        departmentDropdownList(
+          1,
+          "",
+          false,
+          res?.college?.map((item) => item?.college_id)
+        );
       }
       callJobListByRole(1, res);
     } catch (error) {
       console.error("Error fetching institutions:", error);
     }
+  };
+
+  const getCollegeParamsByRole = (profileData?: any) => {
+    const p = profileData ?? state.profile;
+    if (p?.role === ROLES.INSTITUTION_ADMIN) {
+      return { institutionId: p?.institution?.id, collegeIds: null };
+    } else if (p?.role === ROLES.HR) {
+      return {
+        institutionId: null,
+        collegeIds: p?.college?.map((c: any) => c.college_id),
+      };
+    }
+    return { institutionId: null, collegeIds: null };
   };
 
   const callJobListByRole = (page: number, profileData?: any) => {
@@ -348,7 +360,8 @@ const Job = () => {
     search = "",
     loadMore = false,
     institutionId = null,
-    createdBy = null
+    createdBy = null,
+    collegeIds = null
   ) => {
     try {
       setState({ collegeLoading: true });
@@ -356,14 +369,13 @@ const Job = () => {
 
       if (institutionId) {
         body.institution = institutionId;
-      } else if (state.profile?.role === "institution_admin") {
+      } else if (state.profile?.role === ROLES.INSTITUTION_ADMIN) {
         body.institution = state.profile?.institution?.id;
       }
 
-      if (createdBy) {
-        body.created_by = createdBy;
+      if (collegeIds?.length > 0) {
+        body.college_ids = collegeIds;
       }
-      body.team = "No";
 
       const res: any = await Models.college.list(page, body);
       const dropdown = Dropdown(res?.results, "college_name");
@@ -598,7 +610,7 @@ const Job = () => {
             ? "Job unapproved successfully!"
             : "Job approved successfully!"
         );
-        callJobListByRole(state.page)
+        callJobListByRole(state.page);
       } catch (error) {
         Failure(
           row.is_approved ? "Failed to unapprove job" : "Failed to approve job"
@@ -773,14 +785,42 @@ const Job = () => {
             onChange={(e) => setState({ search: e.target.value })}
             icon={<IconSearch className="h-4 w-4" />}
           />
-
-          <CustomSelect
-            options={state.collegeList}
-            value={state.filterCollege}
-            onChange={(e) => setState({ filterCollege: e })}
-            placeholder={"Select College"}
-          />
-
+          {(state.profile?.role == ROLES.SUPER_ADMIN ||
+            state.profile?.role == ROLES.INSTITUTION_ADMIN) && (
+            <CustomSelect
+              options={state.collegeList}
+              value={state.filterCollege}
+              onChange={(e) => setState({ filterCollege: e })}
+              placeholder={"Select College"}
+              isClearable={true}
+              loading={state.collegeLoading}
+              onSearch={(search) => {
+                const { institutionId, collegeIds } = getCollegeParamsByRole();
+                collegeDropdownList(
+                  1,
+                  search,
+                  false,
+                  institutionId,
+                  null,
+                  collegeIds
+                );
+              }}
+              loadMore={() => {
+                if (state.collegeNext) {
+                  const { institutionId, collegeIds } =
+                    getCollegeParamsByRole();
+                  collegeDropdownList(
+                    state.collegePage + 1,
+                    "",
+                    true,
+                    institutionId,
+                    null,
+                    collegeIds
+                  );
+                }
+              }}
+            />
+          )}
           <CustomSelect
             options={state.departmentList}
             value={state.departmentFilter}
@@ -1258,7 +1298,7 @@ const Job = () => {
               {(state.profile?.role == ROLES.SUPER_ADMIN ||
                 state.profile?.role == ROLES.INSTITUTION_ADMIN) && (
                 <>
-                  {state.profile?.role == ROLES.SUPER_ADMIN && (
+                  {/* {state.profile?.role == ROLES.SUPER_ADMIN && (
                     <CustomSelect
                       options={state.institutionList}
                       value={state.institutionFilter}
@@ -1313,8 +1353,8 @@ const Job = () => {
                         );
                     }}
                     loading={state.collegeLoading}
-                  />
-
+                  /> */}
+                  {/* 
                   <CustomSelect
                     options={state.departmentList}
                     value={state.departmentFilter}
@@ -1346,7 +1386,7 @@ const Job = () => {
                     }}
                     loading={state.departmentLoading}
                     disabled={!state.collegeFilter}
-                  />
+                  /> */}
                 </>
               )}
               {/* {state.profile?.role == ROLES.HR && (

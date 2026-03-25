@@ -55,7 +55,7 @@ const Location = () => {
         body.ordering = state.sortOrder === "desc" ? `-${state.sortBy}` : state.sortBy;
       }
 
-      const res: any = await Models.master.location_list(body);
+      const res: any = await Models.master.location_list(page,body);
       const tableData = res?.results?.map((item) => ({
         id: item?.id,
         city: item?.city,

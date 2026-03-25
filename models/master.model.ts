@@ -673,7 +673,12 @@ const master = {
   dept_list: (body, page = 1) => {
     let promise = new Promise((resolve, reject) => {
       let url = `department-masters/?page=${page}`;
+
+      
+
       if (body?.search) url += `&search=${encodeURIComponent(body.search)}`;
+      if (body.pagination = "No") url += `&pagination=${encodeURIComponent(false)}`;
+
       if (body?.department_id) url += `&department_id=${body.department_id}`;
       if (body?.ordering) url += `&ordering=${body.ordering}`;
       if (body?.is_approved == "Yes") url += `&is_approved=${true}`;

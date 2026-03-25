@@ -605,6 +605,7 @@ const CollegeAndDepartment = () => {
         body.search = search;
       }
       body.is_approved = "Yes";
+      body.pagination = "No"
       if (catId?.length > 0) {
         body.job_category_id = catId?.map((item) => item?.value || item);
       }

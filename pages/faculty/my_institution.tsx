@@ -195,7 +195,7 @@ const Institution = () => {
     { id: 2, name: "Institution Admin", icon: User, required: false },
     { id: 3, name: "Create HR", icon: UserCheck, required: false },
     { id: 4, name: "College", icon: GraduationCap, required: false },
-    { id: 5, name: "Department HOD", icon: UserCheck, required: false },
+    // { id: 5, name: "Department HOD", icon: UserCheck, required: false },
     // { id: 6, name: "Department", icon: BookOpen, required: false },
   ];
 
@@ -1585,7 +1585,9 @@ const Institution = () => {
       </div>
 
       <Modal
-      maxWidth="max-w-5xl"
+      subTitle="Setup Institution"
+      closeIcon
+        maxWidth="max-w-5xl"
         open={state.showModal}
         close={handleCloseModal}
         addHeader="Institution Setup Wizard"
@@ -1715,7 +1717,7 @@ const Institution = () => {
               {state.currentStep === 2 && (
                 <div className="space-y-3">
                   <h3 className="text-lg font-semibold">Institution Admin</h3>
-                
+
                   <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                     <TextInput
                       title="Username"
@@ -1945,164 +1947,167 @@ const Institution = () => {
 
               {state.currentStep === 4 && (
                 <div>
+                  <div className="w-full space-y-3">
+                    <h3 className="text-lg font-semibold">Create College</h3>
 
-                <div className="w-full space-y-3">
-                <h3 className="text-lg font-semibold">Create College</h3>
-
-                  <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                    <div>
-                      <UpdatePropertyImagePreview
-                        existingImages={state.college_logo}
-                        onImagesChange={(newImages) => setState({ newImages })}
-                        onDeleteImage={(imageUrl) => {
-                          setState({
-                            college_logo: state.college_logo.filter(
-                              (img) => img !== imageUrl
-                            ),
-                          });
-                        }}
-                        maxFiles={1}
-                        title="College Logo"
-                        description="Upload college logo (JPEG or PNG)"
-                        validateDimensions={false}
-                        isSingleImage={true}
-                      />
+                    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                      <div>
+                        <UpdatePropertyImagePreview
+                          existingImages={state.college_logo}
+                          onImagesChange={(newImages) =>
+                            setState({ newImages })
+                          }
+                          onDeleteImage={(imageUrl) => {
+                            setState({
+                              college_logo: state.college_logo.filter(
+                                (img) => img !== imageUrl
+                              ),
+                            });
+                          }}
+                          maxFiles={1}
+                          title="College Logo"
+                          description="Upload college logo (JPEG or PNG)"
+                          validateDimensions={false}
+                          isSingleImage={true}
+                        />
+                      </div>
+                      <div className="space-y-4">
+                        <TextInput
+                          title="College Name"
+                          placeholder="Enter college name"
+                          value={state.college_name}
+                          onChange={(e) =>
+                            handleFormChange("college_name", e.target.value)
+                          }
+                          error={state.errors.college_name}
+                          required
+                        />
+                        <CustomSelect
+                          title="College Type"
+                          options={state.college_type_list}
+                          value={state.college_type}
+                          onChange={(selectedOption) =>
+                            handleFormChange("college_type", selectedOption)
+                          }
+                          isMulti={true}
+                          placeholder="College Type"
+                          error={state.errors.college_type}
+                        />
+                        <TextInput
+                          title="Email Address"
+                          type="email"
+                          placeholder="college@example.com"
+                          value={state.college_email}
+                          onChange={(e) =>
+                            handleFormChange("college_email", e.target.value)
+                          }
+                          error={state.errors.college_email}
+                          required
+                        />
+                      </div>
                     </div>
-                    <div className="space-y-4">
+
+                    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                       <TextInput
-                        title="College Name"
-                        placeholder="Enter college name"
-                        value={state.college_name}
+                        title="College Code"
+                        placeholder="Enter college code"
+                        value={state.college_code}
                         onChange={(e) =>
-                          handleFormChange("college_name", e.target.value)
+                          handleFormChange("college_code", e.target.value)
                         }
-                        error={state.errors.college_name}
+                        error={state.errors.college_code}
+                        required
+                      />
+                      <CustomPhoneInput
+                        title="Phone Number"
+                        value={state.college_phone}
+                        onChange={(value) =>
+                          handleFormChange("college_phone", value)
+                        }
+                        error={state.errors.college_phone}
+                        required
+                      />
+                      <TextArea
+                        title="Address"
+                        placeholder="Enter college address"
+                        value={state.college_address}
+                        onChange={(e) =>
+                          handleFormChange("college_address", e.target.value)
+                        }
+                        error={state.errors.college_address}
+                        rows={3}
                         required
                       />
                       <CustomSelect
-                        title="College Type"
-                        options={state.college_type_list}
-                        value={state.college_type}
+                        title="NAAC Accreditation"
+                        options={state.naac_accreditation_list}
+                        value={state.naac_accreditation}
                         onChange={(selectedOption) =>
-                          handleFormChange("college_type", selectedOption)
+                          handleFormChange("naac_accreditation", selectedOption)
                         }
                         isMulti={true}
-                        placeholder="College Type"
-                        error={state.errors.college_type}
+                        placeholder="NAAC Accreditation"
                       />
-                      <TextInput
-                        title="Email Address"
-                        type="email"
-                        placeholder="college@example.com"
-                        value={state.college_email}
-                        onChange={(e) =>
-                          handleFormChange("college_email", e.target.value)
+
+                      <CustomSelect
+                        title="NIRF Band"
+                        options={state.nirf_band_list}
+                        value={state.nirf_band}
+                        onChange={(selectedOption) =>
+                          handleFormChange("nirf_band", selectedOption)
                         }
-                        error={state.errors.college_email}
-                        required
+                        placeholder="NIRF Band"
+                      />
+
+                      <CustomSelect
+                        title="NIRF Category"
+                        options={state.nirf_category_list}
+                        value={state.nirf_category}
+                        onChange={(selectedOption) =>
+                          handleFormChange("nirf_category", selectedOption)
+                        }
+                        isMulti={true}
+                        placeholder="NIRF Category"
+                      />
+                      <NumberInput
+                        title="Intake Per Year"
+                        value={state.intake_per_year}
+                        onChange={(e) =>
+                          handleFormChange("intake_per_year", e.target.value)
+                        }
+                        placeholder="Intake Per Year"
+                      />
+                      <NumberInput
+                        title="Total Strength"
+                        value={state.total_strength}
+                        onChange={(e) =>
+                          handleFormChange("total_strength", e.target.value)
+                        }
+                        placeholder="Total Strength"
                       />
                     </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                    <TextInput
-                      title="College Code"
-                      placeholder="Enter college code"
-                      value={state.college_code}
-                      onChange={(e) =>
-                        handleFormChange("college_code", e.target.value)
+                    <DynamicAchievementInput
+                      title="Achivements"
+                      placeholder="Enter achivessments"
+                      defaultValue={state.recent_achievements}
+                      onChange={(data) =>
+                        setState({ recent_achievements: data })
                       }
-                      error={state.errors.college_code}
-                      required
-                    />
-                    <CustomPhoneInput
-                      title="Phone Number"
-                      value={state.college_phone}
-                      onChange={(value) =>
-                        handleFormChange("college_phone", value)
-                      }
-                      error={state.errors.college_phone}
-                      required
                     />
                     <TextArea
-                      title="Address"
-                      placeholder="Enter college address"
-                      value={state.college_address}
+                      title="Summary"
+                      placeholder="Enter college summary"
+                      value={state.summary}
                       onChange={(e) =>
-                        handleFormChange("college_address", e.target.value)
+                        handleFormChange("summary", e.target.value)
                       }
-                      error={state.errors.college_address}
                       rows={3}
-                      required
-                    />
-                    <CustomSelect
-                      title="NAAC Accreditation"
-                      options={state.naac_accreditation_list}
-                      value={state.naac_accreditation}
-                      onChange={(selectedOption) =>
-                        handleFormChange("naac_accreditation", selectedOption)
-                      }
-                      isMulti={true}
-                      placeholder="NAAC Accreditation"
-                    />
-
-                    <CustomSelect
-                      title="NIRF Band"
-                      options={state.nirf_band_list}
-                      value={state.nirf_band}
-                      onChange={(selectedOption) =>
-                        handleFormChange("nirf_band", selectedOption)
-                      }
-                      placeholder="NIRF Band"
-                    />
-
-                    <CustomSelect
-                      title="NIRF Category"
-                      options={state.nirf_category_list}
-                      value={state.nirf_category}
-                      onChange={(selectedOption) =>
-                        handleFormChange("nirf_category", selectedOption)
-                      }
-                      isMulti={true}
-                      placeholder="NIRF Category"
-                    />
-                    <NumberInput
-                      title="Intake Per Year"
-                      value={state.intake_per_year}
-                      onChange={(e) =>
-                        handleFormChange("intake_per_year", e.target.value)
-                      }
-                      placeholder="Intake Per Year"
-                    />
-                    <NumberInput
-                      title="Total Strength"
-                      value={state.total_strength}
-                      onChange={(e) =>
-                        handleFormChange("total_strength", e.target.value)
-                      }
-                      placeholder="Total Strength"
                     />
                   </div>
-                  <DynamicAchievementInput
-                    title="Achivements"
-                    placeholder="Enter achivessments"
-                    defaultValue={state.recent_achievements}
-                    onChange={(data) => setState({ recent_achievements: data })}
-                  />
-                  <TextArea
-                    title="Summary"
-                    placeholder="Enter college summary"
-                    value={state.summary}
-                    onChange={(e) =>
-                      handleFormChange("summary", e.target.value)
-                    }
-                    rows={3}
-                  />
-                </div>
                 </div>
               )}
 
-              {state.currentStep === 5 && (
+              {/* {state.currentStep === 5 && (
                 <div className="space-y-6">
                   <h3 className="text-lg font-semibold">Department HOD</h3>
                   <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -2205,7 +2210,7 @@ const Institution = () => {
                     required
                   />
                 </div>
-              )}
+              )} */}
 
               {/* {state.currentStep === 6 && (
                 <div className="space-y-6">
