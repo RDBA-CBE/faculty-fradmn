@@ -52,6 +52,7 @@ const Master_department = () => {
   useEffect(() => {
     dispatch(setPageTitle("Department Management"));
     deptList(1);
+    categoryList(1);
   }, [dispatch]);
 
   useEffect(() => {
@@ -79,6 +80,8 @@ const Master_department = () => {
         name: item.name,
         short_name: item.short_name,
         is_approved: item?.is_approved,
+
+        job_categories: item?.job_categories,
       }));
 
       setState({
@@ -89,6 +92,31 @@ const Master_department = () => {
       });
     } catch {
       setState({ loading: false });
+    }
+  };
+
+  const categoryList = async (page = 1, search = "") => {
+    try {
+      setState({ catLoading: true });
+      const body: any = {};
+      if (search) body.search = search;
+
+      const res: any = await Models.master.category_list(body);
+      const tableData = res?.results?.map((item) => ({
+        value: item?.id,
+        label: item?.name,
+      }));
+
+      setState({
+        catLoading: false,
+        categoryList: tableData,
+        count: res?.count,
+        catnext: res?.next,
+        catPage: page,
+      });
+    } catch (error) {
+      setState({ loading: false });
+      Failure("Failed to fetch categories");
     }
   };
 
@@ -105,11 +133,11 @@ const Master_department = () => {
       short_name: "",
       errors: {},
       submitting: false,
+      job_category_id: null,
     });
   };
 
   const handleEdit = (row) => {
-    console.log("✌️row --->", row);
     setState({
       editId: row?.id,
       showModal: true,
@@ -117,6 +145,10 @@ const Master_department = () => {
       short_name: row.short_name,
       is_approved: row?.is_approved,
     });
+    if(row?.job_categories?.length>0){
+      setState({job_category_id:Dropdown(row?.job_categories,"name")
+      })
+    }
   };
 
   const handleDelete = (row) => {
@@ -144,6 +176,7 @@ const Master_department = () => {
       const body: any = {
         name: capitalizeFLetter(state.name),
         short_name: capitalizeFLetter(state.short_name),
+        job_category_id: state.job_category_id?.map((item) => item?.value),
       };
 
       await Utils.Validation.master_dept.validate(body, { abortEarly: false });
@@ -417,7 +450,7 @@ const Master_department = () => {
         closeIcon
         renderComponent={() => (
           <div className="relative">
-            <div className="space-y-6">
+            <div className="space-y-4">
               <TextInput
                 title="Short Name"
                 placeholder="Enter short name"
@@ -443,6 +476,25 @@ const Master_department = () => {
                 }
                 error={state.errors.name}
                 required
+              />
+
+              <CustomSelect
+                title="Select Category"
+                options={state.categoryList}
+                value={state.job_category_id}
+                onChange={(e) => setState({ job_category_id: e })}
+                placeholder="Select Category"
+                isClearable={true}
+                onSearch={(searchTerm) => {
+                  categoryList(1, searchTerm);
+                }}
+                loadMore={() => {
+                  state.catnext && categoryList(state.catPage + 1, "");
+                }}
+                error={state.errors.job_category_id}
+                loading={state.catLoading}
+                required
+                isMulti
               />
             </div>
 

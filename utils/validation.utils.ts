@@ -72,6 +72,11 @@ export const CreateCollege = Yup.object().shape({
     .required("College phone is required"),
   location_id: Yup.number().required("Location is required"),
   college_address: Yup.string().required("College address is required"),
+  category: Yup.array()
+  .min(1, "At least one category is required")
+  .required("Category is required")
+  .nullable(true),
+  
 });
 
 export const CreateCollegeForm = Yup.object().shape({
@@ -329,6 +334,10 @@ export const single_interview = Yup.object().shape({
 export const master_dept = Yup.object().shape({
   name: Yup.string().required("Name is required"),
   short_name: Yup.string().required("Short name is required"),
+  job_category_id: Yup.array()
+    .min(1, "At least one category is required")
+    .required("Category is required"),
+  
 });
 
 export const master_job_role = Yup.object().shape({

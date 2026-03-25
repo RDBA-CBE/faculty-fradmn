@@ -91,14 +91,12 @@ const master = {
   },
 
   // Location APIs
-  location_list: (page=1,body: any = {}) => {
+  location_list: (page = 1, body: any = {}) => {
     let promise = new Promise((resolve, reject) => {
       let url = `job-locations/?page=${page}`;
       if (body?.search) url += `&search=${encodeURIComponent(body.search)}`;
       if (body?.ordering)
-        url += `&ordering=${encodeURIComponent(
-          body.ordering
-        )}`;
+        url += `&ordering=${encodeURIComponent(body.ordering)}`;
       instance()
         .get(url)
         .then((res) => resolve(res.data))
@@ -679,6 +677,8 @@ const master = {
       if (body?.department_id) url += `&department_id=${body.department_id}`;
       if (body?.ordering) url += `&ordering=${body.ordering}`;
       if (body?.is_approved == "Yes") url += `&is_approved=${true}`;
+      if (body?.job_category_id)
+        url += `&job_category_id=${body?.job_category_id}`;
 
       instance()
         .get(url)

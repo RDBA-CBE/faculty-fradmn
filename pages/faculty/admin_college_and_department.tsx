@@ -194,7 +194,7 @@ const CollegeAndDepartment = () => {
     college_type();
     naac_accreditations();
     nirf_band(), nirf_category();
-    master_department();
+    // master_department();
     categoryList();
     HRList();
     locationList();
@@ -592,19 +592,31 @@ const CollegeAndDepartment = () => {
     }
   };
 
-  const master_department = async (page = 1, search = "", loadMore = false) => {
+  const master_department = async (
+    page = 1,
+    search = "",
+    loadMore = false,
+    catId = null
+  ) => {
     try {
+
       const body: any = {};
       if (search) {
         body.search = search;
       }
       body.is_approved = "Yes";
+      if (catId?.length > 0) {
+        body.job_category_id = catId?.map((item) => item?.value || item);
+      }
 
       const res: any = await Models.master.dept_list(body, page);
-      console.log("✌️res --->", res);
       const dropdown = Dropdown(res?.results, "short_name");
       setState({
-        master_department: dropdown,
+        master_department: loadMore
+          ? [...state.master_department, ...dropdown]
+          : dropdown,
+        masterNext: res?.next,
+        masterPage: page,
       });
     } catch (error) {
       console.log("✌️error --->", error);
@@ -935,6 +947,15 @@ const CollegeAndDepartment = () => {
         });
       } else {
         setState({ category: [] });
+      }
+
+      if (row.category?.length > 0) {
+        master_department(
+          1,
+          "",
+          false,
+          row?.category?.map((item) => item?.id)
+        );
       }
 
       if (row?.department?.length > 0) {
@@ -1719,6 +1740,7 @@ const CollegeAndDepartment = () => {
         is_legacy: state.is_legacy,
         short_name: state.short_name || "",
         location_id: state.location_id?.value,
+        category:state.category
       };
       console.log("✌️collegeBody --->", collegeBody);
       await Validation.CreateCollege.validate(collegeBody, {
@@ -1836,6 +1858,8 @@ const CollegeAndDepartment = () => {
         is_legacy: state.is_legacy,
         short_name: state.short_name,
         location_id: state.location_id?.value,
+        category:state.category
+
       };
 
       await Validation.CreateCollege.validate(body, {
@@ -2192,6 +2216,9 @@ const CollegeAndDepartment = () => {
             setState({
               category: selectedOption,
             });
+            if (selectedOption) {
+              master_department(1, "", false, selectedOption);
+            }
           }}
           onSearch={(searchTerm) => categoryList(1, searchTerm)}
           placeholder="Select category"
@@ -2202,6 +2229,9 @@ const CollegeAndDepartment = () => {
           }
           loading={state.catLoading}
           title="Select category"
+          error={state.errors?.category}
+
+          required
         />
 
         <TextArea
@@ -2353,10 +2383,21 @@ const CollegeAndDepartment = () => {
                       }
                     );
                   });
+
                   setState({
                     department: selectedOption,
                     departmentData: updated,
                   });
+                }}
+                onSearch={(e) => master_department(1, e, false, state.category)}
+                loadMore={() => {
+                  state.masterNext &&
+                    master_department(
+                      state.masterPage + 1,
+                      "",
+                      true,
+                      state.category
+                    );
                 }}
                 isMulti={true}
                 placeholder="Select department"
