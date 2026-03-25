@@ -211,7 +211,7 @@ const Dashboard = () => {
         }
       : {
           id: 3,
-          label: "Out Reached",
+          label: "Job Seekers",
           value: stats.outreached,
           color: "text-[#dd22cc]",
           bg: "bg-indigo-100",
@@ -457,12 +457,12 @@ const Dashboard = () => {
       }
 
       body.status = "approved";
-      console.log("✌️body ssss--->", body);
       const res: any = await Models.job.list(page, body);
 
       const tableData = res?.results?.map((item) => ({
         id: item.id,
-        job_title: item.job_title,
+        job_title: item.roles?.length > 0 ? item?.roles?.[0]?.role_name : "",
+
         job_description: item.job_description,
 
         college_name: item?.college?.short_name,
@@ -522,7 +522,7 @@ const Dashboard = () => {
 
       setState({
         loading: false,
-        jobPage:page,
+        jobPage: page,
         jobFiltercount: res?.count,
         jobFilterList: dropdown,
         jobFilternext: res?.next,
@@ -1032,7 +1032,7 @@ const Dashboard = () => {
     } else if (state.activeCard == 2) {
       title = "Interview Scheduled List";
     } else if (state.activeCard == 3) {
-      title = "Out reached List";
+      title = "Job Seeker List";
     } else if (state.activeCard == 4) {
       title = "Active Jobs";
     }
@@ -1175,8 +1175,7 @@ const Dashboard = () => {
         applicant_id: state.applicantId,
         sender_id: state.profile?.id,
         job_id: state.interestJob?.value,
-        hr_interview_status:"Sent Interest"
-
+        hr_interview_status: "Sent Interest",
       };
 
       const res = await Models.application.send_interest(body);
@@ -1187,8 +1186,8 @@ const Dashboard = () => {
         message: "",
         applicantName: "",
         applicantId: "",
-        job_id:"",
-        hr_interview_status:""
+        job_id: "",
+        hr_interview_status: "",
       });
     } catch (error) {
       if (error?.data?.error) {
@@ -2500,7 +2499,7 @@ const Dashboard = () => {
               }}
               loadMore={() => {
                 state.jobFilternext &&
-                jobFilterList(
+                  jobFilterList(
                     state.jobPage + 1,
                     "",
                     state.profile?.college?.map((item) => item?.college_id)
