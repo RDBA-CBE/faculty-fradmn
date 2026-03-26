@@ -1391,7 +1391,7 @@ const Application = () => {
               },
               {
                 value: 3,
-                label: "Not Own Records",
+                label: "Admin Records",
               },
             ]}
             value={state.sortingFilter}

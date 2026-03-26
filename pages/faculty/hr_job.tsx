@@ -808,7 +808,7 @@ const Job = () => {
               },
               {
                 value: 3,
-                label: "Not Own Records",
+                label: "Admin Records",
               },
             ]}
             value={state.sortingFilter}
