@@ -164,24 +164,19 @@ const Job = () => {
       const res: any = await Models.auth.profile();
       setState({ profile: res });
       console.log("✌️profile --->", res);
-      if (res?.role == ROLES.SUPER_ADMIN) {
-        collegeDropdownList(1, "", false, null);
-      } else if (res?.role == ROLES.INSTITUTION_ADMIN) {
-        collegeDropdownList(1, "", false, res?.institution?.id);
-      } else if (res?.role == ROLES.HR) {
-        setState({
-          collegeList: res?.college?.map((item) => ({
-            value: item?.college_id,
-            label: item?.short_name,
-          })),
-        });
-        departmentDropdownList(
-          1,
-          "",
-          false,
-          res?.college?.map((item) => item?.college_id)
-        );
-      }
+
+      setState({
+        collegeList: res?.college?.map((item) => ({
+          value: item?.college_id,
+          label: item?.short_name,
+        })),
+      });
+      departmentDropdownList(
+        1,
+        "",
+        false,
+        res?.college?.map((item) => item?.college_id)
+      );
       callJobListByRole(1, res);
     } catch (error) {
       console.error("Error fetching institutions:", error);
@@ -190,48 +185,36 @@ const Job = () => {
 
   const getCollegeParamsByRole = (profileData?: any) => {
     const p = profileData ?? state.profile;
-    if (p?.role === ROLES.INSTITUTION_ADMIN) {
-      return { institutionId: p?.institution?.id, collegeIds: null };
-    } else if (p?.role === ROLES.HR) {
+ 
       return {
         institutionId: null,
         collegeIds: p?.college?.map((c: any) => c.college_id),
       };
-    }
-    return { institutionId: null, collegeIds: null };
   };
 
   const getDeptCollegeIds = () => {
-    if (state.profile?.role === ROLES.HR) {
       return state.profile?.college?.map((c: any) => c.college_id);
-    }
-    return state.filterCollege?.value ? [state.filterCollege.value] : null;
   };
 
   const callJobListByRole = (page: number, profileData?: any) => {
     const p = profileData ?? state.profile;
-    const role = p?.role;
-    if (role === ROLES.SUPER_ADMIN) jobList(page, null, null);
-    else if (role === ROLES.INSTITUTION_ADMIN)
-      jobList(page, p?.institution?.id, null);
-    else if (role === ROLES.HR)
+    console.log("✌️p --->", p);
+   
       jobList(
         page,
         null,
         p?.college?.map((c: any) => c.college_id)
       );
-    else jobList(page, null, null);
   };
+
   const jobList = async (page, insId = null, colId = null) => {
     try {
       setState({ loading: true });
 
       const body = bodyData();
-      if (insId) body.institution_id = insId;
       if (state.filterCollege?.value) {
         body.college_id = state.filterCollege?.value;
-      } 
-      else if (colId) body.college_id = colId;
+      } else if (colId) body.college_id = colId;
       const res: any = await Models.job.list(page, body);
 
       const tableData = res?.results?.map((item) => ({
@@ -376,18 +359,15 @@ const Job = () => {
     collegeIds = null
   ) => {
     try {
+      console.log("✌️collegeIds --->", collegeIds);
       setState({ collegeLoading: true });
       const body: any = { search };
 
-      if (institutionId) {
-        body.institution = institutionId;
-      } else if (state.profile?.role === ROLES.INSTITUTION_ADMIN) {
-        body.institution = state.profile?.institution?.id;
-      }
-
+  
       if (collegeIds?.length > 0) {
         body.college_ids = collegeIds;
       }
+      console.log("✌️body --->", body);
 
       const res: any = await Models.college.list(page, body);
       const dropdown = Dropdown(res?.results, "college_name");
@@ -436,9 +416,7 @@ const Job = () => {
       body.search = state.search;
     }
 
-    if (state.institutionFilter?.value) {
-      body.institution_id = state.institutionFilter.value;
-    }
+ 
 
     if (state.collegeFilter?.value) {
       body.college_id = state.collegeFilter.value;
@@ -455,13 +433,7 @@ const Job = () => {
     if (state.locationFilter?.value) {
       body.location = state.locationFilter.value;
     }
-    if (state.categoryFilter?.value) {
-      body.category = state.categoryFilter.value;
-    }
-    if (state.priorityFilter?.value) {
-      body.priority = state.priorityFilter.value;
-    }
-
+   
     if (state.salaryFilter?.value) {
       body.salary_range = state.salaryFilter.value;
     }
@@ -493,24 +465,7 @@ const Job = () => {
     callJobListByRole(pageNumber);
   };
 
-  const handleInstitutionChange = (selectedOption: any) => {
-    setState({
-      institutionFilter: selectedOption,
-      collegeFilter: null,
-      collegeList: [],
-      page: 1,
-    });
 
-    if (selectedOption?.value) {
-      collegeDropdownList(
-        1,
-        "",
-        false,
-        selectedOption.value,
-        state.profile?.id
-      );
-    }
-  };
 
   const handleLog = async (row) => {
     console.log("✌️row --->", row);
@@ -543,17 +498,6 @@ const Job = () => {
     }
   };
 
-  const handleCollegeChange = (selectedOption: any) => {
-    setState({
-      collegeFilter: selectedOption,
-      departmentFilter: null,
-      departmentList: [],
-      page: 1,
-    });
-    if (selectedOption?.value) {
-      departmentDropdownList(1, "", false, [selectedOption.value]);
-    }
-  };
 
   const handleDepartmentChange = (selectedOption: any) => {
     setState({ departmentFilter: selectedOption, page: 1 });
@@ -825,7 +769,6 @@ const Job = () => {
               placeholder={"Select College"}
               isClearable={true}
             />
-            
           )}
           {/* )} */}
           <CustomSelect

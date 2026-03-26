@@ -86,7 +86,7 @@ const CollegeAndDepartment = () => {
     state.sortBy,
     state.sortingFilter,
     state.profile,
-    state.filterCollege
+    state.filterCollege,
   ]);
 
   const profile = async () => {
@@ -99,7 +99,7 @@ const CollegeAndDepartment = () => {
         profile_college: res?.college,
         collegeList: res?.college?.map((item) => ({
           value: item?.college_id,
-          label: item?.college_name,
+          label: item?.short_name,
         })),
       });
       const collegeIds = res?.college?.map((c: any) => c.college_id);
@@ -133,13 +133,13 @@ const CollegeAndDepartment = () => {
       setState({ loading: true });
       const body = collegeBodyData();
 
-      if(state.filterCollege){
-        body.college=state.filterCollege?.value
-      }else{
-      const colleges =
-        collegeId ?? state.profile?.college?.map((c: any) => c.college_id);
-      if (colleges) body.college = colleges;
-    }
+      if (state.filterCollege) {
+        body.college = state.filterCollege?.value;
+      } else {
+        const colleges =
+          collegeId ?? state.profile?.college?.map((c: any) => c.college_id);
+        if (colleges) body.college = colleges;
+      }
       const res: any = await Models.department.list(page, body);
 
       const tableData = res?.results?.map((item) => ({
@@ -149,7 +149,7 @@ const CollegeAndDepartment = () => {
         department_email: item?.department_email,
         department_phone: item?.department_phone,
         status: item?.status,
-        college_name: item?.college_name,
+        college_name: item?.college_short_name,
         college_id: item?.college,
         total_jobs: item?.total_jobs,
         institution_name: item?.institution_name,
@@ -257,8 +257,6 @@ const CollegeAndDepartment = () => {
     if (state.search) {
       body.search = state.search;
     }
-
-   
 
     // if (state.sortingFilter?.value) {
     //   if (state.sortingFilter?.value == 1) {
@@ -773,16 +771,16 @@ const CollegeAndDepartment = () => {
   );
 
   const departmentColumns = [
-    // {
-    //   accessor: "department_code",
-    //   title: "Department Code",
-    //   sortable: true,
-    //   render: ({ department_code }) => (
-    //     <span className="inline-flex items-center justify-center rounded-full bg-purple-100 px-4 py-2 text-sm font-medium text-purple-800 dark:bg-purple-900 dark:text-purple-200">
-    //       {department_code}
-    //     </span>
-    //   ),
-    // },
+    {
+      accessor: "college_name",
+      title: "College Name",
+      sortable: true,
+      render: ({ college_name }) => (
+        <span className="inline-flex items-center justify-center  ">
+          {college_name}
+        </span>
+      ),
+    },
     {
       accessor: "department_name",
       title: "Department Name",

@@ -643,7 +643,7 @@ export const OwnmenuConfig = {
       type: "link",
       icon: "IconMenuForms",
       label: "Job Postings",
-      href: "/faculty/my_job",
+      href: "/faculty/hr_job",
     },
     {
       type: "link",

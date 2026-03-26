@@ -168,7 +168,7 @@ const Application = () => {
     selectedRecords: [],
     sortingFilter: {
       value: 1,
-      label: "Own Records",
+      label: "All Records",
     },
   });
 
@@ -205,6 +205,12 @@ const Application = () => {
           state.profile?.id
         );
       } else if (role === ROLES.HR) {
+        setState({
+          collegeList: state.profile?.college?.map((item) => ({
+            value: item?.college_id,
+            label: item?.short_name,
+          })),
+        });
         applicationList(
           1,
           null,
@@ -237,7 +243,10 @@ const Application = () => {
     state.typeFilter,
     state.salaryFilter,
     state.sortingFilter,
+    state.filterCollege,
   ]);
+
+  console.log("✌️collegeList --->", state.collegeList);
 
   const profile = async () => {
     try {
@@ -258,12 +267,18 @@ const Application = () => {
         applicationList(1, res?.institution?.id, null, null, res?.id);
         loadJobList(1, null, false, null, null, null, res?.id);
       } else if (res?.role == ROLES.HR) {
+        setState({
+          collegeList: res?.college?.map((item) => ({
+            value: item?.college_id,
+            label: item?.short_name,
+          })),
+        });
         departmentDropdownList(
           1,
           "",
           false,
           res?.college?.map((college) => college.college_id),
-          res.id
+          null
         );
         applicationList(
           1,
@@ -298,6 +313,7 @@ const Application = () => {
       setState({ applicationStatusLoading: false });
     }
   };
+  console.log("✌️res --->", state.collegeList);
 
   const applicationList = async (
     page,
@@ -317,17 +333,27 @@ const Application = () => {
       if (collegeId) {
         body.college = collegeId;
       }
+
       if (deptId) {
         body.department = deptId;
       }
+
+      if (state.departmentFilter) {
+        body.department = state.departmentFilter?.value;
+      }
+
+      if (state.filterCollege) {
+        body.college = state.filterCollege?.value;
+      }
+
       // if (profileId) {
       //   body.created_by = profileId;
       // }
       if (state.sortingFilter?.value) {
-        if (state.sortingFilter?.value == 1) {
+        if (state.sortingFilter?.value == 2) {
           body.team = "No";
           body.created_by = profileId;
-        } else {
+        } else if (state.sortingFilter?.value == 3) {
           body.created_by = profileId;
           body.team = "Yes";
         }
@@ -335,7 +361,6 @@ const Application = () => {
       // body.team = "No";
 
       const res: any = await Models.application.list(page, body);
-      console.log("✌️res --->", res);
 
       const tableData = res?.results?.map((item) => ({
         applicant_name: `${item?.first_name} ${item?.last_name}`,
@@ -378,7 +403,6 @@ const Application = () => {
       });
     }
   };
-
 
   const bodyData = () => {
     const body: any = {};
@@ -517,7 +541,7 @@ const Application = () => {
         applicationList(
           state.page,
           null,
-          state.profile?.college?.map((item)=>item?.college_id),
+          state.profile?.college?.map((item) => item?.college_id),
           null,
           state.profile?.id
         );
@@ -665,7 +689,7 @@ const Application = () => {
       if (createdBy) {
         body.created_by = createdBy;
       }
-      body.team = "No";
+      // body.team = "No";
       const res: any = await Models.department.list(page, body);
       const dropdown = res?.results?.map((item) => ({
         value: item.id,
@@ -1172,6 +1196,13 @@ const Application = () => {
     }
   };
 
+  const getDeptCollegeIds = () => {
+    if (state.profile?.role === ROLES.HR) {
+      return state.profile?.college?.map((c: any) => c.college_id);
+    }
+    return state.filterCollege?.value ? [state.filterCollege.value] : null;
+  };
+
   return (
     <div className="min-h-screen dark:from-gray-900 dark:to-gray-800">
       {/* Header Section */}
@@ -1232,8 +1263,9 @@ const Application = () => {
 
             <div className="flex flex-col">
               <p className="text-2xl  leading-none text-gray-900 dark:text-white">
-                {state.applications_by_status?.applied || state.applications_by_status?.Applied || 
- 0}
+                {state.applications_by_status?.applied ||
+                  state.applications_by_status?.Applied ||
+                  0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Applied
@@ -1298,7 +1330,43 @@ const Application = () => {
             onChange={(e) => setState({ search: e.target.value })}
             icon={<IconSearch className="h-4 w-4" />}
           />
-          <CustomeDatePicker
+
+          {state.profile?.role == ROLES.HR && (
+            <>
+              <CustomSelect
+                options={state.collegeList}
+                value={state.filterCollege}
+                onChange={(e) => setState({ filterCollege: e })}
+                placeholder={"Select College"}
+                isClearable={true}
+              />
+              <CustomSelect
+                options={state.departmentList}
+                value={state.departmentFilter}
+                onChange={handleDepartmentChange}
+                placeholder="Select department"
+                isClearable={true}
+                onSearch={(searchTerm) => {
+                  const ids = getDeptCollegeIds();
+                  if (ids) departmentDropdownList(1, searchTerm, false, ids);
+                }}
+                loadMore={() => {
+                  if (state.departmentNext) {
+                    const ids = getDeptCollegeIds();
+                    if (ids)
+                      departmentDropdownList(
+                        state.departmentPage + 1,
+                        "",
+                        true,
+                        ids
+                      );
+                  }
+                }}
+                loading={state.departmentLoading}
+              />
+            </>
+          )}
+          {/* <CustomeDatePicker
             value={state.start_date}
             placeholder="Choose From"
             onChange={(e) => setState({ start_date: e })}
@@ -1309,16 +1377,20 @@ const Application = () => {
             placeholder="Choose To "
             onChange={(e) => setState({ end_date: e })}
             showTimeSelect={false}
-          />
+          /> */}
 
           <CustomSelect
             options={[
               {
                 value: 1,
-                label: "Own Records",
+                label: "All Records",
               },
               {
                 value: 2,
+                label: "Own Records",
+              },
+              {
+                value: 3,
                 label: "Not Own Records",
               },
             ]}
