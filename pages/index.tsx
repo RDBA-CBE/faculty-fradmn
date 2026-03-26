@@ -3,10 +3,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { IRootState } from "@/store";
 import { setPageTitle } from "@/store/themeConfigSlice";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
 
 import Models from "@/imports/models.import";
-import { FRONTEND_URL, ROLES, STATUS_COLOR } from "@/utils/constant.utils";
+import {
+  FRONTEND_URL,
+  PREFERENCES,
+  ROLES,
+  STATUS_COLOR,
+} from "@/utils/constant.utils";
 import CustomeDatePicker from "@/components/datePicker";
 import moment from "moment";
 import IconBriefcase from "@/components/Icon/IconBolt";
@@ -28,6 +32,7 @@ import {
 } from "@/utils/function.utils";
 import Pagination from "@/components/pagination/pagination";
 import {
+  BriefcaseBusiness,
   CalendarCheck,
   CheckCircle,
   Clock,
@@ -53,6 +58,9 @@ import IconHistory from "@/components/Icon/IconHistory";
 import TextArea from "@/components/FormFields/TextArea.component";
 import Utils from "@/imports/utils.import";
 import * as Yup from "yup";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import CheckboxInput from "@/components/FormFields/CheckBoxInput.component";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -102,6 +110,7 @@ const Dashboard = () => {
     decisionsSelected: 0,
     decisionsRejected: 0,
     outreached: 0,
+    application_update:0
   });
 
   const [state, setState] = useSetState({
@@ -121,6 +130,7 @@ const Dashboard = () => {
     requestForChange: false,
     interviewStatus: null,
     interview_link: "",
+    refFilter: [],
   });
 
   const debounceSearch = useDebounce(state.search, 500);
@@ -139,7 +149,11 @@ const Dashboard = () => {
   useEffect(() => {
     if (state.activeCard == 2) {
       applicationStatusList();
-    } else {
+    }
+    // else if (state.activeCard == 3) {
+    //   ExceptInterviewAndAppliedList();
+    // }
+    else {
       profiles();
     }
     setState({
@@ -170,11 +184,15 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (profileRef.current) {
-      if (state.activeCard === 1 || state.activeCard === 2) {
+      if (
+        state.activeCard === 1 ||
+        state.activeCard === 2 ||
+        state.activeCard === 3
+      ) {
         callListByRole(1, applicationList);
-      } else if (state.activeCard === 3) {
-        callListByRole(1, userList);
       } else if (state.activeCard === 4) {
+        callListByRole(1, userList);
+      } else if (state.activeCard === 5) {
         callListByRole(1, jobList);
       }
     }
@@ -192,6 +210,7 @@ const Dashboard = () => {
     state.priorityFilter,
     state.typeFilter,
     state.salaryFilter,
+    state.refFilter,
     // state.activeCard,
   ]);
 
@@ -199,7 +218,7 @@ const Dashboard = () => {
     state.profile?.role === ROLES.INSTITUTION_ADMIN ||
     state.profile?.role === ROLES.SUPER_ADMIN
       ? {
-          id: 3,
+          id: 4,
           label: "Colleges",
           value: stats.colleges,
           color: "text-[#dd22cc]",
@@ -210,7 +229,7 @@ const Dashboard = () => {
           sub: null,
         }
       : {
-          id: 3,
+          id: 4,
           label: "Job Seekers",
           value: stats.outreached,
           color: "text-[#dd22cc]",
@@ -233,8 +252,20 @@ const Dashboard = () => {
       href: "/faculty/dashboard/applications",
       sub: null,
     },
+
     {
       id: 2,
+      label: "Application Updates",
+      value: stats.application_update,
+      color: "text-orange-600",
+      bg: "bg-info-light",
+      mainbg: "bg-green-100",
+      icon: <IconUsers className="h-7 w-7" />,
+      href: "/faculty/dashboard/applications",
+      sub: null,
+    },
+    {
+      id: 3,
       label: "Interviews Scheduled",
       value: stats.interviews,
       color: "text-pink-600",
@@ -246,8 +277,8 @@ const Dashboard = () => {
     },
     card3,
     {
-      id: 4,
-      label: "Active Jobs",
+      id: 5,
+      label: "Job Postings",
       value: stats.activeJobs,
       color: "text-dblue",
       bg: "bg-primary-light",
@@ -275,7 +306,11 @@ const Dashboard = () => {
       const instId = res?.institution?.id;
       const deptId = res?.department?.department_id;
 
-      if (state.activeCard === 1 || state.activeCard === 2) {
+      if (
+        state.activeCard === 1 ||
+        state.activeCard === 2 ||
+        state.activeCard === 3
+      ) {
         if (res?.role == ROLES.SUPER_ADMIN)
           applicationList(1, null, null, null, res?.id);
         else if (res?.role == ROLES.INSTITUTION_ADMIN)
@@ -283,15 +318,21 @@ const Dashboard = () => {
         else if (res?.role == ROLES.HR) {
           applicationList(1, null, colleges, null, res?.id);
           jobFilterList(1, "", colleges);
+          setState({
+            collegeList: res?.college?.map((item) => ({
+              value: item?.college_id,
+              label: item?.short_name,
+            })),
+          });
         } else if (res?.role == ROLES.HOD)
           applicationList(1, null, null, deptId, res?.id);
-      } else if (state.activeCard === 3) {
+      } else if (state.activeCard === 4) {
         if (res?.role == ROLES.SUPER_ADMIN) userList(1, null, null, null);
         else if (res?.role == ROLES.INSTITUTION_ADMIN)
           userList(1, instId, null, null);
         else if (res?.role == ROLES.HR) userList(1, colleges, null, null);
         else if (res?.role == ROLES.HOD) userList(1, null, null, deptId);
-      } else if (state.activeCard === 4) {
+      } else if (state.activeCard === 5) {
         if (res?.role == ROLES.SUPER_ADMIN) jobList(1, null, null, null);
         else if (res?.role == ROLES.INSTITUTION_ADMIN)
           jobList(1, instId, null, null);
@@ -310,6 +351,8 @@ const Dashboard = () => {
       console.log("✌️body --->", body);
       body.role = ROLES.APPLICANT;
       body.active_job_seeker = "Yes";
+      body.reveal_name = "Yes";
+
       // if (ins) {
       //   body.institution_id = ins;
       // }
@@ -381,18 +424,31 @@ const Dashboard = () => {
       if (institutionId) {
         body.institution = institutionId;
       }
-      if (collegeId) {
-        body.college = collegeId;
+      if (state.collegeFilter?.value) {
+        body.college = state.collegeFilter?.value;
+      } else {
+        if (collegeId) {
+          body.college = collegeId;
+        }
       }
       if (deptId) {
         body.department = deptId;
       }
-      if (statusId) {
-        body.status = statusId;
-      }
+
       if (state.activeCard == 2) {
-        body.status = 6;
+        body.exclude_applied_interview = "Yes";
+      } else {
+        if (statusId) {
+          body.status = statusId;
+        }
+        if (state.activeCard == 3) {
+          body.status = 6;
+        }
       }
+
+      // if (state.activeCard == 2) {
+      //   body.exclude_applied_interview = "Yes";
+      // }
       // body.team = "No";
 
       console.log("✌️body --->", body);
@@ -416,7 +472,9 @@ const Dashboard = () => {
           label: item?.application_status?.name,
         },
         college_name: item?.job_detail?.college?.short_name,
-        department_name: item?.department?.short_name,
+        department_name:
+          item?.department_details?.length > 0 &&
+          item?.department_details?.map((item) => item?.short_name),
         interview_status:
           item?.interview_slots?.length > 0
             ? item?.interview_slots[item?.interview_slots.length - 1]?.status
@@ -502,7 +560,6 @@ const Dashboard = () => {
       });
     } catch (error) {
       setState({ loading: false });
-      Failure("Failed to fetch jobs");
     }
   };
 
@@ -530,7 +587,6 @@ const Dashboard = () => {
       });
     } catch (error) {
       setState({ loading: false });
-      Failure("Failed to fetch jobs");
     }
   };
 
@@ -594,6 +650,15 @@ const Dashboard = () => {
       body.status = state.selectedStatus.value;
     }
 
+    if (state.refFilter?.length) {
+      const values = state.refFilter.map((item) => item.value);
+
+      body.phd_completed = values.includes(1);
+      body.net_cleared = values.includes(2);
+      body.set_cleared = values.includes(3);
+      body.slet_cleared = values.includes(4);
+    }
+
     if (state.sortBy) {
       body.ordering =
         state.sortOrder === "desc" ? `-${state.sortBy}` : state.sortBy;
@@ -620,9 +685,41 @@ const Dashboard = () => {
         decisionsSelected: data?.top_cards?.decisions?.selected ?? 0,
         decisionsRejected: data?.top_cards?.decisions?.rejected ?? 0,
         outreached: data?.top_cards?.outreached?.value ?? 0,
+        application_update:
+          data?.top_cards?.application_status?.value ?? 0,
       });
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const ExceptInterviewAndAppliedList = async () => {
+    try {
+      setState({ applicationStatusLoading: true });
+      const res: any = await Models.master.application_status_list();
+      const dropdown = res?.find((item) => item.name == "Interview Scheduled");
+      const role = state.profile?.role;
+      const colleges = state.profile?.college?.map((c: any) => c.college_id);
+      const instId = state.profile?.institution?.id;
+      const deptId = state.profile?.department?.department_id;
+
+      if (role === ROLES.SUPER_ADMIN)
+        applicationList(1, null, null, null, state.profile?.id, dropdown?.id);
+      else if (role === ROLES.INSTITUTION_ADMIN)
+        applicationList(1, instId, null, null, state.profile?.id, dropdown?.id);
+      else if (role === ROLES.HR)
+        applicationList(
+          1,
+          null,
+          colleges,
+          null,
+          state.profile?.id,
+          dropdown?.id
+        );
+      else if (role === ROLES.HOD)
+        applicationList(1, null, null, deptId, state.profile?.id, dropdown?.id);
+    } catch (error) {
+      setState({ applicationStatusLoading: false });
     }
   };
 
@@ -659,7 +756,11 @@ const Dashboard = () => {
   const applicationStatus = async () => {
     try {
       setState({ applicationStatusLoading: true });
-      const res: any = await Models.master.application_status_list();
+
+      const body = {
+        rexclude_applied_interview: "Yes",
+      };
+      const res: any = await Models.master.application_status_list(body);
       const dropdown = res?.map((item) => ({
         value: item.id,
         label: item.name,
@@ -936,11 +1037,15 @@ const Dashboard = () => {
 
   const handlePageChange = (pageNumber: number) => {
     setState({ page: pageNumber });
-    if (state.activeCard === 1 || state.activeCard === 2) {
+    if (
+      state.activeCard === 1 ||
+      state.activeCard === 2 ||
+      state.activeCard === 3
+    ) {
       callListByRole(pageNumber, applicationList);
-    } else if (state.activeCard === 3) {
-      callListByRole(pageNumber, userList);
     } else if (state.activeCard === 4) {
+      callListByRole(pageNumber, userList);
+    } else if (state.activeCard === 5) {
       jobList(pageNumber);
     }
   };
@@ -1030,11 +1135,13 @@ const Dashboard = () => {
     if (state.activeCard == 1) {
       title = "Application List";
     } else if (state.activeCard == 2) {
-      title = "Interview Scheduled List";
+      title = "Application Updates";
     } else if (state.activeCard == 3) {
-      title = "Job Seeker List";
+      title = "Interview Scheduled List";
     } else if (state.activeCard == 4) {
-      title = "Active Jobs";
+      title = "Job Seeker List";
+    } else if (state.activeCard == 5) {
+      title = "Job Postings";
     }
     return title;
   };
@@ -1263,10 +1370,58 @@ const Dashboard = () => {
     }
   };
 
+  const getDeptCollegeIds = () => {
+    if (state.profile?.role === ROLES.HR) {
+      return state.profile?.college?.map((c: any) => c.college_id);
+    }
+    return state.filterCollege?.value ? [state.filterCollege.value] : null;
+  };
+
+  const departmentDropdownList = async (
+    page,
+    search = "",
+    loadMore = false,
+    collegeId = null,
+    createdBy = null
+  ) => {
+    try {
+      setState({ departmentLoading: true });
+      const body: any = { search };
+      if (collegeId) {
+        body.college = collegeId;
+      } else if (state.profile?.role === "hr") {
+        body.college = state.profile?.college?.college_id;
+      }
+      if (createdBy) {
+        body.created_by = createdBy;
+      }
+      // body.team = "No";
+      const res: any = await Models.department.list(page, body);
+      const dropdown = res?.results?.map((item) => ({
+        value: item.id,
+        label: item.short_name,
+      }));
+      setState({
+        departmentLoading: false,
+        departmentPage: page,
+        departmentList: loadMore
+          ? [...state.departmentList, ...dropdown]
+          : dropdown,
+        departmentNext: res?.next,
+      });
+    } catch (error) {
+      setState({ departmentLoading: false });
+    }
+  };
+
+  const handleDepartmentChange = (selectedOption: any) => {
+    setState({ departmentFilter: selectedOption, page: 1 });
+  };
+
   return (
     <div className="min-h-screen dark:from-gray-900 dark:to-gray-800">
       {/* Stat Cards */}
-      <div className="mb-3 grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
+      <div className="mb-3 grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-5">
         {statCards.map((card) => (
           <div
             key={card.label}
@@ -1311,55 +1466,107 @@ const Dashboard = () => {
           <div className="flex items-center justify-between gap-5">
             <TextInput
               placeholder={
-                state.activeCard == 1 || state.activeCard == 2
+                state.activeCard == 1 ||
+                state.activeCard == 2 ||
+                state.activeCard == 3
                   ? "Search applications..."
-                  : state.activeCard == 3
-                  ? "Search faculty..."
+                  : state.activeCard == 4
+                  ? "Search job seekers..."
                   : "Search jobs..."
               }
               value={state.search}
               onChange={(e) => setState({ search: e.target.value })}
               icon={<IconSearch className="h-4 w-4" />}
             />
-            {state.profile?.role != ROLES.HR &&
-              state.profile?.role != ROLES.HOD && (
-                <CustomSelect
-                  options={state.collegeList}
-                  value={state.collegeFilter}
-                  onChange={handleCollegeChange}
-                  placeholder="Select college"
-                  isClearable={true}
-                  onSearch={(searchTerm) => {
-                    const institutionId =
-                      state.profile?.role === ROLES.SUPER_ADMIN
-                        ? state.institutionFilter?.value
-                        : null;
-                    collegeDropdownList(
-                      1,
-                      searchTerm,
-                      false,
-                      institutionId,
-                      state.profile?.id
-                    );
-                  }}
-                  loadMore={() => {
-                    const institutionId =
-                      state.profile?.role === ROLES.SUPER_ADMIN
-                        ? state.institutionFilter?.value
-                        : state.profile?.institution?.id;
-                    state.collegeNext &&
-                      collegeDropdownList(
-                        state.collegePage + 1,
-                        "",
-                        true,
-                        institutionId,
-                        state.profile?.id
-                      );
-                  }}
-                  loading={state.collegeLoading}
-                />
-              )}
-            <CustomeDatePicker
+            {state.activeCard == 4 && (
+              <CustomSelect
+                options={PREFERENCES}
+                value={state.refFilter}
+                onChange={(e) => setState({ refFilter: e })}
+                placeholder="Preferences"
+                isClearable={true}
+                isMulti
+              />
+            )}
+            {state.activeCard != 4 && (
+              <CustomSelect
+                options={state.collegeList}
+                value={state.collegeFilter}
+                onChange={(e) => {
+                  if (e) {
+                    departmentDropdownList(1, "", false, e?.value);
+                  } else {
+                    setState({ departmentFilter: "", departmentList: [] });
+                  }
+                  setState({ collegeFilter: e });
+                }}
+                placeholder={"Select College"}
+                isClearable={true}
+              />
+            )}
+
+            <CustomSelect
+              options={state.departmentList}
+              value={state.departmentFilter}
+              onChange={handleDepartmentChange}
+              placeholder="Select department"
+              isClearable={true}
+              // onSearch={(searchTerm) => {
+              //   const ids = getDeptCollegeIds();
+              //   if (ids) departmentDropdownList(1, searchTerm, false, ids);
+              // }}
+              // loadMore={() => {
+              //   if (state.departmentNext) {
+              //     const ids = getDeptCollegeIds();
+              //     if (ids)
+              //       departmentDropdownList(
+              //         state.departmentPage + 1,
+              //         "",
+              //         true,
+              //         ids
+              //       );
+              //   }
+              // }}
+              loading={state.departmentLoading}
+              disabled={!state.collegeFilter}
+            />
+
+            {/* <CustomSelect
+              options={state.collegeList}
+              value={state.collegeFilter}
+              onChange={handleCollegeChange}
+              placeholder="Select department"
+              isClearable={true}
+              onSearch={(searchTerm) => {
+                const institutionId =
+                  state.profile?.role === ROLES.SUPER_ADMIN
+                    ? state.institutionFilter?.value
+                    : null;
+                collegeDropdownList(
+                  1,
+                  searchTerm,
+                  false,
+                  institutionId,
+                  state.profile?.id
+                );
+              }}
+              loadMore={() => {
+                const institutionId =
+                  state.profile?.role === ROLES.SUPER_ADMIN
+                    ? state.institutionFilter?.value
+                    : state.profile?.institution?.id;
+                state.collegeNext &&
+                  collegeDropdownList(
+                    state.collegePage + 1,
+                    "",
+                    true,
+                    institutionId,
+                    state.profile?.id
+                  );
+              }}
+              loading={state.collegeLoading}
+            /> */}
+            {/* <CustomeDatePicker
               value={state.start_date}
               placeholder="Choose From"
               onChange={(e) => setState({ start_date: e })}
@@ -1374,7 +1581,7 @@ const Dashboard = () => {
               showTimeSelect={false}
               usePortal={true}
               popperPlacement="bottom-start"
-            />
+            /> */}
 
             {/* <button
             onClick={() => setState({ showFilterModal: true })}
@@ -1459,13 +1666,15 @@ const Dashboard = () => {
           </div>
         </div>
         <DataTable
-          noRecordsText="No applications found"
+          noRecordsText="No data found"
           highlightOnHover
           className="table-hover mb-4 whitespace-nowrap"
           records={
-            state.activeCard == 1 || state.activeCard == 2
+            state.activeCard == 1 ||
+            state.activeCard == 2 ||
+            state.activeCard == 3
               ? state.applicationList
-              : state.activeCard == 3
+              : state.activeCard == 4
               ? state.userList
               : state.jobList
           }
@@ -1494,11 +1703,41 @@ const Dashboard = () => {
             </div>
           }
           columns={
-            state.activeCard == 1 || state.activeCard == 2
+            state.activeCard == 1 ||
+            state.activeCard == 2 ||
+            state.activeCard == 3
               ? [
                   {
+                    accessor: "applicant_name",
+                    title: "Faculty Name",
+                    sortable: true,
+
+                    render: (row) => (
+                      <Link
+                        href={`/faculty/application_detail?id=${row?.id}`}
+                        title={row?.applicant_name}
+                        className="text-gray-600 dark:text-gray-400"
+                      >
+                        {truncateText(row?.applicant_name)}
+                      </Link>
+                    ),
+                  },
+                  // {
+                  //   accessor: "applicant_name",
+                  //   title: "Faculty",
+                  //   sortable: true,
+                  //   render: ({ applicant_name }) => (
+                  //     <div
+                  //       className="font-medium text-gray-900 dark:text-white"
+                  //       title={applicant_name}
+                  //     >
+                  //       {truncateText(applicant_name)}
+                  //     </div>
+                  //   ),
+                  // },
+                  {
                     accessor: "job_title",
-                    title: "Title",
+                    title: "Job Title",
                     sortable: true,
                     render: (row: any) => (
                       <div
@@ -1531,43 +1770,77 @@ const Dashboard = () => {
                   {
                     accessor: "department_name",
                     title: "Department",
-                    render: ({ department_name }) => (
-                      <div
-                        className="text-gray-600 dark:text-gray-400"
-                        title={department_name}
-                      >
-                        {department_name}
-                      </div>
-                    ),
-                    sortable: true,
-                  },
-                  {
-                    accessor: "applicant_name",
-                    title: "Faculty",
-                    sortable: true,
-                    render: ({ applicant_name }) => (
-                      <div
-                        className="font-medium text-gray-900 dark:text-white"
-                        title={applicant_name}
-                      >
-                        {truncateText(applicant_name)}
-                      </div>
-                    ),
-                  },
-                  {
-                    accessor: "applicant_email",
-                    title: "Email",
-                    sortable: true,
+                    render: ({ department_name }) => {
+                      if (!department_name || department_name?.length === 0) {
+                        return <span className="text-gray-400">-</span>;
+                      }
 
-                    render: ({ applicant_email }) => (
-                      <span
-                        className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-200"
-                        title={applicant_email}
-                      >
-                        {truncateText(applicant_email)}
-                      </span>
-                    ),
+                      const firstDept = department_name?.[0];
+                      const otherDept = department_name?.slice(1);
+                      const maxShow = 3;
+                      const remaining = otherDept?.length - maxShow;
+                      const visibleDept = otherDept?.slice(0, maxShow);
+                      const hiddenDept = otherDept?.slice(maxShow);
+
+                      return (
+                        <div className="flex flex-wrap items-center gap-2">
+                          {/* First department text */}
+                          <span
+                            title={firstDept}
+                            className="text-sm  text-gray-700 dark:text-gray-300"
+                          >
+                            {firstDept}
+                          </span>
+
+                          {/* Avatars */}
+                          <div className="flex items-center -space-x-2">
+                            {visibleDept?.map((dept: string, index: number) => (
+                              <div key={index} className="group relative z-10">
+                                <div className="bg-dblue flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white text-xs  text-white dark:border-gray-900">
+                                  {dept?.slice(0, 2)?.toUpperCase()}
+                                </div>
+
+                                {/* Tooltip */}
+                                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
+                                  {capitalizeFLetter(dept)}
+                                </div>
+                              </div>
+                            ))}
+                            {remaining > 0 && (
+                              <div className="group relative">
+                                <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-gray-400 text-xs  text-white dark:border-gray-900">
+                                  +{remaining}
+                                </div>
+
+                                {/* Remaining tooltip */}
+                                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
+                                  {hiddenDept
+                                    ?.map((d: string) => capitalizeFLetter(d))
+                                    .join(", ")}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    },
+                    sortable: true,
                   },
+
+                  // {
+                  //   accessor: "applicant_email",
+                  //   title: "Email",
+                  //   sortable: true,
+
+                  //   render: ({ applicant_email }) => (
+                  //     <span
+                  //       className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+                  //       title={applicant_email}
+                  //     >
+                  //       {truncateText(applicant_email)}
+                  //     </span>
+                  //   ),
+                  // },
                   {
                     accessor: "status",
                     title: "Status",
@@ -1590,13 +1863,12 @@ const Dashboard = () => {
                     render: (row: any) => (
                       <div className="flex items-center justify-center gap-3">
                         <button
-                          onClick={() => handleRound(row)}
-                          className="flex  items-center justify-center rounded-lg  text-pink-600 transition-all duration-200 "
-                          title="Interview Round"
+                          onClick={() => handleEdit(row)}
+                          className="flex  items-center justify-center rounded-lg  text-green-900 transition-all duration-200 "
+                          title="View"
                         >
-                          <MessageSquare className="h-4 w-4" />
+                          <IconEye className="h-4 w-4" />
                         </button>
-
                         <button
                           onClick={() => handleDownloadResume(row)}
                           className="flex  items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
@@ -1605,12 +1877,13 @@ const Dashboard = () => {
                           <FileText className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => handleEdit(row)}
-                          className="flex  items-center justify-center rounded-lg  text-green-600 transition-all duration-200 "
-                          title="View"
+                          onClick={() => handleRound(row)}
+                          className="flex  items-center justify-center rounded-lg  text-pink-600 transition-all duration-200 "
+                          title="Interview Round"
                         >
-                          <IconEye className="h-4 w-4" />
+                          <BriefcaseBusiness className="h-4 w-4" />
                         </button>
+
                         {state.profile?.role == ROLES.HR && (
                           <button
                             onClick={() => {
@@ -1637,7 +1910,7 @@ const Dashboard = () => {
                     ),
                   },
                 ]
-              : state.activeCard == 3
+              : state.activeCard == 4
               ? [
                   {
                     accessor: "username",
@@ -1688,6 +1961,64 @@ const Dashboard = () => {
                       </div>
                     ),
                   },
+
+                  {
+                    accessor: "department",
+                    title: "Department",
+                    render: ({ department }) => {
+                      if (!department || department?.length === 0) {
+                        return <span className="text-gray-400">-</span>;
+                      }
+                      const firstDept = department?.[0];
+                      const otherDept = department?.slice(1);
+                      const maxShow = 3;
+                      const remaining = otherDept?.length - maxShow;
+                      const visibleDept = otherDept?.slice(0, maxShow);
+                      const hiddenDept = otherDept?.slice(maxShow);
+
+                      return (
+                        <div className="flex flex-wrap items-center gap-2">
+                          {/* First department text */}
+                          <span
+                            title={firstDept}
+                            className="text-sm  text-gray-700 dark:text-gray-300"
+                          >
+                            {firstDept}
+                          </span>
+
+                          {/* Avatars */}
+                          <div className="flex items-center -space-x-2">
+                            {visibleDept?.map((dept: string, index: number) => (
+                              <div key={index} className="group relative z-10">
+                                <div className="bg-dblue flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white text-xs  text-white dark:border-gray-900">
+                                  {dept?.slice(0, 2)?.toUpperCase()}
+                                </div>
+
+                                {/* Tooltip */}
+                                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
+                                  {capitalizeFLetter(dept)}
+                                </div>
+                              </div>
+                            ))}
+                            {remaining > 0 && (
+                              <div className="group relative">
+                                <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-gray-400 text-xs  text-white dark:border-gray-900">
+                                  +{remaining}
+                                </div>
+
+                                {/* Remaining tooltip */}
+                                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
+                                  {hiddenDept
+                                    ?.map((d: string) => capitalizeFLetter(d))
+                                    .join(", ")}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    },
+                  },
                   {
                     accessor: "actions",
                     title: "Actions",
@@ -1696,11 +2027,7 @@ const Dashboard = () => {
                         <a
                           href={`${FRONTEND_URL}profile/${row?.id}`}
                           target="_blank"
-                          className={`flex items-center justify-center rounded-lg transition-all duration-200 ${
-                            row.status === "active"
-                              ? " text-green-600 "
-                              : "text-red-600 "
-                          }`}
+                          className={`flex items-center justify-center rounded-lg text-green-900 transition-all duration-200 `}
                           title={"View"}
                         >
                           <IconEye className="h-4 w-4" />
@@ -1717,10 +2044,11 @@ const Dashboard = () => {
                                 },
                               });
                             }}
-                            className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
+                            className="flex  items-center justify-center rounded-lg  text-pink-600 transition-all duration-200 "
                             title="Interview schedule"
                           >
-                            <CalendarCheck className="h-4 w-4" />
+                            {/* <CalendarCheck className="h-4 w-4" /> */}
+                            <BriefcaseBusiness className="h-4 w-4" />
                           </button>
                         ) : (
                           <button
@@ -1910,17 +2238,17 @@ const Dashboard = () => {
                     ),
                   },
 
-                  {
-                    accessor: "last_date",
-                    title: "Last Date",
-                    render: ({ last_date }) => (
-                      <span className="text-gray-600 dark:text-gray-400">
-                        {last_date
-                          ? new Date(last_date).toLocaleDateString()
-                          : "-"}
-                      </span>
-                    ),
-                  },
+                  // {
+                  //   accessor: "last_date",
+                  //   title: "Last Date",
+                  //   render: ({ last_date }) => (
+                  //     <span className="text-gray-600 dark:text-gray-400">
+                  //       {last_date
+                  //         ? new Date(last_date).toLocaleDateString()
+                  //         : "-"}
+                  //     </span>
+                  //   ),
+                  // },
                   {
                     accessor: "actions",
                     title: "Actions",
@@ -2399,6 +2727,7 @@ const Dashboard = () => {
                     value={state.appstatus}
                     onChange={(e) => setState({ appstatus: e })}
                     placeholder="Select final status"
+                    isClearable={false}
                   />
                 </div>
 
@@ -2434,6 +2763,7 @@ const Dashboard = () => {
                 onChange={(e) => setState({ selectedStatus: e })}
                 placeholder="Select status"
                 loading={state.applicationStatusLoading}
+                isClearable={false}
               />
             </div>
 

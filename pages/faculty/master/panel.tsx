@@ -75,9 +75,13 @@ const Category = () => {
         name: item.name,
         email: item.email,
         phone: item.phone,
-        department_name: item?.department?.department_name,
+        department_name: item?.department?.short_name,
         department_id: item.department?.id,
         designation: item.designation,
+        college:{
+          label: item?.department?.college?.short_name,
+          value: item?.department?.college?.id,
+        }
       }));
 
       setState({
@@ -99,13 +103,12 @@ const Category = () => {
       } else if (res?.role == ROLES.INSTITUTION_ADMIN) {
         departmentList(1, "", false, res?.institution?.id, "");
       } else if (res?.role == ROLES.HR) {
-        departmentList(
-          1,
-          "",
-          false,
-          res?.college?.map((item) => item?.college_id),
-          ""
-        );
+        setState({
+          collegeList: res?.college?.map((item) => ({
+            value: item?.college_id,
+            label: item?.short_name,
+          })),
+        });
       } else if (res?.role == ROLES.HOD) {
         setState({
           department: {
@@ -143,7 +146,8 @@ const Category = () => {
       console.log("✌️body --->", body);
 
       const res: any = await Models.department.list(page, body);
-      const dropdown = Dropdown(res?.results, "department_name");
+      console.log("✌️res --->", res);
+      const dropdown = Dropdown(res?.results, "short_name");
 
       setState({
         deptLoading: false,
@@ -175,6 +179,8 @@ const Category = () => {
       designation: "",
       errors: {},
       submitting: false,
+      department_id: null,
+      filterCollege: null,
     });
   };
 
@@ -189,9 +195,19 @@ const Category = () => {
         label: row.department_name,
         value: row.department_id,
       },
+
+      filterCollege:row?.college,
+      // department: {
+      //   label: row.department_name,
+      //   value: row.department_id,
+      // },
       designation: row.designation,
-      decision_maker:row?.decision_maker
+      decision_maker: row?.decision_maker,
     });
+
+    if(row?.college?.value){
+      departmentList(1,"",false,"",row?.college?.value)
+    }
   };
 
   const handleDelete = (row) => {
@@ -223,6 +239,7 @@ const Category = () => {
         department_id: state.department_id?.value,
         designation: capitalizeFLetter(state.designation),
         decision_maker: state.decision_maker,
+        filterCollege: state.filterCollege?.value,
       };
       console.log("✌️body --->", body);
 
@@ -261,11 +278,12 @@ const Category = () => {
       let institutionId = "";
       let collegeIds: any = "";
 
-      if (role === ROLES.INSTITUTION_ADMIN) {
-        institutionId = state.profile?.institution?.id;
-      }
-
-      if (role === ROLES.HR) {
+      // if (role === ROLES.INSTITUTION_ADMIN) {
+      //   institutionId = state.profile?.institution?.id;
+      // }
+      if (state.filterCollege?.value) {
+        collegeIds = state.filterCollege?.value;
+      } else if (role === ROLES.HR) {
         collegeIds = state.profile?.college?.map((item) => item?.college_id);
       }
 
@@ -514,7 +532,7 @@ const Category = () => {
               </h2>
             </div> */}
 
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 items-center">
+            <div className="grid grid-cols-1 items-center gap-4 lg:grid-cols-2">
               <TextInput
                 title="Name"
                 placeholder="Enter name"
@@ -553,6 +571,20 @@ const Category = () => {
                 error={state.errors.phone}
                 required
               />
+
+              <CustomSelect
+                options={state.collegeList}
+                value={state.filterCollege}
+                onChange={(e) => {
+                  departmentList(1, "", false, "", e?.value);
+                  setState({ filterCollege: e, department_id: null });
+                }}
+                placeholder={"Select College"}
+                isClearable={true}
+                title="Select College"
+                required
+                error={state.errors?.filterCollege}
+              />
               <CustomSelect
                 options={state.departmentList}
                 value={state.department_id}
@@ -567,21 +599,12 @@ const Category = () => {
                 }
                 placeholder="Select department"
                 isClearable={state.profile?.role != ROLES.HOD}
-                loadMore={
-                  () => handleChangeDept("loadMore", "")
-
-                  // state.deptNext &&
-                  // departmentList(
-                  //   state.deptPage + 1,
-                  //   "",
-                  //   true,
-                  //   state.college?.value
-                  // )
-                }
+                loadMore={() => handleChangeDept("loadMore", "")}
                 loading={state.deptLoading}
                 title="Select department"
                 error={state.errors.department_id}
-                disabled={state.profile?.role == ROLES.HOD}
+                disabled={!state.filterCollege}
+                required
               />
               <TextInput
                 title="Designation"

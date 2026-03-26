@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import moment from "moment";
 import IconEye from "@/components/Icon/IconEye";
+import Link from "next/link";
 
 const JobDetails = () => {
   const dispatch = useDispatch();
@@ -400,7 +401,7 @@ const JobDetails = () => {
               <Users className="h-5 w-5 text-black" />
             </div>
             <h2 className="text-lg  text-black ">
-              Applicants{" "}
+              Applications{" "}
               <span className="text-purple-600">({state.applicantCount})</span>
             </h2>
           </div>
@@ -420,14 +421,29 @@ const JobDetails = () => {
             columns={[
               {
                 accessor: "name",
-                title: "Name",
+                title: "Faculty Name",
                 render: (row: any) => (
-                  <div
-                    className=" text-gray-900 dark:text-white"
+                  <Link
+                    href={`/faculty/application_detail?id=${row?.id}`}
+                    className="cursor-pointer text-gray-900 dark:text-white"
                     title={`${row?.first_name} ${row?.last_name}`}
                   >
                     {truncateText(`${row?.first_name} ${row?.last_name}`)}
-                  </div>
+                  </Link>
+                ),
+              },
+
+              {
+                accessor: "department",
+                title: "Department",
+                render: (row: any) => (
+                  <Link
+                    href={`/faculty/application_detail?id=${row?.id}`}
+                    className="cursor-pointer text-gray-900 dark:text-white"
+                    title={`${row?.first_name} ${row?.last_name}`}
+                  >
+                   {row?.department?.length>0 &&  row?.department?.map((d)=>d.name).join(', ')}
+                  </Link>
                 ),
               },
               {
@@ -457,18 +473,14 @@ const JobDetails = () => {
                   </span>
                 ),
               },
+
               {
                 accessor: "status",
                 title: "Status",
                 render: (row: any) => (
                   <span
-                    className={`inline-flex rounded-full px-3 py-1 text-xs  shadow-md ${
-                      row?.status === "accepted"
-                        ? "bg-green-500 text-white"
-                        : row?.status === "rejected"
-                        ? "bg-red-500 text-white"
-                        : "bg-yellow-400 text-white"
-                    }`}
+                    className={` inline-flex rounded-full px-3 py-1 text-xs text-black
+                     `}
                   >
                     {capitalizeFLetter(row?.status || "Pending")}
                   </span>
@@ -483,7 +495,7 @@ const JobDetails = () => {
                   <div className="flex items-center justify-center gap-2">
                     <button
                       onClick={() => handleEdit(row)}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 transition-all duration-200 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-400"
+                      className="flex  items-center justify-center rounded-lg  text-green-900 transition-all duration-200 "
                       title="View"
                     >
                       <IconEye className="h-4 w-4" />

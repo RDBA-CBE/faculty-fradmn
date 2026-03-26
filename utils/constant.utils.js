@@ -570,63 +570,8 @@ export const OwnmenuConfig = {
       key: "master",
       children: [
         {
-          label: "Departments",
-          href: "/faculty/master/master_department",
-        },
-        {
           label: "Panel Members",
           href: "/faculty/master/panel",
-        },
-        {
-          label: "Experience",
-          href: "/faculty/master/experience",
-        },
-        {
-          label: "Job Urgency",
-          href: "/faculty/master/job_urgency",
-        },
-
-        {
-          label: "Category",
-          href: "/faculty/master/category",
-        },
-
-        {
-          label: "Location",
-          href: "/faculty/master/location",
-        },
-        {
-          label: "Salary Range",
-          href: "/faculty/master/salary_range",
-        },
-        // {
-        //   label: "Skill",
-        //   href: "/faculty/master/skill",
-        // },
-        // {
-        //   label: "Tags",
-        //   href: "/faculty/master/tags",
-        // },
-        {
-          label: "Application Status",
-          href: "/faculty/master/application_status",
-        },
-
-        {
-          label: "College Type",
-          href: "/faculty/master/college_type",
-        },
-        {
-          label: "NAAC Accreditation",
-          href: "/faculty/master/naac_accreditation",
-        },
-        {
-          label: "NIRF Band",
-          href: "/faculty/master/nirf_band",
-        },
-        {
-          label: "NIRF Category",
-          href: "/faculty/master/nirf_category",
         },
       ],
     },
@@ -675,74 +620,11 @@ export const OwnmenuConfig = {
           label: "Panel Members",
           href: "/faculty/master/panel",
         },
-        {
-          label: "Experience",
-          href: "/faculty/master/experience",
-        },
-        {
-          label: "Job Urgency",
-          href: "/faculty/master/job_urgency",
-        },
-
-        // {
-        //   label: "Category",
-        //   href: "/faculty/master/category",
-        // },
-
-        {
-          label: "Location",
-          href: "/faculty/master/location",
-        },
-        {
-          label: "Salary Range",
-          href: "/faculty/master/salary_range",
-        },
-        // {
-        //   label: "Skill",
-        //   href: "/faculty/master/skill",
-        // },
-        // {
-        //   label: "Tags",
-        //   href: "/faculty/master/tags",
-        // },
-        {
-          label: "Application Status",
-          href: "/faculty/master/application_status",
-        },
-
-        {
-          label: "College Type",
-          href: "/faculty/master/college_type",
-        },
-        {
-          label: "NAAC Accreditation",
-          href: "/faculty/master/naac_accreditation",
-        },
-        {
-          label: "NIRF Band",
-          href: "/faculty/master/nirf_band",
-        },
-        {
-          label: "NIRF Category",
-          href: "/faculty/master/nirf_category",
-        },
       ],
     },
   ],
 
   hod: [
-    // {
-    //   type: "link",
-    //   icon: "IconMenuDashboard",
-    //   label: "dashboard",
-    //    href: "/",
-    // },
-    //   {
-    //   type: "link",
-    //   icon: "IconMenuNotes",
-    //   label: "Departments",
-    //   href: "/faculty/hr_department",
-    // },
     {
       type: "link",
       icon: "IconMenuUsers",
@@ -762,75 +644,6 @@ export const OwnmenuConfig = {
       icon: "IconMenuTables",
       label: "Applications",
       href: "/faculty/my_application",
-    },
-    // {
-    //   type: "link",
-    //   icon: "IconMenuCharts",
-    //   label: "Reports",
-    //   href: "/",
-    // },
-    {
-      type: "submenu",
-      icon: "IconMenuCharts",
-      label: "Master",
-      key: "master",
-      children: [
-        {
-          label: "Panel Members",
-          href: "/faculty/master/panel",
-        },
-        {
-          label: "Experience",
-          href: "/faculty/master/experience",
-        },
-        {
-          label: "Job Urgency",
-          href: "/faculty/master/job_urgency",
-        },
-
-        // {
-        //   label: "Category",
-        //   href: "/faculty/master/category",
-        // },
-
-        {
-          label: "Location",
-          href: "/faculty/master/location",
-        },
-        {
-          label: "Salary Range",
-          href: "/faculty/master/salary_range",
-        },
-        // {
-        //   label: "Skill",
-        //   href: "/faculty/master/skill",
-        // },
-        // {
-        //   label: "Tags",
-        //   href: "/faculty/master/tags",
-        // },
-        {
-          label: "Application Status",
-          href: "/faculty/master/application_status",
-        },
-
-        {
-          label: "College Type",
-          href: "/faculty/master/college_type",
-        },
-        {
-          label: "NAAC Accreditation",
-          href: "/faculty/master/naac_accreditation",
-        },
-        {
-          label: "NIRF Band",
-          href: "/faculty/master/nirf_band",
-        },
-        {
-          label: "NIRF Category",
-          href: "/faculty/master/nirf_category",
-        },
-      ],
     },
   ],
 };
@@ -1027,4 +840,38 @@ export const STATUS_COLOR = {
 export const JOB_STATUS = [
   { value: "approved", label: "Approved" },
   { value: "pending", label: "Pending" },
+];
+
+export const RECORDS = [
+  {
+    value: 1,
+    label: "All Records",
+  },
+  {
+    value: 2,
+    label: "Hr Records",
+  },
+  {
+    value: 3,
+    label: "Admin Records",
+  },
+];
+
+export const PREFERENCES = [
+  {
+    value: 1,
+    label: "PhD Completed",
+  },
+  {
+    value: 2,
+    label: "NET Cleared",
+  },
+  {
+    value: 3,
+    label: "SET Cleared",
+  },
+  {
+    value: 4,
+    label: "SLET Cleared",
+  },
 ];

@@ -50,7 +50,7 @@ import {
 } from "lucide-react";
 import moment from "moment";
 import { useRouter } from "next/navigation";
-import { JOB_STATUS, ROLES } from "@/utils/constant.utils";
+import { JOB_STATUS, RECORDS, ROLES } from "@/utils/constant.utils";
 import LogCard from "@/components/logCard";
 import { MdApproval } from "react-icons/md";
 import PrivateRouter from "@/hook/privateRouter";
@@ -124,7 +124,7 @@ const Job = () => {
   const debounceSearch = useDebounce(state.search, 500);
 
   useEffect(() => {
-    dispatch(setPageTitle("Job Management"));
+    dispatch(setPageTitle("Job Postings"));
   }, [dispatch]);
 
   useEffect(() => {
@@ -171,12 +171,12 @@ const Job = () => {
           label: item?.short_name,
         })),
       });
-      departmentDropdownList(
-        1,
-        "",
-        false,
-        res?.college?.map((item) => item?.college_id)
-      );
+      // departmentDropdownList(
+      //   1,
+      //   "",
+      //   false,
+      //   res?.college?.map((item) => item?.college_id)
+      // );
       callJobListByRole(1, res);
     } catch (error) {
       console.error("Error fetching institutions:", error);
@@ -185,26 +185,26 @@ const Job = () => {
 
   const getCollegeParamsByRole = (profileData?: any) => {
     const p = profileData ?? state.profile;
- 
-      return {
-        institutionId: null,
-        collegeIds: p?.college?.map((c: any) => c.college_id),
-      };
+
+    return {
+      institutionId: null,
+      collegeIds: p?.college?.map((c: any) => c.college_id),
+    };
   };
 
   const getDeptCollegeIds = () => {
-      return state.profile?.college?.map((c: any) => c.college_id);
+    return state.profile?.college?.map((c: any) => c.college_id);
   };
 
   const callJobListByRole = (page: number, profileData?: any) => {
     const p = profileData ?? state.profile;
     console.log("✌️p --->", p);
-   
-      jobList(
-        page,
-        null,
-        p?.college?.map((c: any) => c.college_id)
-      );
+
+    jobList(
+      page,
+      null,
+      p?.college?.map((c: any) => c.college_id)
+    );
   };
 
   const jobList = async (page, insId = null, colId = null) => {
@@ -363,7 +363,6 @@ const Job = () => {
       setState({ collegeLoading: true });
       const body: any = { search };
 
-  
       if (collegeIds?.length > 0) {
         body.college_ids = collegeIds;
       }
@@ -392,7 +391,7 @@ const Job = () => {
     try {
       setState({ departmentLoading: true });
       const body: any = { search };
-      if (collegeIds?.length > 0) {
+      if (collegeIds) {
         body.college = collegeIds;
       }
       const res: any = await Models.department.list(page, body);
@@ -416,8 +415,6 @@ const Job = () => {
       body.search = state.search;
     }
 
- 
-
     if (state.collegeFilter?.value) {
       body.college_id = state.collegeFilter.value;
     }
@@ -433,7 +430,7 @@ const Job = () => {
     if (state.locationFilter?.value) {
       body.location = state.locationFilter.value;
     }
-   
+
     if (state.salaryFilter?.value) {
       body.salary_range = state.salaryFilter.value;
     }
@@ -465,8 +462,6 @@ const Job = () => {
     callJobListByRole(pageNumber);
   };
 
-
-
   const handleLog = async (row) => {
     console.log("✌️row --->", row);
     try {
@@ -497,7 +492,6 @@ const Job = () => {
       console.error("Failed to create log", error);
     }
   };
-
 
   const handleDepartmentChange = (selectedOption: any) => {
     setState({ departmentFilter: selectedOption, page: 1 });
@@ -621,7 +615,7 @@ const Job = () => {
       <div className="mb-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
-            <h1 className=" page-ti text-transparent">Job Management</h1>
+            <h1 className=" page-ti text-transparent">Job Postings</h1>
             <p className="text-gray-600 dark:text-gray-400">
               Manage job postings and opportunities
             </p>
@@ -671,7 +665,7 @@ const Job = () => {
                 {state.jobList?.filter((job) => job.is_approved)?.length || 0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Approved Jobs
+                Active job posting
               </p>
             </div>
           </div>
@@ -692,7 +686,7 @@ const Job = () => {
                 {state.jobList?.filter((job) => !job.is_approved)?.length || 0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Pending Jobs
+                In Active job posting
               </p>
             </div>
           </div>
@@ -762,13 +756,28 @@ const Job = () => {
             />
           )}
           {state.profile?.role == ROLES.HR && (
+            // <CustomSelect
+            //   options={state.collegeList}
+            //   value={state.filterCollege}
+            //   onChange={(e) => setState({ filterCollege: e })}
+            //   placeholder={"Select College"}
+            //   isClearable={true}
+            // />
+
             <CustomSelect
-              options={state.collegeList}
-              value={state.filterCollege}
-              onChange={(e) => setState({ filterCollege: e })}
-              placeholder={"Select College"}
-              isClearable={true}
-            />
+            options={state.collegeList}
+            value={state.filterCollege}
+            onChange={(e) => {
+              if (e) {
+                departmentDropdownList(1, "", false, e?.value);
+              } else {
+                setState({ departmentFilter: "", departmentList: [] });
+              }
+              setState({ filterCollege: e });
+            }}
+            placeholder={"Select College"}
+            isClearable={true}
+          />
           )}
           {/* )} */}
           <CustomSelect
@@ -777,40 +786,29 @@ const Job = () => {
             onChange={handleDepartmentChange}
             placeholder="Select department"
             isClearable={true}
-            onSearch={(searchTerm) => {
-              const ids = getDeptCollegeIds();
-              if (ids) departmentDropdownList(1, searchTerm, false, ids);
-            }}
-            loadMore={() => {
-              if (state.departmentNext) {
-                const ids = getDeptCollegeIds();
-                if (ids)
-                  departmentDropdownList(
-                    state.departmentPage + 1,
-                    "",
-                    true,
-                    ids
-                  );
-              }
-            }}
+            disabled={!state.filterCollege}
+
+            // onSearch={(searchTerm) => {
+            //   const ids = getDeptCollegeIds();
+            //   if (ids) departmentDropdownList(1, searchTerm, false, ids);
+            // }}
+            // loadMore={() => {
+            //   if (state.departmentNext) {
+            //     const ids = getDeptCollegeIds();
+            //     if (ids)
+            //       departmentDropdownList(
+            //         state.departmentPage + 1,
+            //         "",
+            //         true,
+            //         ids
+            //       );
+            //   }
+            // }}
             loading={state.departmentLoading}
           />
 
           <CustomSelect
-            options={[
-              {
-                value: 1,
-                label: "All Records",
-              },
-              {
-                value: 2,
-                label: "Own Records",
-              },
-              {
-                value: 3,
-                label: "Admin Records",
-              },
-            ]}
+            options={RECORDS}
             value={state.sortingFilter}
             onChange={(e) => setState({ sortingFilter: e })}
             placeholder={"All Records"}
@@ -1098,22 +1096,26 @@ const Job = () => {
                 title: "Applications",
                 sortable: true,
 
-                render: ({ total_applications }) => (
-                  <span className="text-gray-600 dark:text-gray-400">
-                    {total_applications}
-                  </span>
+                render: (row: any) => (
+                  <Link
+                    href={`/faculty/job_details?id=${row?.id}`}
+                    title={row?.total_applications}
+                    className="cursor-pointer text-gray-900 underline dark:text-white"
+                  >
+                    {row?.total_applications}
+                  </Link>
                 ),
               },
 
-              {
-                accessor: "last_date",
-                title: "Last Date",
-                render: ({ last_date }) => (
-                  <span className="text-gray-600 dark:text-gray-400">
-                    {last_date ? new Date(last_date).toLocaleDateString() : "-"}
-                  </span>
-                ),
-              },
+              // {
+              //   accessor: "last_date",
+              //   title: "Last Date",
+              //   render: ({ last_date }) => (
+              //     <span className="text-gray-600 dark:text-gray-400">
+              //       {last_date ? new Date(last_date).toLocaleDateString() : "-"}
+              //     </span>
+              //   ),
+              // },
               {
                 accessor: "actions",
                 title: "Actions",

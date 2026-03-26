@@ -15,6 +15,11 @@ const application = {
         url += `&ordering=${encodeURIComponent(body.ordering)}`;
       }
 
+      if (body?.exclude_applied_interview == "Yes") {
+        url += `&exclude_applied_interview=${encodeURIComponent(true)}`;
+      }
+      
+
       if (body.role) {
         url = url + `&role=${body.role}`;
       }

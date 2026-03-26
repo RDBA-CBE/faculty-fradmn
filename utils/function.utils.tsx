@@ -45,24 +45,15 @@ export const Failure = (message: string) => {
   });
 };
 
-export const truncateText = (
-  text: string,
-  maxLength: number = 10,
-  cap = true
-) => {
+export const truncateText = (text: string, maxLength: number = 10) => {
   if (!text) return "";
 
   const capitalized =
     text?.charAt(0).toUpperCase() + text?.slice(1)?.toLowerCase();
-  if (cap) {
-    return text?.length > maxLength
-      ? text?.substring(0, maxLength) + "..."
-      : text;
-  } else {
-    return capitalized.length > maxLength
-      ? capitalized?.substring(0, maxLength) + "..."
-      : capitalized;
-  }
+
+  return capitalized.length > maxLength
+    ? capitalized?.substring(0, maxLength) + "..."
+    : capitalized;
 };
 
 export const showDeleteAlert = (onConfirm, onCancel, title) => {

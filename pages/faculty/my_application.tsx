@@ -52,11 +52,12 @@ import {
   Verified,
   VerifiedIcon,
   X,
+  BriefcaseBusiness,
 } from "lucide-react";
 import CustomeDatePicker from "@/components/datePicker";
 import PrivateRouter from "@/hook/privateRouter";
 import moment from "moment";
-import { ROLES, STATUS_COLOR } from "@/utils/constant.utils";
+import { RECORDS, ROLES, STATUS_COLOR } from "@/utils/constant.utils";
 import Utils from "@/imports/utils.import";
 import * as Yup from "yup";
 import Link from "next/link";
@@ -189,6 +190,7 @@ const Application = () => {
     jobStatusList();
     categoryList(1);
     applicationStatusList();
+    applicationStatusExceptAppliedandInterList();
   }, []);
 
   useEffect(() => {
@@ -313,6 +315,26 @@ const Application = () => {
       setState({ applicationStatusLoading: false });
     }
   };
+
+  const applicationStatusExceptAppliedandInterList = async () => {
+    try {
+      setState({ applicationStatusLoading: true });
+      const body = {
+        rexclude_applied_interview: "Yes",
+      };
+      const res: any = await Models.master.application_status_list(body);
+      const dropdown = res?.map((item) => ({
+        value: item.id,
+        label: item.name,
+      }));
+      setState({
+        applicationStatusLoading: false,
+        applicationStatusesList: dropdown,
+      });
+    } catch (error) {
+      setState({ applicationStatusLoading: false });
+    }
+  };
   console.log("✌️res --->", state.collegeList);
 
   const applicationList = async (
@@ -379,7 +401,9 @@ const Application = () => {
           label: item?.application_status?.name,
         },
         college_name: item?.job_detail?.college?.short_name,
-        department_name: item?.department?.short_name,
+        department_name: item?.department_details?.map(
+          (item) => item?.short_name
+        ),
         interview_status:
           item?.interview_slots?.length > 0
             ? item?.interview_slots[item?.interview_slots.length - 1]?.status
@@ -466,7 +490,7 @@ const Application = () => {
       applicationList(
         pageNumber,
         null,
-        state.profile?.college?.college_id,
+        state.profile?.college?.map((item) => item?.college_id),
         null,
         state.profile?.id
       );
@@ -580,7 +604,7 @@ const Application = () => {
         applicationList(
           state.page,
           null,
-          state.profile?.college?.map((item)=>item?.college_id),
+          state.profile?.college?.map((item) => item?.college_id),
           null,
           state.profile?.id
         );
@@ -1141,13 +1165,16 @@ const Application = () => {
         state.selectedRecords.map((id) => Models.application.details(id))
       );
 
+      console.log("✌️responses --->", responses);
+
       const jobMap = new Map();
       const deptMap = new Map();
       const applicantMap = new Map();
 
       responses.forEach((res) => {
         const job = res?.job_detail;
-        const dept = res?.department;
+        const dept = res?.department_details;
+        console.log("✌️dept --->", dept);
 
         // Job
         if (job && !jobMap.has(job.id)) {
@@ -1158,10 +1185,22 @@ const Application = () => {
         }
 
         // Department
-        if (dept && !deptMap.has(dept.id)) {
-          deptMap.set(dept.id, {
-            value: dept.id,
-            label: dept.department_name?.trim() || "No Department",
+        // if (dept && !deptMap.has(dept.id)) {
+        //   deptMap.set(dept.id, {
+        //     value: dept.id,
+        //     label: dept.short_name?.trim() || "No Department",
+        //   });
+        // }
+
+        if (Array.isArray(dept)) {
+          dept.forEach((dept) => {
+            console.log("abcd --->", dept);
+            if (dept && !deptMap.has(dept.id)) {
+              deptMap.set(dept.id, {
+                value: dept.id,
+                label: dept.short_name?.trim() || "No Department",
+              });
+            }
           });
         }
 
@@ -1244,7 +1283,7 @@ const Application = () => {
                 {state.count || 0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Total Applications
+                 Applications
               </p>
             </div>
           </div>
@@ -1336,7 +1375,14 @@ const Application = () => {
               <CustomSelect
                 options={state.collegeList}
                 value={state.filterCollege}
-                onChange={(e) => setState({ filterCollege: e })}
+                onChange={(e) => {
+                  if (e) {
+                    departmentDropdownList(1, "", false, e?.value);
+                  } else {
+                    setState({ departmentFilter: "", departmentList: [] });
+                  }
+                  setState({ filterCollege: e });
+                }}
                 placeholder={"Select College"}
                 isClearable={true}
               />
@@ -1346,23 +1392,24 @@ const Application = () => {
                 onChange={handleDepartmentChange}
                 placeholder="Select department"
                 isClearable={true}
-                onSearch={(searchTerm) => {
-                  const ids = getDeptCollegeIds();
-                  if (ids) departmentDropdownList(1, searchTerm, false, ids);
-                }}
-                loadMore={() => {
-                  if (state.departmentNext) {
-                    const ids = getDeptCollegeIds();
-                    if (ids)
-                      departmentDropdownList(
-                        state.departmentPage + 1,
-                        "",
-                        true,
-                        ids
-                      );
-                  }
-                }}
+                // onSearch={(searchTerm) => {
+                //   const ids = getDeptCollegeIds();
+                //   if (ids) departmentDropdownList(1, searchTerm, false, ids);
+                // }}
+                // loadMore={() => {
+                //   if (state.departmentNext) {
+                //     const ids = getDeptCollegeIds();
+                //     if (ids)
+                //       departmentDropdownList(
+                //         state.departmentPage + 1,
+                //         "",
+                //         true,
+                //         ids
+                //       );
+                //   }
+                // }}
                 loading={state.departmentLoading}
+                disabled={!state.filterCollege}
               />
             </>
           )}
@@ -1380,20 +1427,7 @@ const Application = () => {
           /> */}
 
           <CustomSelect
-            options={[
-              {
-                value: 1,
-                label: "All Records",
-              },
-              {
-                value: 2,
-                label: "Own Records",
-              },
-              {
-                value: 3,
-                label: "Admin Records",
-              },
-            ]}
+            options={RECORDS}
             value={state.sortingFilter}
             onChange={(e) => setState({ sortingFilter: e })}
             placeholder={"Own Records"}
@@ -1544,8 +1578,23 @@ const Application = () => {
             }
             columns={[
               {
+                accessor: "applicant_name",
+                title: "Faculty Name",
+                sortable: true,
+
+                render: (row) => (
+                  <Link
+                    href={`/faculty/application_detail?id=${row?.id}`}
+                    title={row?.applicant_name}
+                    className="text-gray-600 dark:text-gray-400"
+                  >
+                    {truncateText(row?.applicant_name)}
+                  </Link>
+                ),
+              },
+              {
                 accessor: "job_title",
-                title: "Title",
+                title: "Job Title",
                 sortable: true,
                 render: (row) => (
                   <Link
@@ -1574,43 +1623,77 @@ const Application = () => {
               {
                 accessor: "department_name",
                 title: "Department",
-                render: ({ department_name }) => (
-                  <div
-                    title={department_name}
-                    className="text-gray-600 dark:text-gray-400"
-                  >
-                    {department_name}
-                  </div>
-                ),
-                sortable: true,
-              },
-              {
-                accessor: "applicant_name",
-                title: "Faculty",
-                sortable: true,
-                render: ({ applicant_name }) => (
-                  <div
-                    title={applicant_name}
-                    className="font-medium text-gray-900 dark:text-white"
-                  >
-                    {truncateText(applicant_name)}
-                  </div>
-                ),
-              },
-              {
-                accessor: "applicant_email",
-                title: "Email",
-                sortable: true,
+                render: ({ department_name }) => {
+                  if (!department_name || department_name?.length === 0) {
+                    return <span className="text-gray-400">-</span>;
+                  }
 
-                render: ({ applicant_email }) => (
-                  <span
-                    title={applicant_email}
-                    className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-200"
-                  >
-                    {truncateText(applicant_email)}
-                  </span>
-                ),
+                  const firstDept = department_name?.[0];
+                  const otherDept = department_name?.slice(1);
+                  const maxShow = 3;
+                  const remaining = otherDept?.length - maxShow;
+                  const visibleDept = otherDept?.slice(0, maxShow);
+                  const hiddenDept = otherDept?.slice(maxShow);
+
+                  return (
+                    <div className="flex flex-wrap items-center gap-2">
+                      {/* First department text */}
+                      <span
+                        title={firstDept}
+                        className="text-sm  text-gray-700 dark:text-gray-300"
+                      >
+                        {firstDept}
+                      </span>
+
+                      {/* Avatars */}
+                      <div className="flex items-center -space-x-2">
+                        {visibleDept?.map((dept: string, index: number) => (
+                          <div key={index} className="group relative z-10">
+                            <div className="bg-dblue flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white text-xs  text-white dark:border-gray-900">
+                              {dept?.slice(0, 2)?.toUpperCase()}
+                            </div>
+
+                            {/* Tooltip */}
+                            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
+                              {capitalizeFLetter(dept)}
+                            </div>
+                          </div>
+                        ))}
+                        {remaining > 0 && (
+                          <div className="group relative">
+                            <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-gray-400 text-xs  text-white dark:border-gray-900">
+                              +{remaining}
+                            </div>
+
+                            {/* Remaining tooltip */}
+                            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
+                              {hiddenDept
+                                ?.map((d: string) => capitalizeFLetter(d))
+                                .join(", ")}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                },
+                sortable: true,
               },
+
+              // {
+              //   accessor: "applicant_email",
+              //   title: "Email",
+              //   sortable: true,
+
+              //   render: ({ applicant_email }) => (
+              //     <span
+              //       title={applicant_email}
+              //       className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+              //     >
+              //       {truncateText(applicant_email)}
+              //     </span>
+              //   ),
+              // },
               // {
               //   accessor: "applicant_phone",
               //   title: "Phone",
@@ -1652,13 +1735,12 @@ const Application = () => {
                 render: (row: any) => (
                   <div className="flex items-center justify-center gap-3">
                     <button
-                      onClick={() => handleRound(row)}
-                      className="flex  items-center justify-center rounded-lg  text-pink-600 transition-all duration-200 "
-                      title="Interview Round"
+                      onClick={() => handleEdit(row)}
+                      className="flex  items-center justify-center rounded-lg  text-green-900 transition-all duration-200 "
+                      title="View"
                     >
-                      <MessageSquare className="h-4 w-4" />
+                      <IconEye className="h-4 w-4" />
                     </button>
-
                     <button
                       onClick={() => handleDownloadResume(row)}
                       className="flex  items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
@@ -1667,12 +1749,13 @@ const Application = () => {
                       <FileText className="h-4 w-4" />
                     </button>
                     <button
-                      onClick={() => handleEdit(row)}
-                      className="flex  items-center justify-center rounded-lg  text-green-600 transition-all duration-200 "
-                      title="View"
+                      onClick={() => handleRound(row)}
+                      className="flex  items-center justify-center rounded-lg  text-pink-600 transition-all duration-200 "
+                      title="Interview Round"
                     >
-                      <IconEye className="h-4 w-4" />
+                      <BriefcaseBusiness className="h-4 w-4" />
                     </button>
+
                     {state.profile?.role == ROLES.HR && (
                       <button
                         onClick={() => {
@@ -1790,6 +1873,8 @@ const Application = () => {
 
       {/* Interview Schedule Modal */}
       <Modal
+        subTitle="Create Interview Schedule"
+        closeIcon
         open={state.showInterviewModal}
         close={() =>
           setState({
@@ -1806,16 +1891,7 @@ const Application = () => {
           })
         }
         renderComponent={() => (
-          <div className="p-6">
-            <div className="mb-6 text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-green-100 to-teal-100 dark:from-green-900 dark:to-teal-900">
-                <UserCheck className="h-8 w-8 text-green-600 dark:text-green-400" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Create Interview Schedule
-              </h2>
-            </div>
-
+          <div className="">
             <div className="space-y-5">
               <CustomSelect
                 title="Select Jobs"
@@ -2047,7 +2123,7 @@ const Application = () => {
               <button
                 onClick={handleInterviewScheduleSubmit}
                 disabled={state.submitting}
-                className="flex-1 rounded-lg bg-gradient-to-r from-green-600 to-teal-600 px-4 py-2 text-white hover:shadow-lg disabled:opacity-50"
+                className="bg-dblue flex-1 rounded-lg  px-4 py-2 text-white hover:shadow-lg disabled:opacity-50"
               >
                 {state.submitting ? "Creating..." : "Create Schedule"}
               </button>
@@ -2069,69 +2145,107 @@ const Application = () => {
             {/* Scrollable Content */}
             <div className="flex-1 space-y-6 overflow-y-auto px-4">
               {/* Candidate */}
-              <div className="rounded-lg border bg-gray-50 p-4">
-                <h3 className="text-lg font-semibold">
+              <div className="rounded-lg border bg-gray-50 px-4 py-2">
+                <p className="text-sm font-semibold">Application details :</p>
+                <h3 className="pl-4 text-lg font-semibold">
                   {state.application?.first_name} {state.application?.last_name}
                 </h3>
-                <p className="text-sm text-gray-500">
+                <p className="pl-4 text-sm text-gray-500">
                   {state.application?.email} • {state.application?.phone}
                 </p>
               </div>
 
               {/* Rounds */}
               <div className="space-y-4 pb-6">
-                {state.application?.interview_slots?.map((round) => (
+                {state.application?.interview_slots?.map((round) => {
+                  const isRoundOpen = !!state.expandedRounds?.[round.id];
+                  return (
                   <div
                     key={round.id}
-                    className="rounded-lg border bg-white p-4 shadow-sm"
+                    className="rounded-lg border bg-white shadow-sm"
                   >
-                    {/* Round Header */}
-                    <div className="mb-3 flex items-center justify-between">
-                      <div>
-                        <p className="font-semibold">
-                          {capitalizeFLetter(round.round_name)}
-                        </p>
+                    {/* Round Header — clickable accordion toggle */}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setState({
+                          expandedRounds: {
+                            ...state.expandedRounds,
+                            [round.id]: !isRoundOpen,
+                          },
+                        })
+                      }
+                      className="flex w-full items-center justify-between p-4 text-left"
+                    >
+                      <p className="font-semibold">
+                        {capitalizeFLetter(round.round_name)}
+                      </p>
+                      <div className="flex items-center gap-3">
+                        <span
+                          className={`rounded px-3 py-1 text-xs font-semibold ${
+                            round.status === "completed"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-yellow-100 text-yellow-700"
+                          }`}
+                        >
+                          {capitalizeFLetter(round.status)}
+                        </span>
                         <p className="text-xs text-gray-500">
                           {formatScheduleDateTime(
                             round.scheduled_date,
                             round.scheduled_time
                           )}
                         </p>
+                        <svg
+                          className={`h-4 w-4 text-gray-500 transition-transform ${
+                            isRoundOpen ? "rotate-180" : ""
+                          }`}
+                          fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
                       </div>
-
-                      <span
-                        className={`rounded px-3 py-1 text-xs font-semibold ${
-                          round.status === "completed"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-yellow-100 text-yellow-700"
-                        }`}
-                      >
-                        {capitalizeFLetter(round.status)}
-                      </span>
-                    </div>
+                    </button>
 
                     {/* Feedback List */}
-                    <div className="space-y-2">
+                    {isRoundOpen && (
+                    <div className="space-y-2 border-t px-4 pb-4 pt-3">
                       {round.panels?.map((panel) => {
                         const feedback = panel?.feedbacks?.[0];
+                        const panelKey = `${round.id}-${panel.id}`;
+                        const isPanelOpen = !!state.expandedRounds?.[panelKey];
                         return (
                           <div
                             key={panel.id}
-                            className="flex items-start justify-between rounded border bg-gray-50 p-3"
+                            className="rounded border bg-gray-50"
                           >
-                            <div>
-                              <p className="text-sm">{panel.name}</p>
-
-                              {/* {panel?.feedbacks?.[0]?.feedback_text && (
-                              <p className="mt-1 text-sm text-gray-700">
-                                {capitalizeFLetter(
-                                  panel.feedbacks[0].feedback_text
-                                )}
-                              </p>
-                            )} */}
-
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setState({
+                                  expandedRounds: {
+                                    ...state.expandedRounds,
+                                    [panelKey]: !isPanelOpen,
+                                  },
+                                })
+                              }
+                              className="flex w-full items-center justify-between p-3 text-left"
+                            >
+                              <p className="text-sm font-medium">{panel.name}</p>
                               {feedback && (
-                                <div className="mt-3 space-y-2 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm dark:border-gray-700 dark:bg-gray-900">
+                                <svg
+                                  className={`h-4 w-4 text-gray-400 transition-transform ${
+                                    isPanelOpen ? "rotate-180" : ""
+                                  }`}
+                                  fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                >
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                              )}
+                            </button>
+                            {isPanelOpen && feedback && (
+                            <div className="border-t px-3 pb-3 pt-2">
+                                <div className="space-y-2 rounded-lg border border-gray-200 bg-white p-3 text-sm dark:border-gray-700 dark:bg-gray-900">
                                   {feedback.is_same_as_applicant !==
                                     undefined && (
                                     <p>
@@ -2252,14 +2366,16 @@ const Application = () => {
                                     </p>
                                   )}
                                 </div>
-                              )}
                             </div>
+                            )}
                           </div>
                         );
                       })}
                     </div>
+                    )}
                   </div>
-                ))}
+                );
+                })}
               </div>
             </div>
 
@@ -2268,10 +2384,11 @@ const Application = () => {
               <div className="flex items-end gap-3">
                 <div className="flex-1">
                   <CustomSelect
-                    options={state.applicationStatusList}
+                    options={state.applicationStatusesList}
                     value={state.appstatus}
                     onChange={(e) => setState({ appstatus: e })}
                     placeholder="Select final status"
+                    isClearable={false}
                   />
                 </div>
 

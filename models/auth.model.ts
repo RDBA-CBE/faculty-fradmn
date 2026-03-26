@@ -125,6 +125,19 @@ const auth = {
         url = url + `&created_by=${body.created_by}`;
       }
 
+      if (body.net_cleared) {
+        url = url + `&net_cleared=${true}`;
+      }
+      if (body.set_cleared) {
+        url = url + `&set_cleared=${true}`;
+      }
+      if (body.slet_cleared) {
+        url = url + `&slet_cleared=${true}`;
+      }
+      if (body.phd_completed) {
+        url = url + `&phd_completed=${true}`;
+      }
+
       if (body.team == "No") {
         url = url + `&team=${false}`;
       }
@@ -141,8 +154,6 @@ const auth = {
         url += `&active_job_seeker=${encodeURIComponent(true)}`;
       }
 
-
-      
       instance()
         .get(url)
         .then((res) => {

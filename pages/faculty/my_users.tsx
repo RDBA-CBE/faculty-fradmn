@@ -42,11 +42,9 @@ import CustomeDatePicker from "@/components/datePicker";
 import moment from "moment";
 import Utils from "@/imports/utils.import";
 import * as Yup from "yup";
-import { useRouter } from "next/navigation";
 
 const Users = () => {
   const dispatch = useDispatch();
-  const router = useRouter();
   const [state, setState] = useSetState({
     activeTab: "institution_admin",
     page: 1,

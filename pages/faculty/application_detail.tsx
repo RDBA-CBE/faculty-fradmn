@@ -57,6 +57,7 @@ import Modal from "@/components/modal/modal.component";
 import moment from "moment";
 import Utils from "@/imports/utils.import";
 import * as Yup from "yup";
+import ReadMore from "@/components/readMore";
 
 const ApplicationDetail = () => {
   const dispatch = useDispatch();
@@ -110,10 +111,15 @@ const ApplicationDetail = () => {
     }
   };
 
+  console.log("✌️state?.application --->", state?.application);
+
   const applicationStatusList = async () => {
     try {
       setState({ applicationStatusLoading: true });
-      const res: any = await Models.master.application_status_list();
+      const body = {
+        rexclude_applied_interview: "Yes",
+      };
+      const res: any = await Models.master.application_status_list(body);
       const dropdown = res?.map((item) => ({
         value: item.id,
         label: item.name,
@@ -200,7 +206,8 @@ const ApplicationDetail = () => {
 
       const validation = {
         selectedJobs: [state.application?.job_detail?.id],
-        selectedDepartments: [state.application?.department?.id],
+        selectedDepartments: state?.selectedDepartments?.value,
+
         interviewSlot: state.interviewSlot
           ? moment(state.interviewSlot).format("YYYY-MM-DD HH:mm")
           : "",
@@ -221,7 +228,8 @@ const ApplicationDetail = () => {
       const body = {
         position_ids: [state.application?.job_detail?.id],
         // department_id: state.selectedDepartments?.map((item)=>item?.value),
-        department_id: state.application?.department?.id,
+        department_id: state.selectedDepartments?.value,
+        // department_id: state?.selectedDepartments?.map((item) => item?.value),
 
         scheduled_date: moment(state.interviewSlot).format("YYYY-MM-DD HH:mm"),
         panel_ids: state.panelMembers.map((p) => p.value),
@@ -273,7 +281,11 @@ const ApplicationDetail = () => {
 
       const validation = {
         selectedJobs: [state.application?.job_detail?.id],
-        selectedDepartments: [state.application?.department?.id],
+        // selectedDepartments: state?.selectedDepartments?.map(
+        //   (item) => item?.value
+        // ),
+        selectedDepartments: state?.selectedDepartments?.value,
+
         interviewSlot: state.interviewSlot
           ? moment(state.interviewSlot).format("YYYY-MM-DD HH:mm")
           : "",
@@ -294,7 +306,11 @@ const ApplicationDetail = () => {
       const body = {
         position_ids: [state.application?.job_detail?.id],
         // department_id: state.selectedDepartments?.map((item)=>item?.value),
-        department_id: state.application?.department?.id,
+        // department_id: state.application?.department?.id,
+        department_id: state.selectedDepartments?.value,
+
+
+        // department_id: state?.selectedDepartments?.map((item) => item?.value),
 
         scheduled_date: moment(state.interviewSlot).format("YYYY-MM-DD HH:mm"),
         panel_ids: state.panelMembers.map((p) => p.value),
@@ -448,9 +464,6 @@ const ApplicationDetail = () => {
                     <h2 className="page-ti">
                       {app?.first_name} {app?.last_name}
                     </h2>
-                    {/* <p className="text-gray-600 dark:text-gray-400">
- {job?.job_title}
- </p> */}
                   </div>
                 </div>
 
@@ -469,7 +482,7 @@ const ApplicationDetail = () => {
                   ) : (
                     <div className="rounded-xl bg-red-100 px-6 py-3 dark:bg-red-900/30">
                       <p className="font-medium text-red-600 dark:text-red-400">
-                        No Profile
+                        Not a register user
                       </p>
                     </div>
                   )}
@@ -526,118 +539,40 @@ const ApplicationDetail = () => {
                     </p>
                   </div>
                 </div>
+
+                <div className="flex items-start gap-4">
+                  <Calendar className="text-dyellow mt-0.5 h-5 w-5" />
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Departments
+                    </p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                      {state.application?.department_details
+                        ?.map((item) => item?.short_name)
+                        ?.join(", ")}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="pt-3 dark:border-gray-700">
+                <div className="flex items-start gap-4">
+                  <FileText className="text-dyellow mt-0.5 h-5 w-5 flex-shrink-0" />
+
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Cover Letter
+                    </p>
+                    <p className="text-sm font-medium leading-relaxed text-gray-900 dark:text-white">
+                      <ReadMore charLimit={250}>
+                        {capitalizeFLetter(app?.message)}
+                      </ReadMore>
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Job Information */}
-            <div className="rounded-lg border bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-              <h3 className="mb-4 text-lg text-gray-900 dark:text-white">
-                Job Information
-              </h3>
-
-              <div className="">
-                <h4 className="pb-2 text-lg">
-                  <b>Job Title : </b>
-                  {job?.job_title}
-                </h4>
-                {/* <div className="flex gap-3">
- <Building className="text-dyellow" size={18}/>
- <p>{job?.college?.name}</p>
- </div> */}
-              </div>
-
-              {/* Key Details Grid */}
-              <div className="grid grid-cols-1 gap-4 pt-2 dark:border-gray-700 sm:grid-cols-2">
-                <div className="flex items-start gap-3">
-                  <MapPin className="text-dyellow mt-1 h-5 w-5" />
-                  <div>
-                    <p className="text-xs text-gray-500">Location</p>
-                    <p className="font-medium text-gray-800 dark:text-white">
-                      {job?.locations?.map((item) => item?.city).join(", ") ||
-                        "N/A"}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Briefcase className="text-dyellow mt-1 h-5 w-5" />
-                  <div>
-                    <p className="text-xs text-gray-500">Experience</p>
-                    <p className="font-medium text-gray-800 dark:text-white">
-                      {job?.experiences?.name || "N/A"}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Award className="text-dyellow mt-1 h-5 w-5" />
-                  <div>
-                    <p className="text-xs text-gray-500">Qualification</p>
-                    <p className="font-medium text-gray-800 dark:text-white">
-                      {job?.qualification || "N/A"}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Users className="text-dyellow mt-1 h-5 w-5" />
-                  <div>
-                    <p className="text-xs text-gray-500">Openings</p>
-                    <p className="font-medium text-gray-800 dark:text-white">
-                      {job?.number_of_openings || "N/A"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Job Description */}
-              {job?.job_description && (
-                <div className=" mt-4 border-t pt-4">
-                  <h4 className="mb-2 text-lg text-gray-800 dark:text-white">
-                    Job Description
-                  </h4>
-                  <p className="prose-sm max-w-none text-gray-700 dark:text-gray-300">
-                    {job.job_description}
-                  </p>
-                </div>
-              )}
-
-              <div className="mt-4 border-t pt-4">
-                <h4 className="mb-2 text-lg text-gray-800 dark:text-white">
-                  Timeline
-                </h4>
-
-                <div className="flex gap-5">
-                  <div className="flex items-center justify-between rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
-                    <span className=" text-gray-700 dark:text-gray-300">
-                      Start Date
-                    </span>
-                    <span className=" text-gray-900 dark:text-white">
-                      {new Date(job?.start_date).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between rounded-lg bg-purple-50 p-4 dark:bg-purple-900/20">
-                    <span className=" text-gray-700 dark:text-gray-300">
-                      Last Date to Apply
-                    </span>
-                    <span className=" text-gray-900 dark:text-white">
-                      {new Date(job?.last_date).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 p-4 dark:from-green-900/20 dark:to-emerald-900/20">
-                    <span className=" text-gray-700 dark:text-gray-300">
-                      Deadline
-                    </span>
-                    <span
-                      className={` ${
-                        job?.is_deadline_passed
-                          ? "text-red-600"
-                          : "text-green-600"
-                      }`}
-                    >
-                      {new Date(job?.deadline).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
 
             {/* Interview Details */}
             {state.application?.interview_slots?.length > 0 && (
@@ -989,6 +924,113 @@ const ApplicationDetail = () => {
                 {/* Final Decision */}
               </div>
             )}
+
+            <div className="rounded-lg border bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+              <h3 className="mb-4 text-lg text-gray-900 dark:text-white">
+                Job Information
+              </h3>
+
+              <div className="">
+                <h4 className="pb-2 text-lg">
+                  <b>Job Title : </b>
+                  {job?.job_title}
+                </h4>
+              </div>
+
+              {/* Key Details Grid */}
+              <div className="grid grid-cols-1 gap-4 pt-2 dark:border-gray-700 sm:grid-cols-2">
+                <div className="flex items-start gap-3">
+                  <MapPin className="text-dyellow mt-1 h-5 w-5" />
+                  <div>
+                    <p className="text-xs text-gray-500">Location</p>
+                    <p className="font-medium text-gray-800 dark:text-white">
+                      {job?.locations?.map((item) => item?.city).join(", ") ||
+                        "N/A"}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Briefcase className="text-dyellow mt-1 h-5 w-5" />
+                  <div>
+                    <p className="text-xs text-gray-500">Experience</p>
+                    <p className="font-medium text-gray-800 dark:text-white">
+                      {job?.experiences?.name || "N/A"}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Award className="text-dyellow mt-1 h-5 w-5" />
+                  <div>
+                    <p className="text-xs text-gray-500">Qualification</p>
+                    <p className="font-medium text-gray-800 dark:text-white">
+                      {job?.qualification || "N/A"}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Users className="text-dyellow mt-1 h-5 w-5" />
+                  <div>
+                    <p className="text-xs text-gray-500">Openings</p>
+                    <p className="font-medium text-gray-800 dark:text-white">
+                      {job?.number_of_openings || "N/A"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Job Description */}
+              {job?.job_description && (
+                <div className=" mt-4 border-t pt-4">
+                  <h4 className="mb-2 text-lg text-gray-800 dark:text-white">
+                    Job Description
+                  </h4>
+                  <p className="prose-sm max-w-none text-gray-700 dark:text-gray-300">
+                    {job.job_description}
+                  </p>
+                </div>
+              )}
+
+              <div className="mt-4 border-t pt-4">
+                <h4 className="mb-2 text-lg text-gray-800 dark:text-white">
+                  Timeline
+                </h4>
+
+                <div className="flex gap-5">
+                  <div className="flex items-center justify-between rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
+                    <span className=" text-gray-700 dark:text-gray-300">
+                      Start Date
+                    </span>
+                    <span className=" text-gray-900 dark:text-white">
+                      {new Date(job?.start_date).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between rounded-lg bg-purple-50 p-4 dark:bg-purple-900/20">
+                    <span className=" text-gray-700 dark:text-gray-300">
+                      Last Date to Apply
+                    </span>
+                    <span className=" text-gray-900 dark:text-white">
+                      {new Date(job?.last_date).toLocaleDateString()}
+                    </span>
+                  </div>
+                  {job?.is_deadline_passed && (
+                    <div className="flex items-center justify-between rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 p-4 dark:from-green-900/20 dark:to-emerald-900/20">
+                      <span className=" text-gray-700 dark:text-gray-300">
+                        Deadline
+                      </span>
+                      <span
+                        className={` ${
+                          job?.is_deadline_passed
+                            ? "text-red-600"
+                            : "text-green-600"
+                        }`}
+                      >
+                        {new Date(job?.deadline).toLocaleDateString()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Sidebar (Right Column) */}
@@ -1020,7 +1062,7 @@ const ApplicationDetail = () => {
                   className="w-full"
                 />
                 <div className="mt-4 flex items-center justify-between">
-                <div className=" flex justify-end">
+                  <div className=" flex justify-end">
                     <button
                       onClick={() => setState({ showInterviewModal: true })}
                       className="bg-dblue group relative inline-flex transform items-center gap-2 overflow-hidden rounded-lg px-4 py-2 text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
@@ -1040,20 +1082,9 @@ const ApplicationDetail = () => {
                       "Update Status"
                     )}
                   </button>
-                  
                 </div>
               </div>
               {/* Applicant Summary Card */}
-              {app?.message && (
-                <div className="rounded-lg border bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-                  <h4 className="mb-4 text-xl text-gray-800 dark:text-white">
-                    Applicant Summary
-                  </h4>
-                  <p className="text-gray-700 dark:text-gray-300">
-                    {capitalizeFLetter(app?.message)}
-                  </p>
-                </div>
-              )}
 
               {/* Resume Card */}
               {app?.resume && (
@@ -1076,6 +1107,8 @@ const ApplicationDetail = () => {
       </div>
 
       <Modal
+        subTitle="Create Interview Schedule"
+        closeIcon
         open={state.showInterviewModal}
         close={() =>
           setState({
@@ -1092,7 +1125,7 @@ const ApplicationDetail = () => {
           })
         }
         renderComponent={() => (
-          <div className="p-6">
+          <div className="">
             <div className="space-y-5">
               <TextInput
                 title="Select Jobs"
@@ -1109,19 +1142,23 @@ const ApplicationDetail = () => {
                 disabled={true}
               />
 
-              <TextInput
-                title="Select Departments"
-                placeholder="Select Departments"
-                value={state.application?.department?.department_name}
-                onChange={(e) =>
+              <CustomSelect
+                title="Select Department"
+                placeholder="Select Department"
+                options={state?.application?.department_details?.map(
+                  (item: any) => ({ value: item?.id, label: item?.short_name })
+                )}
+                value={state.selectedDepartments}
+                onChange={(e) => {
                   setState({
-                    selectedDepartments: e.target.value,
+                    selectedDepartments: e,
                     errors: { ...state.errors, selectedDepartments: "" },
-                  })
-                }
-                required
+                  });
+                }}
+                // isMulti
+                loading={state.jobLoading}
                 error={state.errors?.selectedDepartments}
-                disabled={true}
+                required
               />
               <TextInput
                 title="Faculty"
@@ -1272,6 +1309,8 @@ const ApplicationDetail = () => {
       {/* // ReSchedule interview slot */}
 
       <Modal
+        subTitle="Interview Schedule"
+        closeIcon
         open={state.isOpenReschedule}
         close={() =>
           setState({
@@ -1289,11 +1328,11 @@ const ApplicationDetail = () => {
           })
         }
         renderComponent={() => (
-          <div className="p-6">
+          <div className="">
             <div className="space-y-5">
               <TextInput
-                title="Select Jobs"
-                placeholder="Select Jobs"
+                title="Select Job"
+                placeholder="Select Job"
                 value={state.application?.job_detail?.job_title}
                 onChange={(e) =>
                   setState({
@@ -1306,7 +1345,7 @@ const ApplicationDetail = () => {
                 disabled={true}
               />
 
-              <TextInput
+              {/* <TextInput
                 title="Select Departments"
                 placeholder="Select Departments"
                 value={state.application?.department?.department_name}
@@ -1318,7 +1357,26 @@ const ApplicationDetail = () => {
                 }
                 required
                 error={state.errors?.selectedDepartments}
-                disabled={true}
+                // disabled={true}
+              /> */}
+
+              <CustomSelect
+                title="Select Department"
+                placeholder="Select Department"
+                options={state?.application?.department_details?.map(
+                  (item: any) => ({ value: item?.id, label: item?.short_name })
+                )}
+                value={state.selectedDepartments}
+                onChange={(e) => {
+                  setState({
+                    selectedDepartments: e,
+                    errors: { ...state.errors, selectedDepartments: "" },
+                  });
+                }}
+                // isMulti
+                loading={state.jobLoading}
+                error={state.errors?.selectedDepartments}
+                required
               />
               <TextInput
                 title="Faculty"

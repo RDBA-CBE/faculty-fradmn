@@ -281,6 +281,8 @@ export const panel = Yup.object().shape({
   email: Yup.string()
     .email("Enter a valid email address")
     .required("Email is required"),
+    filterCollege:
+Yup.string().required("College is required"),
 });
 
 export const interview = Yup.object().shape({
@@ -312,11 +314,13 @@ export const single_interview = Yup.object().shape({
     .min(1, "At least one job is required")
     .required("Job is required"),
 
-  selectedDepartments: Yup.array()
-    .min(1, "At least one department is required")
-    .required("Department is required"),
+  // selectedDepartments: Yup.array()
+  //   .min(1, "At least one department is required")
+  //   .required("Department is required"),
 
   interviewSlot: Yup.string().required("Interview date is required"),
+  selectedDepartments: Yup.string().required("Department is required"),
+
 
   panelMembers: Yup.array()
     .min(1, "At least one panel member is required")

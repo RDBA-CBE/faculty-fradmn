@@ -15,7 +15,7 @@ const ReadMore = ({ children, charLimit = 100, readMoreText = 'Read more', readL
             {children?.length > 400 && (
                 <button
                     onClick={toggleReadMore}
-                    className="text-primary underline"
+                    className="text-[#1E3786] underline"
                 >
                     {isExpanded ? readLessText : readMoreText}
                 </button>

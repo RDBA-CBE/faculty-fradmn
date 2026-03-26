@@ -267,12 +267,25 @@ const master = {
   // Application Status APIs
   application_status_list: (body: any = {}) => {
     let promise = new Promise((resolve, reject) => {
+
       let url = "application-statuses/";
-      if (body?.search) url += `?search=${encodeURIComponent(body.search)}`;
-      if (body?.ordering)
-        url += `${body.search ? "&" : "?"}ordering=${encodeURIComponent(
-          body.ordering
-        )}`;
+      let hasQuery = false;
+      
+      if (body?.search) {
+        url += `${hasQuery ? "&" : "?"}search=${encodeURIComponent(body.search)}`;
+        hasQuery = true;
+      }
+      
+      if (body?.ordering) {
+        url += `${hasQuery ? "&" : "?"}ordering=${encodeURIComponent(body.ordering)}`;
+        hasQuery = true;
+      }
+      
+      if (body?.rexclude_applied_interview === "Yes") {
+        url += `${hasQuery ? "&" : "?"}rexclude_applied_interview=true`;
+        hasQuery = true;
+      }
+        
       instance()
         .get(url)
         .then((res) => resolve(res.data))
