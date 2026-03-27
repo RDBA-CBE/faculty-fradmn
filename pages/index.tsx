@@ -110,7 +110,7 @@ const Dashboard = () => {
     decisionsSelected: 0,
     decisionsRejected: 0,
     outreached: 0,
-    application_update:0
+    application_update: 0,
   });
 
   const [state, setState] = useSetState({
@@ -507,13 +507,20 @@ const Dashboard = () => {
       if (insId) {
         body.institution_id = insId;
       }
-      if (colId) {
-        body.college_id = colId;
+      if (state.collegeFilter?.value) {
+        body.college_id = state.collegeFilter?.value;
+      } else {
+        if (colId) {
+          body.college_id = colId;
+        }
       }
+      if (state.departmentFilter?.value) {
+        body.department_id = state.departmentFilter?.value;
+      }else{
       if (deptId) {
         body.department_id = deptId;
       }
-
+    }
       body.status = "approved";
       const res: any = await Models.job.list(page, body);
 
@@ -685,8 +692,7 @@ const Dashboard = () => {
         decisionsSelected: data?.top_cards?.decisions?.selected ?? 0,
         decisionsRejected: data?.top_cards?.decisions?.rejected ?? 0,
         outreached: data?.top_cards?.outreached?.value ?? 0,
-        application_update:
-          data?.top_cards?.application_status?.value ?? 0,
+        application_update: data?.top_cards?.application_status?.value ?? 0,
       });
     } catch (err) {
       console.error(err);
