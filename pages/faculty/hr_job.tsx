@@ -1173,7 +1173,6 @@ const Job = () => {
                     </button>
 
                     <button
-                      onClickCapture={(e) => e.stopPropagation()}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDelete(row);
