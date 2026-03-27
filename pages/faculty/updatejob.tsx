@@ -139,7 +139,10 @@ export default function Newjob() {
           //   label: res?.college?.college_name,
           // },
         });
-        fetchDepartments(res?.college?.map((item)=>item?.college_id), 1);
+        fetchDepartments(
+          res?.college?.map((item) => item?.college_id),
+          1
+        );
       }
       getJobDetails(res);
     } catch (error) {
@@ -165,10 +168,12 @@ export default function Newjob() {
             value: res?.job_type_obj?.id,
             label: res?.job_type_obj?.name,
           },
-          salary: res?.salary_range_obj?{
-            value: res?.salary_range_obj?.id,
-            label: res?.salary_range_obj?.name,
-          }:null,
+          salary: res?.salary_range_obj
+            ? {
+                value: res?.salary_range_obj?.id,
+                label: res?.salary_range_obj?.name,
+              }
+            : null,
           job_status: {
             value: res?.job_status_obj?.id,
             label: res?.job_status_obj?.name,
@@ -241,12 +246,12 @@ export default function Newjob() {
           //       }))
           //     : [],
           jobRole:
-          res?.roles?.length > 0
-            ? {
-                value: res?.roles?.[0]?.id,
-                label: res?.roles?.[0]?.role_name,
-              }
-            : [],
+            res?.roles?.length > 0
+              ? {
+                  value: res?.roles?.[0]?.id,
+                  label: res?.roles?.[0]?.role_name,
+                }
+              : [],
         });
         if (res?.job_image) {
           setState({
@@ -636,10 +641,9 @@ export default function Newjob() {
         applyLink: state.applyLink,
         jobRole: state.jobRole?.value,
         job_title: state.jobRole?.label,
-
       };
-      console.log('✌️validation --->', validation);
-      
+      console.log("✌️validation --->", validation);
+
       await CreateNewJob.validate(validation, { abortEarly: false });
 
       const body: any = {
@@ -721,7 +725,7 @@ export default function Newjob() {
       }
 
       if (state.jobRole?.value) {
-        body.role_ids = [state.jobRole?.value]
+        body.role_ids = [state.jobRole?.value];
       } else {
         body.role_ids = [];
       }
@@ -1147,8 +1151,12 @@ export default function Newjob() {
                       title="College"
                       options={state.collegeList}
                       value={state.college}
-                      onChange={(option) =>
+                      onChange={(option) =>{
+                        setState({ department: [] });
+
                         handleFieldChange("college", option)
+
+                      }
                       }
                       placeholder="Select college"
                       error={state.error?.college}
@@ -1202,9 +1210,10 @@ export default function Newjob() {
                           label: item.short_name,
                         }))}
                         value={state.college}
-                        onChange={(option) =>
-                          handleFieldChange("college", option)
-                        }
+                        onChange={(option) => {
+
+                          handleFieldChange("college", option);
+                        }}
                         placeholder="Select college"
                         error={state.error?.college}
                         disabled={!state.institution}

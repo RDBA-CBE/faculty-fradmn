@@ -1024,9 +1024,10 @@ export default function Newjob() {
                       title="College"
                       options={state.collegeList}
                       value={state.college}
-                      onChange={(option) =>
-                        handleFieldChange("college", option)
-                      }
+                      onChange={(option) => {
+                        setState({ department: [] });
+                        handleFieldChange("college", option);
+                      }}
                       placeholder="Select college"
                       error={state.error?.college}
                       disabled={!state.institution}

@@ -622,7 +622,7 @@ const Dashboard = () => {
       const res: any = await Models.college.list(page, body);
       const dropdown = res?.results?.map((item) => ({
         value: item.id,
-        label: item.college_name,
+        label: item.short_name,
       }));
       setState({
         collegeLoading: false,

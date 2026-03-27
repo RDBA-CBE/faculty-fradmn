@@ -542,13 +542,13 @@ export const OwnmenuConfig = {
       type: "link",
       icon: "IconMenuForms",
       label: "Job Postings",
-      href: "/faculty/my_job",
+      href: "/faculty/institution_job",
     },
     {
       type: "link",
       icon: "IconMenuTables",
       label: "Applications",
-      href: "/faculty/my_application",
+      href: "/faculty/ins_application",
     },
     {
       type: "link",
@@ -560,7 +560,7 @@ export const OwnmenuConfig = {
       type: "link",
       icon: "IconMenuUsers",
       label: "Users",
-      href: "/faculty/my_users",
+      href: "/faculty/hr_user",
     },
 
     {
@@ -850,6 +850,21 @@ export const RECORDS = [
   {
     value: 2,
     label: "Hr Records",
+  },
+  {
+    value: 3,
+    label: "Admin Records",
+  },
+];
+
+export const RECORDS_FOR_INS_ADMIN = [
+  {
+    value: 1,
+    label: "All Records",
+  },
+  {
+    value: 2,
+    label: "College Admin Records",
   },
   {
     value: 3,
