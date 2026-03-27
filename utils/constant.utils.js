@@ -594,7 +594,7 @@ export const OwnmenuConfig = {
       type: "link",
       icon: "IconMenuUsers",
       label: "Job Seekers",
-      href: "/faculty/my_users",
+      href: "/faculty/job_seekers",
     },
 
     {
