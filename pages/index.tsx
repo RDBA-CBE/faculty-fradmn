@@ -1055,7 +1055,7 @@ const Dashboard = () => {
     } else if (state.activeCard === 4) {
       callListByRole(pageNumber, userList);
     } else if (state.activeCard === 5) {
-      jobList(pageNumber);
+      jobList(pageNumber,null,state.profile?.college?.map((item)=>item?.college_id));
     }
   };
 
