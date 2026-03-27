@@ -256,6 +256,7 @@ const Job = () => {
         jobList: tableData,
         next: res?.next,
         prev: res?.previous,
+        card_cound:res?.counts
       });
     } catch (error) {
       setState({ loading: false });
@@ -641,7 +642,7 @@ const Job = () => {
 
             <div className="flex flex-col">
               <p className="text-2xl  leading-none text-gray-900 dark:text-white">
-                {state.count || 0}
+                {state.card_cound?.total_jobs || 0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Total Jobs
@@ -662,7 +663,7 @@ const Job = () => {
 
             <div className="flex flex-col">
               <p className="text-2xl  leading-none text-gray-900 dark:text-white">
-                {state.jobList?.filter((job) => job.is_approved)?.length || 0}
+                {state.card_cound?.approved_count || 0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Active job posting
@@ -683,7 +684,8 @@ const Job = () => {
 
             <div className="flex flex-col">
               <p className="text-2xl  leading-none text-gray-900 dark:text-white">
-                {state.jobList?.filter((job) => !job.is_approved)?.length || 0}
+                {state.card_cound?.unapproved_count || 0}
+
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 In Active job posting
