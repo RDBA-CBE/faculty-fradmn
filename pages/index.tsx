@@ -2087,7 +2087,7 @@ const Dashboard = () => {
               : [
                   {
                     accessor: "job_title",
-                    title: "Title",
+                    title: "Job Title",
                     sortable: true,
                     render: (row: any) => (
                       <div
