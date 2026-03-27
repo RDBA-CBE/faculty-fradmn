@@ -78,10 +78,10 @@ const Category = () => {
         department_name: item?.department?.short_name,
         department_id: item.department?.id,
         designation: item.designation,
-        college:{
+        college: {
           label: item?.department?.college?.short_name,
           value: item?.department?.college?.id,
-        }
+        },
       }));
 
       setState({
@@ -196,7 +196,7 @@ const Category = () => {
         value: row.department_id,
       },
 
-      filterCollege:row?.college,
+      filterCollege: row?.college,
       // department: {
       //   label: row.department_name,
       //   value: row.department_id,
@@ -205,8 +205,8 @@ const Category = () => {
       decision_maker: row?.decision_maker,
     });
 
-    if(row?.college?.value){
-      departmentList(1,"",false,"",row?.college?.value)
+    if (row?.college?.value) {
+      departmentList(1, "", false, "", row?.college?.value);
     }
   };
 
@@ -265,7 +265,9 @@ const Category = () => {
 
         setState({ errors: validationErrors, submitting: false });
       } else {
-        Failure(error?.error);
+        if (error?.data?.error) {
+          Failure(capitalizeFLetter(error?.data?.error));
+        }
         setState({ submitting: false });
       }
     }

@@ -38,8 +38,11 @@ import {
   Clock,
   FileText,
   Heart,
+  Mail,
   MessageSquare,
+  Phone,
   SlidersHorizontal,
+  User,
   UserCheck,
   X,
 } from "lucide-react";
@@ -2524,212 +2527,322 @@ const Dashboard = () => {
         open={state.isOpenRound}
         close={() => setState({ isOpenRound: false })}
         closeIcon={() => setState({ isOpenRound: false })}
-        padding="px-0 py-5"
+        padding="px-0 py-4"
         renderComponent={() => (
           <div className="flex h-[75vh] flex-col">
             {/* Scrollable Content */}
-            <div className="flex-1 space-y-6 overflow-y-auto px-4">
+            <div className="flex-1 space-y-2 overflow-y-auto px-2">
               {/* Candidate */}
-              <div className="rounded-lg border bg-gray-50 p-4">
-                <h3 className="text-lg font-semibold">
-                  {state.application?.first_name} {state.application?.last_name}
-                </h3>
-                <p className="text-sm text-gray-500">
-                  {state.application?.email} • {state.application?.phone}
+              <div className="rounded-xl border bg-white px-2 py-2 shadow-sm">
+                <p className="mb-2 text-sm font-semibold text-gray-500">
+                  Application Details
                 </p>
+
+                {/* Name */}
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
+                    <User className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <h3 className="text-base font-semibold">
+                    {capitalizeFLetter(state.application?.first_name)}{" "}
+                    {state.application?.last_name}
+                  </h3>
+                </div>
+
+                {/* Email + Phone in single row */}
+                <div className="mt-3 flex flex-wrap items-center gap-6 text-sm text-gray-600">
+                  {/* Email */}
+                  <div className="flex min-w-[200px] items-center gap-2">
+                    <Mail className="h-4 w-4 text-gray-400" />
+                    <span className="truncate">
+                      {state.application?.email || "N/A"}
+                    </span>
+                  </div>
+
+                  {/* Phone */}
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-4 w-4 text-gray-400" />
+                    <span>{state.application?.phone || "N/A"}</span>
+                  </div>
+                </div>
               </div>
 
               {/* Rounds */}
-              <div className="space-y-4 pb-6">
-                {state.application?.interview_slots?.map((round) => (
-                  <div
-                    key={round.id}
-                    className="rounded-lg border bg-white p-4 shadow-sm"
-                  >
-                    {/* Round Header */}
-                    <div className="mb-3 flex items-center justify-between">
-                      <div>
+              <div className="space-y-4  ">
+                {state.application?.interview_slots?.map((round) => {
+                  const isRoundOpen = !!state.expandedRounds?.[round.id];
+                  return (
+                    <div
+                      key={round.id}
+                      className="rounded-lg border bg-white shadow-sm"
+                    >
+                      {/* Round Header — clickable accordion toggle */}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setState({
+                            expandedRounds: {
+                              ...state.expandedRounds,
+                              [round.id]: !isRoundOpen,
+                            },
+                          })
+                        }
+                        className="flex w-full items-center justify-between p-4 text-left"
+                      >
                         <p className="font-semibold">
                           {capitalizeFLetter(round.round_name)}
                         </p>
-                        <p className="text-xs text-gray-500">
-                          {formatScheduleDateTime(
-                            round.scheduled_date,
-                            round.scheduled_time
-                          )}
-                        </p>
-                      </div>
-
-                      <span
-                        className={`rounded px-3 py-1 text-xs font-semibold ${
-                          round.status === "completed"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-yellow-100 text-yellow-700"
-                        }`}
-                      >
-                        {capitalizeFLetter(round.status)}
-                      </span>
-                    </div>
-
-                    {/* Feedback List */}
-                    <div className="space-y-2">
-                      {round.panels?.map((panel) => {
-                        const feedback = panel?.feedbacks?.[0];
-                        return (
-                          <div
-                            key={panel.id}
-                            className="flex items-start justify-between rounded border bg-gray-50 p-3"
+                        <div className="flex items-center gap-3">
+                          <span
+                            className={`rounded px-3 py-1 text-xs font-semibold ${
+                              round.status != "Scheduled"
+                                ? "bg-green-100 text-green-700"
+                                : "bg-yellow-100 text-yellow-700"
+                            }`}
                           >
-                            <div>
-                              <p className="text-sm">{panel.name}</p>
+                            {capitalizeFLetter(round.status)}
+                          </span>
+                          <p className="text-xs text-gray-500">
+                            {formatScheduleDateTime(
+                              round.scheduled_date,
+                              round.scheduled_time
+                            )}
+                          </p>
+                          <svg
+                            className={`h-4 w-4 text-gray-500 transition-transform ${
+                              isRoundOpen ? "rotate-180" : ""
+                            }`}
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 9l-7 7-7-7"
+                            />
+                          </svg>
+                        </div>
+                      </button>
 
-                              {/* {panel?.feedbacks?.[0]?.feedback_text && (
-                              <p className="mt-1 text-sm text-gray-700">
-                                {capitalizeFLetter(
-                                  panel.feedbacks[0].feedback_text
+                      {/* Feedback List */}
+                      {isRoundOpen && (
+                        <div className="space-y-2 border-t px-4 pb-4 pt-3">
+                          <div>Pannel Members With Feedbacks :</div>
+                          {round.panels?.map((panel) => {
+                            const feedback = panel?.feedbacks?.[0];
+                            const panelKey = `${round.id}-${panel.id}`;
+                            const isPanelOpen =
+                              !!state.expandedRounds?.[panelKey];
+                            return (
+                              <div
+                                key={panel.id}
+                                className="rounded border bg-gray-50"
+                              >
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setState({
+                                      expandedRounds: {
+                                        ...state.expandedRounds,
+                                        [panelKey]: !isPanelOpen,
+                                      },
+                                    })
+                                  }
+                                  className="flex w-full items-center justify-between p-3 text-left"
+                                >
+                                  <p className="text-sm font-medium">
+                                    {panel.name}
+                                  </p>
+                                  {feedback && (
+                                    <svg
+                                      className={`h-4 w-4 text-gray-400 transition-transform ${
+                                        isPanelOpen ? "rotate-180" : ""
+                                      }`}
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke="currentColor"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M19 9l-7 7-7-7"
+                                      />
+                                    </svg>
+                                  )}
+                                </button>
+                                {isPanelOpen && feedback && (
+                                  <div className="border-t px-3 pb-3 pt-2">
+                                    <div className="space-y-2 rounded-lg border border-gray-200 bg-white p-3 text-sm dark:border-gray-700 dark:bg-gray-900">
+                                      {feedback.is_same_as_applicant !==
+                                        undefined && (
+                                        <p>
+                                          <span className="font-semibold">
+                                            Same As Applicant :
+                                          </span>{" "}
+                                          {feedback.is_same_as_applicant
+                                            ? "Yes"
+                                            : "No"}
+                                        </p>
+                                      )}
+
+                                      {feedback.academic_record_remark && (
+                                        <p>
+                                          <span className="font-semibold">
+                                            Academic Record :
+                                          </span>{" "}
+                                          {feedback.academic_record_remark}
+                                        </p>
+                                      )}
+
+                                      {feedback.experience_remark && (
+                                        <p>
+                                          <span className="font-semibold">
+                                            Experience :
+                                          </span>{" "}
+                                          {feedback.experience_remark}
+                                        </p>
+                                      )}
+
+                                      {feedback.knowledge_rating && (
+                                        <p>
+                                          <span className="font-semibold">
+                                            Knowledge Rating :
+                                          </span>{" "}
+                                          {feedback.knowledge_rating}
+                                        </p>
+                                      )}
+
+                                      {feedback.knowledge_detail && (
+                                        <p>
+                                          <span className="font-semibold">
+                                            Knowledge Detail :
+                                          </span>{" "}
+                                          {feedback.knowledge_detail}
+                                        </p>
+                                      )}
+
+                                      {feedback.communication_skills_rating && (
+                                        <p>
+                                          <span className="font-semibold">
+                                            Communication Rating :
+                                          </span>{" "}
+                                          {feedback.communication_skills_rating}
+                                        </p>
+                                      )}
+
+                                      {feedback.communication_skills_comment && (
+                                        <p>
+                                          <span className="font-semibold">
+                                            Communication Comment :
+                                          </span>{" "}
+                                          {
+                                            feedback.communication_skills_comment
+                                          }
+                                        </p>
+                                      )}
+
+                                      {feedback.attitude_rating && (
+                                        <p>
+                                          <span className="font-semibold">
+                                            Attitude Rating :
+                                          </span>{" "}
+                                          {feedback.attitude_rating}
+                                        </p>
+                                      )}
+
+                                      {feedback.attitude_comment && (
+                                        <p>
+                                          <span className="font-semibold">
+                                            Attitude Comment :
+                                          </span>{" "}
+                                          {feedback.attitude_comment}
+                                        </p>
+                                      )}
+
+                                      {feedback.overall_assessment_rating && (
+                                        <p>
+                                          <span className="font-semibold">
+                                            Overall Assessment :
+                                          </span>{" "}
+                                          {feedback.overall_assessment_rating}
+                                        </p>
+                                      )}
+
+                                      {feedback.overall_assessment_remark && (
+                                        <p>
+                                          <span className="font-semibold">
+                                            Overall Remark :
+                                          </span>{" "}
+                                          {feedback.overall_assessment_remark}
+                                        </p>
+                                      )}
+
+                                      {feedback.position_recommendation && (
+                                        <p>
+                                          <span className="font-semibold">
+                                            Position Recommendation :
+                                          </span>{" "}
+                                          {feedback.position_recommendation}
+                                        </p>
+                                      )}
+
+                                      {feedback.recommendation_comments && (
+                                        <p>
+                                          <span className="font-semibold">
+                                            Recommendation Comment :
+                                          </span>{" "}
+                                          {feedback.recommendation_comments}
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
                                 )}
-                              </p>
-                            )} */}
-
-                              {feedback && (
-                                <div className="mt-3 space-y-2 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm dark:border-gray-700 dark:bg-gray-900">
-                                  {feedback.is_same_as_applicant !==
-                                    undefined && (
-                                    <p>
-                                      <span className="font-semibold">
-                                        Same As Applicant :
-                                      </span>{" "}
-                                      {feedback.is_same_as_applicant
-                                        ? "Yes"
-                                        : "No"}
-                                    </p>
-                                  )}
-
-                                  {feedback.academic_record_remark && (
-                                    <p>
-                                      <span className="font-semibold">
-                                        Academic Record :
-                                      </span>{" "}
-                                      {feedback.academic_record_remark}
-                                    </p>
-                                  )}
-
-                                  {feedback.experience_remark && (
-                                    <p>
-                                      <span className="font-semibold">
-                                        Experience :
-                                      </span>{" "}
-                                      {feedback.experience_remark}
-                                    </p>
-                                  )}
-
-                                  {feedback.knowledge_rating && (
-                                    <p>
-                                      <span className="font-semibold">
-                                        Knowledge Rating :
-                                      </span>{" "}
-                                      {feedback.knowledge_rating}
-                                    </p>
-                                  )}
-
-                                  {feedback.knowledge_detail && (
-                                    <p>
-                                      <span className="font-semibold">
-                                        Knowledge Detail :
-                                      </span>{" "}
-                                      {feedback.knowledge_detail}
-                                    </p>
-                                  )}
-
-                                  {feedback.communication_skills_rating && (
-                                    <p>
-                                      <span className="font-semibold">
-                                        Communication Rating :
-                                      </span>{" "}
-                                      {feedback.communication_skills_rating}
-                                    </p>
-                                  )}
-
-                                  {feedback.communication_skills_comment && (
-                                    <p>
-                                      <span className="font-semibold">
-                                        Communication Comment :
-                                      </span>{" "}
-                                      {feedback.communication_skills_comment}
-                                    </p>
-                                  )}
-
-                                  {feedback.attitude_rating && (
-                                    <p>
-                                      <span className="font-semibold">
-                                        Attitude Rating :
-                                      </span>{" "}
-                                      {feedback.attitude_rating}
-                                    </p>
-                                  )}
-
-                                  {feedback.attitude_comment && (
-                                    <p>
-                                      <span className="font-semibold">
-                                        Attitude Comment :
-                                      </span>{" "}
-                                      {feedback.attitude_comment}
-                                    </p>
-                                  )}
-
-                                  {feedback.overall_assessment_rating && (
-                                    <p>
-                                      <span className="font-semibold">
-                                        Overall Assessment :
-                                      </span>{" "}
-                                      {feedback.overall_assessment_rating}
-                                    </p>
-                                  )}
-
-                                  {feedback.overall_assessment_remark && (
-                                    <p>
-                                      <span className="font-semibold">
-                                        Overall Remark :
-                                      </span>{" "}
-                                      {feedback.overall_assessment_remark}
-                                    </p>
-                                  )}
-
-                                  {feedback.position_recommendation && (
-                                    <p>
-                                      <span className="font-semibold">
-                                        Position Recommendation :
-                                      </span>{" "}
-                                      {feedback.position_recommendation}
-                                    </p>
-                                  )}
-
-                                  {feedback.recommendation_comments && (
-                                    <p>
-                                      <span className="font-semibold">
-                                        Recommendation Comment :
-                                      </span>{" "}
-                                      {feedback.recommendation_comments}
-                                    </p>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
+             
             </div>
+            <div className="rounded-xl border bg-gray-50 p-2">
+                <div className="flex items-center justify-between">
+                  {/* Status */}
+                  <div>
+                    <p className="text-xs text-gray-500">Application Status</p>
+                    <span className="mt-1 inline-block rounded bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
+                      {capitalizeFLetter(
+                        state.application?.status || "Pending"
+                      )}
+                    </span>
+                  </div>
 
+                  {/* View Application Button */}
+                  <button
+                    onClick={() => {
+                      setState({isOpenRound:false})
+                      router.push(`/faculty/application_detail?id=${state.application?.id}`)
+                      // navigate or open application
+                      // viewApplication(state.application?.id);
+                    }}
+                    className="flex items-center gap-2 rounded border border-blue-600 px-2 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
+                  >
+                    View Application
+                  </button>
+                </div>
+              </div>
             {/* Fixed Bottom Section */}
             <div className="sticky bottom-0 border-t bg-white p-4">
               <div className="flex items-end gap-3">
                 <div className="flex-1">
                   <CustomSelect
-                    options={state.applicationStatusList}
+                    options={state.applicationStatusesList}
                     value={state.appstatus}
                     onChange={(e) => setState({ appstatus: e })}
                     placeholder="Select final status"

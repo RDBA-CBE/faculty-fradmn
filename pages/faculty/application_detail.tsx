@@ -98,7 +98,7 @@ const ApplicationDetail = () => {
       setState({ loading: true });
       const res: any = await Models.application.details(id);
       console.log("✌️res --->", res);
-      await loadPanelMembers(1, "", false, res?.department?.id);
+      // await loadPanelMembers(1, "", false, res?.department?.id);
       setState({ application: res, loading: false });
       const statusList: any = await Models.master.application_status_list();
       const find = statusList?.find((item) => item?.name == res?.status);
@@ -308,7 +308,6 @@ const ApplicationDetail = () => {
         // department_id: state.selectedDepartments?.map((item)=>item?.value),
         // department_id: state.application?.department?.id,
         department_id: state.selectedDepartments?.value,
-
 
         // department_id: state?.selectedDepartments?.map((item) => item?.value),
 
@@ -571,26 +570,31 @@ const ApplicationDetail = () => {
                 </div>
               </div>
             </div>
+            <div className=" flex items-center justify-between">
+              <div className="page-ti  flex items-center gap-3 text-gray-900 dark:text-white">
+                <div className="flex items-center justify-center rounded-xl">
+                  <Calendar className="text-dyellow h-5 w-5" />{" "}
+                </div>
+                Interview Rounds
+              </div>
+
+              <div className=" flex items-center justify-end">
+                <button
+                  onClick={() => setState({ showInterviewModal: true })}
+                  className="bg-dblue group relative inline-flex transform items-center gap-2 overflow-hidden rounded-lg px-4 py-2 text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+                >
+                  <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+                  <UserCheck className="relative z-10 h-5 w-5" />
+                  <span className="relative z-10"> Interview Schedule</span>
+                </button>
+              </div>
+            </div>
 
             {/* Job Information */}
 
             {/* Interview Details */}
             {state.application?.interview_slots?.length > 0 && (
-              <div className="pt-5 dark:border-gray-700">
-                {/* <h3 className="mb-10 flex items-center gap-3 text-3xl text-gray-900 dark:text-white">
- <div className="bg-dblue rounded-xl p-3">
- <Calendar className="h-8 w-8 text-white" />
- </div>
- 
- </h3> */}
-
-                <h3 className="page-ti mb-6 flex items-center gap-3 text-gray-900 dark:text-white">
-                  <div className="flex items-center justify-center rounded-xl">
-                    <Calendar className="text-dyellow h-5 w-5" />{" "}
-                  </div>
-                  Interview Process
-                </h3>
-
+              <div className=" dark:border-gray-700">
                 <div className="space-y-4">
                   {state.application?.interview_slots?.map((round, index) => (
                     <div
@@ -609,15 +613,15 @@ const ApplicationDetail = () => {
                         }
                         className="flex w-full items-center justify-between p-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"
                       >
-                        <div className="flex items-center gap-4">
-                          <div className="bg-dblue flex h-10 w-10 items-center justify-center rounded-full text-lg text-white shadow-md">
+                        <div className="flex items-center gap-2">
+                          <div className="bg-dblue text-md flex h-7 w-7 items-center justify-center rounded-full text-white shadow-md">
                             {index + 1}
                           </div>
                           <div>
                             <h4 className="text-lg text-gray-900 dark:text-white">
                               {round.round_name}
                             </h4>
-                            <p className="mt-1 text-sm font-medium text-gray-500">
+                            <p className=" text-sm text-gray-500">
                               {formatScheduleDateTime(
                                 round.scheduled_date,
                                 round.scheduled_time
@@ -739,7 +743,10 @@ const ApplicationDetail = () => {
                       </div>
 
                       {state.expandedRounds?.[round?.id] && (
-                        <div className="border-t border-gray-200 bg-gray-50/60 p-4 backdrop-blur dark:border-gray-700 dark:bg-gray-900/40">
+                        <div className="border-t border-gray-200 bg-gray-50/60 p-2 backdrop-blur dark:border-gray-700 dark:bg-gray-900/40">
+                          <div className="text-md fond-medium py-2">
+                            Pannel Members With Feedbacks :
+                          </div>
                           <div className="grid gap-4 ">
                             {round.panels.map((panel, i) => {
                               const feedback = panel?.feedbacks?.[0];
@@ -750,27 +757,26 @@ const ApplicationDetail = () => {
                                 >
                                   {/* Header */}
                                   <div className="flex items-center justify-between">
-                                    <div className="flex gap-3">
+                                    <div className="flex gap-3 ">
                                       {/* Avatar */}
-                                      <div className="bg-dblue flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold text-white">
+                                      <div className="bg-dblue flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white">
                                         {panel.name?.charAt(0)}
                                       </div>
-
-                                      {/* Name + Email */}
-                                      <div className="space-y-2">
-                                        <p className="text-[18px] text-gray-900 dark:text-white">
+                                      <div className="flex items-center gap-3">
+                                        {/* Name + Email */}
+                                        <p className="text-[15px] text-gray-900 dark:text-white">
                                           {panel.name}
                                         </p>
+                                      </div>
 
-                                        <div className="flex items-center gap-1 text-sm text-gray-500">
-                                          <Mail className="h-3 w-3" />
-                                          {`${panel.email} (${panel.designation})`}
-                                        </div>
+                                      <div className="flex items-center gap-1 text-sm text-gray-500">
+                                        <Mail className="h-3 w-3" />
+                                        {`${panel.email} (${panel.designation})`}
+                                      </div>
 
-                                        <div className="flex items-center gap-1 text-sm text-gray-500">
-                                          <Building2 className="h-3 w-3" />
-                                          {panel.department?.department_name}
-                                        </div>
+                                      <div className="flex items-center gap-1 text-sm text-gray-500">
+                                        <Building2 className="h-3 w-3" />
+                                        {panel.department?.department_name}
                                       </div>
                                     </div>
 
@@ -786,7 +792,7 @@ const ApplicationDetail = () => {
                                   <div className="my-3 h-px bg-gray-200 dark:bg-gray-700" />
 
                                   {/* Score Progress */}
-                                  {feedback && (
+                                  {feedback ? (
                                     <div className="mt-3 space-y-2 rounded-lg text-sm ">
                                       {feedback.is_same_as_applicant !==
                                         undefined && (
@@ -910,6 +916,10 @@ const ApplicationDetail = () => {
                                         </p>
                                       )}
                                     </div>
+                                  ) : (
+                                    <div className="flex items-center justify-center text-gray-500">
+                                      No Feedbacks
+                                    </div>
                                   )}
                                 </div>
                               );
@@ -989,47 +999,54 @@ const ApplicationDetail = () => {
                   </p>
                 </div>
               )}
+              {(job?.start_date ||
+                job?.last_date ||
+                job?.is_deadline_passed) && (
+                <div className="mt-4 border-t pt-4">
+                  <h4 className="mb-2 text-lg text-gray-800 dark:text-white">
+                    Timeline
+                  </h4>
 
-              <div className="mt-4 border-t pt-4">
-                <h4 className="mb-2 text-lg text-gray-800 dark:text-white">
-                  Timeline
-                </h4>
-
-                <div className="flex gap-5">
-                  <div className="flex items-center justify-between rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
-                    <span className=" text-gray-700 dark:text-gray-300">
-                      Start Date
-                    </span>
-                    <span className=" text-gray-900 dark:text-white">
-                      {new Date(job?.start_date).toLocaleDateString()}
-                    </span>
+                  <div className="flex gap-5">
+                    {job?.start_date && (
+                      <div className=" flex  items-center justify-between gap-2 rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
+                        <span className=" text-gray-700 dark:text-gray-300">
+                          Start Date :
+                        </span>
+                        <span className=" text-gray-900 dark:text-white">
+                          {new Date(job?.start_date).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
+                    {job?.last_date && (
+                      <div className=" flex items-center justify-between gap-2 rounded-lg bg-purple-50 p-4 dark:bg-purple-900/20">
+                        <span className=" text-gray-700 dark:text-gray-300">
+                          Last Date to Apply :
+                        </span>
+                        <span className=" text-gray-900 dark:text-white">
+                          {new Date(job?.last_date).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
+                    {job?.is_deadline_passed && (
+                      <div className="flex items-center justify-between rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 p-4 dark:from-green-900/20 dark:to-emerald-900/20">
+                        <span className=" text-gray-700 dark:text-gray-300">
+                          Deadline
+                        </span>
+                        <span
+                          className={` ${
+                            job?.is_deadline_passed
+                              ? "text-red-600"
+                              : "text-green-600"
+                          }`}
+                        >
+                          {new Date(job?.deadline).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center justify-between rounded-lg bg-purple-50 p-4 dark:bg-purple-900/20">
-                    <span className=" text-gray-700 dark:text-gray-300">
-                      Last Date to Apply
-                    </span>
-                    <span className=" text-gray-900 dark:text-white">
-                      {new Date(job?.last_date).toLocaleDateString()}
-                    </span>
-                  </div>
-                  {job?.is_deadline_passed && (
-                    <div className="flex items-center justify-between rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 p-4 dark:from-green-900/20 dark:to-emerald-900/20">
-                      <span className=" text-gray-700 dark:text-gray-300">
-                        Deadline
-                      </span>
-                      <span
-                        className={` ${
-                          job?.is_deadline_passed
-                            ? "text-red-600"
-                            : "text-green-600"
-                        }`}
-                      >
-                        {new Date(job?.deadline).toLocaleDateString()}
-                      </span>
-                    </div>
-                  )}
                 </div>
-              </div>
+              )}
             </div>
           </div>
 
@@ -1046,7 +1063,7 @@ const ApplicationDetail = () => {
                     app?.status
                   )}`}
                 >
-                  {app?.status_display}
+                  {capitalizeFLetter(app?.status_display)}
                 </span>
                 <CustomSelect
                   options={state.applicationStatusList}
@@ -1062,16 +1079,6 @@ const ApplicationDetail = () => {
                   className="w-full"
                 />
                 <div className="mt-4 flex items-center justify-between">
-                  <div className=" flex justify-end">
-                    <button
-                      onClick={() => setState({ showInterviewModal: true })}
-                      className="bg-dblue group relative inline-flex transform items-center gap-2 overflow-hidden rounded-lg px-4 py-2 text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
-                    >
-                      <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
-                      <UserCheck className="relative z-10 h-5 w-5" />
-                      <span className="relative z-10"> Interview Schedule</span>
-                    </button>
-                  </div>
                   <button
                     onClick={() => updateStatus()}
                     className="bg-dblue group flex items-center gap-2 rounded-lg px-4 py-2  text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
@@ -1154,6 +1161,7 @@ const ApplicationDetail = () => {
                     selectedDepartments: e,
                     errors: { ...state.errors, selectedDepartments: "" },
                   });
+                  loadPanelMembers(1, "", false, e?.value);
                 }}
                 // isMulti
                 loading={state.jobLoading}
@@ -1186,24 +1194,24 @@ const ApplicationDetail = () => {
                     errors: { ...state.errors, panelMembers: "" },
                   });
                 }}
-                onSearch={(searchTerm) => {
-                  loadPanelMembers(
-                    1,
-                    searchTerm,
-                    false,
-                    state.application?.department?.id
-                  );
-                }}
-                loadMore={() => {
-                  if (state.panelNext) {
-                    loadPanelMembers(
-                      state.panelPage + 1,
-                      "",
-                      false,
-                      state.application?.department?.id
-                    );
-                  }
-                }}
+                // onSearch={(searchTerm) => {
+                //   loadPanelMembers(
+                //     1,
+                //     searchTerm,
+                //     false,
+                //     state.application?.department?.id
+                //   );
+                // }}
+                // loadMore={() => {
+                //   if (state.panelNext) {
+                //     loadPanelMembers(
+                //       state.panelPage + 1,
+                //       "",
+                //       false,
+                //       state.application?.department?.id
+                //     );
+                //   }
+                // }}
                 isMulti
                 loading={state.jobLoading}
                 error={state.errors?.panelMembers}
