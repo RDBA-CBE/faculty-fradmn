@@ -8,6 +8,10 @@ const department = {
       if (body?.search) {
         url += `&search=${encodeURIComponent(body.search)}`;
       }
+
+      if (body?.pagination == "No") {
+        url += `&pagination=${encodeURIComponent(false)}`;
+      }
       if (body?.college) {
         url += `&college=${encodeURIComponent(body.college)}`;
       }

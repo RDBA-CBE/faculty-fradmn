@@ -54,6 +54,7 @@ import IconUser from "@/components/Icon/IconUser";
 import Link from "next/link";
 import IconPencilPaper from "@/components/Icon/IconPencilPaper";
 import * as Validation from "@/utils/validation.utils";
+import { RECORDS_FOR_ADMIN } from "@/utils/constant.utils";
 
 const CollegeAndDepartment = () => {
   const dispatch = useDispatch();
@@ -599,13 +600,12 @@ const CollegeAndDepartment = () => {
     catId = null
   ) => {
     try {
-
       const body: any = {};
       if (search) {
         body.search = search;
       }
       body.is_approved = "Yes";
-      body.pagination = "No"
+      body.pagination = "No";
       if (catId?.length > 0) {
         body.job_category_id = catId?.map((item) => item?.value || item);
       }
@@ -1741,7 +1741,7 @@ const CollegeAndDepartment = () => {
         is_legacy: state.is_legacy,
         short_name: state.short_name || "",
         location_id: state.location_id?.value,
-        category:state.category
+        category: state.category,
       };
       console.log("✌️collegeBody --->", collegeBody);
       await Validation.CreateCollege.validate(collegeBody, {
@@ -1859,8 +1859,7 @@ const CollegeAndDepartment = () => {
         is_legacy: state.is_legacy,
         short_name: state.short_name,
         location_id: state.location_id?.value,
-        category:state.category
-
+        category: state.category,
       };
 
       await Validation.CreateCollege.validate(body, {
@@ -2099,7 +2098,7 @@ const CollegeAndDepartment = () => {
           required
         />
         <TextInput
-          title="Short Name"
+          title="College Short Name"
           placeholder="Enter short name"
           value={state.short_name}
           onChange={(e) => handleFormChange("short_name", e.target.value)}
@@ -2231,7 +2230,6 @@ const CollegeAndDepartment = () => {
           loading={state.catLoading}
           title="Select category"
           error={state.errors?.category}
-
           required
         />
 
@@ -2723,22 +2721,26 @@ const CollegeAndDepartment = () => {
       accessor: "college_code",
       title: "College Code",
       sortable: true,
-      render: ({ college_code }) => (
-        <span className="inline-flex items-center justify-center rounded-full bg-blue-100 px-4 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-          {college_code}
-        </span>
+      render: (row) => (
+        <div
+          onClick={() => handleEdit(row)}
+          className="inline-flex cursor-pointer items-center justify-center rounded-full bg-blue-100 px-4 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+        >
+          {row?.college_code}
+        </div>
       ),
     },
     {
       accessor: "short_name",
       title: "College Name",
       sortable: true,
-      render: ({ short_name }) => (
+      render: (row) => (
         <div
-          className="font-medium text-gray-900 dark:text-white"
-          title={short_name}
+          onClick={() => handleEdit(row)}
+          className="cursor-pointer font-medium text-gray-900 dark:text-white"
+          title={row.short_name}
         >
-          {short_name}
+          {row.short_name}
         </div>
       ),
     },
@@ -2758,29 +2760,19 @@ const CollegeAndDepartment = () => {
     },
 
     {
-      accessor: "college_email",
-      title: "Email",
+      accessor: "total_departments",
+      title: "Total Departments",
+      render: ({ total_departments }) => (
+        <div className="text-gray-600 dark:text-gray-400">
+          {total_departments}
+        </div>
+      ),
       sortable: true,
-      render: ({ college_email }) => (
-        <span
-          title={college_email}
-          className="text-gray-600 dark:text-gray-400"
-        >
-          {truncateText(college_email)}
-        </span>
-      ),
-    },
-    {
-      accessor: "college_phone",
-      title: "Phone",
-      render: ({ college_phone }) => (
-        <div className="text-gray-600 dark:text-gray-400">{college_phone}</div>
-      ),
     },
 
     {
       accessor: "total_departments",
-      title: "Total Departments",
+      title: "Total Applications",
       render: ({ total_departments }) => (
         <div className="text-gray-600 dark:text-gray-400">
           {total_departments}
@@ -2951,7 +2943,9 @@ const CollegeAndDepartment = () => {
       <div className="mb-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
-            <h1 className="page-ti text-transparent">Colleges</h1>
+            <h1 className="page-ti text-transparent">
+              Colleges and Deparments
+            </h1>
             <p className="text-gray-600 dark:text-gray-400">
               Manage colleges and departments
             </p>
@@ -2962,51 +2956,17 @@ const CollegeAndDepartment = () => {
           >
             <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
             <IconPlus className="relative z-10 h-5 w-5" />
-            <span className="relative z-10">
-              Add {state.activeTab === "colleges" ? "College" : "Department"}
-            </span>
+            <span className="relative z-10">Add College</span>
           </button>
         </div>
       </div>
 
-      {/* Tabs */}
-      {/* <div className="mb-4">
-        <div className="inline-flex rounded-lg bg-white p-1 dark:bg-gray-800">
-          <button
-            onClick={() => handleTabChange("colleges")}
-            className={`rounded-md px-2 py-1 text-sm font-medium transition-all duration-200 ${
-              state.activeTab === "colleges"
-                ? "bg-lyellow text-black shadow-sm dark:bg-gray-700 dark:text-blue-400"
-                : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-            }`}
-          >
-            Colleges
-          </button>
-          <button
-            onClick={() => handleTabChange("departments")}
-            className={`rounded-md px-2 py-1 text-sm font-medium transition-all duration-200 ${
-              state.activeTab === "departments"
-                ? "bg-lyellow text-black shadow-sm dark:bg-gray-700 dark:text-blue-400"
-                : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-            }`}
-          >
-            Departments
-          </button>
-        </div>
-      </div> */}
-
-      {/* Filters Section */}
       <div className="mb-5 rounded-2xl  backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
-        {/* <div className="mb-4 flex items-center gap-2">
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-            Filters
-          </h3>
-        </div> */}
         <div className="flex gap-4 ">
           <div className="flex gap-4">
             <div className="group relative">
               <TextInput
-                placeholder={`Search ${state.activeTab}...`}
+                placeholder={`Search colleges...`}
                 value={state.search}
                 onChange={(e) => setState({ search: e.target.value })}
                 icon={<IconSearch className="h-4 w-4" />}
@@ -3026,42 +2986,11 @@ const CollegeAndDepartment = () => {
                 loading={state.institutionLoading}
               />
             </div>
-
-            {state.activeTab === "departments" && (
-              <div className="group relative z-50">
-                <CustomSelect
-                  options={state.collegeFilterOptions}
-                  value={state.collegeFilter}
-                  onChange={handleCollegeFilterChange}
-                  placeholder="Select College"
-                  isClearable={true}
-                  isSearchable={true}
-                  onSearch={handleCollegeFilterSearch}
-                  loadMore={handleLoadMoreColleges}
-                  loading={state.collegeFilterLoading}
-                />
-              </div>
-            )}
           </div>
           {/* {state.activeTab === "colleges" && ( */}
           <div className="group relative z-50">
             <CustomSelect
-              options={[
-                {
-                  value: 1,
-                  label:
-                    state.activeTab === "colleges"
-                      ? "Own College"
-                      : "Own Department",
-                },
-                {
-                  value: 2,
-                  label:
-                    state.activeTab === "colleges"
-                      ? "Not Own College"
-                      : "Not Own Department",
-                },
-              ]}
+              options={RECORDS_FOR_ADMIN}
               value={state.sortingFilter}
               onChange={(e) => setState({ sortingFilter: e })}
               placeholder={
@@ -3081,7 +3010,7 @@ const CollegeAndDepartment = () => {
         <div className="mb-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-bold text-gray-800 dark:text-white">
-              {state.activeTab === "colleges" ? "Colleges" : "Departments"} List
+            College List
             </h3>
             <div className="flex items-center gap-4">
               {state.selectedRecords.length > 0 && (
@@ -3134,11 +3063,7 @@ const CollegeAndDepartment = () => {
                 </div>
               </div>
             }
-            columns={
-              state.activeTab === "colleges"
-                ? collegeColumns
-                : departmentColumns
-            }
+            columns={collegeColumns}
             sortStatus={{
               columnAccessor: state.sortBy,
               direction: state.sortOrder as "asc" | "desc",

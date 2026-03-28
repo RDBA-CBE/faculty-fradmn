@@ -11,6 +11,7 @@ import IconLoader from "@/components/Icon/IconLoader";
 import Pagination from "@/components/pagination/pagination";
 import {
   capitalizeFLetter,
+  Dropdown,
   formatScheduleDateTime,
   showDeleteAlert,
   truncateText,
@@ -21,11 +22,7 @@ import { Models } from "@/imports/models.import";
 import { Success, Failure } from "@/utils/function.utils";
 import useDebounce from "@/hook/useDebounce";
 import Swal from "sweetalert2";
-import {
-  FRONTEND_URL,
-  PREFERENCES,
-  ROLES,
-} from "@/utils/constant.utils";
+import { FRONTEND_URL, PREFERENCES, ROLES } from "@/utils/constant.utils";
 import {
   CalendarCheck,
   Clock,
@@ -132,19 +129,14 @@ const Users = () => {
   useEffect(() => {
     dispatch(setPageTitle("Users"));
     profile();
+    master_department();
   }, [dispatch]);
 
   useEffect(() => {
     if (state.profile) {
       userList(1);
     }
-    setState({
-      sortingFilter: {
-        value: 1,
-        label: "Own Record",
-      },
-    });
-  }, [state.activeTab, state.profile]);
+  }, [state.activeTab, state.profile, state.department]);
 
   useEffect(() => {
     setState({
@@ -200,6 +192,7 @@ const Users = () => {
         reveal_name: item?.reveal_name,
         current_location: item?.current_location,
         current_position: item?.current_position,
+        department_master: item?.department_master?.short_name,
       }));
 
       setState({
@@ -209,6 +202,32 @@ const Users = () => {
       });
     } catch (error) {
       setState({ loading: false, userList: [], userCount: 0 });
+    }
+  };
+
+  const master_department = async (
+    page = 1,
+    search = "",
+    loadMore = false,
+  ) => {
+    try {
+      const body: any = {};
+      if (search) {
+        body.search = search;
+      }
+      body.is_approved = "Yes";
+      body.pagination = "No";
+      const res: any = await Models.master.dept_list(body, page);
+      const dropdown = Dropdown(res?.results, "short_name");
+      setState({
+        master_department: loadMore
+          ? [...state.master_department, ...dropdown]
+          : dropdown,
+        masterNext: res?.next,
+        masterPage: page,
+      });
+    } catch (error) {
+      console.log("✌️error --->", error);
     }
   };
 
@@ -235,6 +254,10 @@ const Users = () => {
       body.net_cleared = values.includes(2);
       body.set_cleared = values.includes(3);
       body.slet_cleared = values.includes(4);
+    }
+
+    if (state.department?.value) {
+      body.department_master_id = state.department?.value;
     }
 
     return body;
@@ -425,7 +448,7 @@ const Users = () => {
         title: "Department",
         render: (row: any) => (
           <div className="text-gray-600 dark:text-gray-400">
-            {row?.department || "-"}
+            {row?.department_master || "-"}
           </div>
         ),
       },
@@ -649,13 +672,11 @@ const Users = () => {
           </div>
           <div className="group relative">
             <CustomSelect
-              options={PREFERENCES}
+              options={state.master_department}
               value={state.department}
               onChange={(e) => setState({ department: e })}
               placeholder="Select department"
               isClearable={true}
-              isMulti
-              disabled
             />
           </div>
         </div>

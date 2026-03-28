@@ -154,6 +154,12 @@ const auth = {
         url += `&active_job_seeker=${encodeURIComponent(true)}`;
       }
 
+      if (body?.department_master_id) {
+        url += `&department_master_id=${encodeURIComponent(body?.department_master_id)}`;
+      }
+
+      
+
       instance()
         .get(url)
         .then((res) => {

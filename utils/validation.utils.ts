@@ -73,10 +73,9 @@ export const CreateCollege = Yup.object().shape({
   location_id: Yup.number().required("Location is required"),
   college_address: Yup.string().required("College address is required"),
   category: Yup.array()
-  .min(1, "At least one category is required")
-  .required("Category is required")
-  .nullable(true),
-  
+    .min(1, "At least one category is required")
+    .required("Category is required")
+    .nullable(true),
 });
 
 export const CreateCollegeForm = Yup.object().shape({
@@ -206,9 +205,7 @@ export const CreateNewJob = Yup.object().shape({
     .nullable(true),
   // salary: Yup.string().required("Salary range is required"),
 
-  jobRole: Yup.string()
-    .required("Job role is required")
-    .nullable(true),
+  jobRole: Yup.string().required("Job role is required").nullable(true),
 
   priority: Yup.string().required("Job urgency is required"),
   // deadline: Yup.string().required("Deadline is required"),
@@ -281,8 +278,7 @@ export const panel = Yup.object().shape({
   email: Yup.string()
     .email("Enter a valid email address")
     .required("Email is required"),
-    filterCollege:
-Yup.string().required("College is required"),
+  filterCollege: Yup.string().required("College is required"),
 });
 
 export const interview = Yup.object().shape({
@@ -321,7 +317,6 @@ export const single_interview = Yup.object().shape({
   interviewSlot: Yup.string().required("Interview date is required"),
   selectedDepartments: Yup.string().required("Department is required"),
 
-
   panelMembers: Yup.array()
     .min(1, "At least one panel member is required")
     .required("Panel member is required"),
@@ -341,7 +336,6 @@ export const master_dept = Yup.object().shape({
   job_category_id: Yup.array()
     .min(1, "At least one category is required")
     .required("Category is required"),
-  
 });
 
 export const master_job_role = Yup.object().shape({
@@ -351,4 +345,34 @@ export const master_job_role = Yup.object().shape({
 export const user_interview = Yup.object().shape({
   interviewSlot: Yup.string().required("Interview date is required"),
   roundName: Yup.string().required("Round name is required"),
+});
+
+export const create_hr = Yup.object().shape({
+  username: Yup.string().required("Username is required"),
+  email: Yup.string()
+    .email("Please enter a valid email address")
+    .required("Email is required"),
+  password: Yup.string()
+    .min(8, "Password must be at least 8 characters")
+    .required("Password is required"),
+  password_confirm: Yup.string()
+    .oneOf([Yup.ref("password")], "Passwords must match")
+    .required("Confirm password is required"),
+  phone: Yup.string()
+    .matches(/^[+]?[0-9]{10,15}$/, "Please enter a valid phone number")
+    .required("Phone number is required"),
+  gender: Yup.string().required("Gender is required"),
+  profile_institution: Yup.string().required("Institution is required"),
+});
+
+export const update_hr = Yup.object().shape({
+  username: Yup.string().required("Username is required"),
+  email: Yup.string()
+    .email("Please enter a valid email address")
+    .required("Email is required"),
+  phone: Yup.string()
+    .matches(/^[+]?[0-9]{10,15}$/, "Please enter a valid phone number")
+    .required("Phone number is required"),
+  gender: Yup.string().required("Gender is required"),
+  profile_institution: Yup.string().required("Institution is required"),
 });

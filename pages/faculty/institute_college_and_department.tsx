@@ -929,11 +929,10 @@ const CollegeAndDepartment = () => {
       } else {
         body.naac_accreditation_ids = [];
       }
-
-      if (state.newImages?.length > 0 && state.images?.length === 0) {
-        body.college_logo = state.newImages[0];
-      } else if (state.college_logo?.length > 0) {
+      if (state.college_logo?.length > 0) {
         body.college_logo = state.college_logo[0];
+      } else if (state.newImages?.length > 0) {
+        body.college_logo = state.newImages?.[0];
       } else {
         body.college_logo = null;
       }
@@ -1125,7 +1124,7 @@ const CollegeAndDepartment = () => {
           disabled
         />
         <TextInput
-          title="Short Name"
+          title="College Short Name"
           placeholder="Enter short name"
           value={state.short_name}
           onChange={(e) => handleFormChange("short_name", e.target.value)}
@@ -1281,6 +1280,7 @@ const CollegeAndDepartment = () => {
         />
         <ImageUpload
           existingImages={state.college_logo}
+          onDeleteImage={() => setState({ college_logo: [] })}
           onImagesChange={(image) => {
             setState({ newImages: image });
             console.log("✌️image --->", image);
@@ -1549,9 +1549,12 @@ const CollegeAndDepartment = () => {
       accessor: "college_code",
       title: "College Code",
       sortable: true,
-      render: ({ college_code }) => (
-        <span className="inline-flex items-center justify-center rounded-full bg-blue-100 px-4 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-          {college_code}
+      render: (row) => (
+        <span
+          onClick={() => handleEdit(row)}
+          className="inline-flex cursor-pointer items-center justify-center rounded-full bg-blue-100 px-4 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+        >
+          {capitalizeFLetter(row?.college_code)}
         </span>
       ),
     },
@@ -1559,12 +1562,12 @@ const CollegeAndDepartment = () => {
       accessor: "short_name",
       title: "College Name",
       sortable: true,
-      render: ({ short_name }) => (
+      render: (row) => (
         <div
-          className="font-medium text-gray-900 dark:text-white"
-          title={short_name}
+          className=" font-medium text-gray-900 dark:text-white"
+          title={row?.short_name}
         >
-          {short_name}
+          {capitalizeFLetter(row?.short_name)}
         </div>
       ),
     },
@@ -1687,7 +1690,7 @@ const CollegeAndDepartment = () => {
       <div className="mb-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
-            <h1 className="page-ti text-transparent">Colleges</h1>
+            <h1 className="page-ti text-transparent">Colleges and Deparments</h1>
             <p className="text-gray-600 dark:text-gray-400">
               Manage colleges and departments
             </p>
@@ -1790,7 +1793,7 @@ const CollegeAndDepartment = () => {
         <div className="mb-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-bold text-gray-800 dark:text-white">
-              {state.activeTab === "colleges" ? "Colleges" : "Departments"} List
+            College List
             </h3>
             <div className="flex items-center gap-4">
               {state.selectedRecords.length > 0 && (

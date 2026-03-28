@@ -571,7 +571,7 @@ export const OwnmenuConfig = {
       children: [
         {
           label: "Panel Members",
-          href: "/faculty/master/panel",
+          href: "/faculty/master/ins_panel",
         },
       ],
     },
@@ -888,5 +888,21 @@ export const PREFERENCES = [
   {
     value: 4,
     label: "SLET Cleared",
+  },
+];
+
+
+export const RECORDS_FOR_ADMIN = [
+  {
+    value: 1,
+    label: "All Records",
+  },
+  {
+    value: 2,
+    label: "Own Records",
+  },
+  {
+    value: 3,
+    label: "Not Own Records",
   },
 ];

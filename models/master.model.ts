@@ -635,6 +635,14 @@ const master = {
       let url = `interview-panels/?page=${page}`;
       if (body?.search) url += `&search=${encodeURIComponent(body.search)}`;
       if (body?.department_id) url += `&department_id=${body.department_id}`;
+      if (body?.college_id) url += `&college_id=${body.college_id}`;
+      if (body?.institution_id) url += `&institution_id=${body.institution_id}`;
+
+
+      
+
+
+      
 
       instance()
         .get(url)

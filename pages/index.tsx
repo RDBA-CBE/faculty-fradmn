@@ -23,6 +23,7 @@ import PrivateRouter from "@/hook/privateRouter";
 import {
   buildFormData,
   capitalizeFLetter,
+  Dropdown,
   Failure,
   formatScheduleDateTime,
   showDeleteAlert,
@@ -134,6 +135,7 @@ const Dashboard = () => {
     interviewStatus: null,
     interview_link: "",
     refFilter: [],
+    cards: [],
   });
 
   const debounceSearch = useDebounce(state.search, 500);
@@ -147,6 +149,7 @@ const Dashboard = () => {
     fetchDashboard();
     profiles();
     applicationStatus();
+    master_department();
   }, []);
 
   useEffect(() => {
@@ -164,6 +167,8 @@ const Dashboard = () => {
       sortBy: "",
       end_date: "",
       start_date: "",
+      departmentFilter:"",
+    collegeFilter:""
     });
   }, [state.activeCard]);
 
@@ -217,86 +222,16 @@ const Dashboard = () => {
     // state.activeCard,
   ]);
 
-  const card3 =
-    state.profile?.role === ROLES.INSTITUTION_ADMIN ||
-    state.profile?.role === ROLES.SUPER_ADMIN
-      ? {
-          id: 4,
-          label: "Colleges",
-          value: stats.colleges,
-          color: "text-[#dd22cc]",
-          bg: "bg-indigo-100",
-          mainbg: "bg-[#d2c1f7f2]",
-          icon: <IconUser className="h-7 w-7" />,
-          href: null,
-          sub: null,
-        }
-      : {
-          id: 4,
-          label: "Job Seekers",
-          value: stats.outreached,
-          color: "text-[#dd22cc]",
-          bg: "bg-indigo-100",
-          mainbg: "bg-[#d2c1f7f2]",
-          icon: <IconUser className="h-7 w-7" />,
-          href: "/faculty/dashboard/job",
-          sub: null,
-        };
-
-  const statCards = [
-    {
-      id: 1,
-      label: "Applications",
-      value: stats.applications,
-      color: "text-orange-600",
-      bg: "bg-info-light",
-      mainbg: "bg-orange-100",
-      icon: <IconUsers className="h-7 w-7" />,
-      href: "/faculty/dashboard/applications",
-      sub: null,
-    },
-
-    {
-      id: 2,
-      label: "Application Updates",
-      value: stats.application_update,
-      color: "text-orange-600",
-      bg: "bg-info-light",
-      mainbg: "bg-green-100",
-      icon: <IconUsers className="h-7 w-7" />,
-      href: "/faculty/dashboard/applications",
-      sub: null,
-    },
-    {
-      id: 3,
-      label: "Interviews Scheduled",
-      value: stats.interviews,
-      color: "text-pink-600",
-      bg: "bg-warning-light",
-      mainbg: "bg-pink-100",
-      icon: <IconCalendar className="h-7 w-7" />,
-      href: "/faculty/dashboard/interview",
-      sub: null,
-    },
-    card3,
-    {
-      id: 5,
-      label: "Job Postings",
-      value: stats.activeJobs,
-      color: "text-dblue",
-      bg: "bg-primary-light",
-      mainbg: "bg-blue-100",
-      icon: <IconBriefcase className="h-7 w-7" />,
-      href: "/faculty/dashboard/job",
-      sub: null,
-    },
-  ];
+  useEffect(() => {
+    cards(state.profile?.role);
+  }, [state.profile]);
 
   const profiles = async () => {
     console.log("✌️profiles --->");
     try {
       const res: any = await Models.auth.profile();
       setState({ profile: res });
+      cards(res?.role);
       profileRef.current = true;
       if (res?.role == ROLES.SUPER_ADMIN) {
         collegeDropdownList(1, "", false, "", res.id);
@@ -345,6 +280,121 @@ const Dashboard = () => {
     } catch (error) {
       console.error("Error fetching profile:", error);
     }
+  };
+
+  const cards = (role) => {
+    let CARDS = [];
+    if (role == ROLES.HR) {
+      CARDS = [
+        {
+          id: 1,
+          label: "Applications",
+          value: stats.applications,
+          color: "text-orange-600",
+          bg: "bg-info-light",
+          mainbg: "bg-orange-100",
+          icon: <IconUsers className="h-7 w-7" />,
+          href: "/faculty/dashboard/applications",
+          sub: null,
+        },
+
+        {
+          id: 2,
+          label: "Application Updates",
+          value: stats.application_update,
+          color: "text-orange-600",
+          bg: "bg-info-light",
+          mainbg: "bg-green-100",
+          icon: <IconUsers className="h-7 w-7" />,
+          href: "/faculty/dashboard/applications",
+          sub: null,
+        },
+        {
+          id: 3,
+          label: "Interviews Scheduled",
+          value: stats.interviews,
+          color: "text-pink-600",
+          bg: "bg-warning-light",
+          mainbg: "bg-pink-100",
+          icon: <IconCalendar className="h-7 w-7" />,
+          href: "/faculty/dashboard/interview",
+          sub: null,
+        },
+        {
+          id: 4,
+          label: "Job Seekers",
+          value: stats.outreached,
+          color: "text-[#dd22cc]",
+          bg: "bg-indigo-100",
+          mainbg: "bg-[#d2c1f7f2]",
+          icon: <IconUser className="h-7 w-7" />,
+          href: "/faculty/dashboard/job",
+          sub: null,
+        },
+        {
+          id: 5,
+          label: "Job Postings",
+          value: stats.activeJobs,
+          color: "text-dblue",
+          bg: "bg-primary-light",
+          mainbg: "bg-blue-100",
+          icon: <IconBriefcase className="h-7 w-7" />,
+          href: "/faculty/dashboard/job",
+          sub: null,
+        },
+      ];
+    }
+    if (role == ROLES.INSTITUTION_ADMIN) {
+      CARDS = [
+        {
+          id: 1,
+          label: "Applications",
+          value: stats.applications,
+          color: "text-orange-600",
+          bg: "bg-info-light",
+          mainbg: "bg-orange-100",
+          icon: <IconUsers className="h-7 w-7" />,
+          href: "/faculty/dashboard/applications",
+          sub: null,
+        },
+
+        {
+          id: 2,
+          label: "Application Updates",
+          value: stats.application_update,
+          color: "text-orange-600",
+          bg: "bg-info-light",
+          mainbg: "bg-green-100",
+          icon: <IconUsers className="h-7 w-7" />,
+          href: "/faculty/dashboard/applications",
+          sub: null,
+        },
+        {
+          id: 3,
+          label: "Interviews Scheduled",
+          value: stats.interviews,
+          color: "text-pink-600",
+          bg: "bg-warning-light",
+          mainbg: "bg-pink-100",
+          icon: <IconCalendar className="h-7 w-7" />,
+          href: "/faculty/dashboard/interview",
+          sub: null,
+        },
+
+        {
+          id: 5,
+          label: "Job Postings",
+          value: stats.activeJobs,
+          color: "text-dblue",
+          bg: "bg-primary-light",
+          mainbg: "bg-blue-100",
+          icon: <IconBriefcase className="h-7 w-7" />,
+          href: "/faculty/dashboard/job",
+          sub: null,
+        },
+      ];
+    }
+    setState({ cards: CARDS });
   };
 
   const userList = async (page, ins = null, college = null, dept = null) => {
@@ -401,6 +451,8 @@ const Dashboard = () => {
         reveal_name: item?.reveal_name,
         current_location: item?.current_location,
         current_position: item?.current_position,
+        department_master: item?.department_master?.short_name,
+
       }));
 
       setState({
@@ -519,11 +571,11 @@ const Dashboard = () => {
       }
       if (state.departmentFilter?.value) {
         body.department_id = state.departmentFilter?.value;
-      }else{
-      if (deptId) {
-        body.department_id = deptId;
+      } else {
+        if (deptId) {
+          body.department_id = deptId;
+        }
       }
-    }
       body.status = "approved";
       const res: any = await Models.job.list(page, body);
 
@@ -643,11 +695,13 @@ const Dashboard = () => {
     if (state.institutionFilter?.value) {
       body.institution = state.institutionFilter.value;
     }
+    
     if (state.collegeFilter?.value) {
       body.college = state.collegeFilter.value;
     }
     if (state.departmentFilter?.value) {
       body.department = state.departmentFilter.value;
+      body.department_master_id=state.departmentFilter.value;
     }
     if (state.start_date) {
       body.start_date = moment(state.start_date).format("YYYY-MM-DD");
@@ -702,33 +756,34 @@ const Dashboard = () => {
     }
   };
 
-  const ExceptInterviewAndAppliedList = async () => {
+  const master_department = async (
+    page = 1,
+    search = "",
+    loadMore = false,
+    catId = null
+  ) => {
     try {
-      setState({ applicationStatusLoading: true });
-      const res: any = await Models.master.application_status_list();
-      const dropdown = res?.find((item) => item.name == "Interview Scheduled");
-      const role = state.profile?.role;
-      const colleges = state.profile?.college?.map((c: any) => c.college_id);
-      const instId = state.profile?.institution?.id;
-      const deptId = state.profile?.department?.department_id;
+      const body: any = {};
+      if (search) {
+        body.search = search;
+      }
+      body.is_approved = "Yes";
+      body.pagination = "No";
+      if (catId?.length > 0) {
+        body.job_category_id = catId?.map((item) => item?.value || item);
+      }
 
-      if (role === ROLES.SUPER_ADMIN)
-        applicationList(1, null, null, null, state.profile?.id, dropdown?.id);
-      else if (role === ROLES.INSTITUTION_ADMIN)
-        applicationList(1, instId, null, null, state.profile?.id, dropdown?.id);
-      else if (role === ROLES.HR)
-        applicationList(
-          1,
-          null,
-          colleges,
-          null,
-          state.profile?.id,
-          dropdown?.id
-        );
-      else if (role === ROLES.HOD)
-        applicationList(1, null, null, deptId, state.profile?.id, dropdown?.id);
+      const res: any = await Models.master.dept_list(body, page);
+      const dropdown = Dropdown(res?.results, "short_name");
+      setState({
+        master_department: loadMore
+          ? [...state.master_department, ...dropdown]
+          : dropdown,
+        masterNext: res?.next,
+        masterPage: page,
+      });
     } catch (error) {
-      setState({ applicationStatusLoading: false });
+      console.log("✌️error --->", error);
     }
   };
 
@@ -1055,7 +1110,11 @@ const Dashboard = () => {
     } else if (state.activeCard === 4) {
       callListByRole(pageNumber, userList);
     } else if (state.activeCard === 5) {
-      jobList(pageNumber,null,state.profile?.college?.map((item)=>item?.college_id));
+      jobList(
+        pageNumber,
+        null,
+        state.profile?.college?.map((item) => item?.college_id)
+      );
     }
   };
 
@@ -1430,8 +1489,12 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen dark:from-gray-900 dark:to-gray-800">
       {/* Stat Cards */}
-      <div className="mb-3 grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-5">
-        {statCards.map((card) => (
+      <div
+        className={`mb-3 grid grid-cols-2 gap-4 sm:grid-cols-3 ${
+          state.profile?.role == ROLES.HR ? "xl:grid-cols-5" : "xl:grid-cols-4"
+        } `}
+      >
+        {state.cards.map((card) => (
           <div
             key={card.label}
             className={`panel rounded-lg p-4 ${
@@ -1513,32 +1576,42 @@ const Dashboard = () => {
                 isClearable={true}
               />
             )}
-
-            <CustomSelect
-              options={state.departmentList}
-              value={state.departmentFilter}
-              onChange={handleDepartmentChange}
-              placeholder="Select department"
-              isClearable={true}
-              // onSearch={(searchTerm) => {
-              //   const ids = getDeptCollegeIds();
-              //   if (ids) departmentDropdownList(1, searchTerm, false, ids);
-              // }}
-              // loadMore={() => {
-              //   if (state.departmentNext) {
-              //     const ids = getDeptCollegeIds();
-              //     if (ids)
-              //       departmentDropdownList(
-              //         state.departmentPage + 1,
-              //         "",
-              //         true,
-              //         ids
-              //       );
-              //   }
-              // }}
-              loading={state.departmentLoading}
-              disabled={!state.collegeFilter}
-            />
+            {state.activeCard == 4 ? (
+              <CustomSelect
+                options={state.master_department}
+                value={state.departmentFilter}
+                onChange={handleDepartmentChange}
+                placeholder="Select department"
+                isClearable={true}
+                loading={state.departmentLoading}
+              />
+            ) : (
+              <CustomSelect
+                options={state.departmentList}
+                value={state.departmentFilter}
+                onChange={handleDepartmentChange}
+                placeholder="Select department"
+                isClearable={true}
+                // onSearch={(searchTerm) => {
+                //   const ids = getDeptCollegeIds();
+                //   if (ids) departmentDropdownList(1, searchTerm, false, ids);
+                // }}
+                // loadMore={() => {
+                //   if (state.departmentNext) {
+                //     const ids = getDeptCollegeIds();
+                //     if (ids)
+                //       departmentDropdownList(
+                //         state.departmentPage + 1,
+                //         "",
+                //         true,
+                //         ids
+                //       );
+                //   }
+                // }}
+                loading={state.departmentLoading}
+                disabled={!state.collegeFilter}
+              />
+            )}
 
             {/* <CustomSelect
               options={state.collegeList}
@@ -1974,60 +2047,14 @@ const Dashboard = () => {
                   {
                     accessor: "department",
                     title: "Department",
-                    render: ({ department }) => {
-                      if (!department || department?.length === 0) {
-                        return <span className="text-gray-400">-</span>;
-                      }
-                      const firstDept = department?.[0];
-                      const otherDept = department?.slice(1);
-                      const maxShow = 3;
-                      const remaining = otherDept?.length - maxShow;
-                      const visibleDept = otherDept?.slice(0, maxShow);
-                      const hiddenDept = otherDept?.slice(maxShow);
-
-                      return (
-                        <div className="flex flex-wrap items-center gap-2">
-                          {/* First department text */}
-                          <span
-                            title={firstDept}
-                            className="text-sm  text-gray-700 dark:text-gray-300"
-                          >
-                            {firstDept}
-                          </span>
-
-                          {/* Avatars */}
-                          <div className="flex items-center -space-x-2">
-                            {visibleDept?.map((dept: string, index: number) => (
-                              <div key={index} className="group relative z-10">
-                                <div className="bg-dblue flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white text-xs  text-white dark:border-gray-900">
-                                  {dept?.slice(0, 2)?.toUpperCase()}
-                                </div>
-
-                                {/* Tooltip */}
-                                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
-                                  {capitalizeFLetter(dept)}
-                                </div>
-                              </div>
-                            ))}
-                            {remaining > 0 && (
-                              <div className="group relative">
-                                <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-gray-400 text-xs  text-white dark:border-gray-900">
-                                  +{remaining}
-                                </div>
-
-                                {/* Remaining tooltip */}
-                                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
-                                  {hiddenDept
-                                    ?.map((d: string) => capitalizeFLetter(d))
-                                    .join(", ")}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    },
+                    render: (row: any) => (
+                      <div className="text-gray-600 dark:text-gray-400">
+                        {row?.department_master || "-"}
+                      </div>
+                    ),
                   },
+
+                
                   {
                     accessor: "actions",
                     title: "Actions",
@@ -2809,34 +2836,33 @@ const Dashboard = () => {
                   );
                 })}
               </div>
-             
             </div>
             <div className="rounded-xl border bg-gray-50 p-2">
-                <div className="flex items-center justify-between">
-                  {/* Status */}
-                  <div>
-                    <p className="text-xs text-gray-500">Application Status</p>
-                    <span className="mt-1 inline-block rounded bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
-                      {capitalizeFLetter(
-                        state.application?.status || "Pending"
-                      )}
-                    </span>
-                  </div>
-
-                  {/* View Application Button */}
-                  <button
-                    onClick={() => {
-                      setState({isOpenRound:false})
-                      router.push(`/faculty/application_detail?id=${state.application?.id}`)
-                      // navigate or open application
-                      // viewApplication(state.application?.id);
-                    }}
-                    className="flex items-center gap-2 rounded border border-blue-600 px-2 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
-                  >
-                    View Application
-                  </button>
+              <div className="flex items-center justify-between">
+                {/* Status */}
+                <div>
+                  <p className="text-xs text-gray-500">Application Status</p>
+                  <span className="mt-1 inline-block rounded bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
+                    {capitalizeFLetter(state.application?.status || "Pending")}
+                  </span>
                 </div>
+
+                {/* View Application Button */}
+                <button
+                  onClick={() => {
+                    setState({ isOpenRound: false });
+                    router.push(
+                      `/faculty/application_detail?id=${state.application?.id}`
+                    );
+                    // navigate or open application
+                    // viewApplication(state.application?.id);
+                  }}
+                  className="flex items-center gap-2 rounded border border-blue-600 px-2 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
+                >
+                  View Application
+                </button>
               </div>
+            </div>
             {/* Fixed Bottom Section */}
             <div className="sticky bottom-0 border-t bg-white p-4">
               <div className="flex items-end gap-3">

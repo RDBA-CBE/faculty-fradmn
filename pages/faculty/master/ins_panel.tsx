@@ -52,36 +52,30 @@ const Category = () => {
 
   useEffect(() => {
     dispatch(setPageTitle("Panel Management"));
-
     profile();
   }, [dispatch]);
 
   useEffect(() => {
-    panelList(
-      1,
-      state.profile?.college?.map((item) => item?.college_id)
-    );
-  }, [debounceSearch, state.sortBy]);
+    if(state.profile){
+    panelList(1,state.profile?.institution?.id);
+  }
+  }, [debounceSearch, state.sortBy,state.collegeFilter,state.profile]);
 
-  useEffect(() => {
-    if (state.profile) {
-      panelList(
-        1,
-        state.profile?.college?.map((item) => item?.college_id)
-      );
-    }
-  }, [state.profile]);
-
-  // https://user-service.88.222.213.249.nip.io/api/interview-panels/?page=1&college_id=154&institution_id=236
-  const panelList = async (page = 1, clgId) => {
+  const panelList = async (page = 1,insId) => {
     console.log("✌️page --->", page);
     try {
+
       setState({ loading: true });
 
       const body: any = {};
       if (state.search) body.search = state.search;
-      if (clgId) body.college_id = clgId;
-console.log('✌️body --->', body);
+      if (insId) body.institution_id = insId;
+
+
+      if(state.collegeFilter){
+        body.college=state.collegeFilter?.value
+      }
+      console.log('✌️body --->', body);
 
       const res: any = await Models.master.panel_list(body, page);
 
@@ -113,27 +107,74 @@ console.log('✌️body --->', body);
     try {
       const res: any = await Models.auth.profile();
       setState({ profile: res });
-      if (res?.role == ROLES.SUPER_ADMIN) {
-        departmentList(1, "", false, "", "");
-      } else if (res?.role == ROLES.INSTITUTION_ADMIN) {
-        departmentList(1, "", false, res?.institution?.id, "");
-      } else if (res?.role == ROLES.HR) {
-        setState({
-          collegeList: res?.college?.map((item) => ({
-            value: item?.college_id,
-            label: item?.short_name,
-          })),
-        });
-      } else if (res?.role == ROLES.HOD) {
-        setState({
-          department: {
-            label: res?.department?.department_name,
-            value: res?.department?.id,
-          },
-        });
-      }
+      collegeList(1, "", false, res?.institution?.id);
+      CollegeDropList(1, "", false, res?.institution?.id);
     } catch (error) {
       console.error("Error fetching profile:", error);
+    }
+  };
+
+  const collegeList = async (
+    page,
+    search = "",
+    loadMore = false,
+    institutionId = null
+  ) => {
+    try {
+      setState({ collegeLoading: true });
+      const body: any = { search };
+
+      if (institutionId) {
+        body.institution = institutionId;
+      } else if (state.profile?.role === ROLES.INSTITUTION_ADMIN) {
+        body.institution = state.profile?.institution?.id;
+      }
+
+      const res: any = await Models.college.list(page, body);
+      const dropdown = Dropdown(res?.results, "short_name");
+
+      setState({
+        collegeLoading: false,
+        collegePage: page,
+        collegeList: loadMore ? [...state.collegeList, ...dropdown] : dropdown,
+        collegeNext: res?.next,
+      });
+    } catch (error) {
+      console.error("Error fetching colleges:", error);
+      setState({ collegeLoading: false });
+    }
+  };
+
+  const CollegeDropList = async (
+    page,
+    search = "",
+    loadMore = false,
+    institutionId = null
+  ) => {
+    try {
+      setState({ collegeLoading: true });
+      const body: any = { search };
+
+      if (institutionId) {
+        body.institution = institutionId;
+      } else if (state.profile?.role === ROLES.INSTITUTION_ADMIN) {
+        body.institution = state.profile?.institution?.id;
+      }
+
+      const res: any = await Models.college.list(page, body);
+      const dropdown = Dropdown(res?.results, "short_name");
+
+      setState({
+        collegeDropLoading: false,
+        collegeDropPage: page,
+        CollegeDropList: loadMore
+          ? [...state.CollegeDropList, ...dropdown]
+          : dropdown,
+        collegeDropNext: res?.next,
+      });
+    } catch (error) {
+      console.error("Error fetching colleges:", error);
+      setState({ collegeLoading: false });
     }
   };
 
@@ -141,7 +182,6 @@ console.log('✌️body --->', body);
     page,
     search = "",
     loadMore = false,
-    institutionId = null,
     collegeId = null
   ) => {
     try {
@@ -150,13 +190,6 @@ console.log('✌️body --->', body);
       if (collegeId) {
         body.college = collegeId;
       }
-      if (institutionId) {
-        body.institution = institutionId;
-      }
-      // if(state.profile?.role == ROLES.HR){
-      //   body.created_by= state.profile?.id;
-      //   body.team="No"
-      // }
 
       console.log("✌️body --->", body);
 
@@ -180,10 +213,7 @@ console.log('✌️body --->', body);
 
   const handlePageChange = (pageNumber: number) => {
     setState({ page: pageNumber });
-    panelList(
-      pageNumber,
-      state.profile?.college?.map((item) => item?.college_id)
-    );
+    panelList(pageNumber,state.profile?.institution?.id);
   };
 
   const handleCloseModal = () => {
@@ -224,7 +254,7 @@ console.log('✌️body --->', body);
     });
 
     if (row?.college?.value) {
-      departmentList(1, "", false, "", row?.college?.value);
+      departmentList(1, "", false, row?.college?.value);
     }
   };
 
@@ -232,7 +262,7 @@ console.log('✌️body --->', body);
     showDeleteAlert(
       () => deleteRecord(row.id),
       () => Swal.fire("Cancelled", "Record is safe", "info"),
-      "Are you sure you want to delete this category?"
+      "Are you sure you want to delete this panel member?"
     );
   };
 
@@ -240,12 +270,9 @@ console.log('✌️body --->', body);
     try {
       await Models.master.delete_panel(id);
       Success("Panel member deleted successfully!");
-      panelList(
-        state.page,
-        state.profile?.college?.map((item) => item?.college_id)
-      );
+      panelList(state.page,state.profile?.institution?.id);
     } catch (error) {
-      Failure("Failed to delete experience");
+      Failure("Failed to delete panel member ");
     }
   };
 
@@ -275,10 +302,7 @@ console.log('✌️body --->', body);
       }
 
       handleCloseModal();
-      panelList(
-        state.page,
-        state.profile?.college?.map((item) => item?.college_id)
-      );
+      panelList(state.page,state.profile?.institution?.id);
     } catch (error) {
       if (error instanceof Yup.ValidationError) {
         const validationErrors = {};
@@ -293,35 +317,6 @@ console.log('✌️body --->', body);
           Failure(capitalizeFLetter(error?.data?.error));
         }
         setState({ submitting: false });
-      }
-    }
-  };
-
-  const handleChangeDept = (type: string, searchTerm: string) => {
-    const role = state.profile?.role;
-
-    if (role != ROLES.HOD) {
-      let institutionId = "";
-      let collegeIds: any = "";
-
-      // if (role === ROLES.INSTITUTION_ADMIN) {
-      //   institutionId = state.profile?.institution?.id;
-      // }
-      if (state.filterCollege?.value) {
-        collegeIds = state.filterCollege?.value;
-      } else if (role === ROLES.HR) {
-        collegeIds = state.profile?.college?.map((item) => item?.college_id);
-      }
-
-      // SEARCH
-      if (type === "search") {
-        departmentList(1, searchTerm, false, institutionId, collegeIds);
-        return;
-      }
-
-      // PAGINATION / SCROLL
-      if (state.deptNext && searchTerm === "") {
-        departmentList(state.deptPage + 1, "", true, institutionId, collegeIds);
       }
     }
   };
@@ -347,10 +342,7 @@ console.log('✌️body --->', body);
         `${state.selectedRecords?.length} panel member deleted successfully!`
       );
       setState({ selectedRecords: [] });
-      panelList(
-        state.page,
-        state.profile?.college?.map((item) => item?.college_id)
-      );
+      panelList(state.page,state.profile?.institution?.id);
     } catch (error) {
       Failure("Failed to delete panel member. Please try again.");
     }
@@ -389,6 +381,27 @@ console.log('✌️body --->', body);
               className="transition-all duration-200 focus:shadow-lg group-hover:shadow-md"
             />
           </div>
+          <CustomSelect
+            options={state.collegeList}
+            value={state.collegeFilter}
+            onChange={(e) => setState({ collegeFilter: e })}
+            placeholder="Select College"
+            isClearable={true}
+            onSearch={(e) =>
+              collegeList(1, e, false, state.profile?.institution?.id)
+            }
+            loadMore={() =>
+              state?.collegeNext &&
+              collegeList(
+                state.collegePage + 1,
+                "",
+                true,
+                state.profile?.institution?.id
+              )
+            }
+            loading={state.collegeLoading}
+            className="!w-fit"
+          />
         </div>
       </div>
 
@@ -537,10 +550,7 @@ console.log('✌️body --->', body);
                 sortOrder: direction,
                 page: 1,
               });
-              panelList(
-                1,
-                state.profile?.college?.map((item) => item?.college_id)
-              );
+              panelList(1,state.profile?.institution?.id);
             }}
             minHeight={200}
           />
@@ -618,18 +628,39 @@ console.log('✌️body --->', body);
               />
 
               <CustomSelect
-                options={state.collegeList}
+                options={state.CollegeDropList}
                 value={state.filterCollege}
                 onChange={(e) => {
-                  departmentList(1, "", false, "", e?.value);
-                  setState({ filterCollege: e, department_id: null });
+                  departmentList(1, "", false, e?.value);
+
+                  setState({
+                    filterCollege: e,
+                    department_id: null,
+                    departmentList: [],
+                    errors: { ...state.errors, filterCollege: "" },
+
+                  });
                 }}
+                onSearch={(e) =>
+                  CollegeDropList(1, e, false, state.profile?.institution?.id)
+                }
+                loadMore={() =>
+                  state?.collegeDropNext &&
+                  CollegeDropList(
+                    state.collegePage + 1,
+                    "",
+                    true,
+                    state.profile?.institution?.id
+                  )
+                }
                 placeholder={"Select College"}
                 isClearable={true}
                 title="Select College"
                 required
+                loading={state.collegeDropLoading}
                 error={state.errors?.filterCollege}
               />
+
               <CustomSelect
                 options={state.departmentList}
                 value={state.department_id}
@@ -640,11 +671,24 @@ console.log('✌️body --->', body);
                   })
                 }
                 onSearch={(searchTerm) =>
-                  handleChangeDept("search", searchTerm)
+                  departmentList(
+                    1,
+                    searchTerm,
+                    false,
+                    state.filterCollege?.value
+                  )
                 }
                 placeholder="Select department"
                 isClearable={state.profile?.role != ROLES.HOD}
-                loadMore={() => handleChangeDept("loadMore", "")}
+                loadMore={() =>
+                  state.deptNext &&
+                  departmentList(
+                    state.deptPage + 1,
+                    "",
+                    true,
+                    state.filterCollege?.value
+                  )
+                }
                 loading={state.deptLoading}
                 title="Select department"
                 error={state.errors.department_id}
