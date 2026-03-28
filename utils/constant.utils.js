@@ -420,21 +420,21 @@ export const OwnmenuConfig = {
       type: "link",
       icon: "IconMenuForms",
       label: "Job Postings",
-      href: "/faculty/my_job",
+      href: "/faculty/admin_job",
     },
 
     {
       type: "link",
       icon: "IconMenuTables",
       label: "Applications",
-      href: "/faculty/my_application",
+      href: "/faculty/admin_application",
     },
 
     {
       type: "link",
       icon: "IconMenuApps",
       label: "Institutions",
-      href: "/faculty/my_institution",
+      href: "/faculty/admin_institution",
     },
     {
       type: "link",
@@ -447,7 +447,7 @@ export const OwnmenuConfig = {
       type: "link",
       icon: "IconMenuUsers",
       label: "Users",
-      href: "/faculty/my_users",
+      href: "/faculty/admin_users",
     },
 
     // {

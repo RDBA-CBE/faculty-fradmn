@@ -55,6 +55,7 @@ import Link from "next/link";
 import IconPencilPaper from "@/components/Icon/IconPencilPaper";
 import * as Validation from "@/utils/validation.utils";
 import { RECORDS_FOR_ADMIN } from "@/utils/constant.utils";
+import ImageUpload from "@/components/ImageUploadWithPreview/imageUpload.component";
 
 const CollegeAndDepartment = () => {
   const dispatch = useDispatch();
@@ -146,45 +147,20 @@ const CollegeAndDepartment = () => {
     master_department: [],
     deptMoreDetail: false,
     departmentData: [], // array of { dept, intake_per_year, isNBAAccreditation, summary, recent_achievements }
-
-    sortingFilter: null,
-
     oldDept: [],
+    college_logo: [],
+    isOpenLeadInfo: false,
+    isOpenDeptInfo: false,
+    sortingFilter: {
+      value: 1,
+      label: "All Records",
+    },
   });
-
-  useEffect(() => {
-    if (state.activeTab === "colleges") {
-      setState({
-        sortingFilter: {
-          value: 1,
-          label: "Own College",
-        },
-      });
-    } else {
-      setState({
-        sortingFilter: {
-          value: 1,
-          label: "Own Department",
-        },
-      });
-    }
-  }, [state.activeTab]);
-
-  const steps = [
-    { id: 1, name: "College", icon: GraduationCap, required: true },
-    // { id: 2, name: "Department", icon: BookOpen, required: true },
-    // { id: 3, name: "Department HOD", icon: UserCheck, required: true },
-  ];
 
   const isStepCompleted = (stepId: number) =>
     state.completedSteps.includes(stepId);
-  const isStepAccessible = (stepId: number) =>
-    stepId === 1 || isStepCompleted(stepId - 1);
 
-  const statusOptions = [
-    { value: "active", label: "Active" },
-    { value: "inactive", label: "Inactive" },
-  ];
+
 
   const debounceSearch = useDebounce(state.search, 500);
 
@@ -211,11 +187,7 @@ const CollegeAndDepartment = () => {
   }, [state.activeTab]);
 
   useEffect(() => {
-    if (state.activeTab === "colleges") {
       collegeTableList(1);
-    } else {
-      deptList(1);
-    }
   }, [
     debounceSearch,
     state.statusFilter,
@@ -781,7 +753,7 @@ const CollegeAndDepartment = () => {
       college_phone: "",
       college_address: "",
       college_hr: null,
-      college_logo: null,
+      college_logo: [],
       institution: null,
       department_name: "",
       category: [],
@@ -826,6 +798,8 @@ const CollegeAndDepartment = () => {
       departments: [],
       editDeptId: false,
       location_id: null,
+      isOpenLeadInfo: false,
+      isOpenDeptInfo: false,
     });
   };
 
@@ -847,15 +821,13 @@ const CollegeAndDepartment = () => {
       body.search = state.search;
     }
     if (state.sortingFilter?.value) {
-      if (state.sortingFilter?.value == 1) {
+      if (state.sortingFilter?.value == 2) {
         body.team = "No";
-      } else {
+        body.created_by = parseInt(userId);
+      } else if (state.sortingFilter?.value == 3) {
+        body.created_by = parseInt(userId);
         body.team = "Yes";
       }
-    }
-
-    if (userId) {
-      body.created_by = userId;
     }
 
     if (state.sortBy) {
@@ -866,184 +838,116 @@ const CollegeAndDepartment = () => {
   };
 
   const handleEdit = (row) => {
-    console.log("✌️row --->", row);
-    if (state.activeTab === "colleges") {
+    setState({
+      editId: row.id,
+      showModal: true,
+      college_name: row.college_name,
+      college_code: row.college_code,
+      college_email: row.college_email,
+      college_phone: row.college_phone,
+      college_address: row.college_address || "",
+      institution: {
+        value: row?.institution_id,
+        label: row.institution_name,
+      },
+      college_hr: row?.college_hr
+        ? {
+            value: row?.college_hr?.id,
+            label: row.college_hr?.username,
+          }
+        : null,
+      college_logo: row.college_logo ? [row.college_logo] : [],
+      showEditModal: false,
+      intake_per_year: row.intake_per_year,
+      total_strength: row.total_strength,
+      summary: row.summary,
+      recent_achievements: row.recent_achievements,
+      is_legacy: row.is_legacy,
+      short_name: row.short_name,
+      location_id: row?.location_id,
+    });
+
+    if (row?.nirf_band) {
       setState({
-        editId: row.id,
-        showModal: true,
-        college_name: row.college_name,
-        college_code: row.college_code,
-        college_email: row.college_email,
-        college_phone: row.college_phone,
-        college_address: row.college_address || "",
-        institution: {
-          value: row?.institution_id,
-          label: row.institution_name,
+        nirf_band: {
+          value: row.nirf_band?.id,
+          label: row.nirf_band?.band,
         },
-        college_hr: row?.college_hr
-          ? {
-              value: row?.college_hr?.id,
-              label: row.college_hr?.username,
-            }
-          : null,
-        college_logo: row.college_logo ? [row.college_logo] : [],
-        showEditModal: false,
-        intake_per_year: row.intake_per_year,
-        total_strength: row.total_strength,
-        summary: row.summary,
-        recent_achievements: row.recent_achievements,
-        is_legacy: row.is_legacy,
-        short_name: row.short_name,
-        location_id: row?.location_id,
       });
+    }
 
-      if (row?.nirf_band) {
-        setState({
-          nirf_band: {
-            value: row.nirf_band?.id,
-            label: row.nirf_band?.band,
-          },
-        });
-      }
-
-      if (row.college_type?.length > 0) {
-        setState({
-          college_type: row.college_type?.map((item) => ({
-            value: item?.id,
-            label: item?.name,
-          })),
-        });
-      } else {
-        setState({ college_type: [] });
-      }
-
-      if (row.nirf_category?.length > 0) {
-        setState({
-          nirf_category: row.nirf_category?.map((item) => ({
-            value: item?.id,
-            label: item?.category,
-          })),
-        });
-      } else {
-        setState({ nirf_category: [] });
-      }
-
-      if (row.naac_accreditation?.length > 0) {
-        setState({
-          naac_accreditation: row.naac_accreditation?.map((item) => ({
-            value: item?.id,
-            label: item?.grade,
-          })),
-        });
-      } else {
-        setState({ naac_accreditation: [] });
-      }
-
-      if (row.category?.length > 0) {
-        setState({
-          category: row.category?.map((item) => ({
-            value: item?.id,
-            label: item?.name,
-          })),
-        });
-      } else {
-        setState({ category: [] });
-      }
-
-      if (row.category?.length > 0) {
-        master_department(
-          1,
-          "",
-          false,
-          row?.category?.map((item) => item?.id)
-        );
-      }
-
-      if (row?.department?.length > 0) {
-        const departmentData = row.department.map((item, i) => ({
-          dept: {
-            value: item?.department_master?.id,
-            label: item?.department_master?.short_name,
-          },
-          intake_per_year: item?.intake_per_year || "",
-          isNBAAccreditation: item?.nba_accreditation || false,
-          summary: item?.summary || "",
-          recent_achievements: item?.recent_achievements || [],
-          open: i == 0,
-          id: item?.id,
-        }));
-        setState({
-          department: departmentData.map((d) => d.dept),
-          departmentData,
-          isOpenDeptInfo: true,
-          oldDept: row?.department?.filter((item) => item?.id),
-        });
-      }
+    if (row.college_type?.length > 0) {
+      setState({
+        college_type: row.college_type?.map((item) => ({
+          value: item?.id,
+          label: item?.name,
+        })),
+      });
     } else {
+      setState({ college_type: [] });
+    }
+
+    if (row.nirf_category?.length > 0) {
       setState({
-        editDeptId: row.id,
-        showModal: true,
-        department_name: row.department_name,
-        // department_code: row.department_code,
-        institution: {
-          value: row?.institution_id,
-          label: row.institution_name,
-        },
-        // department_email: row.department_email,
-        // department_phone: row.department_phone,
-        // department_head: row.department_head,
-        college: {
-          value: row?.college_id,
-          label: row.college_name,
-        },
-
-        dept_intake_per_year: row?.dept_intake_per_year,
-        dept_summary: row?.dept_summary,
-        recent_dept_achievements: row?.recent_dept_achievements,
-        isNBAAccreditation: row?.isNBAAccreditation,
+        nirf_category: row.nirf_category?.map((item) => ({
+          value: item?.id,
+          label: item?.category,
+        })),
       });
+    } else {
+      setState({ nirf_category: [] });
+    }
 
-      if (row?.hod_id) {
-        setState({
-          deptHod: { value: row?.hod_id, label: row.department_head },
-        });
-      }
+    if (row.naac_accreditation?.length > 0) {
+      setState({
+        naac_accreditation: row.naac_accreditation?.map((item) => ({
+          value: item?.id,
+          label: item?.grade,
+        })),
+      });
+    } else {
+      setState({ naac_accreditation: [] });
+    }
 
-      if (row?.institution_id) {
-        collegeDropdownList(1, "", false, {
-          value: row?.institution_id,
-          label: row.institution_name,
-        });
-      }
+    if (row.category?.length > 0) {
+      setState({
+        category: row.category?.map((item) => ({
+          value: item?.id,
+          label: item?.name,
+        })),
+      });
+    } else {
+      setState({ category: [] });
+    }
 
-      if (row?.college_id) {
-        deptHodDropdownList(1, "", false, row?.college_id);
-      }
+    if (row.category?.length > 0) {
+      master_department(
+        1,
+        "",
+        false,
+        row?.category?.map((item) => item?.id)
+      );
+    }
 
-      if (row?.department_extras?.length > 0) {
-        const departmentsData = row.department_extras.map((item, i) => ({
-          dept: [
-            {
-              value: item?.department_master?.id,
-              label: item?.department_master?.short_name,
-            },
-          ],
-          intake_per_year: item?.intake_per_year || "",
-          isNBAAccreditation: item?.nba_accreditation || false,
-          summary: item?.summary || "",
-          recent_achievements: item?.recent_achievements || [],
-          open: i == 0,
-          id: item?.id,
-        }));
-        setState({
-          departments: row.department_extras.map((item, i) => ({
-            value: item?.department_master?.id,
-            label: item?.department_master?.short_name,
-          })),
-          departmentsData,
-          open: true,
-        });
-      }
+    if (row?.department?.length > 0) {
+      const departmentData = row.department.map((item, i) => ({
+        dept: {
+          value: item?.department_master?.id,
+          label: item?.department_master?.short_name,
+        },
+        intake_per_year: item?.intake_per_year || "",
+        isNBAAccreditation: item?.nba_accreditation || false,
+        summary: item?.summary || "",
+        recent_achievements: item?.recent_achievements || [],
+        open: i == 0,
+        id: item?.id,
+      }));
+      setState({
+        department: departmentData.map((d) => d.dept),
+        departmentData,
+        isOpenDeptInfo: true,
+        oldDept: row?.department?.filter((item) => item?.id),
+      });
     }
   };
 
@@ -1888,10 +1792,10 @@ const CollegeAndDepartment = () => {
         body.naac_accreditation_ids = [];
       }
 
-      if (state.newImages?.length > 0 && state.images?.length === 0) {
-        body.college_logo = state.newImages[0];
-      } else if (state.college_logo?.length > 0) {
+      if (state.college_logo?.length > 0) {
         body.college_logo = state.college_logo[0];
+      } else if (state.newImages?.length > 0) {
+        body.college_logo = state.newImages?.[0];
       } else {
         body.college_logo = null;
       }
@@ -2215,6 +2119,9 @@ const CollegeAndDepartment = () => {
           onChange={(selectedOption) => {
             setState({
               category: selectedOption,
+              department: [],
+              master_department: [],
+              departmentData: [],
             });
             if (selectedOption) {
               master_department(1, "", false, selectedOption);
@@ -2249,6 +2156,15 @@ const CollegeAndDepartment = () => {
             label="Is Legacy"
           />
         </div>
+
+        <ImageUpload
+          existingImages={state.college_logo}
+          onDeleteImage={() => setState({ college_logo: [] })}
+          onImagesChange={(image) => {
+            setState({ newImages: image });
+            console.log("✌️image --->", image);
+          }}
+        />
       </div>
 
       <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-1 ">
@@ -2360,132 +2276,147 @@ const CollegeAndDepartment = () => {
             </div>
           </div>
           {state.isOpenDeptInfo && (
-            <div className="space-y-4 p-4">
-              <CustomSelect
-                title="Department"
-                options={state.master_department}
-                value={state.department}
-                onChange={(selectedOption: any) => {
-                  const existing = state.departmentData;
-                  const updated = (selectedOption || []).map((opt) => {
-                    const prev = existing?.find(
-                      (d) => d.dept?.value === opt.value
-                    );
-                    return (
-                      prev || {
-                        dept: opt,
-                        intake_per_year: "",
-                        isNBAAccreditation: false,
-                        summary: "",
-                        recent_achievements: [],
-                        open: true,
-                      }
-                    );
-                  });
-
-                  setState({
-                    department: selectedOption,
-                    departmentData: updated,
-                  });
-                }}
-                onSearch={(e) => master_department(1, e, false, state.category)}
-                loadMore={() => {
-                  state.masterNext &&
-                    master_department(
-                      state.masterPage + 1,
-                      "",
-                      true,
-                      state.category
-                    );
-                }}
-                isMulti={true}
-                placeholder="Select department"
-              />
-
-              {state.departmentData?.map((item, index) => (
-                <div
-                  key={item.dept.value}
-                  className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700"
+            <>
+              {(!state.category || state.category?.length === 0) && (
+                <p
+                  className="px-2  pt-2 text-sm text-red-600"
+                  id={`${name}-error`}
                 >
-                  <div
-                    className="flex cursor-pointer items-center justify-between bg-gray-50 px-4 py-2 dark:bg-gray-700"
-                    onClick={() => {
-                      const updated = [...state.departmentData];
-                      updated[index] = { ...updated[index], open: !item.open };
-                      setState({ departmentData: updated });
-                    }}
-                  >
-                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">
-                      {item.dept.label}
-                    </span>
-                    {item.open ? (
-                      <ChevronUp className="h-4 w-4 text-gray-500" />
-                    ) : (
-                      <ChevronDown className="h-4 w-4 text-gray-500" />
-                    )}
-                  </div>
-                  {item.open && (
-                    <div className="px-3 pb-4 pt-3">
-                      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                        <NumberInput
-                          title="Intake Per Year"
-                          value={item.intake_per_year}
-                          onChange={(e) => {
-                            const updated = [...state.departmentData];
-                            updated[index] = {
-                              ...updated[index],
-                              intake_per_year: e.target.value,
-                            };
-                            setState({ departmentData: updated });
-                          }}
-                          placeholder="Intake Per Year"
-                        />
+                  Please select college category
+                </p>
+              )}
+              <div className="space-y-4 p-4">
+                <CustomSelect
+                  title="Department"
+                  options={state.master_department}
+                  value={state.department}
+                  onChange={(selectedOption: any) => {
+                    const existing = state.departmentData;
+                    const updated = (selectedOption || []).map((opt) => {
+                      const prev = existing?.find(
+                        (d) => d.dept?.value === opt.value
+                      );
+                      return (
+                        prev || {
+                          dept: opt,
+                          intake_per_year: "",
+                          isNBAAccreditation: false,
+                          summary: "",
+                          recent_achievements: [],
+                          open: true,
+                        }
+                      );
+                    });
 
-                        <TextArea
-                          title="Summary"
-                          placeholder="Enter department summary"
-                          value={item.summary}
-                          onChange={(e) => {
+                    setState({
+                      department: selectedOption,
+                      departmentData: updated,
+                    });
+                  }}
+                  onSearch={(e) =>
+                    master_department(1, e, false, state.category)
+                  }
+                  loadMore={() => {
+                    state.masterNext &&
+                      master_department(
+                        state.masterPage + 1,
+                        "",
+                        true,
+                        state.category
+                      );
+                  }}
+                  isMulti={true}
+                  placeholder="Select department"
+                />
+
+                {state.departmentData?.map((item, index) => (
+                  <div
+                    key={item.dept.value}
+                    className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700"
+                  >
+                    <div
+                      className="flex cursor-pointer items-center justify-between bg-gray-50 px-4 py-2 dark:bg-gray-700"
+                      onClick={() => {
+                        const updated = [...state.departmentData];
+                        updated[index] = {
+                          ...updated[index],
+                          open: !item.open,
+                        };
+                        setState({ departmentData: updated });
+                      }}
+                    >
+                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                        {item.dept.label}
+                      </span>
+                      {item.open ? (
+                        <ChevronUp className="h-4 w-4 text-gray-500" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4 text-gray-500" />
+                      )}
+                    </div>
+                    {item.open && (
+                      <div className="px-3 pb-4 pt-3">
+                        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                          <NumberInput
+                            title="Intake Per Year"
+                            value={item.intake_per_year}
+                            onChange={(e) => {
+                              const updated = [...state.departmentData];
+                              updated[index] = {
+                                ...updated[index],
+                                intake_per_year: e.target.value,
+                              };
+                              setState({ departmentData: updated });
+                            }}
+                            placeholder="Intake Per Year"
+                          />
+
+                          <TextArea
+                            title="Summary"
+                            placeholder="Enter department summary"
+                            value={item.summary}
+                            onChange={(e) => {
+                              const updated = [...state.departmentData];
+                              updated[index] = {
+                                ...updated[index],
+                                summary: e.target.value,
+                              };
+                              setState({ departmentData: updated });
+                            }}
+                            rows={3}
+                          />
+                          <CheckboxInput
+                            checked={item.isNBAAccreditation}
+                            onChange={() => {
+                              const updated = [...state.departmentData];
+                              updated[index] = {
+                                ...updated[index],
+                                isNBAAccreditation: !item.isNBAAccreditation,
+                              };
+                              setState({ departmentData: updated });
+                            }}
+                            label="NBA Accreditation"
+                          />
+                        </div>
+                        <DynamicAchievementInput
+                          title="Achievements"
+                          placeholder="Enter achievements"
+                          defaultValue={item.recent_achievements}
+                          onChange={(data: any) => {
                             const updated = [...state.departmentData];
                             updated[index] = {
                               ...updated[index],
-                              summary: e.target.value,
+                              recent_achievements: data,
                             };
                             setState({ departmentData: updated });
                           }}
-                          rows={3}
-                        />
-                        <CheckboxInput
-                          checked={item.isNBAAccreditation}
-                          onChange={() => {
-                            const updated = [...state.departmentData];
-                            updated[index] = {
-                              ...updated[index],
-                              isNBAAccreditation: !item.isNBAAccreditation,
-                            };
-                            setState({ departmentData: updated });
-                          }}
-                          label="NBA Accreditation"
                         />
                       </div>
-                      <DynamicAchievementInput
-                        title="Achievements"
-                        placeholder="Enter achievements"
-                        defaultValue={item.recent_achievements}
-                        onChange={(data: any) => {
-                          const updated = [...state.departmentData];
-                          updated[index] = {
-                            ...updated[index],
-                            recent_achievements: data,
-                          };
-                          setState({ departmentData: updated });
-                        }}
-                      />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
       </div>
@@ -2994,9 +2925,7 @@ const CollegeAndDepartment = () => {
               value={state.sortingFilter}
               onChange={(e) => setState({ sortingFilter: e })}
               placeholder={
-                state.activeTab === "colleges"
-                  ? "Own College"
-                  : "Own Department"
+               "All Records"
               }
               isClearable={false}
             />
@@ -3010,7 +2939,7 @@ const CollegeAndDepartment = () => {
         <div className="mb-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-bold text-gray-800 dark:text-white">
-            College List
+              College List
             </h3>
             <div className="flex items-center gap-4">
               {state.selectedRecords.length > 0 && (

@@ -43,7 +43,12 @@ import {
 import CustomeDatePicker from "@/components/datePicker";
 import PrivateRouter from "@/hook/privateRouter";
 import moment from "moment";
-import { RECORDS, RECORDS_FOR_INS_ADMIN, ROLES, STATUS_COLOR } from "@/utils/constant.utils";
+import {
+  RECORDS,
+  RECORDS_FOR_INS_ADMIN,
+  ROLES,
+  STATUS_COLOR,
+} from "@/utils/constant.utils";
 import Utils from "@/imports/utils.import";
 import * as Yup from "yup";
 import Link from "next/link";
@@ -157,7 +162,6 @@ const Application = () => {
       value: 1,
       label: "All Records",
     },
-
   });
 
   const debounceSearch = useDebounce(state.search, 500);
@@ -202,7 +206,6 @@ const Application = () => {
     state.sortingFilter,
     state.filterCollege,
   ]);
-
 
   const profile = async () => {
     try {
@@ -325,7 +328,7 @@ const Application = () => {
     if (state.search) {
       body.search = state.search;
     }
-  
+
     if (state.collegeFilter?.value) {
       body.college = state.collegeFilter.value;
     }
@@ -479,7 +482,7 @@ const Application = () => {
     page,
     search = "",
     loadMore = false,
-    institutionId = null,
+    institutionId = null
   ) => {
     try {
       setState({ collegeLoading: true });
@@ -626,8 +629,6 @@ const Application = () => {
     }
   };
 
-
-
   const handleDepartmentChange = (selectedOption: any) => {
     setState({ departmentFilter: selectedOption, page: 1 });
   };
@@ -646,7 +647,6 @@ const Application = () => {
       Failure("Failed to delete application. Please try again.");
     }
   };
-
 
   const handleDownloadResume = (row) => {
     if (row?.resume) {
@@ -973,11 +973,25 @@ const Application = () => {
     }
   };
 
-  const getDeptCollegeIds = () => {
-    if (state.profile?.role === ROLES.HR) {
-      return state.profile?.college?.map((c: any) => c.college_id);
+const handleBulkDelete = () => {
+    showDeleteAlert(
+      () => bulkDeleteRecords(),
+      () => Swal.fire("Cancelled", "Your Records are safe :)", "info"),
+      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`
+    );
+  };
+
+  const bulkDeleteRecords = async () => {
+    try {
+      for (const id of state.selectedRecords) {
+        await Models.application.delete(id);
+      }
+      Success(`${state.selectedRecords.length} application deleted successfully!`);
+      setState({ selectedRecords: [] });
+      applicationList(state.page,state.profile?.institution?.id);
+    } catch (error) {
+      Failure("Failed to delete jobs. Please try again.");
     }
-    return state.filterCollege?.value ? [state.filterCollege.value] : null;
   };
 
   return (
@@ -1262,23 +1276,23 @@ const Application = () => {
           <div className="flex items-center justify-between">
             {/* Left */}
             <h3 className="text-lg font-bold text-gray-800 dark:text-white">
-              Applications List
+              Application List
             </h3>
 
-            {/* Right */}
             <div className="flex items-center gap-4">
-              {/* {state.selectedRecords?.length > 0 && (
+              {state.selectedRecords.length > 0 && (
                 <button
-                  onClick={() => bulkSelect()}
-                  className="group relative inline-flex items-center gap-2 overflow-hidden rounded-xl bg-dblue px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+                  onClick={() => handleBulkDelete()}
+                  className=" group relative inline-flex transform items-center gap-2 overflow-hidden rounded-md border border-red-500  px-3 py-1 text-red-500 shadow-lg transition-all duration-200 "
                 >
-                  <div className="absolute inset-0 bg-dblue opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
-                  <UserCheck className="relative z-10 h-5 w-5" />
-                  <span className="relative z-10">Interview Schedule</span>
+                  <div className=" absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+                  <IconTrash className="h-4 w-4" />
+                  <span className="relative z-10 text-[13px]">
+                    Delete ({state.selectedRecords?.length})
+                  </span>
                 </button>
-              )} */}
-
-              <div className="text-sm text-black">
+              )}
+              <div className="text-sm text-black ">
                 {state.count} applications found
               </div>
             </div>
@@ -1294,18 +1308,9 @@ const Application = () => {
             selectedRecords={state.applicationList?.filter((record) =>
               state.selectedRecords.includes(record.id)
             )}
-            onSelectedRecordsChange={(records) => {
-              const currentPageIds = state.applicationList?.map(
-                (r: any) => r.id
-              );
-              const otherPageSelections = state.selectedRecords?.filter(
-                (id) => !currentPageIds.includes(id)
-              );
-              const newSelections = records?.map((r: any) => r.id);
-              setState({
-                selectedRecords: [...otherPageSelections, ...newSelections],
-              });
-            }}
+            onSelectedRecordsChange={(records) =>
+              setState({ selectedRecords: records.map((r) => r.id) })
+            }
             customLoader={
               <div className="flex items-center justify-center py-12">
                 <div className="flex items-center gap-3">
@@ -1547,22 +1552,6 @@ const Application = () => {
           />
         </div>
       </div>
-      {state.selectedRecords?.length > 0 && (
-        <div className="fixed bottom-6 right-9 z-50">
-          <button
-            onClick={bulkSelect}
-            className="bg-dblue group relative inline-flex items-center gap-2 overflow-hidden rounded-xl px-6 py-3 font-medium text-white shadow-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-2xl"
-          >
-            <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
-
-            <UserCheck className="relative z-10 h-5 w-5" />
-
-            <span className="relative z-10">
-              Interview Schedule ({state.selectedRecords.length})
-            </span>
-          </button>
-        </div>
-      )}
 
       <Modal
         subTitle="Update Application Status"
@@ -2189,7 +2178,7 @@ const Application = () => {
               </div>
             </div>
             {/* Fixed Bottom Section */}
-            <div className="sticky bottom-0 border-t bg-white p-4">
+            {/* <div className="sticky bottom-0 border-t bg-white p-4">
               <div className="flex items-end gap-3">
                 <div className="flex-1">
                   <CustomSelect
@@ -2208,7 +2197,7 @@ const Application = () => {
                   Update Status
                 </button>
               </div>
-            </div>
+            </div> */}
           </div>
         )}
       />
@@ -2230,7 +2219,6 @@ const Application = () => {
               </button>
             </div>
             <div className="grid grid-cols-1 gap-4 py-3 md:grid-cols-3">
-              
               <CustomSelect
                 options={state.applicationStatusList}
                 value={state.selectedStatus}

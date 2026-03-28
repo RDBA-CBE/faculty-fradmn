@@ -48,7 +48,7 @@ import {
   ClipboardList,
   ArrowLeft,
 } from "lucide-react";
-import { FRONTEND_URL } from "@/utils/constant.utils";
+import { FRONTEND_URL, ROLES } from "@/utils/constant.utils";
 import Link from "next/link";
 import CustomSelect from "@/components/FormFields/CustomSelect.component";
 import CustomeDatePicker from "@/components/datePicker";
@@ -91,7 +91,19 @@ const ApplicationDetail = () => {
       fetchApplicationDetail();
       applicationStatusList();
     }
+    profile()
   }, [id, dispatch]);
+
+    const profile = async () => {
+      try {
+        const res: any = await Models.auth.profile();
+        setState({ profile: res });
+   
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      }
+    };
+  
 
   const fetchApplicationDetail = async () => {
     try {
@@ -402,6 +414,7 @@ const ApplicationDetail = () => {
   const app = state.application;
   const job = app?.job_detail;
 
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="">
@@ -576,18 +589,25 @@ const ApplicationDetail = () => {
                   <Calendar className="text-dyellow h-5 w-5" />{" "}
                 </div>
                 Interview Rounds
-              </div>
+              {state.profile?.role != ROLES.HR && (
 
-              <div className=" flex items-center justify-end">
-                <button
-                  onClick={() => setState({ showInterviewModal: true })}
-                  className="bg-dblue group relative inline-flex transform items-center gap-2 overflow-hidden rounded-lg px-4 py-2 text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
-                >
-                  <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
-                  <UserCheck className="relative z-10 h-5 w-5" />
-                  <span className="relative z-10"> Interview Schedule</span>
-                </button>
+                <div className="bg-dblue text-sm flex h-7 w-7 items-center justify-center rounded-full text-white shadow-md">
+                  {state.application?.interview_slots?.length || 0}
+                </div>
+              )}
               </div>
+              {state.profile?.role == ROLES.HR && (
+                <div className=" flex items-center justify-end">
+                  <button
+                    onClick={() => setState({ showInterviewModal: true })}
+                    className="bg-dblue group relative inline-flex transform items-center gap-2 overflow-hidden rounded-lg px-4 py-2 text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+                  >
+                    <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+                    <UserCheck className="relative z-10 h-5 w-5" />
+                    <span className="relative z-10"> Interview Schedule</span>
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Job Information */}
@@ -631,37 +651,53 @@ const ApplicationDetail = () => {
                         </div>
 
                         <div className="flex items-center gap-3">
-                          <select
-                            value={round?.status}
-                            onClick={(e) => e.stopPropagation()}
-                            onChange={(e) => {
-                              rescheduleInterview(e, round);
-                            }}
-                            className={`cursor-pointer rounded-full px-3 py-1 text-xs shadow-sm outline-none ${
-                              round.status === "completed"
-                                ? "bg-green-100 text-green-700"
-                                : round.status === "rescheduled"
-                                ? "bg-yellow-100 text-yellow-700"
-                                : "bg-blue-100 text-blue-700"
-                            }`}
-                          >
-                            <option
-                              disabled
-                              value="Scheduled"
-                              className="text-black"
+                          {state.profile?.role == ROLES.HR ? (
+                            <select
+                              value={round?.status}
+                              onClick={(e) => e.stopPropagation()}
+                              onChange={(e) => {
+                                rescheduleInterview(e, round);
+                              }}
+                              className={`cursor-pointer rounded-full px-3 py-1 text-xs shadow-sm outline-none ${
+                                round.status === "completed"
+                                  ? "bg-green-100 text-green-700"
+                                  : round.status === "rescheduled"
+                                  ? "bg-yellow-100 text-yellow-700"
+                                  : "bg-blue-100 text-blue-700"
+                              }`}
                             >
-                              Scheduled
-                            </option>
+                              <option
+                                disabled
+                                value="Scheduled"
+                                className="text-black"
+                              >
+                                Scheduled
+                              </option>
 
-                            <option value="rescheduled" className="text-black">
-                              Rescheduled
-                            </option>
+                              <option
+                                value="rescheduled"
+                                className="text-black"
+                              >
+                                Rescheduled
+                              </option>
 
-                            <option value="completed" className="text-black">
-                              Completed
-                            </option>
-                          </select>
-
+                              <option value="completed" className="text-black">
+                                Completed
+                              </option>
+                            </select>
+                          ) : (
+                            <div
+                              className={`cursor-pointer rounded-full px-3 py-1 text-xs shadow-sm outline-none ${
+                                round.status === "completed"
+                                  ? "bg-green-100 text-green-700"
+                                  : round.status === "rescheduled"
+                                  ? "bg-yellow-100 text-yellow-700"
+                                  : "bg-blue-100 text-blue-700"
+                              }`}
+                            >
+                              {round?.status}
+                            </div>
+                          )}
                           {/* {round.decision && (
  <span className="bg-dblue rounded-full px-4 py-2 text-xs uppercase text-white shadow-sm">
  {round.decision}
@@ -1065,6 +1101,7 @@ const ApplicationDetail = () => {
                 >
                   {capitalizeFLetter(app?.status_display)}
                 </span>
+                {state.profile?.role == ROLES.HR &&
                 <CustomSelect
                   options={state.applicationStatusList}
                   value={state.appstatus}
@@ -1077,7 +1114,9 @@ const ApplicationDetail = () => {
                   isClearable={false}
                   required
                   className="w-full"
-                />
+                />}
+                {state.profile?.role == ROLES.HR &&
+
                 <div className="mt-4 flex items-center justify-between">
                   <button
                     onClick={() => updateStatus()}
@@ -1090,6 +1129,7 @@ const ApplicationDetail = () => {
                     )}
                   </button>
                 </div>
+                }
               </div>
               {/* Applicant Summary Card */}
 

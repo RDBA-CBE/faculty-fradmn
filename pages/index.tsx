@@ -167,8 +167,8 @@ const Dashboard = () => {
       sortBy: "",
       end_date: "",
       start_date: "",
-      departmentFilter:"",
-    collegeFilter:""
+      departmentFilter: "",
+      collegeFilter: "",
     });
   }, [state.activeCard]);
 
@@ -235,6 +235,7 @@ const Dashboard = () => {
       profileRef.current = true;
       if (res?.role == ROLES.SUPER_ADMIN) {
         collegeDropdownList(1, "", false, "", res.id);
+        institutionDropdownList(1, "", false)
       } else if (res?.role == ROLES.INSTITUTION_ADMIN) {
         collegeDropdownList(1, "", false, res?.institution?.id, res.id);
       }
@@ -344,7 +345,7 @@ const Dashboard = () => {
         },
       ];
     }
-    if (role == ROLES.INSTITUTION_ADMIN) {
+    if (role == ROLES.INSTITUTION_ADMIN || role == ROLES.SUPER_ADMIN) {
       CARDS = [
         {
           id: 1,
@@ -452,7 +453,6 @@ const Dashboard = () => {
         current_location: item?.current_location,
         current_position: item?.current_position,
         department_master: item?.department_master?.short_name,
-
       }));
 
       setState({
@@ -695,13 +695,13 @@ const Dashboard = () => {
     if (state.institutionFilter?.value) {
       body.institution = state.institutionFilter.value;
     }
-    
+
     if (state.collegeFilter?.value) {
       body.college = state.collegeFilter.value;
     }
     if (state.departmentFilter?.value) {
       body.department = state.departmentFilter.value;
-      body.department_master_id=state.departmentFilter.value;
+      body.department_master_id = state.departmentFilter.value;
     }
     if (state.start_date) {
       body.start_date = moment(state.start_date).format("YYYY-MM-DD");
@@ -1438,11 +1438,30 @@ const Dashboard = () => {
     }
   };
 
-  const getDeptCollegeIds = () => {
-    if (state.profile?.role === ROLES.HR) {
-      return state.profile?.college?.map((c: any) => c.college_id);
+const institutionDropdownList = async (
+    page,
+    search = "",
+    loadMore = false
+  ) => {
+    try {
+      setState({ institutionLoading: true });
+      const body = { search };
+      const res: any = await Models.institution.list(page, body);
+      const dropdown = res?.results?.map((item) => ({
+        value: item.id,
+        label: item.institution_name,
+      }));
+      setState({
+        institutionLoading: false,
+        institutionPage: page,
+        institutionList: loadMore
+          ? [...state.institutionList, ...dropdown]
+          : dropdown,
+        institutionNext: res?.next,
+      });
+    } catch (error) {
+      setState({ institutionLoading: false });
     }
-    return state.filterCollege?.value ? [state.filterCollege.value] : null;
   };
 
   const departmentDropdownList = async (
@@ -1485,6 +1504,7 @@ const Dashboard = () => {
   const handleDepartmentChange = (selectedOption: any) => {
     setState({ departmentFilter: selectedOption, page: 1 });
   };
+  console.log("✌️state.cards --->", state.cards);
 
   return (
     <div className="min-h-screen dark:from-gray-900 dark:to-gray-800">
@@ -1494,7 +1514,7 @@ const Dashboard = () => {
           state.profile?.role == ROLES.HR ? "xl:grid-cols-5" : "xl:grid-cols-4"
         } `}
       >
-        {state.cards.map((card) => (
+        {state.cards?.map((card) => (
           <div
             key={card.label}
             className={`panel rounded-lg p-4 ${
@@ -1550,6 +1570,36 @@ const Dashboard = () => {
               onChange={(e) => setState({ search: e.target.value })}
               icon={<IconSearch className="h-4 w-4" />}
             />
+            {state.profile?.role == ROLES.SUPER_ADMIN && (
+              <CustomSelect
+                options={state.institutionList}
+                value={state.institutionFilter}
+                onChange={(e) => {
+                  if (e) {
+                    collegeDropdownList(1, "", false, e.value);
+                  } else {
+                    setState({ collegeFilter: null, departmentFilter: null });
+                  }
+
+                  setState({ institutionFilter: e });
+                }}
+                placeholder={"Select Institution"}
+                isClearable={true}
+                loading={state.institutionLoading}
+                onSearch={(search) => {
+                  institutionDropdownList(1, search, false);
+                }}
+                loadMore={() => {
+                  if (state.institutionNext) {
+                    institutionDropdownList(
+                      state.institutionPage + 1,
+                      "",
+                      true
+                    );
+                  }
+                }}
+              />
+            )}
             {state.activeCard == 4 && (
               <CustomSelect
                 options={PREFERENCES}
@@ -2054,7 +2104,6 @@ const Dashboard = () => {
                     ),
                   },
 
-                
                   {
                     accessor: "actions",
                     title: "Actions",

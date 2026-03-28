@@ -2,6 +2,7 @@ import { DataTable } from "mantine-datatable";
 import { useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/router";
+import { setPageTitle } from "../../store/themeConfigSlice";
 import TextInput from "@/components/FormFields/TextInput.component";
 import TextArea from "@/components/FormFields/TextArea.component";
 import CustomSelect from "@/components/FormFields/CustomSelect.component";
@@ -17,6 +18,7 @@ import Pagination from "@/components/pagination/pagination";
 import {
   buildFormData,
   capitalizeFLetter,
+  Dropdown,
   formatScheduleDateTime,
   showDeleteAlert,
   truncateText,
@@ -51,15 +53,17 @@ import {
   Verified,
   VerifiedIcon,
   X,
+  BriefcaseBusiness,
+  User,
+  Phone,
 } from "lucide-react";
 import CustomeDatePicker from "@/components/datePicker";
 import PrivateRouter from "@/hook/privateRouter";
 import moment from "moment";
-import { ROLES, STATUS_COLOR } from "@/utils/constant.utils";
+import { RECORDS, ROLES, STATUS_COLOR } from "@/utils/constant.utils";
 import Utils from "@/imports/utils.import";
 import * as Yup from "yup";
 import Link from "next/link";
-import { setPageTitle } from "@/store/themeConfigSlice";
 
 const Application = () => {
   const dispatch = useDispatch();
@@ -166,6 +170,10 @@ const Application = () => {
     isOpenRound: false,
     expandedRounds: {},
     selectedRecords: [],
+    sortingFilter: {
+      value: 1,
+      label: "All Records",
+    },
   });
 
   const debounceSearch = useDebounce(state.search, 500);
@@ -185,38 +193,12 @@ const Application = () => {
     jobStatusList();
     categoryList(1);
     applicationStatusList();
+    applicationStatusExceptAppliedandInterList();
   }, []);
 
   useEffect(() => {
     if (profileRef.current) {
-      const role = state.profile?.role;
-      if (role === ROLES.SUPER_ADMIN) {
-        applicationList(1, null, null, null, state.profile?.id);
-      } else if (role === ROLES.INSTITUTION_ADMIN) {
-        applicationList(
-          1,
-          state.profile?.institution?.institution?.id,
-          null,
-          null,
-          state.profile?.id
-        );
-      } else if (role === ROLES.HR) {
-        applicationList(
-          1,
-          null,
-          state.profile?.college?.map((item) => item?.college_id),
-          null,
-          state.profile?.id
-        );
-      } else if (role === ROLES.HOD) {
-        applicationList(
-          1,
-          null,
-          null,
-          state.profile?.department?.department_id,
-          state.profile?.id
-        );
-      }
+      applicationList(1, null, null, null, state.profile?.id);
     }
   }, [
     debounceSearch,
@@ -232,46 +214,21 @@ const Application = () => {
     state.priorityFilter,
     state.typeFilter,
     state.salaryFilter,
+    state.sortingFilter,
+    state.filterCollege,
   ]);
+
+  console.log("✌️collegeList --->", state.collegeList);
 
   const profile = async () => {
     try {
       const res: any = await Models.auth.profile();
       setState({ profile: res });
       profileRef.current = true;
-
-      // Load panel members for interview schedule
-      // loadPanelMembers(1);
-
-      if (res?.role == ROLES.SUPER_ADMIN) {
-        collegeDropdownList(1, "", false, "", res.id);
-        applicationList(1, null, null, null, res?.id);
-        // loadJobList(1, null, null);
-        loadJobList(1, null, false, null, null, null, res?.id);
-      } else if (res?.role == ROLES.INSTITUTION_ADMIN) {
-        collegeDropdownList(1, "", false, res?.institution?.id, res.id);
-        applicationList(1, res?.institution?.id, null, null, res?.id);
-        loadJobList(1, null, false, null, null, null, res?.id);
-      } else if (res?.role == ROLES.HR) {
-        departmentDropdownList(
-          1,
-          "",
-          false,
-          res?.college?.map((college) => college.college_id),
-          res.id
-        );
-        applicationList(
-          1,
-          null,
-          res?.college?.map((college) => college.college_id),
-          null,
-          res?.id
-        );
-        loadJobList(1, null, false, null, null, null, res?.id);
-      } else if (res?.role == ROLES.HOD) {
-        applicationList(1, null, null, res?.department?.department_id, res?.id);
-        loadJobList(1, null, false, null, null, null, res?.id);
-      }
+      collegeDropdownList(1, "", false, "");
+      applicationList(1, null, null, null, res?.id);
+      // loadJobList(1, null, null);
+      loadJobList(1, null, false, null, null, null, res?.id);
     } catch (error) {
       console.error("Error fetching profile:", error);
     }
@@ -294,6 +251,27 @@ const Application = () => {
     }
   };
 
+  const applicationStatusExceptAppliedandInterList = async () => {
+    try {
+      setState({ applicationStatusLoading: true });
+      const body = {
+        rexclude_applied_interview: "Yes",
+      };
+      const res: any = await Models.master.application_status_list(body);
+      const dropdown = res?.map((item) => ({
+        value: item.id,
+        label: item.name,
+      }));
+      setState({
+        applicationStatusLoading: false,
+        applicationStatusesList: dropdown,
+      });
+    } catch (error) {
+      setState({ applicationStatusLoading: false });
+    }
+  };
+  console.log("✌️res --->", state.collegeList);
+
   const applicationList = async (
     page,
     institutionId = null,
@@ -304,18 +282,39 @@ const Application = () => {
     try {
       setState({ loading: true });
       const body = bodyData();
+      console.log("✌️institutionId --->", institutionId);
+
       if (institutionId) {
         body.institution = institutionId;
       }
       if (collegeId) {
         body.college = collegeId;
       }
+
       if (deptId) {
         body.department = deptId;
       }
+
+      if (state.departmentFilter) {
+        body.department = state.departmentFilter?.value;
+      }
+
+      if (state.filterCollege) {
+        body.college = state.filterCollege?.value;
+      }
+
       // if (profileId) {
       //   body.created_by = profileId;
       // }
+      if (state.sortingFilter?.value) {
+        if (state.sortingFilter?.value == 2) {
+          body.team = "No";
+          body.created_by = profileId;
+        } else if (state.sortingFilter?.value == 3) {
+          body.created_by = profileId;
+          body.team = "Yes";
+        }
+      }
       // body.team = "No";
 
       const res: any = await Models.application.list(page, body);
@@ -336,8 +335,10 @@ const Application = () => {
           value: item?.application_status?.id,
           label: item?.application_status?.name,
         },
-        college_name: item?.job_detail?.college?.name,
-        department_name: item?.department?.department_name,
+        college_name: item?.job_detail?.college?.short_name,
+        department_name: item?.department_details?.map(
+          (item) => item?.short_name
+        ),
         interview_status:
           item?.interview_slots?.length > 0
             ? item?.interview_slots[item?.interview_slots.length - 1]?.status
@@ -424,7 +425,7 @@ const Application = () => {
       applicationList(
         pageNumber,
         null,
-        state.profile?.college?.college_id,
+        state.profile?.college?.map((item) => item?.college_id),
         null,
         state.profile?.id
       );
@@ -437,10 +438,6 @@ const Application = () => {
         state.profile?.id
       );
     }
-  };
-
-  const handleStatusChange = (selectedOption: any) => {
-    setState({ statusFilter: selectedOption, page: 1 });
   };
 
   const handleCloseModal = () => {
@@ -499,7 +496,7 @@ const Application = () => {
         applicationList(
           state.page,
           null,
-          state.profile?.college?.college_id,
+          state.profile?.college?.map((item) => item?.college_id),
           null,
           state.profile?.id
         );
@@ -538,7 +535,7 @@ const Application = () => {
         applicationList(
           state.page,
           null,
-          state.profile?.college?.college_id,
+          state.profile?.college?.map((item) => item?.college_id),
           null,
           state.profile?.id
         );
@@ -598,26 +595,19 @@ const Application = () => {
     page,
     search = "",
     loadMore = false,
-    institutionId = null,
-    createdBy = null
+    institutionId = null
   ) => {
     try {
       setState({ collegeLoading: true });
       const body: any = { search };
+
       if (institutionId) {
         body.institution = institutionId;
-      } else if (state.profile?.role === "institution_admin") {
-        body.institution = state.profile?.institution?.id;
       }
-      if (createdBy) {
-        body.created_by = createdBy;
-      }
-      body.team = "No";
+
       const res: any = await Models.college.list(page, body);
-      const dropdown = res?.results?.map((item) => ({
-        value: item.id,
-        label: item.college_name,
-      }));
+      const dropdown = Dropdown(res?.results, "short_name");
+
       setState({
         collegeLoading: false,
         collegePage: page,
@@ -633,26 +623,18 @@ const Application = () => {
     page,
     search = "",
     loadMore = false,
-    collegeId = null,
-    createdBy = null
+    collegeIds = null
   ) => {
     try {
       setState({ departmentLoading: true });
       const body: any = { search };
-      if (collegeId) {
-        body.college = collegeId;
-      } else if (state.profile?.role === "hr") {
-        body.college = state.profile?.college?.college_id;
+      if (collegeIds) {
+        body.college = collegeIds;
       }
-      if (createdBy) {
-        body.created_by = createdBy;
-      }
-      body.team = "No";
+      console.log("✌️body --->", body);
+
       const res: any = await Models.department.list(page, body);
-      const dropdown = res?.results?.map((item) => ({
-        value: item.id,
-        label: item.department_name,
-      }));
+      const dropdown = Dropdown(res?.results, "short_name");
       setState({
         departmentLoading: false,
         departmentPage: page,
@@ -748,46 +730,6 @@ const Application = () => {
     } catch (error) {
       setState({ jobStatusLoading: false });
     }
-  };
-
-  const handleInstitutionChange = (selectedOption: any) => {
-    setState({
-      institutionFilter: selectedOption,
-      collegeFilter: null,
-      collegeList: [],
-      page: 1,
-    });
-    if (selectedOption?.value) {
-      collegeDropdownList(
-        1,
-        "",
-        false,
-        selectedOption.value,
-        state.profile?.id
-      );
-    }
-  };
-
-  const handleCollegeChange = (selectedOption: any) => {
-    setState({
-      collegeFilter: selectedOption,
-      departmentFilter: null,
-      departmentList: [],
-      page: 1,
-    });
-    if (selectedOption?.value) {
-      departmentDropdownList(
-        1,
-        "",
-        false,
-        selectedOption.value,
-        state.profile?.id
-      );
-    }
-  };
-
-  const handleDepartmentChange = (selectedOption: any) => {
-    setState({ departmentFilter: selectedOption, page: 1 });
   };
 
   const deleteRecord = async (row: any) => {
@@ -1063,9 +1005,8 @@ const Application = () => {
         application: res,
         loading: false,
         appstatus: row?.application_status,
+        isOpenRound: true,
       });
-
-      setState({ isOpenRound: true });
     } catch (error) {
       console.log("✌️error --->", error);
     }
@@ -1100,13 +1041,16 @@ const Application = () => {
         state.selectedRecords.map((id) => Models.application.details(id))
       );
 
+      console.log("✌️responses --->", responses);
+
       const jobMap = new Map();
       const deptMap = new Map();
       const applicantMap = new Map();
 
       responses.forEach((res) => {
         const job = res?.job_detail;
-        const dept = res?.department;
+        const dept = res?.department_details;
+        console.log("✌️dept --->", dept);
 
         // Job
         if (job && !jobMap.has(job.id)) {
@@ -1117,10 +1061,22 @@ const Application = () => {
         }
 
         // Department
-        if (dept && !deptMap.has(dept.id)) {
-          deptMap.set(dept.id, {
-            value: dept.id,
-            label: dept.department_name?.trim() || "No Department",
+        // if (dept && !deptMap.has(dept.id)) {
+        //   deptMap.set(dept.id, {
+        //     value: dept.id,
+        //     label: dept.short_name?.trim() || "No Department",
+        //   });
+        // }
+
+        if (Array.isArray(dept)) {
+          dept.forEach((dept) => {
+            console.log("abcd --->", dept);
+            if (dept && !deptMap.has(dept.id)) {
+              deptMap.set(dept.id, {
+                value: dept.id,
+                label: dept.short_name?.trim() || "No Department",
+              });
+            }
           });
         }
 
@@ -1155,21 +1111,147 @@ const Application = () => {
     }
   };
 
+const handleBulkDelete = () => {
+    showDeleteAlert(
+      () => bulkDeleteRecords(),
+      () => Swal.fire("Cancelled", "Your Records are safe :)", "info"),
+      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`
+    );
+  };
+
+  const bulkDeleteRecords = async () => {
+    try {
+      for (const id of state.selectedRecords) {
+        await Models.application.delete(id);
+      }
+      Success(`${state.selectedRecords.length} application deleted successfully!`);
+      setState({ selectedRecords: [] });
+      applicationList(state.page);
+    } catch (error) {
+      Failure("Failed to delete jobs. Please try again.");
+    }
+  };
+
   return (
     <div className="min-h-screen dark:from-gray-900 dark:to-gray-800">
       {/* Header Section */}
-      <div className="mb-6">
+      <div className="mb-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
             <h1 className="page-ti  text-transparent">
-              Application List
+              Application Management
             </h1>
-            
+            <p className="text-gray-600 dark:text-gray-400">
+              Manage and review job applications
+            </p>
           </div>
         </div>
       </div>
 
-      
+      {/* Stats Cards */}
+      <div className="mb-6 flex gap-4">
+        <div
+          onClick={() =>
+            setState({
+              institutionFilter: null,
+              collegeFilter: null,
+              departmentFilter: null,
+              start_date: null,
+              end_date: null,
+              selectedStatus: null,
+            })
+          }
+          className="cursor-pointer rounded-lg border border-gray-200 bg-blue-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700"
+        >
+          <div className="flex items-center gap-5">
+            <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
+              <FileText className="text-dblue h-10 w-10" />
+            </div>
+
+            <div className="flex flex-col">
+              <p className="text-2xl  leading-none text-gray-900 dark:text-white">
+                {state.count || 0}
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Applications
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div
+          onClick={() =>
+            setState({ selectedStatus: { value: 5, label: "Applied" } })
+          }
+          className="cursor-pointer rounded-lg border border-gray-200 bg-yellow-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700"
+        >
+          <div className="flex items-center gap-5">
+            <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
+              <Clock className="h-10 w-10 text-yellow-600" />
+            </div>
+
+            <div className="flex flex-col">
+              <p className="text-2xl  leading-none text-gray-900 dark:text-white">
+                {state.applications_by_status?.applied ||
+                  state.applications_by_status?.Applied ||
+                  0}
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Applied
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div
+          onClick={() =>
+            setState({ selectedStatus: { value: 4, label: "Selected" } })
+          }
+          className="cursor-pointer rounded-lg border border-gray-200 bg-green-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700"
+        >
+          <div className="flex items-center gap-5">
+            <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
+              <CheckCircle className="h-10 w-10 text-green-600" />
+            </div>
+
+            <div className="flex flex-col">
+              <p className="text-2xl  leading-none text-gray-900 dark:text-white">
+                {state.applications_by_status?.Selected || 0}
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Selected
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div
+          onClick={() =>
+            setState({
+              selectedStatus: { value: 6, label: "Interview Scheduled" },
+            })
+          }
+          className="cursor-pointer rounded-lg border border-gray-200 bg-indigo-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700"
+        >
+          <div className="flex items-center gap-5">
+            <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
+              <Clock className="h-10 w-10 text-indigo-600" />
+            </div>
+
+            <div className="flex flex-col">
+              <p className="text-2xl  leading-none text-gray-900 dark:text-white">
+                {state.applications_by_status?.["Interview Scheduled"] ||
+                  state.applications_by_status?.["interview scheduled"] ||
+                  0}
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Interview Scheduled
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Filters Section */}
       <div className="mb-5 rounded-2xl backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
         <div className="flex items-center justify-between gap-5">
@@ -1179,17 +1261,109 @@ const Application = () => {
             onChange={(e) => setState({ search: e.target.value })}
             icon={<IconSearch className="h-4 w-4" />}
           />
-          <CustomeDatePicker
-            value={state.start_date}
-            placeholder="Choose From"
-            onChange={(e) => setState({ start_date: e })}
-            showTimeSelect={false}
+
+          <CustomSelect
+            options={state.institutionList}
+            value={state.institutionFilter}
+            onChange={(e) => {
+              if (e) {
+                collegeDropdownList(1, "", false, e.value);
+              } else {
+                setState({ collegeFilter: null, departmentFilter: null });
+              }
+
+              setState({ institutionFilter: e });
+            }}
+            placeholder={"Select Institution"}
+            isClearable={true}
+            loading={state.institutionLoading}
+            onSearch={(search) => {
+              institutionDropdownList(1, search, false);
+            }}
+            loadMore={() => {
+              if (state.institutionNext) {
+                institutionDropdownList(state.institutionPage + 1, "", true);
+              }
+            }}
           />
-          <CustomeDatePicker
-            value={state.end_date}
-            placeholder="Choose To "
-            onChange={(e) => setState({ end_date: e })}
-            showTimeSelect={false}
+
+          <CustomSelect
+            options={state.collegeList}
+            value={state.collegeFilter}
+            onChange={(e) => {
+              if (e) {
+                departmentDropdownList(1, "", false, e.value);
+              }
+              setState({ collegeFilter: e });
+            }}
+            placeholder={"Select College"}
+            isClearable={true}
+            loading={state.collegeLoading}
+            onSearch={(search) => {
+              collegeDropdownList(
+                1,
+                search,
+                false,
+                state.institutionFilter?.value
+              );
+            }}
+            loadMore={() => {
+              if (state.collegeNext) {
+                collegeDropdownList(
+                  state.collegePage + 1,
+                  "",
+                  true,
+                  state.institutionFilter?.value
+                );
+              }
+            }}
+          />
+
+          <CustomSelect
+            options={state.departmentList}
+            value={state.departmentFilter}
+            onChange={(e) => {
+              setState({ departmentFilter: e });
+            }}
+            // onChange={handleDepartmentChange}
+            placeholder="Select department"
+            isClearable={true}
+            onSearch={(searchTerm) => {
+              departmentDropdownList(
+                1,
+                searchTerm,
+                false,
+                state.collegeFilter?.value
+              );
+            }}
+            loadMore={() => {
+              if (state.departmentNext) {
+                departmentDropdownList(1, "", true, state.collegeFilter?.value);
+              }
+            }}
+            loading={state.departmentLoading}
+            disabled={!state.collegeFilter?.value}
+          />
+
+          <CustomSelect
+            options={[
+              {
+                value: 1,
+                label: "All Records",
+              },
+              {
+                value: 2,
+                label: "Own Records",
+              },
+              {
+                value: 3,
+                label: "Not Own Records",
+              },
+            ]}
+            value={state.sortingFilter}
+            onChange={(e) => setState({ sortingFilter: e })}
+            placeholder={"All Records"}
+            isClearable={false}
           />
           <button
             onClick={() => setState({ showFilterModal: true })}
@@ -1280,23 +1454,23 @@ const Application = () => {
           <div className="flex items-center justify-between">
             {/* Left */}
             <h3 className="text-lg font-bold text-gray-800 dark:text-white">
-              {/* Application List */}
+              Application List
             </h3>
 
-            {/* Right */}
             <div className="flex items-center gap-4">
-              {/* {state.selectedRecords?.length > 0 && (
+              {state.selectedRecords?.length > 0 && (
                 <button
-                  onClick={() => bulkSelect()}
-                  className="group relative inline-flex items-center gap-2 overflow-hidden rounded-xl bg-dblue px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+                  onClick={() => handleBulkDelete()}
+                  className=" group relative inline-flex transform items-center gap-2 overflow-hidden rounded-md border border-red-500  px-3 py-1 text-red-500 shadow-lg transition-all duration-200 "
                 >
-                  <div className="absolute inset-0 bg-dblue opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
-                  <UserCheck className="relative z-10 h-5 w-5" />
-                  <span className="relative z-10">Interview Schedule</span>
+                  <div className=" absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+                  <IconTrash className="h-4 w-4" />
+                  <span className="relative z-10 text-[13px]">
+                    Delete ({state.selectedRecords?.length})
+                  </span>
                 </button>
-              )} */}
-
-              <div className="text-sm text-black">
+              )}
+              <div className="text-sm text-black ">
                 {state.count} applications found
               </div>
             </div>
@@ -1310,20 +1484,11 @@ const Application = () => {
             records={state.applicationList}
             fetching={state.loading}
             selectedRecords={state.applicationList?.filter((record) =>
-              state.selectedRecords.includes(record.id)
+              state.selectedRecords?.includes(record.id)
             )}
-            onSelectedRecordsChange={(records) => {
-              const currentPageIds = state.applicationList?.map(
-                (r: any) => r.id
-              );
-              const otherPageSelections = state.selectedRecords?.filter(
-                (id) => !currentPageIds.includes(id)
-              );
-              const newSelections = records?.map((r: any) => r.id);
-              setState({
-                selectedRecords: [...otherPageSelections, ...newSelections],
-              });
-            }}
+            onSelectedRecordsChange={(records) =>
+              setState({ selectedRecords: records.map((r) => r.id) })
+            }
             customLoader={
               <div className="flex items-center justify-center py-12">
                 <div className="flex items-center gap-3">
@@ -1336,13 +1501,32 @@ const Application = () => {
             }
             columns={[
               {
-                accessor: "job_title",
-                title: "Title",
+                accessor: "applicant_name",
+                title: "Faculty Name",
                 sortable: true,
-                render: ({ job_title }) => (
-                  <div className="text-gray-600 dark:text-gray-400" title={job_title}>
-                    {truncateText(job_title)}
-                  </div>
+
+                render: (row) => (
+                  <Link
+                    href={`/faculty/application_detail?id=${row?.id}`}
+                    title={row?.applicant_name}
+                    className="text-gray-600 dark:text-gray-400"
+                  >
+                    {truncateText(row?.applicant_name)}
+                  </Link>
+                ),
+              },
+              {
+                accessor: "job_title",
+                title: "Job Title",
+                sortable: true,
+                render: (row) => (
+                  <Link
+                    href={`/faculty/application_detail?id=${row?.id}`}
+                    title={row?.job_title}
+                    className="text-gray-600 dark:text-gray-400"
+                  >
+                    {truncateText(row?.job_title)}
+                  </Link>
                 ),
               },
 
@@ -1351,42 +1535,88 @@ const Application = () => {
                 title: "College",
                 sortable: true,
                 render: ({ college_name }) => (
-                  <div className="text-gray-600 dark:text-gray-400" title={college_name}>
-                    {truncateText(college_name)}
+                  <div
+                    title={college_name}
+                    className="text-gray-600 dark:text-gray-400"
+                  >
+                    {college_name}
                   </div>
                 ),
               },
               {
                 accessor: "department_name",
                 title: "Department",
-                render: ({ department_name }) => (
-                  <div className="text-gray-600 dark:text-gray-400" title={department_name}>
-                    {truncateText(department_name)}
-                  </div>
-                ),
-                sortable: true,
-              },
-              {
-                accessor: "applicant_name",
-                title: "Faculty",
-                sortable: true,
-                render: ({ applicant_name }) => (
-                  <div className="font-medium text-gray-900 dark:text-white" title={applicant_name}>
-                    {truncateText(applicant_name)}
-                  </div>
-                ),
-              },
-              {
-                accessor: "applicant_email",
-                title: "Email",
-                sortable: true,
+                render: ({ department_name }) => {
+                  if (!department_name || department_name?.length === 0) {
+                    return <span className="text-gray-400">-</span>;
+                  }
 
-                render: ({ applicant_email }) => (
-                  <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-200" title={applicant_email}>
-                    {truncateText(applicant_email)}
-                  </span>
-                ),
+                  const firstDept = department_name?.[0];
+                  const otherDept = department_name?.slice(1);
+                  const maxShow = 3;
+                  const remaining = otherDept?.length - maxShow;
+                  const visibleDept = otherDept?.slice(0, maxShow);
+                  const hiddenDept = otherDept?.slice(maxShow);
+
+                  return (
+                    <div className="flex flex-wrap items-center gap-2">
+                      {/* First department text */}
+                      <span
+                        title={firstDept}
+                        className="text-sm  text-gray-700 dark:text-gray-300"
+                      >
+                        {firstDept}
+                      </span>
+
+                      {/* Avatars */}
+                      <div className="flex items-center -space-x-2">
+                        {visibleDept?.map((dept: string, index: number) => (
+                          <div key={index} className="group relative z-10">
+                            <div className="bg-dblue flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white text-xs  text-white dark:border-gray-900">
+                              {dept?.slice(0, 2)?.toUpperCase()}
+                            </div>
+
+                            {/* Tooltip */}
+                            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
+                              {capitalizeFLetter(dept)}
+                            </div>
+                          </div>
+                        ))}
+                        {remaining > 0 && (
+                          <div className="group relative">
+                            <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-gray-400 text-xs  text-white dark:border-gray-900">
+                              +{remaining}
+                            </div>
+
+                            {/* Remaining tooltip */}
+                            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
+                              {hiddenDept
+                                ?.map((d: string) => capitalizeFLetter(d))
+                                .join(", ")}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                },
+                sortable: true,
               },
+
+              // {
+              //   accessor: "applicant_email",
+              //   title: "Email",
+              //   sortable: true,
+
+              //   render: ({ applicant_email }) => (
+              //     <span
+              //       title={applicant_email}
+              //       className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+              //     >
+              //       {truncateText(applicant_email)}
+              //     </span>
+              //   ),
+              // },
               // {
               //   accessor: "applicant_phone",
               //   title: "Phone",
@@ -1428,13 +1658,12 @@ const Application = () => {
                 render: (row: any) => (
                   <div className="flex items-center justify-center gap-3">
                     <button
-                      onClick={() => handleRound(row)}
-                      className="flex  items-center justify-center rounded-lg  text-pink-600 transition-all duration-200 "
-                      title="Interview Round"
+                      onClick={() => handleEdit(row)}
+                      className="flex  items-center justify-center rounded-lg  text-green-900 transition-all duration-200 "
+                      title="View"
                     >
-                      <MessageSquare className="h-4 w-4" />
+                      <IconEye className="h-4 w-4" />
                     </button>
-
                     <button
                       onClick={() => handleDownloadResume(row)}
                       className="flex  items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
@@ -1443,12 +1672,13 @@ const Application = () => {
                       <FileText className="h-4 w-4" />
                     </button>
                     <button
-                      onClick={() => handleEdit(row)}
-                      className="flex  items-center justify-center rounded-lg  text-green-600 transition-all duration-200 "
-                      title="View"
+                      onClick={() => handleRound(row)}
+                      className="flex  items-center justify-center rounded-lg  text-pink-600 transition-all duration-200 "
+                      title="Interview Round"
                     >
-                      <IconEye className="h-4 w-4" />
+                      <BriefcaseBusiness className="h-4 w-4" />
                     </button>
+
                     {state.profile?.role == ROLES.HR && (
                       <button
                         onClick={() => {
@@ -1464,13 +1694,13 @@ const Application = () => {
                         <UserCheck className="h-4 w-4" />
                       </button>
                     )}
-                    {/* <button
+                    <button
                       onClick={() => handleDelete(row)}
                       className="flex items-center justify-center rounded-lg  text-red-600 transition-all duration-200 "
                       title="Delete"
                     >
                       <IconTrash className="h-4 w-4" />
-                    </button> */}
+                    </button>
                   </div>
                 ),
               },
@@ -1500,24 +1730,10 @@ const Application = () => {
           />
         </div>
       </div>
-      {state.selectedRecords?.length > 0 && (
-        <div className="fixed bottom-6 right-9 z-50">
-          <button
-            onClick={bulkSelect}
-            className="bg-dblue group relative inline-flex items-center gap-2 overflow-hidden rounded-xl px-6 py-3 font-medium text-white shadow-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-2xl"
-          >
-            <div className="absolute inset-0 bg-dblue opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
-
-            <UserCheck className="relative z-10 h-5 w-5" />
-
-            <span className="relative z-10">
-              Interview Schedule ({state.selectedRecords.length})
-            </span>
-          </button>
-        </div>
-      )}
 
       <Modal
+        subTitle="Update Application Status"
+        closeIcon
         open={state.showStatusModal}
         close={() =>
           setState({
@@ -1528,18 +1744,6 @@ const Application = () => {
         }
         renderComponent={() => (
           <div className="p-6">
-            <div className="mb-6 text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900 dark:to-blue-900">
-                <UserCheck className="h-8 w-8 text-purple-600 dark:text-purple-400" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Update Application Status
-              </h2>
-              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                Select a new status for this application
-              </p>
-            </div>
-
             <div className="mb-6">
               <CustomSelect
                 options={state.applicationStatusList}
@@ -1565,7 +1769,7 @@ const Application = () => {
               </button>
               <button
                 onClick={handleStatusSubmit}
-                className="flex-1 rounded-lg bg-dblue px-4 py-2 text-white hover:shadow-lg"
+                className="bg-dblue flex-1 rounded-lg px-4 py-2 text-white hover:shadow-lg"
               >
                 Update Status
               </button>
@@ -1576,6 +1780,8 @@ const Application = () => {
 
       {/* Interview Schedule Modal */}
       <Modal
+        subTitle="Create Interview Schedule"
+        closeIcon
         open={state.showInterviewModal}
         close={() =>
           setState({
@@ -1592,16 +1798,7 @@ const Application = () => {
           })
         }
         renderComponent={() => (
-          <div className="p-6">
-            <div className="mb-6 text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-green-100 to-teal-100 dark:from-green-900 dark:to-teal-900">
-                <UserCheck className="h-8 w-8 text-green-600 dark:text-green-400" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Create Interview Schedule
-              </h2>
-            </div>
-
+          <div className="">
             <div className="space-y-5">
               <CustomSelect
                 title="Select Jobs"
@@ -1833,7 +2030,7 @@ const Application = () => {
               <button
                 onClick={handleInterviewScheduleSubmit}
                 disabled={state.submitting}
-                className="flex-1 rounded-lg bg-gradient-to-r from-green-600 to-teal-600 px-4 py-2 text-white hover:shadow-lg disabled:opacity-50"
+                className="bg-dblue flex-1 rounded-lg  px-4 py-2 text-white hover:shadow-lg disabled:opacity-50"
               >
                 {state.submitting ? "Creating..." : "Create Schedule"}
               </button>
@@ -1849,226 +2046,316 @@ const Application = () => {
         open={state.isOpenRound}
         close={() => setState({ isOpenRound: false })}
         closeIcon={() => setState({ isOpenRound: false })}
-        padding="px-0 py-5"
+        padding="px-0 py-4"
         renderComponent={() => (
           <div className="flex h-[75vh] flex-col">
             {/* Scrollable Content */}
-            <div className="flex-1 space-y-6 overflow-y-auto px-4">
+            <div className="flex-1 space-y-2 overflow-y-auto px-2">
               {/* Candidate */}
-              <div className="rounded-lg border bg-gray-50 p-4">
-                <h3 className="text-lg font-semibold">
-                  {state.application?.first_name} {state.application?.last_name}
-                </h3>
-                <p className="text-sm text-gray-500">
-                  {state.application?.email} • {state.application?.phone}
+              <div className="rounded-xl border bg-white px-2 py-2 shadow-sm">
+                <p className="mb-2 text-sm font-semibold text-gray-500">
+                  Application Details
                 </p>
+
+                {/* Name */}
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
+                    <User className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <h3 className="text-base font-semibold">
+                    {capitalizeFLetter(state.application?.first_name)}{" "}
+                    {state.application?.last_name}
+                  </h3>
+                </div>
+
+                {/* Email + Phone in single row */}
+                <div className="mt-3 flex flex-wrap items-center gap-6 text-sm text-gray-600">
+                  {/* Email */}
+                  <div className="flex min-w-[200px] items-center gap-2">
+                    <Mail className="h-4 w-4 text-gray-400" />
+                    <span className="truncate">
+                      {state.application?.email || "N/A"}
+                    </span>
+                  </div>
+
+                  {/* Phone */}
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-4 w-4 text-gray-400" />
+                    <span>{state.application?.phone || "N/A"}</span>
+                  </div>
+                </div>
               </div>
 
               {/* Rounds */}
-              <div className="space-y-4 pb-6">
-                {state.application?.interview_slots?.map((round) => (
-                  <div
-                    key={round.id}
-                    className="rounded-lg border bg-white p-4 shadow-sm"
-                  >
-                    {/* Round Header */}
-                    <div className="mb-3 flex items-center justify-between">
-                      <div>
+              <div className="space-y-4  ">
+                {state.application?.interview_slots?.map((round) => {
+                  const isRoundOpen = !!state.expandedRounds?.[round.id];
+                  return (
+                    <div
+                      key={round.id}
+                      className="rounded-lg border bg-white shadow-sm"
+                    >
+                      {/* Round Header — clickable accordion toggle */}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setState({
+                            expandedRounds: {
+                              ...state.expandedRounds,
+                              [round.id]: !isRoundOpen,
+                            },
+                          })
+                        }
+                        className="flex w-full items-center justify-between p-4 text-left"
+                      >
                         <p className="font-semibold">
                           {capitalizeFLetter(round.round_name)}
                         </p>
-                        <p className="text-xs text-gray-500">
-                          {formatScheduleDateTime(
-                            round.scheduled_date,
-                            round.scheduled_time
-                          )}
-                        </p>
-                      </div>
-
-                      <span
-                        className={`rounded px-3 py-1 text-xs font-semibold ${
-                          round.status === "completed"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-yellow-100 text-yellow-700"
-                        }`}
-                      >
-                        {capitalizeFLetter(round.status)}
-                      </span>
-                    </div>
-
-                    {/* Feedback List */}
-                    <div className="space-y-2">
-                      {round.panels?.map((panel) => {
-                        const feedback = panel?.feedbacks?.[0];
-                        return (
-                          <div
-                            key={panel.id}
-                            className="flex items-start justify-between rounded border bg-gray-50 p-3"
+                        <div className="flex items-center gap-3">
+                          <span
+                            className={`rounded px-3 py-1 text-xs font-semibold ${
+                              round.status === "completed"
+                                ? "bg-green-100 text-green-700"
+                                : "bg-yellow-100 text-yellow-700"
+                            }`}
                           >
-                            <div>
-                              <p className="text-sm">{panel.name}</p>
+                            {capitalizeFLetter(round.status)}
+                          </span>
+                          <p className="text-xs text-gray-500">
+                            {formatScheduleDateTime(
+                              round.scheduled_date,
+                              round.scheduled_time
+                            )}
+                          </p>
+                          <svg
+                            className={`h-4 w-4 text-gray-500 transition-transform ${
+                              isRoundOpen ? "rotate-180" : ""
+                            }`}
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 9l-7 7-7-7"
+                            />
+                          </svg>
+                        </div>
+                      </button>
 
-                              {/* {panel?.feedbacks?.[0]?.feedback_text && (
-                              <p className="mt-1 text-sm text-gray-700">
-                                {capitalizeFLetter(
-                                  panel.feedbacks[0].feedback_text
+                      {/* Feedback List */}
+                      {isRoundOpen && (
+                        <div className="space-y-2 border-t px-4 pb-4 pt-3">
+                          <div>Pannel Members With Feedbacks :</div>
+                          {round.panels?.map((panel) => {
+                            const feedback = panel?.feedbacks?.[0];
+                            const panelKey = `${round.id}-${panel.id}`;
+                            const isPanelOpen =
+                              !!state.expandedRounds?.[panelKey];
+                            return (
+                              <div
+                                key={panel.id}
+                                className="rounded border bg-gray-50"
+                              >
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setState({
+                                      expandedRounds: {
+                                        ...state.expandedRounds,
+                                        [panelKey]: !isPanelOpen,
+                                      },
+                                    })
+                                  }
+                                  className="flex w-full items-center justify-between p-3 text-left"
+                                >
+                                  <p className="text-sm font-medium">
+                                    {panel.name}
+                                  </p>
+                                  {feedback && (
+                                    <svg
+                                      className={`h-4 w-4 text-gray-400 transition-transform ${
+                                        isPanelOpen ? "rotate-180" : ""
+                                      }`}
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke="currentColor"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M19 9l-7 7-7-7"
+                                      />
+                                    </svg>
+                                  )}
+                                </button>
+                                {isPanelOpen && feedback && (
+                                  <div className="border-t px-3 pb-3 pt-2">
+                                    <div className="space-y-2 rounded-lg border border-gray-200 bg-white p-3 text-sm dark:border-gray-700 dark:bg-gray-900">
+                                      {feedback.is_same_as_applicant !==
+                                        undefined && (
+                                        <p>
+                                          <span className="font-semibold">
+                                            Same As Applicant :
+                                          </span>{" "}
+                                          {feedback.is_same_as_applicant
+                                            ? "Yes"
+                                            : "No"}
+                                        </p>
+                                      )}
+
+                                      {feedback.academic_record_remark && (
+                                        <p>
+                                          <span className="font-semibold">
+                                            Academic Record :
+                                          </span>{" "}
+                                          {feedback.academic_record_remark}
+                                        </p>
+                                      )}
+
+                                      {feedback.experience_remark && (
+                                        <p>
+                                          <span className="font-semibold">
+                                            Experience :
+                                          </span>{" "}
+                                          {feedback.experience_remark}
+                                        </p>
+                                      )}
+
+                                      {feedback.knowledge_rating && (
+                                        <p>
+                                          <span className="font-semibold">
+                                            Knowledge Rating :
+                                          </span>{" "}
+                                          {feedback.knowledge_rating}
+                                        </p>
+                                      )}
+
+                                      {feedback.knowledge_detail && (
+                                        <p>
+                                          <span className="font-semibold">
+                                            Knowledge Detail :
+                                          </span>{" "}
+                                          {feedback.knowledge_detail}
+                                        </p>
+                                      )}
+
+                                      {feedback.communication_skills_rating && (
+                                        <p>
+                                          <span className="font-semibold">
+                                            Communication Rating :
+                                          </span>{" "}
+                                          {feedback.communication_skills_rating}
+                                        </p>
+                                      )}
+
+                                      {feedback.communication_skills_comment && (
+                                        <p>
+                                          <span className="font-semibold">
+                                            Communication Comment :
+                                          </span>{" "}
+                                          {
+                                            feedback.communication_skills_comment
+                                          }
+                                        </p>
+                                      )}
+
+                                      {feedback.attitude_rating && (
+                                        <p>
+                                          <span className="font-semibold">
+                                            Attitude Rating :
+                                          </span>{" "}
+                                          {feedback.attitude_rating}
+                                        </p>
+                                      )}
+
+                                      {feedback.attitude_comment && (
+                                        <p>
+                                          <span className="font-semibold">
+                                            Attitude Comment :
+                                          </span>{" "}
+                                          {feedback.attitude_comment}
+                                        </p>
+                                      )}
+
+                                      {feedback.overall_assessment_rating && (
+                                        <p>
+                                          <span className="font-semibold">
+                                            Overall Assessment :
+                                          </span>{" "}
+                                          {feedback.overall_assessment_rating}
+                                        </p>
+                                      )}
+
+                                      {feedback.overall_assessment_remark && (
+                                        <p>
+                                          <span className="font-semibold">
+                                            Overall Remark :
+                                          </span>{" "}
+                                          {feedback.overall_assessment_remark}
+                                        </p>
+                                      )}
+
+                                      {feedback.position_recommendation && (
+                                        <p>
+                                          <span className="font-semibold">
+                                            Position Recommendation :
+                                          </span>{" "}
+                                          {feedback.position_recommendation}
+                                        </p>
+                                      )}
+
+                                      {feedback.recommendation_comments && (
+                                        <p>
+                                          <span className="font-semibold">
+                                            Recommendation Comment :
+                                          </span>{" "}
+                                          {feedback.recommendation_comments}
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
                                 )}
-                              </p>
-                            )} */}
-
-                              {feedback && (
-                                <div className="mt-3 space-y-2 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm dark:border-gray-700 dark:bg-gray-900">
-                                  {feedback.is_same_as_applicant !==
-                                    undefined && (
-                                    <p>
-                                      <span className="font-semibold">
-                                        Same As Applicant :
-                                      </span>{" "}
-                                      {feedback.is_same_as_applicant
-                                        ? "Yes"
-                                        : "No"}
-                                    </p>
-                                  )}
-
-                                  {feedback.academic_record_remark && (
-                                    <p>
-                                      <span className="font-semibold">
-                                        Academic Record :
-                                      </span>{" "}
-                                      {feedback.academic_record_remark}
-                                    </p>
-                                  )}
-
-                                  {feedback.experience_remark && (
-                                    <p>
-                                      <span className="font-semibold">
-                                        Experience :
-                                      </span>{" "}
-                                      {feedback.experience_remark}
-                                    </p>
-                                  )}
-
-                                  {feedback.knowledge_rating && (
-                                    <p>
-                                      <span className="font-semibold">
-                                        Knowledge Rating :
-                                      </span>{" "}
-                                      {feedback.knowledge_rating}
-                                    </p>
-                                  )}
-
-                                  {feedback.knowledge_detail && (
-                                    <p>
-                                      <span className="font-semibold">
-                                        Knowledge Detail :
-                                      </span>{" "}
-                                      {feedback.knowledge_detail}
-                                    </p>
-                                  )}
-
-                                  {feedback.communication_skills_rating && (
-                                    <p>
-                                      <span className="font-semibold">
-                                        Communication Rating :
-                                      </span>{" "}
-                                      {feedback.communication_skills_rating}
-                                    </p>
-                                  )}
-
-                                  {feedback.communication_skills_comment && (
-                                    <p>
-                                      <span className="font-semibold">
-                                        Communication Comment :
-                                      </span>{" "}
-                                      {feedback.communication_skills_comment}
-                                    </p>
-                                  )}
-
-                                  {feedback.attitude_rating && (
-                                    <p>
-                                      <span className="font-semibold">
-                                        Attitude Rating :
-                                      </span>{" "}
-                                      {feedback.attitude_rating}
-                                    </p>
-                                  )}
-
-                                  {feedback.attitude_comment && (
-                                    <p>
-                                      <span className="font-semibold">
-                                        Attitude Comment :
-                                      </span>{" "}
-                                      {feedback.attitude_comment}
-                                    </p>
-                                  )}
-
-                                  {feedback.overall_assessment_rating && (
-                                    <p>
-                                      <span className="font-semibold">
-                                        Overall Assessment :
-                                      </span>{" "}
-                                      {feedback.overall_assessment_rating}
-                                    </p>
-                                  )}
-
-                                  {feedback.overall_assessment_remark && (
-                                    <p>
-                                      <span className="font-semibold">
-                                        Overall Remark :
-                                      </span>{" "}
-                                      {feedback.overall_assessment_remark}
-                                    </p>
-                                  )}
-
-                                  {feedback.position_recommendation && (
-                                    <p>
-                                      <span className="font-semibold">
-                                        Position Recommendation :
-                                      </span>{" "}
-                                      {feedback.position_recommendation}
-                                    </p>
-                                  )}
-
-                                  {feedback.recommendation_comments && (
-                                    <p>
-                                      <span className="font-semibold">
-                                        Recommendation Comment :
-                                      </span>{" "}
-                                      {feedback.recommendation_comments}
-                                    </p>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
-
-            {/* Fixed Bottom Section */}
-            <div className="sticky bottom-0 border-t bg-white p-4">
-              <div className="flex items-end gap-3">
-                <div className="flex-1">
-                  <CustomSelect
-                    options={state.applicationStatusList}
-                    value={state.appstatus}
-                    onChange={(e) => setState({ appstatus: e })}
-                    placeholder="Select final status"
-                  />
+            <div className="rounded-xl border bg-gray-50 p-2">
+              <div className="flex items-center justify-between">
+                {/* Status */}
+                <div>
+                  <p className="text-xs text-gray-500">Application Status</p>
+                  <span className="mt-1 inline-block rounded bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
+                    {capitalizeFLetter(state.application?.status || "Pending")}
+                  </span>
                 </div>
 
+                {/* View Application Button */}
                 <button
-                  onClick={() => updateStatus()}
-                  className="bg-dblue rounded px-5 py-2 text-white"
+                  onClick={() => {
+                    setState({ isOpenRound: false });
+                    router.push(
+                      `/faculty/application_detail?id=${state.application?.id}`
+                    );
+                    // navigate or open application
+                    // viewApplication(state.application?.id);
+                  }}
+                  className="flex items-center gap-2 rounded border border-blue-600 px-2 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
                 >
-                  Update Status
+                  View Application
                 </button>
               </div>
             </div>
+          
           </div>
         )}
       />
@@ -2090,100 +2377,6 @@ const Application = () => {
               </button>
             </div>
             <div className="grid grid-cols-1 gap-4 py-3 md:grid-cols-3">
-              {(state.profile?.role == ROLES.SUPER_ADMIN ||
-                state.profile?.role == ROLES.INSTITUTION_ADMIN) && (
-                <>
-                  {state.profile?.role == ROLES.SUPER_ADMIN && (
-                    <CustomSelect
-                      options={state.institutionList}
-                      value={state.institutionFilter}
-                      onChange={handleInstitutionChange}
-                      placeholder="Select institution"
-                      isClearable={true}
-                      onSearch={(searchTerm) =>
-                        institutionDropdownList(1, searchTerm)
-                      }
-                      loadMore={() =>
-                        state.institutionNext &&
-                        institutionDropdownList(
-                          state.institutionPage + 1,
-                          "",
-                          true
-                        )
-                      }
-                      loading={state.institutionLoading}
-                    />
-                  )}
-                  <CustomSelect
-                    options={state.collegeList}
-                    value={state.collegeFilter}
-                    onChange={handleCollegeChange}
-                    placeholder="Select college"
-                    isClearable={true}
-                    onSearch={(searchTerm) => {
-                      const institutionId =
-                        state.profile?.role === ROLES.SUPER_ADMIN
-                          ? state.institutionFilter?.value
-                          : null;
-                      collegeDropdownList(
-                        1,
-                        searchTerm,
-                        false,
-                        institutionId,
-                        state.profile?.id
-                      );
-                    }}
-                    loadMore={() => {
-                      const institutionId =
-                        state.profile?.role === ROLES.SUPER_ADMIN
-                          ? state.institutionFilter?.value
-                          : state.profile?.institution?.id;
-                      state.collegeNext &&
-                        collegeDropdownList(
-                          state.collegePage + 1,
-                          "",
-                          true,
-                          institutionId,
-                          state.profile?.id
-                        );
-                    }}
-                    loading={state.collegeLoading}
-                  />
-
-                  <CustomSelect
-                    options={state.departmentList}
-                    value={state.departmentFilter}
-                    onChange={handleDepartmentChange}
-                    placeholder="Select department"
-                    isClearable={true}
-                    onSearch={(searchTerm) => {
-                      const collegeId = state.collegeFilter?.value;
-                      collegeId &&
-                        departmentDropdownList(
-                          1,
-                          searchTerm,
-                          false,
-                          collegeId,
-                          state.profile?.id
-                        );
-                    }}
-                    loadMore={() => {
-                      const collegeId = state.collegeFilter?.value;
-                      state.departmentNext &&
-                        collegeId &&
-                        departmentDropdownList(
-                          state.departmentPage + 1,
-                          "",
-                          true,
-                          collegeId,
-                          state.profile?.id
-                        );
-                    }}
-                    loading={state.departmentLoading}
-                    disabled={!state.collegeFilter}
-                  />
-                </>
-              )}
               <CustomSelect
                 options={state.applicationStatusList}
                 value={state.selectedStatus}

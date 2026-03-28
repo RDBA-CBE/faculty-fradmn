@@ -898,7 +898,6 @@ const CollegeAndDepartment = () => {
         total_strength: Number(state.total_strength),
         summary: state.summary,
         recent_achievements: state.recent_achievements,
-        is_legacy: state.is_legacy,
         short_name: capitalizeFLetter(state.short_name),
         location_id: state.location_id?.value,
         category: state.category,
