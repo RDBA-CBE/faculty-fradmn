@@ -28,7 +28,7 @@ import { Success, Failure } from "@/utils/function.utils";
 import useDebounce from "@/hook/useDebounce";
 import { CreateUser } from "@/utils/validation.utils";
 import Swal from "sweetalert2";
-import { FRONTEND_URL, GENDER_OPTION, ROLES } from "@/utils/constant.utils";
+import { FRONTEND_URL, GENDER_OPTION, RECORDS_FOR_ADMIN, ROLES } from "@/utils/constant.utils";
 import CheckboxInput from "@/components/FormFields/CheckBoxInput.component";
 import {
   CalendarCheck,
@@ -126,7 +126,7 @@ const Users = () => {
     requestForChange: false,
     sortingFilter: {
       value: 1,
-      label: "Own Record",
+      label: "All Records",
     },
     isOpenRound: false,
   });
@@ -150,12 +150,7 @@ const Users = () => {
     if (state.profile) {
       userList(1);
     }
-    setState({
-      sortingFilter: {
-        value: 1,
-        label: "Own Record",
-      },
-    });
+   
   }, [state.activeTab, state.profile]);
 
   useEffect(() => {
@@ -293,7 +288,7 @@ const Users = () => {
         qualification: item?.education_qualification,
         experience: item?.experience,
         status: item?.status,
-        college: item?.colleges?.map((item) => item?.name),
+        college: item?.colleges?.map((item) => item?.short_name),
         institution: item?.institution?.name,
         institutionData: item?.institution
           ? { label: item?.institution?.name, value: item?.institution?.id }
@@ -303,7 +298,7 @@ const Users = () => {
           : null,
         collegeData: item?.colleges
           ? item?.colleges?.map((c) => ({
-              label: c?.name,
+              label: c?.short_name,
               value: c?.id,
             }))
           : null,
@@ -311,8 +306,9 @@ const Users = () => {
           ? { label: item?.department?.name, value: item?.department?.id }
           : null,
         reveal_name: item?.reveal_name,
-        current_location:item?.current_location,
-        current_position:item?.current_position,
+        current_location: item?.current_location,
+        current_position: item?.current_position,
+        college_count: item?.college_count,
       }));
 
       setState({
@@ -331,125 +327,133 @@ const Users = () => {
     const userId = localStorage.getItem("userId");
 
     if (state.search) {
-      if (state.activeTab === ROLES.APPLICANT) {
+    
         body.search = state.search;
-        body.reveal_name = "Yes";
-      } else {
-        body.search = state.search;
-      }
     }
 
-    if (state.profile?.role === ROLES.SUPER_ADMIN) {
-      if (
-        state.activeTab == "hr" ||
-        state.activeTab == "hod" ||
-        state.activeTab == "applicant"
-      ) {
-        if (state.superAdminCollegeFilter?.value) {
-          body.college_id = state.superAdminCollegeFilter.value;
-        }
-
-        if (state.superAdminInstitutionFilter?.value) {
-          body.institution_id = state.superAdminInstitutionFilter.value;
-        }
-
-        if (state.superAdminDepartmentFilter?.value) {
-          body.department_id = state.superAdminDepartmentFilter.value;
-        }
-
-        if (state.activeTab === ROLES.APPLICANT) {
-          body.active_job_seeker = "Yes";
-        } else {
-          if (state.sortingFilter?.value) {
-            if (state.sortingFilter?.value == 1) {
-              body.team = "No";
-              body.created_by = userId;
-            } else {
-              body.team = "Yes";
-              body.created_by = userId;
-            }
-          }
-
-          // if (state.ownRecord) {
-          //   body.created_by = userId;
-          //   body.team = "No";
-          // } else {
-          //   body.created_by = userId;
-          //   body.team = "Yes";
-          // }
-        }
-      }
-    }
-
-    if (state.profile?.role === ROLES.INSTITUTION_ADMIN) {
-      if (
-        // state.activeTab == "hr" ||
-        state.activeTab == "hod"
-      ) {
-        if (state.superAdminCollegeFilter?.value) {
-          body.college_id = state.superAdminCollegeFilter.value;
-        }
-
-        if (state.superAdminDepartmentFilter?.value) {
-          body.department_id = state.superAdminDepartmentFilter.value;
-        }
-
-        if (state.sortingFilter?.value) {
-          if (state.sortingFilter?.value == 1) {
-            body.team = "No";
-            body.created_by = userId;
-            body.institution_id = state.profile?.institution?.id;
-          } else {
-            body.team = "Yes";
-            body.institution_id = state.profile?.institution?.id;
-            body.created_by = userId;
-          }
-        }
-      } else {
-        if (state.activeTab === ROLES.APPLICANT) {
-          body.active_job_seeker = "Yes";
-        } else {
-          if (state.sortingFilter?.value) {
-            if (state.sortingFilter?.value == 1) {
-              body.team = "No";
-              body.created_by = userId;
-            } else {
-              body.team = "Yes";
-              body.created_by = userId;
-            }
-          }
-          // body.created_by = userId;
-          // body.team = "No";
-        }
-      }
-    }
-    console.log("✌️bodyDATATA --->", body);
-
-    if (state.profile?.role === ROLES.HR) {
-      if (state.activeTab == "hod") {
-        body.created_by = userId;
+    if(state.activeTab == ROLES.HR){
+    if (state.sortingFilter?.value) {
+      if (state.sortingFilter?.value == 2) {
         body.team = "No";
-
-        // body.college_id = state.profile?.college?.map((item)=> item?.college_id);
-      }
-      if (state.activeTab === ROLES.APPLICANT) {
-        body.active_job_seeker = "Yes";
-      }
-    }
-
-    if (state.profile?.role === ROLES.HOD) {
-      if (state.ownRecord) {
-        body.created_by = userId;
-        body.team = "No";
-      } else {
+        body.created_by = parseInt(userId);
+      } else if (state.sortingFilter?.value == 3) {
+        body.created_by = parseInt(userId);
         body.team = "Yes";
-        body.department_id = state.profile?.department?.department_id;
-      }
-
-      if (state.activeTab === ROLES.APPLICANT) {
-        body.active_job_seeker = "Yes";
       }
     }
+  }
+
+    // if (state.profile?.role === ROLES.SUPER_ADMIN) {
+    //   if (
+    //     state.activeTab == "hr" ||
+    //     state.activeTab == "hod" ||
+    //     state.activeTab == "applicant"
+    //   ) {
+    //     if (state.superAdminCollegeFilter?.value) {
+    //       body.college_id = state.superAdminCollegeFilter.value;
+    //     }
+
+    //     if (state.superAdminInstitutionFilter?.value) {
+    //       body.institution_id = state.superAdminInstitutionFilter.value;
+    //     }
+
+    //     if (state.superAdminDepartmentFilter?.value) {
+    //       body.department_id = state.superAdminDepartmentFilter.value;
+    //     }
+
+    //     if (state.activeTab === ROLES.APPLICANT) {
+    //       body.active_job_seeker = "Yes";
+    //     } else {
+    //       if (state.sortingFilter?.value) {
+    //         if (state.sortingFilter?.value == 1) {
+    //           body.team = "No";
+    //           body.created_by = userId;
+    //         } else {
+    //           body.team = "Yes";
+    //           body.created_by = userId;
+    //         }
+    //       }
+
+    //       // if (state.ownRecord) {
+    //       //   body.created_by = userId;
+    //       //   body.team = "No";
+    //       // } else {
+    //       //   body.created_by = userId;
+    //       //   body.team = "Yes";
+    //       // }
+    //     }
+    //   }
+    // }
+
+    // if (state.profile?.role === ROLES.INSTITUTION_ADMIN) {
+    //   if (
+    //     // state.activeTab == "hr" ||
+    //     state.activeTab == "hod"
+    //   ) {
+    //     if (state.superAdminCollegeFilter?.value) {
+    //       body.college_id = state.superAdminCollegeFilter.value;
+    //     }
+
+    //     if (state.superAdminDepartmentFilter?.value) {
+    //       body.department_id = state.superAdminDepartmentFilter.value;
+    //     }
+
+    //     if (state.sortingFilter?.value) {
+    //       if (state.sortingFilter?.value == 1) {
+    //         body.team = "No";
+    //         body.created_by = userId;
+    //         body.institution_id = state.profile?.institution?.id;
+    //       } else {
+    //         body.team = "Yes";
+    //         body.institution_id = state.profile?.institution?.id;
+    //         body.created_by = userId;
+    //       }
+    //     }
+    //   } else {
+    //     if (state.activeTab === ROLES.APPLICANT) {
+    //       body.active_job_seeker = "Yes";
+    //     } else {
+    //       if (state.sortingFilter?.value) {
+    //         if (state.sortingFilter?.value == 1) {
+    //           body.team = "No";
+    //           body.created_by = userId;
+    //         } else {
+    //           body.team = "Yes";
+    //           body.created_by = userId;
+    //         }
+    //       }
+    //       // body.created_by = userId;
+    //       // body.team = "No";
+    //     }
+    //   }
+    // }
+    // console.log("✌️bodyDATATA --->", body);
+
+    // if (state.profile?.role === ROLES.HR) {
+    //   if (state.activeTab == "hod") {
+    //     body.created_by = userId;
+    //     body.team = "No";
+
+    //     // body.college_id = state.profile?.college?.map((item)=> item?.college_id);
+    //   }
+    //   if (state.activeTab === ROLES.APPLICANT) {
+    //     body.active_job_seeker = "Yes";
+    //   }
+    // }
+
+    // if (state.profile?.role === ROLES.HOD) {
+    //   if (state.ownRecord) {
+    //     body.created_by = userId;
+    //     body.team = "No";
+    //   } else {
+    //     body.team = "Yes";
+    //     body.department_id = state.profile?.department?.department_id;
+    //   }
+
+    //   if (state.activeTab === ROLES.APPLICANT) {
+    //     body.active_job_seeker = "Yes";
+    //   }
+    // }
 
     // if (userId) {
     //   body.created_by = userId;
@@ -505,7 +509,7 @@ const Users = () => {
       }
 
       const res: any = await Models.college.list(page, body);
-      const dropdown = Dropdown(res?.results, "college_name");
+      const dropdown = Dropdown(res?.results, "short_name");
 
       setState({
         collegeLoading: false,
@@ -661,7 +665,7 @@ const Users = () => {
       }
 
       const res: any = await Models.college.list(page, body);
-      const dropdown = Dropdown(res?.results, "college_name");
+      const dropdown = Dropdown(res?.results, "short_name");
 
       setState({
         collegeLoading: false,
@@ -738,7 +742,7 @@ const Users = () => {
       }
 
       const res: any = await Models.college.list(page, body);
-      const dropdown = Dropdown(res?.results, "college_name");
+      const dropdown = Dropdown(res?.results, "short_name");
 
       setState({
         hodCollegeLoading: false,
@@ -856,7 +860,7 @@ const Users = () => {
       applicantName: "",
       sendLoading: false,
       message: "",
-      interestJob:""
+      interestJob: "",
     });
     profile(false);
   };
@@ -1490,259 +1494,300 @@ const Users = () => {
   );
 
   const getColumns = (): any[] => {
-    const isAnonymous = (row: any) =>
-      state.activeTab === "applicant" && !row?.reveal_name;
-
-    const safeUser = (row: any) => {
-      if (!isAnonymous(row)) return row;
-
-      return {
-        ...row,
-        username: "Anonymous Faculty",
-        email: null,
-        phone: null,
-      };
-    };
-
-    const baseColumns = [
-      {
-        accessor: "username",
-        title: "Name",
-        sortable: true,
-        render: (row: any) => {
-          const user = safeUser(row);
-          return state.activeTab == ROLES.APPLICANT ? (
-            <a
-              title={user.username}
-              href={`${FRONTEND_URL}profile/${row?.id}`}
-              target="_blank"
-              className={`cursor-pointer font-medium ${
-                isAnonymous(row)
-                  ? "italic text-gray-400"
-                  : "text-gray-900 dark:text-white"
-              }`}
-            >
-              {truncateText(user.username)}
-            </a>
-          ) : (
+    let baseColumns = [];
+    if (state.activeTab === ROLES.INSTITUTION_ADMIN) {
+      baseColumns = [
+        {
+          accessor: "username",
+          title: "Name",
+          sortable: true,
+          render: (row: any) => (
             <div
-              title={user.username}
-              className={` font-medium ${
-                isAnonymous(row)
-                  ? "italic text-gray-400"
-                  : "text-gray-900 dark:text-white"
-              }`}
+              title={row.username}
+              className={` font-medium ${"text-gray-900 dark:text-white"}`}
             >
-              {truncateText(user.username)}
+              {truncateText(row.username)}
             </div>
-          );
+          ),
         },
-      },
+        {
+          accessor: "institution",
+          title: "Institution",
+          sortable: true,
 
-      ...(state.activeTab == ROLES.APPLICANT
-        ? [
-            {
-              accessor: "current_location",
-              title: "Location",
-              render: (row: any) => (
-                <div className="text-gray-600 dark:text-gray-400">
-                  {row?.current_location || "-"}
-           
-                </div>
-              ),
-            },
-            {
-              accessor: "experience",
-              title: "Experience",
-              render: (row: any) => (
-                <div className="text-gray-600 dark:text-gray-400">
-                  {row?.experience || "-"}
-                </div>
-              ),
-            },
-            {
-              accessor: "current_position",
-              title: "Current Position",
-              render: (row: any) => (
-                <div className="text-gray-600 dark:text-gray-400">
-                  {row?.current_position || "-"}
-                </div>
-              ),
-            },
-          ]
-        : [
-            {
-              accessor: "email",
-              title: "Email",
-              sortable: true,
-              render: (row: any) => {
-                const user = safeUser(row);
+          render: (row: any) => (
+            <div
+              title={row?.institution}
+              className="text-gray-600 dark:text-gray-400"
+            >
+              {truncateText(row?.institution)}
+            </div>
+          ),
+        },
 
-                return (
-                  <span className="text-gray-600 dark:text-gray-400">
-                    {user.email ? truncateText(user.email) : "Hidden"}
-                  </span>
-                );
-              },
-            },
-            {
-              accessor: "phone",
-              title: "Phone",
-              render: (row: any) => {
-                const user = safeUser(row);
+        {
+          accessor: "institution",
+          title: "College Count",
+          sortable: true,
 
-                return (
-                  <div className="text-gray-600 dark:text-gray-400">
-                    {user.phone || "Hidden"}
-                  </div>
-                );
-              },
-            },
-          ]),
-    ];
-    if (state.activeTab !== "applicant") {
-      baseColumns.push({
-        accessor: "institution",
-        title: "Institution",
-        sortable: true,
+          render: (row: any) => (
+            <div
+              title={row?.institution}
+              className="text-gray-600 dark:text-gray-400"
+            >
+              {row?.college_count || 0}
+            </div>
+          ),
+        },
+        {
+          accessor: "actions",
+          title: "Actions",
+          render: (row) => (
+            <div className="flex items-center justify-center gap-3">
+              {state.activeTab == "applicant" && (
+                <a
+                  href={`${FRONTEND_URL}profile/${row?.id}`}
+                  target="_blank"
+                  className={`flex cursor-pointer items-center justify-center rounded-lg transition-all duration-200 ${
+                    row.status === "active"
+                      ? " text-green-600 "
+                      : "text-red-600 "
+                  }`}
+                  title={"View"}
+                >
+                  <IconEye className="h-4 w-4" />
+                </a>
+              )}
+              {state.activeTab == "applicant" && row?.is_interested && (
+                <button
+                  onClick={() => handleRound(row)}
+                  className="flex  items-center justify-center rounded-lg  text-pink-600 transition-all duration-200 "
+                  title="Interview Round"
+                >
+                  <MessageSquare className="h-4 w-4" />
+                </button>
+              )}
 
-        render: (row: any) => (
-          <div
-            title={row?.institution}
-            className="text-gray-600 dark:text-gray-400"
-          >
-            {truncateText(row?.institution)}
-          </div>
-        ),
-      });
-    }
+              {state.activeTab == "applicant" && row?.reveal_name && (
+                <button
+                  onClick={() => handleSheduleInterview(row)}
+                  className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
+                  title="Interview schedule"
+                >
+                  <CalendarCheck className="h-4 w-4" />
+                </button>
+              )}
 
-    if (state.activeTab === "hr") {
-      baseColumns.splice(3, 0, {
-        accessor: "college",
-        title: "College",
-        sortable: true,
-
-        render: (row: any) => {
-          const department = row?.college;
-          if (!department || department?.length === 0) {
-            return <span className="text-gray-400">-</span>;
-          }
-
-          const firstDept = department?.[0];
-          const otherDept = department?.slice(1);
-          const maxShow = 3;
-          const remaining = otherDept?.length - maxShow;
-          const visibleDept = otherDept?.slice(0, maxShow);
-          const hiddenDept = otherDept?.slice(maxShow);
-
-          return (
-            <div className="flex max-w-[200px] items-center gap-2 overflow-hidden">
-              {/* First department text */}
-              <span
-                title={firstDept}
-                className="text-sm font-medium text-gray-700 dark:text-gray-300"
+              {state.activeTab == "applicant" && !row?.reveal_name && (
+                <button
+                  onClick={() =>
+                    setState({
+                      isOpenInterest: true,
+                      message: "",
+                      applicantName: row?.username,
+                      applicantId: row?.id,
+                    })
+                  }
+                  className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
+                  title="send interest"
+                >
+                  <Heart className="h-4 w-4" />
+                </button>
+              )}
+              {state.activeTab !== "applicant" && (
+                <>
+                  <button
+                    onClick={() => handleEdit(row)}
+                    className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
+                    title="Edit"
+                  >
+                    <IconEdit className="h-4 w-4" />
+                  </button>
+                </>
+              )}
+              <button
+                onClick={() => handleDelete(row)}
+                className="flex items-center justify-center rounded-lg  text-red-600 transition-all duration-200"
+                title="Delete"
               >
-                {truncateText(firstDept)}
-              </span>
-
-              {/* Avatars */}
-              <div className="flex items-center -space-x-2">
-                {visibleDept?.map((dept: string, index: number) => (
-                  <div key={index} className="group relative">
-                    <div className="bg-dblue flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white text-xs font-semibold text-white dark:border-gray-900">
-                      {dept?.slice(0, 2)?.toUpperCase()}
-                    </div>
-
-                    {/* Tooltip */}
-                    <div className="absolute bottom-10 left-1/2 z-[999] -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
-                      {capitalizeFLetter(dept)}
-                    </div>
-                  </div>
-                ))}
-                {remaining > 0 && (
-                  <div className="group relative">
-                    <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-gray-400 text-xs font-semibold text-white dark:border-gray-900">
-                      +{remaining}
-                    </div>
-
-                    {/* Remaining tooltip */}
-                    <div className="absolute  bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
-                      {hiddenDept
-                        ?.map((d: string) => capitalizeFLetter(d))
-                        .join(", ")}
-                    </div>
-                  </div>
-                )}
-              </div>
+                <IconTrash className="h-4 w-4" />
+              </button>
             </div>
-          );
+          ),
         },
-      });
+      ];
+    } else {
+      baseColumns = [
+        {
+          accessor: "username",
+          title: "Name",
+          sortable: true,
+          render: (row: any) => (
+            <div
+              title={row.username}
+              className={` font-medium ${"text-gray-900 dark:text-white"}`}
+            >
+              {truncateText(row.username)}
+            </div>
+          ),
+        },
+        {
+          accessor: "institution",
+          title: "Institution",
+          sortable: true,
+
+          render: (row: any) => (
+            <div
+              title={row?.institution}
+              className="text-gray-600 dark:text-gray-400"
+            >
+              {truncateText(row?.institution)}
+            </div>
+          ),
+        },
+
+        {
+          accessor: "college",
+          title: "College",
+          sortable: true,
+
+          render: (row: any) => {
+            const department = row?.college;
+            if (!department || department?.length === 0) {
+              return <span className="text-gray-400">-</span>;
+            }
+
+            const firstDept = department?.[0];
+            const otherDept = department?.slice(1);
+            const maxShow = 3;
+            const remaining = otherDept?.length - maxShow;
+            const visibleDept = otherDept?.slice(0, maxShow);
+            const hiddenDept = otherDept?.slice(maxShow);
+
+            return (
+              <div className="flex items-center gap-2">
+                {/* First department text */}
+                <span
+                  title={firstDept}
+                  className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  {truncateText(firstDept)}
+                </span>
+
+                {/* Avatars */}
+                <div className="flex items-center -space-x-2">
+                  {visibleDept?.map((dept: string, index: number) => (
+                    <div key={index} className="group relative">
+                      <div className="bg-dblue flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white text-xs font-semibold text-white dark:border-gray-900">
+                        {dept?.slice(0, 2)?.toUpperCase()}
+                      </div>
+
+                      {/* Tooltip */}
+                      <div className="absolute bottom-10 left-1/2 z-[999] -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
+                        {capitalizeFLetter(dept)}
+                      </div>
+                    </div>
+                  ))}
+                  {remaining > 0 && (
+                    <div className="group relative">
+                      <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-gray-400 text-xs font-semibold text-white dark:border-gray-900">
+                        +{remaining}
+                      </div>
+
+                      {/* Remaining tooltip */}
+                      <div className="absolute  bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
+                        {hiddenDept
+                          ?.map((d: string) => capitalizeFLetter(d))
+                          .join(", ")}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          },
+        },
+        {
+          accessor: "actions",
+          title: "Actions",
+          render: (row) => (
+            <div className="flex items-center justify-center gap-3">
+              {state.activeTab == "applicant" && (
+                <a
+                  href={`${FRONTEND_URL}profile/${row?.id}`}
+                  target="_blank"
+                  className={`flex cursor-pointer items-center justify-center rounded-lg transition-all duration-200 ${
+                    row.status === "active"
+                      ? " text-green-600 "
+                      : "text-red-600 "
+                  }`}
+                  title={"View"}
+                >
+                  <IconEye className="h-4 w-4" />
+                </a>
+              )}
+              {state.activeTab == "applicant" && row?.is_interested && (
+                <button
+                  onClick={() => handleRound(row)}
+                  className="flex  items-center justify-center rounded-lg  text-pink-600 transition-all duration-200 "
+                  title="Interview Round"
+                >
+                  <MessageSquare className="h-4 w-4" />
+                </button>
+              )}
+
+              {state.activeTab == "applicant" && row?.reveal_name && (
+                <button
+                  onClick={() => handleSheduleInterview(row)}
+                  className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
+                  title="Interview schedule"
+                >
+                  <CalendarCheck className="h-4 w-4" />
+                </button>
+              )}
+
+              {state.activeTab == "applicant" && !row?.reveal_name && (
+                <button
+                  onClick={() =>
+                    setState({
+                      isOpenInterest: true,
+                      message: "",
+                      applicantName: row?.username,
+                      applicantId: row?.id,
+                    })
+                  }
+                  className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
+                  title="send interest"
+                >
+                  <Heart className="h-4 w-4" />
+                </button>
+              )}
+              {state.activeTab !== "applicant" && (
+                <>
+                  <button
+                    onClick={() => handleEdit(row)}
+                    className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
+                    title="Edit"
+                  >
+                    <IconEdit className="h-4 w-4" />
+                  </button>
+                </>
+              )}
+              <button
+                onClick={() => handleDelete(row)}
+                className="flex items-center justify-center rounded-lg  text-red-600 transition-all duration-200"
+                title="Delete"
+              >
+                <IconTrash className="h-4 w-4" />
+              </button>
+            </div>
+          ),
+        },
+      ];
     }
 
     if (state.activeTab === "hod") {
-      baseColumns.splice(3, 0, {
-        accessor: "college",
-        title: "College",
-        sortable: true,
-
-        render: (row: any) => {
-          const department = row?.college;
-          if (!department || department?.length === 0) {
-            return <span className="text-gray-400">-</span>;
-          }
-
-          const firstDept = department?.[0];
-          const otherDept = department?.slice(1);
-          const maxShow = 3;
-          const remaining = otherDept?.length - maxShow;
-          const visibleDept = otherDept?.slice(0, maxShow);
-          const hiddenDept = otherDept?.slice(maxShow);
-
-          return (
-            <div className="flex items-center gap-2">
-              {/* First department text */}
-              <span
-                title={firstDept}
-                className="text-sm font-medium text-gray-700 dark:text-gray-300"
-              >
-                {truncateText(firstDept)}
-              </span>
-
-              {/* Avatars */}
-              <div className="flex items-center -space-x-2">
-                {visibleDept?.map((dept: string, index: number) => (
-                  <div key={index} className="group relative">
-                    <div className="bg-dblue flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white text-xs font-semibold text-white dark:border-gray-900">
-                      {dept?.slice(0, 2)?.toUpperCase()}
-                    </div>
-
-                    {/* Tooltip */}
-                    <div className="absolute bottom-10 left-1/2 z-[999] -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
-                      {capitalizeFLetter(dept)}
-                    </div>
-                  </div>
-                ))}
-                {remaining > 0 && (
-                  <div className="group relative">
-                    <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-gray-400 text-xs font-semibold text-white dark:border-gray-900">
-                      +{remaining}
-                    </div>
-
-                    {/* Remaining tooltip */}
-                    <div className="absolute  bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
-                      {hiddenDept
-                        ?.map((d: string) => capitalizeFLetter(d))
-                        .join(", ")}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        },
-      });
+      baseColumns.splice(3, 0);
 
       baseColumns.splice(3, 0, {
         accessor: "department",
@@ -1776,80 +1821,7 @@ const Users = () => {
     //   );
     // }
 
-    baseColumns.push({
-      accessor: "actions",
-      title: "Actions",
-      render: (row) => (
-        <div className="flex items-center justify-center gap-3">
-          {state.activeTab == "applicant" && (
-            <a
-              href={`${FRONTEND_URL}profile/${row?.id}`}
-              target="_blank"
-              className={`flex cursor-pointer items-center justify-center rounded-lg transition-all duration-200 ${
-                row.status === "active" ? " text-green-600 " : "text-red-600 "
-              }`}
-              title={"View"}
-            >
-              <IconEye className="h-4 w-4" />
-            </a>
-          )}
-          {state.activeTab == "applicant" && row?.is_interested && (
-            <button
-              onClick={() => handleRound(row)}
-              className="flex  items-center justify-center rounded-lg  text-pink-600 transition-all duration-200 "
-              title="Interview Round"
-            >
-              <MessageSquare className="h-4 w-4" />
-            </button>
-          )}
-
-          {state.activeTab == "applicant" && row?.reveal_name && (
-            <button
-              onClick={() => handleSheduleInterview(row)}
-              className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
-              title="Interview schedule"
-            >
-              <CalendarCheck className="h-4 w-4" />
-            </button>
-          )}
-
-          {state.activeTab == "applicant" && !row?.reveal_name && (
-            <button
-              onClick={() =>
-                setState({
-                  isOpenInterest: true,
-                  message: "",
-                  applicantName: row?.username,
-                  applicantId: row?.id,
-                })
-              }
-              className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
-              title="send interest"
-            >
-              <Heart className="h-4 w-4" />
-            </button>
-          )}
-          {state.activeTab !== "applicant" && (
-            <>
-              <button
-                onClick={() => handleEdit(row)}
-                className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
-                title="Edit"
-              >
-                <IconEdit className="h-4 w-4" />
-              </button>
-            </>
-          )}
-          <button
-            onClick={() => handleDelete(row)}
-            className="flex items-center justify-center rounded-lg  text-red-600 transition-all duration-200"
-            title="Delete"
-          >
-            <IconTrash className="h-4 w-4" />
-          </button>
-        </div>
-      ),
-    });
+    // baseColumns.push();
 
     return baseColumns;
   };
@@ -1874,7 +1846,7 @@ const Users = () => {
         applicant_id: state.applicantId,
         sender_id: state.profile?.id,
         job_id: state.interestJob?.value,
-        hr_interview_status:"Sent Interest"
+        hr_interview_status: "Sent Interest",
       };
 
       const res = await Models.application.send_interest(body);
@@ -2151,16 +2123,7 @@ const Users = () => {
                     (state.profile?.role === ROLES.INSTITUTION_ADMIN &&
                       state.activeTab != "hr")) && (
                     <CustomSelect
-                      options={[
-                        {
-                          value: 1,
-                          label: "Own Record",
-                        },
-                        {
-                          value: 2,
-                          label: "Not Own Record",
-                        },
-                      ]}
+                      options={RECORDS_FOR_ADMIN}
                       value={state.sortingFilter}
                       className="!w-fit"
                       onChange={(e) => setState({ sortingFilter: e })}
