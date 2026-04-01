@@ -27,6 +27,7 @@ import {
   CalendarCheck,
   Clock,
   Heart,
+  Mail,
   MessageSquare,
   UserCheck,
 } from "lucide-react";
@@ -500,7 +501,7 @@ const Users = () => {
                 className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
                 title="send interest"
               >
-                <Heart className="h-4 w-4" />
+                <Mail className="h-4 w-4" />
               </button>
             )}
 

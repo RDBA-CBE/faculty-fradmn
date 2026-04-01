@@ -251,6 +251,28 @@ const auth = {
     });
     return promise;
   },
+
+  hr_request_list: (body: any) => {
+    let promise = new Promise((resolve, reject) => {
+      let url = `hr-registrations/`;
+      instance()
+        .get(url, body)
+        .then((res) => {
+          resolve(res.data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            reject(error.response?.data);
+          } else {
+            reject(error);
+          }
+        });
+    });
+    return promise;
+  },
+
+  
+
 };
 
 export default auth;
