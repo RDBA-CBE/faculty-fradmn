@@ -134,6 +134,8 @@ const Users = () => {
       label: "All Records",
     },
     isOpenRound: false,
+    hr_request: false,
+
   });
 
   const debounceSearch = useDebounce(state.search, 500);
@@ -176,6 +178,8 @@ const Users = () => {
     state.superAdminInstitutionFilter,
     state.superAdminDepartmentFilter,
     state.sortingFilter,
+    state.hr_request,
+
   ]);
 
   const profile = async (isTabChange = true) => {
@@ -271,7 +275,12 @@ const Users = () => {
       const body = bodyData();
       console.log("✌️body --->", body);
       body.role = state.activeTab;
-      const res: any = await Models.auth.userList(page, body);
+      let res: any;
+      if (state.activeTab == ROLES.HR && state.hr_request) {
+        res = await Models.auth.hr_request_list(page);
+      } else {
+        res = await Models.auth.userList(page, body);
+      }
 
       const tableData = res?.results?.map((item) => ({
         id: item?.id,
@@ -287,17 +296,30 @@ const Users = () => {
         qualification: item?.education_qualification,
         experience: item?.experience,
         status: item?.status,
-        college: item?.colleges?.map((item) => item?.name),
-        institution: item?.institution?.name,
-        institutionData: item?.institution
+        college:
+        state.activeTab == ROLES.HR && state.hr_request
+          ? [item?.college]
+          : item?.colleges?.map((item) => item?.short_name),
+        institution:
+        state.activeTab == ROLES.HR
+          ? state.hr_request
+            ? item?.institution
+            : item?.institution?.name
+          : item?.institution?.name,
+
+        institutionData: state.hr_request
+          ? item?.institution
+          : item?.institution
           ? { label: item?.institution?.name, value: item?.institution?.id }
           : null,
         genderData: item?.gender
           ? { label: capitalizeFLetter(item?.gender), value: item?.gender }
           : null,
-        collegeData: item?.colleges
+          collegeData: state.hr_request
+          ? item?.college
+          : item?.colleges
           ? item?.colleges?.map((c) => ({
-              label: c?.name,
+              label: c?.short_name,
               value: c?.id,
             }))
           : null,
@@ -1388,48 +1410,38 @@ const Users = () => {
           render: (row: any) => (
             <div
               title={row.username}
-              onClick={() => handleEdit(row)}
-              className={` cursor-pointer font-medium`}
+              className={` font-medium ${"text-gray-900 dark:text-white"}`}
             >
-              {truncateText(row.username)}
+              {truncateText(row?.username)}
             </div>
           ),
         },
         {
-          accessor: "college_count",
-          title: "Total Colleges",
+          accessor: "institution",
+          title: "Institution",
           sortable: true,
+
           render: (row: any) => (
-            <div className={` font-medium`}>{row.college_count}</div>
+            <div
+              title={row?.institution}
+              className="text-gray-600 dark:text-gray-400"
+            >
+              {truncateText(row?.institution)}
+            </div>
           ),
         },
 
         {
-          accessor: "job_count",
-          title: "Total Jobs",
+          accessor: "institution",
+          title: "College Count",
           sortable: true,
-          render: (row: any) => (
-            <div className={` font-medium`}>{row.job_count}</div>
-          ),
-        },
 
-        {
-          accessor: "applications_count",
-          title: "Total Applications",
-
-          sortable: true,
           render: (row: any) => (
-            <div className={` font-medium`}>{row.applications_count}</div>
-          ),
-        },
-
-        {
-          accessor: "interviews_scheduled_count",
-          title: "Interview Scheduled",
-          sortable: true,
-          render: (row: any) => (
-            <div className={` font-medium`}>
-              {row.interviews_scheduled_count}
+            <div
+              title={row?.institution}
+              className="text-gray-600 dark:text-gray-400"
+            >
+              {row?.college_count || 0}
             </div>
           ),
         },
@@ -1438,15 +1450,67 @@ const Users = () => {
           title: "Actions",
           render: (row) => (
             <div className="flex items-center justify-center gap-3">
-              <>
-                <button
-                  onClick={() => handleEdit(row)}
-                  className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
-                  title="Edit"
+              {state.activeTab == "applicant" && (
+                <a
+                  href={`${FRONTEND_URL}profile/${row?.id}`}
+                  target="_blank"
+                  className={`flex cursor-pointer items-center justify-center rounded-lg transition-all duration-200 ${
+                    row.status === "active"
+                      ? " text-green-600 "
+                      : "text-red-600 "
+                  }`}
+                  title={"View"}
                 >
-                  <IconEdit className="h-4 w-4" />
+                  <IconEye className="h-4 w-4" />
+                </a>
+              )}
+              {state.activeTab == "applicant" && row?.is_interested && (
+                <button
+                  onClick={() => handleRound(row)}
+                  className="flex  items-center justify-center rounded-lg  text-pink-600 transition-all duration-200 "
+                  title="Interview Round"
+                >
+                  <MessageSquare className="h-4 w-4" />
                 </button>
-              </>
+              )}
+
+              {state.activeTab == "applicant" && row?.reveal_name && (
+                <button
+                  onClick={() => handleSheduleInterview(row)}
+                  className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
+                  title="Interview schedule"
+                >
+                  <CalendarCheck className="h-4 w-4" />
+                </button>
+              )}
+
+              {state.activeTab == "applicant" && !row?.reveal_name && (
+                <button
+                  onClick={() =>
+                    setState({
+                      isOpenInterest: true,
+                      message: "",
+                      applicantName: row?.username,
+                      applicantId: row?.id,
+                    })
+                  }
+                  className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
+                  title="send interest"
+                >
+                  <Heart className="h-4 w-4" />
+                </button>
+              )}
+              {state.activeTab !== "applicant" && (
+                <>
+                  <button
+                    onClick={() => handleEdit(row)}
+                    className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
+                    title="Edit"
+                  >
+                    <IconEdit className="h-4 w-4" />
+                  </button>
+                </>
+              )}
               <button
                 onClick={() => handleDelete(row)}
                 className="flex items-center justify-center rounded-lg  text-red-600 transition-all duration-200"
@@ -1467,77 +1531,170 @@ const Users = () => {
           render: (row: any) => (
             <div
               title={row.username}
-              onClick={() => handleEdit(row)}
-              className={` cursor-pointer font-medium`}
+              className={` font-medium ${"text-gray-900 dark:text-white"}`}
             >
-              {truncateText(row.username)}
+              {truncateText(row?.username)}
             </div>
           ),
         },
         {
-          accessor: "college_count",
-          title: "Total Colleges",
+          accessor: "institution",
+          title: "Institution",
           sortable: true,
-          render: (row: any) => (
-            <div className={` font-medium`}>{row.college_count}</div>
-          ),
-        },
 
-        {
-          accessor: "job_count",
-          title: "Total Jobs",
-          sortable: true,
           render: (row: any) => (
-            <div className={` font-medium`}>{row.job_count}</div>
-          ),
-        },
-
-        {
-          accessor: "applications_count",
-          title: "Total Applications",
-
-          sortable: true,
-          render: (row: any) => (
-            <div className={` font-medium`}>{row.applications_count}</div>
-          ),
-        },
-
-        {
-          accessor: "interviews_scheduled_count",
-          title: "Interview Scheduled",
-          sortable: true,
-          render: (row: any) => (
-            <div className={` font-medium`}>
-              {row.interviews_scheduled_count}
+            <div
+              title={row?.institution}
+              className="text-gray-600 dark:text-gray-400"
+            >
+              {truncateText(row?.institution)}
             </div>
           ),
+        },
+
+        {
+          accessor: "college",
+          title: "College",
+          sortable: true,
+
+          render: (row: any) => {
+            const department = row?.college;
+            if (!department || department?.length === 0) {
+              return <span className="text-gray-400">-</span>;
+            }
+
+            const firstDept = department?.[0];
+            const otherDept = department?.slice(1);
+            const maxShow = 3;
+            const remaining = otherDept?.length - maxShow;
+            const visibleDept = otherDept?.slice(0, maxShow);
+            const hiddenDept = otherDept?.slice(maxShow);
+
+            return (
+              <div className="flex items-center gap-2">
+                {/* First department text */}
+                <span
+                  title={firstDept}
+                  className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  {truncateText(firstDept)}
+                </span>
+
+                {/* Avatars */}
+                <div className="flex items-center -space-x-2">
+                  {visibleDept?.map((dept: string, index: number) => (
+                    <div key={index} className="group relative">
+                      <div className="bg-dblue flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white text-xs font-semibold text-white dark:border-gray-900">
+                        {dept?.slice(0, 2)?.toUpperCase()}
+                      </div>
+
+                      {/* Tooltip */}
+                      <div className="absolute bottom-10 left-1/2 z-[999] -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
+                        {capitalizeFLetter(dept)}
+                      </div>
+                    </div>
+                  ))}
+                  {remaining > 0 && (
+                    <div className="group relative">
+                      <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-gray-400 text-xs font-semibold text-white dark:border-gray-900">
+                        +{remaining}
+                      </div>
+
+                      {/* Remaining tooltip */}
+                      <div className="absolute  bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
+                        {hiddenDept
+                          ?.map((d: string) => capitalizeFLetter(d))
+                          .join(", ")}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          },
         },
         {
           accessor: "actions",
           title: "Actions",
           render: (row) => (
             <div className="flex items-center justify-center gap-3">
-              <>
-                <button
-                  onClick={() => handleEdit(row)}
-                  className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
-                  title="Edit"
-                >
-                  <IconEdit className="h-4 w-4" />
-                </button>
-              </>
-              <button
-                onClick={() => handleDelete(row)}
-                className="flex items-center justify-center rounded-lg  text-red-600 transition-all duration-200"
-                title="Delete"
-              >
-                <IconTrash className="h-4 w-4" />
-              </button>
+              {state.activeTab == ROLES.HR && state.hr_request ? (
+                <>
+                  <button
+                    onClick={() => handleEdit(row)}
+                    className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
+                    title="Edit"
+                  >
+                   Approve
+                  </button>
+                  <button
+                    onClick={() => handleDelete(row)}
+                    className="flex items-center justify-center rounded-lg  text-red-600 transition-all duration-200"
+                    title="Delete"
+                  >
+                    Reject
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => handleEdit(row)}
+                    className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
+                    title="Edit"
+                  >
+                    <IconEdit className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(row)}
+                    className="flex items-center justify-center rounded-lg  text-red-600 transition-all duration-200"
+                    title="Delete"
+                  >
+                    <IconTrash className="h-4 w-4" />
+                  </button>
+                </>
+              )}
             </div>
           ),
         },
       ];
     }
+
+    if (state.activeTab === "hod") {
+      baseColumns.splice(3, 0);
+
+      baseColumns.splice(3, 0, {
+        accessor: "department",
+        title: "Department",
+        sortable: true,
+        render: (row: any) => (
+          <div
+            title={row?.department}
+            className="text-gray-600 dark:text-gray-400"
+          >
+            {truncateText(row?.department)}
+          </div>
+        ),
+      });
+    }
+
+    // if (state.activeTab === "hod" || state.activeTab === "applicant") {
+    //   baseColumns.push(
+    //     {
+    //       accessor: "qualification",
+    //       title: "Qualification",
+    //       sortable: true,
+
+    //       render: (row: any) => (
+    //         <div className="text-gray-600 dark:text-gray-400">
+    //           {row?.qualification}
+    //         </div>
+    //       ),
+    //     }
+
+    //   );
+    // }
+
+    // baseColumns.push();
 
     return baseColumns;
   };
@@ -1821,6 +1978,16 @@ const Users = () => {
                   )}
                 </>
               )}
+             
+                  {state.activeTab == ROLES.HR && (
+                    <CheckboxInput
+                      checked={state.hr_request}
+                      onChange={(e) =>
+                        setState({ hr_request: !state.hr_request })
+                      }
+                      label="HR Request"
+                    />
+                  )}
               {/* {state.profile?.role === ROLES.HR &&
                 state.activeTab == "applicant" && (
                   <CheckboxInput
