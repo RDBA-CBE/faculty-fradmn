@@ -104,6 +104,12 @@ const auth = {
         url = url + `&role=${body.role}`;
       }
 
+      if (body.experience_id) {
+        url = url + `&experience_id=${body.experience_id}`;
+      }
+
+      
+
       if (body.reveal_name == "Yes") {
         url = url + `&reveal_name=${true}`;
       }

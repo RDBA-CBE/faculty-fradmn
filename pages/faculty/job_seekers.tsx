@@ -131,6 +131,7 @@ const Users = () => {
     dispatch(setPageTitle("Users"));
     profile();
     master_department();
+    master_experience()
   }, [dispatch]);
 
   useEffect(() => {
@@ -161,6 +162,7 @@ const Users = () => {
 
     state.sortingFilter,
     state.refFilter,
+    state.experience
   ]);
 
   const profile = async () => {
@@ -194,6 +196,8 @@ const Users = () => {
         current_location: item?.current_location,
         current_position: item?.current_position,
         department_master: item?.department_master?.short_name,
+        publication_count:item?.publication_count,
+        project_count:item?.project_count,
       }));
 
       setState({
@@ -232,6 +236,32 @@ const Users = () => {
     }
   };
 
+  const master_experience = async (
+    page = 1,
+    search = "",
+    loadMore = false,
+  ) => {
+    try {
+      const body: any = {};
+      if (search) {
+        body.search = search;
+      }
+      body.pagination = "No";
+      const res: any = await Models.master.experience_list(body, page);
+console.log('master_experience --->', res);
+      const dropdown = Dropdown(res?.results, "name");
+      setState({
+        master_experience: loadMore
+          ? [...state.master_experience, ...dropdown]
+          : dropdown,
+        masterNext: res?.next,
+        masterPage: page,
+      });
+    } catch (error) {
+      console.log("✌️error --->", error);
+    }
+  };
+
   const bodyData = () => {
     const body: any = {};
 
@@ -260,6 +290,12 @@ const Users = () => {
     if (state.department?.value) {
       body.department_master_id = state.department?.value;
     }
+
+    if (state.experience?.value) {
+      body.experience_id = state.experience?.label;
+    }
+
+    
 
     return body;
   };
@@ -453,6 +489,28 @@ const Users = () => {
           </div>
         ),
       },
+
+      {
+        accessor: "publication_count",
+        title: "Publications ",
+        render: (row: any) => (
+          <div className="text-gray-600 dark:text-gray-400">
+            {row?.publication_count || "-"}
+          </div>
+        ),
+      },
+
+      {
+        accessor: "project_count",
+        title: "Projects ",
+        render: (row: any) => (
+          <div className="text-gray-600 dark:text-gray-400">
+            {row?.project_count || "-"}
+          </div>
+        ),
+      },
+
+  
       {
         accessor: "actions",
         title: "Actions",
@@ -666,7 +724,7 @@ const Users = () => {
               options={PREFERENCES}
               value={state.refFilter}
               onChange={(e) => setState({ refFilter: e })}
-              placeholder="Preferences"
+              placeholder="Education Qualification"
               isClearable={true}
               isMulti
             />
@@ -677,6 +735,15 @@ const Users = () => {
               value={state.department}
               onChange={(e) => setState({ department: e })}
               placeholder="Select department"
+              isClearable={true}
+            />
+          </div>
+          <div className="group relative">
+            <CustomSelect
+              options={state.master_experience}
+              value={state.experience}
+              onChange={(e) => setState({ experience: e })}
+              placeholder="Select experience"
               isClearable={true}
             />
           </div>
