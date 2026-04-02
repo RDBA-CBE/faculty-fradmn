@@ -618,7 +618,7 @@ export const OwnmenuConfig = {
       children: [
         {
           label: "Panel Members",
-          href: "/faculty/master/panel",
+          href: "/faculty/master/hr_panel",
         },
       ],
     },

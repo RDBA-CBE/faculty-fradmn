@@ -52,42 +52,36 @@ const Category = () => {
 
   useEffect(() => {
     dispatch(setPageTitle("Panel Management"));
-    institutionDropdownList(1, "", false);
+
     profile();
-    collegeList(1, "", false);
   }, [dispatch]);
 
   useEffect(() => {
-    panelList(1);
-  }, [
-    debounceSearch,
-    state.sortBy,
-    state.institutionFilter,
-    state.collegeFilter,
-  ]);
+    panelList(
+      1,
+      state.profile?.college?.map((item) => item?.college_id)
+    );
+  }, [debounceSearch, state.sortBy]);
 
   useEffect(() => {
     if (state.profile) {
-      panelList(1);
+      panelList(
+        1,
+        state.profile?.college?.map((item) => item?.college_id)
+      );
     }
   }, [state.profile]);
 
   // https://user-service.88.222.213.249.nip.io/api/interview-panels/?page=1&college_id=154&institution_id=236
-  const panelList = async (page = 1) => {
+  const panelList = async (page = 1, clgId) => {
     console.log("✌️page --->", page);
     try {
       setState({ loading: true });
 
       const body: any = {};
       if (state.search) body.search = state.search;
-
-      if (state.institutionFilter?.value) {
-        body.institution_id = state.institutionFilter?.value;
-      }
-      if (state.collegeFilter?.value) {
-        body.college_id = state.collegeFilter?.value;
-      }
-
+      if (clgId) body.college_id = clgId;
+console.log('✌️body --->', body);
 
       const res: any = await Models.master.panel_list(body, page);
 
@@ -103,8 +97,6 @@ const Category = () => {
           label: item?.department?.college?.short_name,
           value: item?.department?.college?.id,
         },
-        institution:item?.department?.institution?.institution_name,
-
       }));
 
       setState({
@@ -188,7 +180,10 @@ const Category = () => {
 
   const handlePageChange = (pageNumber: number) => {
     setState({ page: pageNumber });
-    panelList(pageNumber);
+    panelList(
+      pageNumber,
+      state.profile?.college?.map((item) => item?.college_id)
+    );
   };
 
   const handleCloseModal = () => {
@@ -245,7 +240,10 @@ const Category = () => {
     try {
       await Models.master.delete_panel(id);
       Success("Panel member deleted successfully!");
-      panelList(state.page);
+      panelList(
+        state.page,
+        state.profile?.college?.map((item) => item?.college_id)
+      );
     } catch (error) {
       Failure("Failed to delete experience");
     }
@@ -277,7 +275,10 @@ const Category = () => {
       }
 
       handleCloseModal();
-      panelList(state.page);
+      panelList(
+        state.page,
+        state.profile?.college?.map((item) => item?.college_id)
+      );
     } catch (error) {
       if (error instanceof Yup.ValidationError) {
         const validationErrors = {};
@@ -346,66 +347,12 @@ const Category = () => {
         `${state.selectedRecords?.length} panel member deleted successfully!`
       );
       setState({ selectedRecords: [] });
-      panelList(state.page);
+      panelList(
+        state.page,
+        state.profile?.college?.map((item) => item?.college_id)
+      );
     } catch (error) {
       Failure("Failed to delete panel member. Please try again.");
-    }
-  };
-
-  const collegeList = async (
-    page,
-    search = "",
-    loadMore = false,
-    institutionId = null
-  ) => {
-    try {
-      setState({ collegeLoading: true });
-      const body: any = { search };
-      state.institutionFilter?.value &&
-        (body.institution = state.institutionFilter?.value);
-
-      if (institutionId) {
-        body.institution = institutionId;
-      }
-
-      const res: any = await Models.college.list(page, body);
-      const dropdown = Dropdown(res?.results, "short_name");
-
-      setState({
-        collegeLoading: false,
-        collegePage: page,
-        collegeList: loadMore ? [...state.collegeList, ...dropdown] : dropdown,
-        collegeNext: res?.next,
-      });
-    } catch (error) {
-      console.error("Error fetching colleges:", error);
-      setState({ collegeLoading: false });
-    }
-  };
-
-  const institutionDropdownList = async (
-    page,
-    search = "",
-    loadMore = false
-  ) => {
-    try {
-      setState({ institutionLoading: true });
-      const body = { search };
-      const res: any = await Models.institution.list(page, body);
-      const dropdown = res?.results?.map((item) => ({
-        value: item.id,
-        label: item.institution_name,
-      }));
-      setState({
-        institutionLoading: false,
-        institutionPage: page,
-        institutionList: loadMore
-          ? [...state.institutionList, ...dropdown]
-          : dropdown,
-        institutionNext: res?.next,
-      });
-    } catch (error) {
-      setState({ institutionLoading: false });
     }
   };
 
@@ -432,59 +379,14 @@ const Category = () => {
       </div>
 
       <div className="mb-5 rounded-2xl  backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-          <div className="group relative w-full">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="group relative">
             <TextInput
               placeholder="Search panel member..."
               value={state.search}
               onChange={(e) => setState({ search: e.target.value })}
               icon={<IconSearch className="h-4 w-4" />}
-              className="w-full transition-all duration-200 focus:shadow-lg group-hover:shadow-md"
-            />
-          </div>
-
-          <div className="group relative w-full">
-            <CustomSelect
-              options={state.institutionList}
-              value={state.institutionFilter}
-              onChange={(e) => {
-                if (e) {
-                  collegeList(1, "", false, e.value);
-                } else {
-                  setState({ collegeFilter: null, departmentFilter: null });
-                }
-                setState({ institutionFilter: e,collegeFilter:"" });
-              }}
-              placeholder="Select Institution"
-              isClearable
-              loading={state.institutionLoading}
-              onSearch={(search) => {
-                institutionDropdownList(1, search, false);
-              }}
-              loadMore={() => {
-                if (state.institutionNext) {
-                  institutionDropdownList(state.institutionPage + 1, "", true);
-                }
-              }}
-              className="w-full"
-            />
-          </div>
-          <div className="group relative w-full">
-            <CustomSelect
-              options={state.collegeList}
-              value={state.collegeFilter}
-              onChange={(e) => setState({ collegeFilter: e })}
-              placeholder="Select College"
-              isClearable
-              onSearch={(e) => collegeList(1, e, false,state.institutionFilter?.value)}
-              loadMore={() =>
-                state?.collegeNext &&
-                collegeList(state.collegePage + 1, "", true,state.institutionFilter?.value)
-              }
-              loading={state.collegeLoading}
-              className="w-full"
-              disabled={!state.institutionFilter?.value}
-
+              className="transition-all duration-200 focus:shadow-lg group-hover:shadow-md"
             />
           </div>
         </div>
@@ -559,17 +461,13 @@ const Category = () => {
                 ),
               },
 
-
-
-              
-
               {
-                accessor: "institution",
-                title: "Institution",
+                accessor: "email",
+                title: "Email",
                 sortable: true,
-                render: ({ institution }) => (
+                render: ({ email }) => (
                   <div className="font-medium text-gray-900 dark:text-white">
-                    {institution}
+                    {email}
                   </div>
                 ),
               },
@@ -639,7 +537,10 @@ const Category = () => {
                 sortOrder: direction,
                 page: 1,
               });
-              panelList(1);
+              panelList(
+                1,
+                state.profile?.college?.map((item) => item?.college_id)
+              );
             }}
             minHeight={200}
           />
@@ -727,11 +628,6 @@ const Category = () => {
                 isClearable={true}
                 title="Select College"
                 required
-                loadMore={() =>
-                  state.collegeNext &&
-                  collegeList(state.collegePage + 1, "", true, "")
-                }
-                onSearch={(searchTerm) => collegeList(1, searchTerm, false, "")}
                 error={state.errors?.filterCollege}
               />
               <CustomSelect

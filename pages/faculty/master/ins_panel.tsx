@@ -70,10 +70,8 @@ const Category = () => {
       const body: any = {};
       if (state.search) body.search = state.search;
       if (insId) body.institution_id = insId;
-
-
       if(state.collegeFilter){
-        body.college=state.collegeFilter?.value
+        body.college_id=state.collegeFilter?.value
       }
       console.log('✌️body --->', body);
 
