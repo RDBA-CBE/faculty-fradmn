@@ -223,6 +223,7 @@ const Dashboard = () => {
   ]);
 
   useEffect(() => {
+    fetchDashboard();
     cards(state.profile?.role);
   }, [state.profile]);
 

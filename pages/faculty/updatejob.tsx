@@ -127,6 +127,7 @@ export default function Newjob() {
           },
         });
         fetchColleges(res?.institution?.institution?.id, 1);
+
       } else if (res?.role == ROLES.HR) {
         setState({
           profile: res,
@@ -139,10 +140,10 @@ export default function Newjob() {
           //   label: res?.college?.college_name,
           // },
         });
-        fetchDepartments(
-          res?.college?.map((item) => item?.college_id),
-          1
-        );
+        // fetchDepartments(
+        //   res?.college?.map((item) => item?.college_id),
+        //   1
+        // );
       }
       getJobDetails(res);
     } catch (error) {
@@ -267,6 +268,8 @@ export default function Newjob() {
           fetchColleges(res?.institution?.id, 1);
           fetchDepartments(res?.college?.id, 1);
         }
+        fetchDepartments(res?.college?.id, 1);
+
         if (res.apply_link) {
           console.log("✌️ if  --->");
           setState({

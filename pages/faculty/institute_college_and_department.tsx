@@ -181,7 +181,7 @@ const CollegeAndDepartment = () => {
       setState({ profile: res });
       collegeTableList(1, res?.institution?.id);
       HRList(1, "", false, res?.institution?.id);
-      collegeDropdownList(1, "", false, state.profile?.institution?.id);
+      collegeDropdownList(1, "", false, res?.institution?.id);
     } catch (error) {
       console.error("Error fetching institutions:", error);
     }
@@ -855,7 +855,8 @@ const CollegeAndDepartment = () => {
           );
         })
       );
-      collegeTableList(1);
+      collegeTableList(1, state.profile?.institution?.id);
+
       handleCloseModal();
       Success("College created successfully");
     } catch (error) {
@@ -996,6 +997,7 @@ const CollegeAndDepartment = () => {
       }
 
       const oldDeptIds = state.oldDept?.map((item) => item.id);
+
       const currentIds = state.departmentData
         ?.filter((item) => item?.id)
         .map((item) => item.id);
@@ -1003,13 +1005,33 @@ const CollegeAndDepartment = () => {
       const deleteDept = oldDeptIds.filter(
         (item) => !currentIds.includes(item)
       );
+
       if (deleteDept?.length > 0) {
         deleteDept?.map((item) =>
           Models.department.delete_dept_extra_data_each_college(item)
         );
       }
 
-      collegeTableList(1);
+      const oldDeptMasterIds = state.oldDept?.map(
+        (item) => item.department_master_id
+      );
+
+      const currentMasterIds = state.departmentData
+        ?.filter((item) => item?.dept?.value)
+        .map((item) => item.dept?.value);
+
+      const deleteMasterDept = oldDeptMasterIds.filter(
+        (item) => !currentMasterIds.includes(item)
+      );
+
+      if (deleteMasterDept?.length > 0) {
+        deleteMasterDept?.map((item) =>
+          Models.department.delete_dept_master(item)
+        );
+      }
+
+
+      collegeTableList(1, state.profile?.institution?.id);
       handleCloseModal();
       Success("College updated successfully!");
     } catch (error) {
@@ -1689,7 +1711,9 @@ const CollegeAndDepartment = () => {
       <div className="mb-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
-            <h1 className="page-ti text-transparent">Colleges and Deparments</h1>
+            <h1 className="page-ti text-transparent">
+              Colleges and Deparments
+            </h1>
             <p className="text-gray-600 dark:text-gray-400">
               Manage colleges and departments
             </p>
@@ -1792,7 +1816,7 @@ const CollegeAndDepartment = () => {
         <div className="mb-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-bold text-gray-800 dark:text-white">
-            College List
+              College List
             </h3>
             <div className="flex items-center gap-4">
               {state.selectedRecords.length > 0 && (

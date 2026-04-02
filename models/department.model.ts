@@ -236,6 +236,25 @@ const department = {
     });
     return promise;
   },
+
+  delete_dept_master: (id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      let url = `departments/master/${id}/`;
+      instance()
+        .delete(url)
+        .then((res) => {
+          resolve(res.data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            reject(error.response.data.message);
+          } else {
+            reject(error);
+          }
+        });
+    });
+    return promise;
+  },
 };
 
 export default department;
