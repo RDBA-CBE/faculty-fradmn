@@ -146,7 +146,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     setIsMounted(true);
-    fetchDashboard();
+    // fetchDashboard();
     profiles();
     applicationStatus();
     master_department();
@@ -176,17 +176,20 @@ const Dashboard = () => {
     if (activePeriod !== "custom") {
       setFromDate(null);
       setToDate(null);
-      fetchDashboard({ period: activePeriod });
+      fetchDashboard({ period: activePeriod }, state.profile);
     }
   }, [activePeriod]);
 
   useEffect(() => {
     if (fromDate && toDate) {
       setActivePeriod("custom");
-      fetchDashboard({
-        from: moment(fromDate).format("YYYY-MM-DD"),
-        to: moment(toDate).format("YYYY-MM-DD"),
-      });
+      fetchDashboard(
+        {
+          from: moment(fromDate).format("YYYY-MM-DD"),
+          to: moment(toDate).format("YYYY-MM-DD"),
+        },
+        state.profile
+      );
     }
   }, [fromDate, toDate]);
 
@@ -222,21 +225,21 @@ const Dashboard = () => {
     // state.activeCard,
   ]);
 
-  useEffect(() => {
-    fetchDashboard();
-    cards(state.profile?.role);
-  }, [state.profile]);
+  // useEffect(() => {
+  //   fetchDashboard();
+  //   cards(state.profile?.role);
+  // }, [state.profile]);
 
   const profiles = async () => {
     console.log("✌️profiles --->");
     try {
       const res: any = await Models.auth.profile();
       setState({ profile: res });
-      cards(res?.role);
+      fetchDashboard("", res);
       profileRef.current = true;
       if (res?.role == ROLES.SUPER_ADMIN) {
         collegeDropdownList(1, "", false, "", res.id);
-        institutionDropdownList(1, "", false)
+        institutionDropdownList(1, "", false);
       } else if (res?.role == ROLES.INSTITUTION_ADMIN) {
         collegeDropdownList(1, "", false, res?.institution?.id, res.id);
       }
@@ -284,14 +287,14 @@ const Dashboard = () => {
     }
   };
 
-  const cards = (role) => {
+  const cards = (role, body) => {
     let CARDS = [];
     if (role == ROLES.HR) {
       CARDS = [
         {
           id: 1,
           label: "Applications",
-          value: stats.applications,
+          value: body.applications,
           color: "text-orange-600",
           bg: "bg-info-light",
           mainbg: "bg-orange-100",
@@ -303,7 +306,7 @@ const Dashboard = () => {
         {
           id: 2,
           label: "Application Updates",
-          value: stats.application_update,
+          value: body.application_update,
           color: "text-orange-600",
           bg: "bg-info-light",
           mainbg: "bg-green-100",
@@ -314,7 +317,7 @@ const Dashboard = () => {
         {
           id: 3,
           label: "Interviews Scheduled",
-          value: stats.interviews,
+          value: body.interviews,
           color: "text-pink-600",
           bg: "bg-warning-light",
           mainbg: "bg-pink-100",
@@ -325,7 +328,7 @@ const Dashboard = () => {
         {
           id: 4,
           label: "Job Seekers",
-          value: stats.outreached,
+          value: body.outreached,
           color: "text-[#dd22cc]",
           bg: "bg-indigo-100",
           mainbg: "bg-[#d2c1f7f2]",
@@ -336,7 +339,7 @@ const Dashboard = () => {
         {
           id: 5,
           label: "Job Postings",
-          value: stats.activeJobs,
+          value: body.activeJobs,
           color: "text-dblue",
           bg: "bg-primary-light",
           mainbg: "bg-blue-100",
@@ -351,7 +354,7 @@ const Dashboard = () => {
         {
           id: 1,
           label: "Applications",
-          value: stats.applications,
+          value: body.applications,
           color: "text-orange-600",
           bg: "bg-info-light",
           mainbg: "bg-orange-100",
@@ -363,7 +366,7 @@ const Dashboard = () => {
         {
           id: 2,
           label: "Application Updates",
-          value: stats.application_update,
+          value: body.application_update,
           color: "text-orange-600",
           bg: "bg-info-light",
           mainbg: "bg-green-100",
@@ -374,7 +377,7 @@ const Dashboard = () => {
         {
           id: 3,
           label: "Interviews Scheduled",
-          value: stats.interviews,
+          value: body.interviews,
           color: "text-pink-600",
           bg: "bg-warning-light",
           mainbg: "bg-pink-100",
@@ -386,7 +389,7 @@ const Dashboard = () => {
         {
           id: 5,
           label: "Job Postings",
-          value: stats.activeJobs,
+          value: body.activeJobs,
           color: "text-dblue",
           bg: "bg-primary-light",
           mainbg: "bg-blue-100",
@@ -731,7 +734,7 @@ const Dashboard = () => {
     return body;
   };
 
-  const fetchDashboard = async (params?: Record<string, string>) => {
+  const fetchDashboard = async (params?: any, profile?: any) => {
     try {
       const profileRes = await Models.auth.profile();
       const dashRes: any = await Models.dashboard.list(params ?? {});
@@ -740,7 +743,17 @@ const Dashboard = () => {
 
       setProfile(profileRes);
       setDashboard(data);
-
+      const body = {
+        activeJobs: data?.top_cards?.active_jobs?.value ?? 0,
+        applications: data?.top_cards?.applications?.value ?? 0,
+        colleges: data?.top_cards?.colleges?.value ?? 0,
+        interviews: data?.top_cards?.interview_scheduled?.value ?? 0,
+        decisions: data?.top_cards?.decisions?.value ?? 0,
+        decisionsSelected: data?.top_cards?.decisions?.selected ?? 0,
+        decisionsRejected: data?.top_cards?.decisions?.rejected ?? 0,
+        outreached: data?.top_cards?.outreached?.value ?? 0,
+        application_update: data?.top_cards?.application_status?.value ?? 0,
+      };
       setStats({
         activeJobs: data?.top_cards?.active_jobs?.value ?? 0,
         applications: data?.top_cards?.applications?.value ?? 0,
@@ -752,6 +765,7 @@ const Dashboard = () => {
         outreached: data?.top_cards?.outreached?.value ?? 0,
         application_update: data?.top_cards?.application_status?.value ?? 0,
       });
+      cards(profile?.role, body);
     } catch (err) {
       console.error(err);
     }
@@ -1238,7 +1252,7 @@ const Dashboard = () => {
       Success("Application status updated successfully!");
       setState({ btnLoading: false, isOpenRound: false });
       handleUpdateStatus("", "");
-      fetchDashboard();
+      fetchDashboard("", state.profile);
     } catch (error) {
       setState({ btnLoading: false, isOpenRound: false });
 
@@ -1263,7 +1277,7 @@ const Dashboard = () => {
         selectedStatus: null,
       });
       handleUpdateStatus("", "");
-      fetchDashboard();
+      fetchDashboard("", state.profile);
     } catch (error) {
       Failure("Failed to update status. Please try again.");
     }
@@ -1299,7 +1313,7 @@ const Dashboard = () => {
           state.profile?.college?.map((c: any) => c.college_id),
           null
         );
-        fetchDashboard();
+        fetchDashboard("", state.profile);
       } catch (error) {
         Failure(
           row.is_approved ? "Failed to unapprove job" : "Failed to approve job"
@@ -1326,7 +1340,7 @@ const Dashboard = () => {
         state.profile?.college?.map((c: any) => c.college_id),
         null
       );
-      fetchDashboard();
+      fetchDashboard("", state.profile);
     } catch (error) {
       Failure("Failed to delete job");
     }
@@ -1439,7 +1453,7 @@ const Dashboard = () => {
     }
   };
 
-const institutionDropdownList = async (
+  const institutionDropdownList = async (
     page,
     search = "",
     loadMore = false
@@ -2914,26 +2928,28 @@ const institutionDropdownList = async (
               </div>
             </div>
             {/* Fixed Bottom Section */}
-            <div className="sticky bottom-0 border-t bg-white p-4">
-              <div className="flex items-end gap-3">
-                <div className="flex-1">
-                  <CustomSelect
-                    options={state.applicationStatusesList}
-                    value={state.appstatus}
-                    onChange={(e) => setState({ appstatus: e })}
-                    placeholder="Select final status"
-                    isClearable={false}
-                  />
-                </div>
+            {state.profile?.role == ROLES.HR && (
+              <div className="sticky bottom-0 border-t bg-white p-4">
+                <div className="flex items-end gap-3">
+                  <div className="flex-1">
+                    <CustomSelect
+                      options={state.applicationStatusesList}
+                      value={state.appstatus}
+                      onChange={(e) => setState({ appstatus: e })}
+                      placeholder="Select final status"
+                      isClearable={false}
+                    />
+                  </div>
 
-                <button
-                  onClick={() => updateStatus()}
-                  className="bg-dblue rounded px-5 py-2 text-white"
-                >
-                  Update Status
-                </button>
+                  <button
+                    onClick={() => updateStatus()}
+                    className="bg-dblue rounded px-5 py-2 text-white"
+                  >
+                    Update Status
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         )}
       />
