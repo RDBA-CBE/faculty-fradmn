@@ -980,7 +980,11 @@ const Users = () => {
         return;
       }
 
-      Failure("Operation failed. Please try again.");
+      if(error?.response?.data?.error){
+        Failure((error?.response?.data?.error));
+
+      }
+
     } finally {
       setState({ submitting: false });
     }
