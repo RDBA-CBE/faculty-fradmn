@@ -5,7 +5,8 @@ export const CLIENT_ID =
 
 // export const BACKEND_URL = "http://88.222.213.249/api/";
 export const BACKEND_URL = "https://user-service.88.222.213.249.nip.io/api/";
-export const FRONTEND_URL = "https://faculty-web-xi.vercel.app/";
+export const FRONTEND_URL = "https://www.facultypro.in/";
+
 
 export const ROLES = {
   SUPER_ADMIN: "super_admin",
