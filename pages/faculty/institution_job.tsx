@@ -167,25 +167,27 @@ const Job = () => {
       const res: any = await Models.auth.profile();
       setState({ profile: res });
       console.log("✌️profile --->", res);
+      jobCount(res?.institution?.id);
 
-      collegeDropdownList(1, "", false, state.profile?.institution?.id);
+      collegeDropdownList(1, "", false, res?.institution?.id);
       callJobListByRole(1, res);
     } catch (error) {
       console.error("Error fetching institutions:", error);
     }
   };
 
-  const getCollegeParamsByRole = (profileData?: any) => {
-    const p = profileData ?? state.profile;
+  const jobCount = async (institutionId) => {
+    try {
+      setState({ locationLoading: true });
+      const body = {
+        institution: institutionId,
+      };
 
-    return {
-      institutionId: null,
-      collegeIds: p?.college?.map((c: any) => c.college_id),
-    };
-  };
-
-  const getDeptCollegeIds = () => {
-    return state.profile?.college?.map((c: any) => c.college_id);
+      const res: any = await Models.job.job_counts(body);
+      setState({ job_count: res?.counts });
+    } catch (error) {
+      setState({ locationLoading: false });
+    }
   };
 
   const callJobListByRole = (page: number, profileData?: any) => {
@@ -247,6 +249,7 @@ const Job = () => {
         jobList: tableData,
         next: res?.next,
         prev: res?.previous,
+        card_cound: res?.counts,
       });
     } catch (error) {
       setState({ loading: false });
@@ -311,7 +314,7 @@ const Job = () => {
   const institutionDropdownList = async (
     page,
     search = "",
-    loadMore = false
+    loadMore = false,
   ) => {
     try {
       setState({ institutionLoading: true });
@@ -336,7 +339,7 @@ const Job = () => {
     page,
     search = "",
     loadMore = false,
-    insId = null
+    insId = null,
   ) => {
     try {
       console.log("insId --->", insId);
@@ -366,7 +369,7 @@ const Job = () => {
     page,
     search = "",
     loadMore = false,
-    collegeIds = null
+    collegeIds = null,
   ) => {
     try {
       setState({ departmentLoading: true });
@@ -388,7 +391,6 @@ const Job = () => {
       setState({ departmentLoading: false });
     }
   };
-
 
   const bodyData = () => {
     const body: any = {};
@@ -524,12 +526,12 @@ const Job = () => {
         Success(
           row.is_approved
             ? "Job unapproved successfully!"
-            : "Job approved successfully!"
+            : "Job approved successfully!",
         );
         callJobListByRole(state.page);
       } catch (error) {
         Failure(
-          row.is_approved ? "Failed to unapprove job" : "Failed to approve job"
+          row.is_approved ? "Failed to unapprove job" : "Failed to approve job",
         );
       }
     }
@@ -551,7 +553,7 @@ const Job = () => {
     showDeleteAlert(
       () => deleteRecord(row?.id),
       () => Swal.fire("Cancelled", "Record is safe", "info"),
-      "Are you sure you want to delete this job?"
+      "Are you sure you want to delete this job?",
     );
   };
 
@@ -559,7 +561,7 @@ const Job = () => {
     try {
       await Models.job.delete(id);
       Success("Job deleted successfully!");
-      jobList(state.page,state.profile?.institution?.id);
+      jobList(state.page, state.profile?.institution?.id);
     } catch (error) {
       Failure("Failed to delete job");
     }
@@ -569,7 +571,7 @@ const Job = () => {
     showDeleteAlert(
       () => bulkDeleteRecords(),
       () => Swal.fire("Cancelled", "Your Records are safe :)", "info"),
-      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`
+      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`,
     );
   };
 
@@ -580,7 +582,7 @@ const Job = () => {
       }
       Success(`${state.selectedRecords.length} jobs deleted successfully!`);
       setState({ selectedRecords: [] });
-      jobList(state.page,state.profile?.institution?.id);
+      jobList(state.page, state.profile?.institution?.id);
     } catch (error) {
       Failure("Failed to delete jobs. Please try again.");
     }
@@ -615,7 +617,12 @@ const Job = () => {
 
       {/* Stats Cards */}
       <div className="mb-6 flex gap-4">
-        <div className="rounded-lg border border-gray-200 bg-blue-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
+        <div
+          onClick={() => {
+            setState({ statusFilter: null });
+          }}
+          className="cursor-pointer rounded-lg border border-gray-200 bg-blue-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700"
+        >
           <div className="flex items-center gap-5">
             <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
               <Briefcase className="text-dblue h-10 w-10" />
@@ -623,7 +630,7 @@ const Job = () => {
 
             <div className="flex flex-col">
               <p className="text-2xl  leading-none text-gray-900 dark:text-white">
-                {state.count || 0}
+                {state.job_count?.total_jobs || 0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Total Jobs
@@ -644,7 +651,7 @@ const Job = () => {
 
             <div className="flex flex-col">
               <p className="text-2xl  leading-none text-gray-900 dark:text-white">
-                {state.jobList?.filter((job) => job.is_approved)?.length || 0}
+                {state.job_count?.approved_count || 0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Active job posting
@@ -665,7 +672,7 @@ const Job = () => {
 
             <div className="flex flex-col">
               <p className="text-2xl  leading-none text-gray-900 dark:text-white">
-                {state.jobList?.filter((job) => !job.is_approved)?.length || 0}
+                {state.job_count?.unapproved_count || 0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 In Active job posting
@@ -709,11 +716,11 @@ const Job = () => {
 
             onChange={(e) => {
               if (e) {
-                setState({ filterCollege: e,departmentFilter:null });
+                setState({ filterCollege: e, departmentFilter: null });
 
                 departmentDropdownList(1, "", false, e?.value);
               } else {
-                setState({ filterCollege: null,departmentFilter:null });
+                setState({ filterCollege: null, departmentFilter: null });
               }
             }}
             placeholder={"Select College"}
@@ -724,7 +731,7 @@ const Job = () => {
                 1,
                 search,
                 false,
-                state.profile?.institution?.id
+                state.profile?.institution?.id,
               );
             }}
             loadMore={() => {
@@ -733,7 +740,7 @@ const Job = () => {
                   state.collegePage + 1,
                   "",
                   false,
-                  state.profile?.institution?.id
+                  state.profile?.institution?.id,
                 );
               }
             }}
@@ -754,7 +761,7 @@ const Job = () => {
                 1,
                 search,
                 false,
-                state.filterCollege?.value
+                state.filterCollege?.value,
               );
             }}
             loadMore={() => {
@@ -763,8 +770,7 @@ const Job = () => {
                   state.departmentPage + 1,
                   "",
                   false,
-                  state.filterCollege?.value
-
+                  state.filterCollege?.value,
                 );
               }
             }}
@@ -905,7 +911,7 @@ const Job = () => {
             records={state.jobList}
             fetching={state.loading}
             selectedRecords={state.jobList?.filter((record) =>
-              state.selectedRecords.includes(record.id)
+              state.selectedRecords.includes(record.id),
             )}
             onSelectedRecordsChange={(records) =>
               setState({ selectedRecords: records.map((r: any) => r.id) })
@@ -1028,7 +1034,7 @@ const Job = () => {
                       <Clock className="h-3 w-3" />
                     )}
                     {capitalizeFLetter(
-                      (row as any).is_approved ? "Approved" : "Pending"
+                      (row as any).is_approved ? "Approved" : "Pending",
                     ) || "-"}
                   </span>
                 ),
@@ -1160,7 +1166,7 @@ const Job = () => {
                 sortOrder: direction,
                 page: 1,
               });
-              jobList(1,state.profile?.institution?.id);
+              jobList(1, state.profile?.institution?.id);
             }}
             minHeight={200}
           />

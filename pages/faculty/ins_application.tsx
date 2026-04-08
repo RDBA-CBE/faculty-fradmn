@@ -215,6 +215,7 @@ const Application = () => {
       collegeDropdownList(1, "", false, res?.institution?.id);
       applicationList(1, res?.institution?.id);
       loadJobList(1, null, false, null, null, null, res?.id);
+      applicationCount(res?.institution?.id);
     } catch (error) {
       console.error("Error fetching profile:", error);
     }
@@ -234,6 +235,14 @@ const Application = () => {
       });
     } catch (error) {
       setState({ applicationStatusLoading: false });
+    }
+  };
+  const applicationCount = async (institutionId) => {
+    try {
+      const res: any = await Models.application.application_counts({institution: institutionId});
+      setState({ applicationCount: res });
+    } catch (error) {
+      setState({ applicationCountLoading: false });
     }
   };
 
@@ -301,6 +310,7 @@ const Application = () => {
           item?.interview_slots?.length > 0
             ? item?.interview_slots[item?.interview_slots.length - 1]?.status
             : "-",
+            job_id:item?.job
       }));
       setState({
         loading: false,
@@ -1032,7 +1042,7 @@ const handleBulkDelete = () => {
 
             <div className="flex flex-col">
               <p className="text-2xl  leading-none text-gray-900 dark:text-white">
-                {state.count || 0}
+                {state.applicationCount?.count || 0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Applications
@@ -1054,8 +1064,8 @@ const handleBulkDelete = () => {
 
             <div className="flex flex-col">
               <p className="text-2xl  leading-none text-gray-900 dark:text-white">
-                {state.applications_by_status?.applied ||
-                  state.applications_by_status?.Applied ||
+                {state.applicationCount?.applications_by_status?.applied ||
+                  state.applicationCount?.applications_by_status?.Applied ||
                   0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -1078,7 +1088,7 @@ const handleBulkDelete = () => {
 
             <div className="flex flex-col">
               <p className="text-2xl  leading-none text-gray-900 dark:text-white">
-                {state.applications_by_status?.Selected || 0}
+                {state.applicationCount?.applications_by_status?.Selected || 0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Selected
@@ -1102,8 +1112,8 @@ const handleBulkDelete = () => {
 
             <div className="flex flex-col">
               <p className="text-2xl  leading-none text-gray-900 dark:text-white">
-                {state.applications_by_status?.["Interview Scheduled"] ||
-                  state.applications_by_status?.["interview scheduled"] ||
+                {state.applicationCount?.applications_by_status?.["Interview Scheduled"] ||
+                  state.applicationCount?.applications_by_status?.["interview scheduled"] ||
                   0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -1343,7 +1353,7 @@ const handleBulkDelete = () => {
                 sortable: true,
                 render: (row) => (
                   <Link
-                    href={`/faculty/application_detail?id=${row?.id}`}
+                    href={`/faculty/job_details?id=${row?.job_id}`}
                     title={row?.job_title}
                     className="text-gray-600 dark:text-gray-400"
                   >

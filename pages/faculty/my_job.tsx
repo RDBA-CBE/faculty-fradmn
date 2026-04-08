@@ -273,6 +273,9 @@ const Job = () => {
         jobList: tableData,
         next: res?.next,
         prev: res?.previous,
+        card_cound: res?.counts,
+
+
       });
     } catch (error) {
       setState({ loading: false });
@@ -694,7 +697,7 @@ const Job = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="mb-6 flex gap-4">
+         <div className="mb-6 flex gap-4">
         <div className="rounded-lg border border-gray-200 bg-blue-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
           <div className="flex items-center gap-5">
             <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
@@ -703,7 +706,7 @@ const Job = () => {
 
             <div className="flex flex-col">
               <p className="text-2xl  leading-none text-gray-900 dark:text-white">
-                {state.count || 0}
+                {state.card_cound?.total_jobs || 0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Total Jobs
@@ -724,10 +727,10 @@ const Job = () => {
 
             <div className="flex flex-col">
               <p className="text-2xl  leading-none text-gray-900 dark:text-white">
-                {state.jobList?.filter((job) => job.is_approved)?.length || 0}
+                {state.card_cound?.approved_count || 0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Approved Jobs
+                Active job posting
               </p>
             </div>
           </div>
@@ -745,10 +748,11 @@ const Job = () => {
 
             <div className="flex flex-col">
               <p className="text-2xl  leading-none text-gray-900 dark:text-white">
-                {state.jobList?.filter((job) => !job.is_approved)?.length || 0}
+                {state.card_cound?.unapproved_count || 0}
+
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Pending Jobs
+                In Active job posting
               </p>
             </div>
           </div>

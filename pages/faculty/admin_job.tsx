@@ -165,6 +165,7 @@ const Job = () => {
       setState({ profile: res });
       console.log("✌️profile --->", res);
       collegeDropdownList(1, "", false, null);
+      jobCount();
 
       callJobListByRole(1, res);
     } catch (error) {
@@ -186,6 +187,17 @@ const Job = () => {
       );
     else jobList(page, null, null);
   };
+
+  const jobCount = async () => {
+    try {
+      setState({ locationLoading: true });
+      const res: any = await Models.job.job_counts();
+      setState({ job_count: res?.counts });
+    } catch (error) {
+      setState({ locationLoading: false });
+    }
+  };
+
 
   const jobList = async (page, insId = null, colId = null) => {
     try {
@@ -237,6 +249,8 @@ const Job = () => {
         jobList: tableData,
         next: res?.next,
         prev: res?.previous,
+        card_cound:res?.counts
+
       });
     } catch (error) {
       setState({ loading: false });
@@ -640,7 +654,12 @@ const Job = () => {
 
       {/* Stats Cards */}
       <div className="mb-6 flex gap-4">
-        <div className="rounded-lg border border-gray-200 bg-blue-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
+        <div
+        onClick={() => {
+          setState({ statusFilter:null})
+
+        }}
+        className="cursor-pointer rounded-lg border border-gray-200 bg-blue-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
           <div className="flex items-center gap-5">
             <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
               <Briefcase className="text-dblue h-10 w-10" />
@@ -648,7 +667,7 @@ const Job = () => {
 
             <div className="flex flex-col">
               <p className="text-2xl  leading-none text-gray-900 dark:text-white">
-                {state.count || 0}
+                {state.job_count?.total_jobs || 0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Total Jobs
@@ -669,10 +688,10 @@ const Job = () => {
 
             <div className="flex flex-col">
               <p className="text-2xl  leading-none text-gray-900 dark:text-white">
-                {state.jobList?.filter((job) => job.is_approved)?.length || 0}
+                {state.job_count?.approved_count || 0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Approved Jobs
+                Active job posting
               </p>
             </div>
           </div>
@@ -690,15 +709,31 @@ const Job = () => {
 
             <div className="flex flex-col">
               <p className="text-2xl  leading-none text-gray-900 dark:text-white">
-                {state.jobList?.filter((job) => !job.is_approved)?.length || 0}
+                {state.job_count?.unapproved_count || 0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Pending Jobs
+                In Active job posting
               </p>
             </div>
           </div>
         </div>
-     
+        {/* <div className="rounded-lg border border-gray-200 bg-red-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
+          <div className="flex items-center gap-5">
+            <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
+              <Clock className="h-10 w-10 text-red-600" />
+            </div>
+
+            <div className="flex flex-col">
+              <p className="text-2xl  leading-none text-gray-900 dark:text-white">
+                {state.jobList?.filter((job) => job.priority == "0 - 30 Days")
+                  ?.length || 0}
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Urgent Job
+              </p>
+            </div>
+          </div>
+        </div> */}
       </div>
 
       {/* Filters Section */}

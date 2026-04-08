@@ -177,6 +177,7 @@ const Job = () => {
       //   false,
       //   res?.college?.map((item) => item?.college_id)
       // );
+      jobCount(res?.college?.map((item) => item?.college_id));
       callJobListByRole(1, res);
     } catch (error) {
       console.error("Error fetching institutions:", error);
@@ -203,7 +204,7 @@ const Job = () => {
     jobList(
       page,
       null,
-      p?.college?.map((c: any) => c.college_id)
+      p?.college?.map((c: any) => c.college_id),
     );
   };
 
@@ -256,10 +257,24 @@ const Job = () => {
         jobList: tableData,
         next: res?.next,
         prev: res?.previous,
-        card_cound:res?.counts
+        card_cound: res?.counts,
       });
     } catch (error) {
       setState({ loading: false });
+    }
+  };
+
+  const jobCount = async (college) => {
+    try {
+      setState({ locationLoading: true });
+      const body={
+        college
+      }
+
+      const res: any = await Models.job.job_counts(body);
+      setState({ job_count: res?.counts });
+    } catch (error) {
+      setState({ locationLoading: false });
     }
   };
 
@@ -330,7 +345,7 @@ const Job = () => {
   const institutionDropdownList = async (
     page,
     search = "",
-    loadMore = false
+    loadMore = false,
   ) => {
     try {
       setState({ institutionLoading: true });
@@ -357,7 +372,7 @@ const Job = () => {
     loadMore = false,
     institutionId = null,
     createdBy = null,
-    collegeIds = null
+    collegeIds = null,
   ) => {
     try {
       console.log("✌️collegeIds --->", collegeIds);
@@ -387,7 +402,7 @@ const Job = () => {
     page,
     search = "",
     loadMore = false,
-    collegeIds = null
+    collegeIds = null,
   ) => {
     try {
       setState({ departmentLoading: true });
@@ -543,12 +558,12 @@ const Job = () => {
         Success(
           row.is_approved
             ? "Job unapproved successfully!"
-            : "Job approved successfully!"
+            : "Job approved successfully!",
         );
         callJobListByRole(state.page);
       } catch (error) {
         Failure(
-          row.is_approved ? "Failed to unapprove job" : "Failed to approve job"
+          row.is_approved ? "Failed to unapprove job" : "Failed to approve job",
         );
       }
     }
@@ -570,7 +585,7 @@ const Job = () => {
     showDeleteAlert(
       () => deleteRecord(row?.id),
       () => Swal.fire("Cancelled", "Record is safe", "info"),
-      "Are you sure you want to delete this job?"
+      "Are you sure you want to delete this job?",
     );
   };
 
@@ -588,7 +603,7 @@ const Job = () => {
     showDeleteAlert(
       () => bulkDeleteRecords(),
       () => Swal.fire("Cancelled", "Your Records are safe :)", "info"),
-      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`
+      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`,
     );
   };
 
@@ -634,7 +649,12 @@ const Job = () => {
 
       {/* Stats Cards */}
       <div className="mb-6 flex gap-4">
-        <div className="rounded-lg border border-gray-200 bg-blue-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
+        <div
+        onClick={() => {
+          setState({ statusFilter:null})
+
+        }}
+        className="cursor-pointer rounded-lg border border-gray-200 bg-blue-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
           <div className="flex items-center gap-5">
             <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
               <Briefcase className="text-dblue h-10 w-10" />
@@ -642,7 +662,7 @@ const Job = () => {
 
             <div className="flex flex-col">
               <p className="text-2xl  leading-none text-gray-900 dark:text-white">
-                {state.card_cound?.total_jobs || 0}
+                {state.job_count?.total_jobs || 0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Total Jobs
@@ -663,7 +683,7 @@ const Job = () => {
 
             <div className="flex flex-col">
               <p className="text-2xl  leading-none text-gray-900 dark:text-white">
-                {state.card_cound?.approved_count || 0}
+                {state.job_count?.approved_count || 0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Active job posting
@@ -684,8 +704,7 @@ const Job = () => {
 
             <div className="flex flex-col">
               <p className="text-2xl  leading-none text-gray-900 dark:text-white">
-                {state.card_cound?.unapproved_count || 0}
-
+                {state.job_count?.unapproved_count || 0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 In Active job posting
@@ -738,7 +757,7 @@ const Job = () => {
                   false,
                   institutionId,
                   null,
-                  collegeIds
+                  collegeIds,
                 );
               }}
               loadMore={() => {
@@ -751,7 +770,7 @@ const Job = () => {
                     true,
                     institutionId,
                     null,
-                    collegeIds
+                    collegeIds,
                   );
                 }
               }}
@@ -767,19 +786,19 @@ const Job = () => {
             // />
 
             <CustomSelect
-            options={state.collegeList}
-            value={state.filterCollege}
-            onChange={(e) => {
-              if (e) {
-                departmentDropdownList(1, "", false, e?.value);
-              } else {
-                setState({ departmentFilter: "", departmentList: [] });
-              }
-              setState({ filterCollege: e });
-            }}
-            placeholder={"Select College"}
-            isClearable={true}
-          />
+              options={state.collegeList}
+              value={state.filterCollege}
+              onChange={(e) => {
+                if (e) {
+                  departmentDropdownList(1, "", false, e?.value);
+                } else {
+                  setState({ departmentFilter: "", departmentList: [] });
+                }
+                setState({ filterCollege: e });
+              }}
+              placeholder={"Select College"}
+              isClearable={true}
+            />
           )}
           {/* )} */}
           <CustomSelect
@@ -789,7 +808,6 @@ const Job = () => {
             placeholder="Select department"
             isClearable={true}
             disabled={!state.filterCollege}
-
             // onSearch={(searchTerm) => {
             //   const ids = getDeptCollegeIds();
             //   if (ids) departmentDropdownList(1, searchTerm, false, ids);
@@ -944,7 +962,7 @@ const Job = () => {
             records={state.jobList}
             fetching={state.loading}
             selectedRecords={state.jobList?.filter((record) =>
-              state.selectedRecords.includes(record.id)
+              state.selectedRecords.includes(record.id),
             )}
             onSelectedRecordsChange={(records) =>
               setState({ selectedRecords: records.map((r: any) => r.id) })
@@ -1067,7 +1085,7 @@ const Job = () => {
                       <Clock className="h-3 w-3" />
                     )}
                     {capitalizeFLetter(
-                      (row as any).is_approved ? "Approved" : "Pending"
+                      (row as any).is_approved ? "Approved" : "Pending",
                     ) || "-"}
                   </span>
                 ),

@@ -351,6 +351,32 @@ const job = {
 
     return promise;
   },
+  job_counts: (body=null) => {
+    let promise = new Promise((resolve, reject) => {
+      let url = `jobs/counts/`;
+      if (body?.college) {
+        url += `?college=${encodeURIComponent(body.college)}`;
+      }
+
+      if (body?.institution) {
+        url += `?institution=${encodeURIComponent(body.institution)}`;
+      }
+      instance()
+        .get(url)
+        .then((res) => {
+          resolve(res.data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            reject(error.response.message);
+          } else {
+            reject(error);
+          }
+        });
+    });
+    return promise;
+  },
+
 };
 
 export default job;

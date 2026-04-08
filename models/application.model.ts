@@ -185,6 +185,24 @@ const application = {
     });
     return promise;
   },
+
+  application_counts: (body=null) => {
+    let promise = new Promise((resolve, reject) => {
+      let url = `applications/counts/`;
+      if (body?.college) {
+        url += `?college=${encodeURIComponent(body.college)}`;
+      }
+      if (body?.institution) {
+        url += `?institution=${encodeURIComponent(body.institution)}`;
+      }
+      instance()
+        .get(url)
+        .then((res) => {
+          resolve(res.data);
+        });
+    });
+    return promise;
+  },
 };
 
 export default application;

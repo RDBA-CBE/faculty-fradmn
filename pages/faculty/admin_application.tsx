@@ -227,10 +227,22 @@ const Application = () => {
       profileRef.current = true;
       collegeDropdownList(1, "", false, "");
       applicationList(1, null, null, null, res?.id);
+      applicationCount();
       // loadJobList(1, null, null);
       loadJobList(1, null, false, null, null, null, res?.id);
     } catch (error) {
       console.error("Error fetching profile:", error);
+    }
+  };
+
+  const applicationCount = async () => {
+    try {
+      setState({ applicationCountLoading: true });
+
+      const res: any = await Models.application.application_counts();
+      setState({ applicationCount: res });
+    } catch (error) {
+      setState({ applicationCountLoading: false });
     }
   };
 
@@ -277,7 +289,7 @@ const Application = () => {
     institutionId = null,
     collegeId = null,
     deptId = null,
-    profileId = null
+    profileId = null,
   ) => {
     try {
       setState({ loading: true });
@@ -337,12 +349,13 @@ const Application = () => {
         },
         college_name: item?.job_detail?.college?.short_name,
         department_name: item?.department_details?.map(
-          (item) => item?.short_name
+          (item) => item?.short_name,
         ),
         interview_status:
           item?.interview_slots?.length > 0
             ? item?.interview_slots[item?.interview_slots.length - 1]?.status
             : "-",
+        job_id: item?.job,
       }));
       setState({
         loading: false,
@@ -419,7 +432,7 @@ const Application = () => {
         state.profile?.institution?.id,
         null,
         null,
-        state.profile?.id
+        state.profile?.id,
       );
     } else if (role === ROLES.HR) {
       applicationList(
@@ -427,7 +440,7 @@ const Application = () => {
         null,
         state.profile?.college?.map((item) => item?.college_id),
         null,
-        state.profile?.id
+        state.profile?.id,
       );
     } else if (role === ROLES.HOD) {
       applicationList(
@@ -435,7 +448,7 @@ const Application = () => {
         null,
         null,
         state.profile?.department?.department_id,
-        state.profile?.id
+        state.profile?.id,
       );
     }
   };
@@ -490,7 +503,7 @@ const Application = () => {
           state.profile?.institution?.id,
           null,
           null,
-          state.profile?.id
+          state.profile?.id,
         );
       } else if (role === ROLES.HR) {
         applicationList(
@@ -498,7 +511,7 @@ const Application = () => {
           null,
           state.profile?.college?.map((item) => item?.college_id),
           null,
-          state.profile?.id
+          state.profile?.id,
         );
       } else if (role === ROLES.HOD) {
         applicationList(
@@ -506,7 +519,7 @@ const Application = () => {
           null,
           null,
           state.profile?.department?.department_id,
-          state.profile?.id
+          state.profile?.id,
         );
       }
     } catch (error) {
@@ -529,7 +542,7 @@ const Application = () => {
           state.profile?.institution?.id,
           null,
           null,
-          state.profile?.id
+          state.profile?.id,
         );
       } else if (role === ROLES.HR) {
         applicationList(
@@ -537,7 +550,7 @@ const Application = () => {
           null,
           state.profile?.college?.map((item) => item?.college_id),
           null,
-          state.profile?.id
+          state.profile?.id,
         );
       } else if (role === ROLES.HOD) {
         applicationList(
@@ -545,7 +558,7 @@ const Application = () => {
           null,
           null,
           state.profile?.department?.department_id,
-          state.profile?.id
+          state.profile?.id,
         );
       }
     } catch (error) {
@@ -561,14 +574,14 @@ const Application = () => {
       () => {
         Swal.fire("Cancelled", "Your Record is safe :)", "info");
       },
-      "Are you sure want to delete record?"
+      "Are you sure want to delete record?",
     );
   };
 
   const institutionDropdownList = async (
     page,
     search = "",
-    loadMore = false
+    loadMore = false,
   ) => {
     try {
       setState({ institutionLoading: true });
@@ -595,7 +608,7 @@ const Application = () => {
     page,
     search = "",
     loadMore = false,
-    institutionId = null
+    institutionId = null,
   ) => {
     try {
       setState({ collegeLoading: true });
@@ -623,7 +636,7 @@ const Application = () => {
     page,
     search = "",
     loadMore = false,
-    collegeIds = null
+    collegeIds = null,
   ) => {
     try {
       setState({ departmentLoading: true });
@@ -800,7 +813,7 @@ const Application = () => {
     institutionId = null,
     collegeId = null,
     deptId = null,
-    created_by = null
+    created_by = null,
   ) => {
     try {
       setState({ jobLoading: true });
@@ -834,7 +847,7 @@ const Application = () => {
     page = 1,
     search = "",
     loadMore = false,
-    job = null
+    job = null,
   ) => {
     try {
       const body = {
@@ -866,7 +879,7 @@ const Application = () => {
     page = 1,
     search = "",
     loadMore = false,
-    deptId = null
+    deptId = null,
   ) => {
     try {
       setState({ panelMemberLoading: true });
@@ -894,7 +907,7 @@ const Application = () => {
     page = 1,
     search = "",
     loadMore = false,
-    deptIds
+    deptIds,
   ) => {
     try {
       setState({ applicantsLoading: true });
@@ -931,7 +944,7 @@ const Application = () => {
       const validation = {
         selectedJobs: state.selectedJobs.map((j) => j.value),
         selectedDepartments: state.selectedDepartments?.map(
-          (item) => item?.value
+          (item) => item?.value,
         ),
         interviewSlot: state.interviewSlot
           ? moment(state.interviewSlot).format("YYYY-MM-DD HH:mm")
@@ -1024,7 +1037,7 @@ const Application = () => {
       handleUpdateStatus("", "");
       if (state.appstatus?.label == "Rejected") {
         const filter = state.selectedRecords?.filter(
-          (item) => item != state.application?.id
+          (item) => item != state.application?.id,
         );
         setState({ selectedRecords: filter });
       }
@@ -1038,7 +1051,7 @@ const Application = () => {
   const bulkSelect = async () => {
     try {
       const responses = await Promise.all(
-        state.selectedRecords.map((id) => Models.application.details(id))
+        state.selectedRecords.map((id) => Models.application.details(id)),
       );
 
       console.log("✌️responses --->", responses);
@@ -1111,11 +1124,11 @@ const Application = () => {
     }
   };
 
-const handleBulkDelete = () => {
+  const handleBulkDelete = () => {
     showDeleteAlert(
       () => bulkDeleteRecords(),
       () => Swal.fire("Cancelled", "Your Records are safe :)", "info"),
-      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`
+      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`,
     );
   };
 
@@ -1124,7 +1137,9 @@ const handleBulkDelete = () => {
       for (const id of state.selectedRecords) {
         await Models.application.delete(id);
       }
-      Success(`${state.selectedRecords.length} application deleted successfully!`);
+      Success(
+        `${state.selectedRecords.length} application deleted successfully!`,
+      );
       setState({ selectedRecords: [] });
       applicationList(state.page);
     } catch (error) {
@@ -1170,7 +1185,7 @@ const handleBulkDelete = () => {
 
             <div className="flex flex-col">
               <p className="text-2xl  leading-none text-gray-900 dark:text-white">
-                {state.count || 0}
+                {state.applicationCount?.count || 0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Applications
@@ -1192,8 +1207,8 @@ const handleBulkDelete = () => {
 
             <div className="flex flex-col">
               <p className="text-2xl  leading-none text-gray-900 dark:text-white">
-                {state.applications_by_status?.applied ||
-                  state.applications_by_status?.Applied ||
+                {state.applicationCount?.applications_by_status?.applied ||
+                  state.applicationCount?.applications_by_status?.Applied ||
                   0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -1216,7 +1231,7 @@ const handleBulkDelete = () => {
 
             <div className="flex flex-col">
               <p className="text-2xl  leading-none text-gray-900 dark:text-white">
-                {state.applications_by_status?.Selected || 0}
+                {state.applicationCount?.applications_by_status?.Selected || 0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Selected
@@ -1240,8 +1255,12 @@ const handleBulkDelete = () => {
 
             <div className="flex flex-col">
               <p className="text-2xl  leading-none text-gray-900 dark:text-white">
-                {state.applications_by_status?.["Interview Scheduled"] ||
-                  state.applications_by_status?.["interview scheduled"] ||
+                {state.applicationCount?.applications_by_status?.[
+                  "Interview Scheduled"
+                ] ||
+                  state.applicationCount?.applications_by_status?.[
+                    "interview scheduled"
+                  ] ||
                   0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -1304,7 +1323,7 @@ const handleBulkDelete = () => {
                 1,
                 search,
                 false,
-                state.institutionFilter?.value
+                state.institutionFilter?.value,
               );
             }}
             loadMore={() => {
@@ -1313,7 +1332,7 @@ const handleBulkDelete = () => {
                   state.collegePage + 1,
                   "",
                   true,
-                  state.institutionFilter?.value
+                  state.institutionFilter?.value,
                 );
               }
             }}
@@ -1333,7 +1352,7 @@ const handleBulkDelete = () => {
                 1,
                 searchTerm,
                 false,
-                state.collegeFilter?.value
+                state.collegeFilter?.value,
               );
             }}
             loadMore={() => {
@@ -1484,7 +1503,7 @@ const handleBulkDelete = () => {
             records={state.applicationList}
             fetching={state.loading}
             selectedRecords={state.applicationList?.filter((record) =>
-              state.selectedRecords?.includes(record.id)
+              state.selectedRecords?.includes(record.id),
             )}
             onSelectedRecordsChange={(records) =>
               setState({ selectedRecords: records.map((r) => r.id) })
@@ -1521,7 +1540,7 @@ const handleBulkDelete = () => {
                 sortable: true,
                 render: (row) => (
                   <Link
-                    href={`/faculty/application_detail?id=${row?.id}`}
+                    href={`/faculty/job_details?id=${row?.job_id}`}
                     title={row?.job_title}
                     className="text-gray-600 dark:text-gray-400"
                   >
@@ -1855,7 +1874,7 @@ const handleBulkDelete = () => {
                     1,
                     searchTerm,
                     false,
-                    state.selectedJobs
+                    state.selectedJobs,
                   );
                 }}
                 loadMore={() => {
@@ -1864,7 +1883,7 @@ const handleBulkDelete = () => {
                       state.deptPage + 1,
                       "",
                       true,
-                      state.selectedJobs
+                      state.selectedJobs,
                     );
                 }}
                 isMulti
@@ -1889,7 +1908,7 @@ const handleBulkDelete = () => {
                     1,
                     searchTerm,
                     false,
-                    state.selectedDepartments
+                    state.selectedDepartments,
                   );
                 }}
                 loadMore={() => {
@@ -1898,7 +1917,7 @@ const handleBulkDelete = () => {
                       state.appPage + 1,
                       "",
                       false,
-                      state.selectedDepartments
+                      state.selectedDepartments,
                     );
                   }
                 }}
@@ -1926,7 +1945,7 @@ const handleBulkDelete = () => {
                     1,
                     searchTerm,
                     false,
-                    state.selectedDepartments
+                    state.selectedDepartments,
                   );
                 }}
                 loadMore={() => {
@@ -1935,7 +1954,7 @@ const handleBulkDelete = () => {
                       state.panelPage + 1,
                       "",
                       false,
-                      state.selectedDepartments
+                      state.selectedDepartments,
                     );
                   }
                 }}
@@ -2124,7 +2143,7 @@ const handleBulkDelete = () => {
                           <p className="text-xs text-gray-500">
                             {formatScheduleDateTime(
                               round.scheduled_date,
-                              round.scheduled_time
+                              round.scheduled_time,
                             )}
                           </p>
                           <svg
@@ -2344,7 +2363,7 @@ const handleBulkDelete = () => {
                   onClick={() => {
                     setState({ isOpenRound: false });
                     router.push(
-                      `/faculty/application_detail?id=${state.application?.id}`
+                      `/faculty/application_detail?id=${state.application?.id}`,
                     );
                     // navigate or open application
                     // viewApplication(state.application?.id);
@@ -2355,7 +2374,6 @@ const handleBulkDelete = () => {
                 </button>
               </div>
             </div>
-          
           </div>
         )}
       />
