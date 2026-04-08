@@ -91,6 +91,9 @@ export default function Newjob() {
     isCollegeEmail: true,
     alternativeEmail: "",
     applyLink: "",
+    academicResponsibility: [],
+    academicResponsibilityList: [],
+    academicResponsibilityLoading: false,
   });
 
   useEffect(() => {
@@ -104,6 +107,7 @@ export default function Newjob() {
     tagList(1);
     fetchExperience(1);
     jobRoleList();
+    academicResponsibilityList();
   }, []);
 
   useEffect(() => {
@@ -253,6 +257,13 @@ export default function Newjob() {
                   label: res?.roles?.[0]?.role_name,
                 }
               : [],
+          academicResponsibility:
+            res?.additional_academic_responsibilities?.length > 0
+              ? res.additional_academic_responsibilities.map((item: any) => ({
+                  value: item.id,
+                  label: item.responsibility_title,
+                }))
+              : [],
         });
         if (res?.job_image) {
           setState({
@@ -330,6 +341,27 @@ export default function Newjob() {
     } catch (error) {
       setState({ hrLoading: false });
       // console.error("Error fetching HR users:", error);
+    }
+  };
+
+  const academicResponsibilityList = async () => {
+    try {
+      setState({ academicResponsibilityLoading: true });
+      const res: any =
+        await Models.master.additional_academic_responsibilities_list(
+          { pagination: "No" },
+          1
+        );
+      const dropdown = res?.map((item: any) => ({
+        value: item.id,
+        label: item.responsibility_title,
+      }));
+      setState({
+        academicResponsibilityList: dropdown || [],
+        academicResponsibilityLoading: false,
+      });
+    } catch (error) {
+      setState({ academicResponsibilityLoading: false });
     }
   };
 
@@ -733,6 +765,13 @@ export default function Newjob() {
         body.role_ids = [];
       }
 
+      if (state.academicResponsibility?.length > 0) {
+        body.additional_academic_responsibility_ids =
+          state.academicResponsibility.map((item: any) => item.value);
+      } else {
+        body.additional_academic_responsibility_ids = [];
+      }
+
       console.log("✌️body --->", body);
       const formData: any = buildFormData(body);
 
@@ -1053,6 +1092,8 @@ export default function Newjob() {
                   loading={state.catLoading}
                   title="Select category"
                 />
+
+               
               </div>
             </div>
           </div>
@@ -1399,9 +1440,6 @@ export default function Newjob() {
                   error={state.error?.experience}
                   required
                 />
-              </div>
-
-              <div className="mt-5">
                 <TextInput
                   name="qualification"
                   title="Qualification"
@@ -1413,7 +1451,21 @@ export default function Newjob() {
                   error={state.error?.qualification}
                   required
                 />
+                 <CustomSelect
+                  options={state.academicResponsibilityList}
+                  value={state.academicResponsibility}
+                  onChange={(selectedOption) =>
+                    setState({ academicResponsibility: selectedOption })
+                  }
+                  placeholder="Select academic responsibilities"
+                  isClearable={true}
+                  isMulti={true}
+                  loading={state.academicResponsibilityLoading}
+                  title="Academic Responsibilities"
+                />
               </div>
+
+             
               <div className="mt-5">
                 <CustomSelect
                   title="Apply Type"

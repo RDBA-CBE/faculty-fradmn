@@ -2740,7 +2740,8 @@ const Dashboard = () => {
                                       },
                                     })
                                   }
-                                  className="flex w-full items-center justify-between p-3 text-left"
+                                  className={`flex w-full items-center justify-between p-3 text-left ${feedback ? "cursor-pointer" : "cursor-default"}`}
+
                                 >
                                   <p className="text-sm font-medium">
                                     {panel.name}

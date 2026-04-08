@@ -56,6 +56,8 @@ import { MdApproval } from "react-icons/md";
 import PrivateRouter from "@/hook/privateRouter";
 import Link from "next/link";
 
+const SESSION_KEY = "admin_job_page";
+
 const Job = () => {
   const dispatch = useDispatch();
   const router = useRouter();
@@ -119,6 +121,10 @@ const Job = () => {
       value: 1,
       label: "All Records",
     },
+
+    academicResponsibilityFilter: null,
+    academicResponsibilityList: [],
+    academicResponsibilityLoading: false,
   });
 
   const debounceSearch = useDebounce(state.search, 500);
@@ -128,18 +134,27 @@ const Job = () => {
   }, [dispatch]);
 
   useEffect(() => {
+    const savedPage = parseInt(sessionStorage.getItem(SESSION_KEY) || "1", 10);
+    if (savedPage > 1) {
+      setState({ page: savedPage });
+    }
     institutionDropdownList(1);
-    profile();
+    profile(savedPage);
     locationList(1);
     salaryRangeList(1);
     priorityList(1);
     typeList();
     jobStatusList();
     categoryList(1);
+    academicResponsibilityList();
   }, []);
 
   useEffect(() => {
-    if (state.profile) callJobListByRole(1);
+    if (state.profile) {
+      sessionStorage.removeItem(SESSION_KEY);
+      setState({ page: 1 });
+      callJobListByRole(1);
+    }
   }, [
     debounceSearch,
     state.statusFilter,
@@ -155,11 +170,11 @@ const Job = () => {
     state.typeFilter,
     state.salaryFilter,
     state.sortingFilter,
-    state.profile,
     state.filterCollege,
+    state.academicResponsibilityFilter,
   ]);
 
-  const profile = async () => {
+  const profile = async (initialPage = 1) => {
     try {
       const res: any = await Models.auth.profile();
       setState({ profile: res });
@@ -167,7 +182,7 @@ const Job = () => {
       collegeDropdownList(1, "", false, null);
       jobCount();
 
-      callJobListByRole(1, res);
+      callJobListByRole(initialPage, res);
     } catch (error) {
       console.error("Error fetching institutions:", error);
     }
@@ -276,6 +291,27 @@ const Job = () => {
       setState({ categoryLoading: false, categoryList: dropdown });
     } catch (error) {
       setState({ categoryLoading: false });
+    }
+  };
+
+  const academicResponsibilityList = async () => {
+    try {
+      setState({ academicResponsibilityLoading: true });
+      const res: any =
+        await Models.master.additional_academic_responsibilities_list(
+          { pagination: "No" },
+          1
+        );
+      const dropdown = res?.map((item: any) => ({
+        value: item.id,
+        label: item.responsibility_title,
+      }));
+      setState({
+        academicResponsibilityList: dropdown || [],
+        academicResponsibilityLoading: false,
+      });
+    } catch (error) {
+      setState({ academicResponsibilityLoading: false });
     }
   };
 
@@ -426,11 +462,17 @@ const Job = () => {
     if (state.end_date) {
       body.end_date = moment(state.end_date).format("YYYY-MM-DD");
     }
+
+
     if (state.locationFilter?.value) {
       body.location = state.locationFilter.value;
     }
     if (state.categoryFilter?.value) {
       body.category = state.categoryFilter.value;
+    }
+    if (state.academicResponsibilityFilter?.length > 0) {
+      body.additional_academic_responsibility_ids =
+        state.academicResponsibilityFilter.map((item: any) => item.value);
     }
     if (state.priorityFilter?.value) {
       body.priority = state.priorityFilter.value;
@@ -464,6 +506,7 @@ const Job = () => {
 
   const handlePageChange = (pageNumber: number) => {
     setState({ page: pageNumber });
+    sessionStorage.setItem(SESSION_KEY, String(pageNumber));
     callJobListByRole(pageNumber);
   };
 
@@ -855,6 +898,17 @@ const Job = () => {
           <div className="group relative"></div>
           {(() => {
             const activeFilters = [];
+             if (state.sortingFilter?.value != 1 && state.sortingFilter)
+              activeFilters.push({
+                key: "sortingFilter",
+                label: `Record: ${state.sortingFilter?.label}`,
+              });
+            if (state.academicResponsibilityFilter?.length > 0) {
+              activeFilters.push({
+                key: "academicResponsibilityFilter",
+                label: `Academic Responsibility: ${state.academicResponsibilityFilter.map((item: any) => item.label).join(", ")}`,
+              });
+            }
             if (state.institutionFilter)
               activeFilters.push({
                 key: "institutionFilter",
@@ -924,6 +978,9 @@ const Job = () => {
                         locationFilter: null,
                         salaryFilter: null,
                         statusFilter: null,
+                        filterCollege:null,
+                        sortingFilter:null,
+                        academicResponsibilityFilter: [],
                       })
                     }
                     className="text-xs  text-red-500 hover:underline"
@@ -1433,6 +1490,17 @@ const Job = () => {
                 placeholder="Select status"
                 isClearable={true}
               />
+              <CustomSelect
+                options={state.academicResponsibilityList}
+                value={state.academicResponsibilityFilter}
+                onChange={(e) =>
+                  setState({ academicResponsibilityFilter: e })
+                }
+                placeholder="Academic responsibility"
+                isClearable={true}
+                loading={state.academicResponsibilityLoading}
+                isMulti={true}
+              />
             </div>
             <div className="flex items-center justify-between py-3 ">
               <button
@@ -1449,6 +1517,7 @@ const Job = () => {
                     priorityFilter: null,
                     typeFilter: null,
                     salaryFilter: null,
+                    academicResponsibilityFilter: null,
                   });
                 }}
                 className=" text-sm text-red-500 transition-all hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"

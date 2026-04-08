@@ -24,6 +24,7 @@ import useDebounce from "@/hook/useDebounce";
 import Swal from "sweetalert2";
 import { FRONTEND_URL, PREFERENCES, ROLES } from "@/utils/constant.utils";
 import {
+  BriefcaseBusiness,
   CalendarCheck,
   Clock,
   Heart,
@@ -170,6 +171,7 @@ const Users = () => {
       const res: any = await Models.auth.profile();
       console.log("profile --->", res);
       setState({ profile: res });
+      jobList(1,"",false,res?.college?.map((item) => item?.college_id));
     } catch (error) {
       console.error("Error fetching institutions:", error);
     }
@@ -198,6 +200,7 @@ const Users = () => {
         department_master: item?.department_master?.short_name,
         publication_count:item?.publication_count,
         project_count:item?.project_count,
+        hr_interview_status:item?.hr_interview_status,
       }));
 
       setState({
@@ -301,13 +304,13 @@ console.log('master_experience --->', res);
   };
 
   const jobList = async (page, search = "", loadMore = false, colId = null) => {
-    console.log("✌️colId --->", colId);
     try {
       setState({ loading: true });
 
       const body = bodyData();
       if (colId) body.college_id = colId;
       if (search) body.search = search;
+      body.is_approved = "Yes";
       const res: any = await Models.job.list(page, body);
       const dropdown = res?.results?.map((item) => ({
         value: item?.id,
@@ -415,7 +418,12 @@ console.log('master_experience --->', res);
   };
 
   const getColumns = (): any[] => {
-    const isAnonymous = (row: any) => !row?.reveal_name;
+    const isAnonymous = (row: any) => {
+      if(!row?.reveal_name){
+        return row?.hr_interview_status == "Accepted" ? false:true;
+      }
+      return false;
+    }
 
     const safeUser = (row: any) => {
       if (!isAnonymous(row)) return row;
@@ -435,7 +443,9 @@ console.log('master_experience --->', res);
         sortable: true,
         render: (row: any) => {
           const user = safeUser(row);
-          return (
+          const showFullActions =
+            row?.reveal_name || row?.hr_interview_status === "Accepted";
+          return showFullActions ? (
             <a
               title={user.username}
               href={`${FRONTEND_URL}profile/${row?.id}`}
@@ -448,6 +458,17 @@ console.log('master_experience --->', res);
             >
               {truncateText(user.username)}
             </a>
+          ) : (
+            <span
+              title={user.username}
+              className={`cursor-default font-medium ${
+                isAnonymous(row)
+                  ? "italic text-gray-400"
+                  : "text-gray-900 dark:text-white"
+              }`}
+            >
+              {truncateText(user.username)}
+            </span>
           );
         },
       },
@@ -514,64 +535,75 @@ console.log('master_experience --->', res);
       {
         accessor: "actions",
         title: "Actions",
-        render: (row) => (
-          <div className="flex items-center justify-center gap-3">
-            <a
-              href={`${FRONTEND_URL}profile/${row?.id}`}
-              target="_blank"
-              className={`flex cursor-pointer items-center justify-center rounded-lg transition-all duration-200 ${
-                row.status === "active" ? " text-green-600 " : "text-red-600 "
-              }`}
-              title={"View"}
-            >
-              <IconEye className="h-4 w-4" />
-            </a>
-            {row?.is_interested && (
-              <button
-                onClick={() => handleRound(row)}
-                className="flex  items-center justify-center rounded-lg  text-pink-600 transition-all duration-200 "
-                title="Interview Round"
-              >
-                <MessageSquare className="h-4 w-4" />
-              </button>
-            )}
+        render: (row) => {
 
-            {row?.reveal_name && (
-              <button
-                onClick={() => handleSheduleInterview(row)}
-                className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
-                title="Interview schedule"
-              >
-                <CalendarCheck className="h-4 w-4" />
-              </button>
-            )}
+          const showFullActions =
+            row?.reveal_name || row?.hr_interview_status === "Accepted";
 
-            {!row?.reveal_name && (
-              <button
-                onClick={() =>
-                  setState({
-                    isOpenInterest: true,
-                    message: "",
-                    applicantName: row?.username,
-                    applicantId: row?.id,
-                  })
-                }
-                className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
-                title="send interest"
-              >
-                <Mail className="h-4 w-4" />
-              </button>
-            )}
+          return (
+            <div className="flex items-center justify-center gap-3">
+              {showFullActions ? (
+                <a
+                  href={`${FRONTEND_URL}profile/${row?.id}`}
+                  target="_blank"
+                  className="flex cursor-pointer items-center justify-center rounded-lg text-green-600 transition-all duration-200"
+                  title="View Profile"
+                >
+                  <IconEye className="h-4 w-4" />
+                </a>
+              ) : (
+                <span
+                  className="flex cursor-not-allowed items-center justify-center rounded-lg text-gray-400 transition-all duration-200"
+                  title="Profile not available"
+                >
+                  <IconEye className="h-4 w-4" />
+                </span>
+              )}
 
-            <button
-              onClick={() => handleDelete(row)}
-              className="flex items-center justify-center rounded-lg  text-red-600 transition-all duration-200"
-              title="Delete"
-            >
-              <IconTrash className="h-4 w-4" />
-            </button>
-          </div>
-        ),
+              {showFullActions ? (
+                <>
+                  <button
+                    onClick={() => handleRound(row)}
+                    className="flex items-center justify-center rounded-lg text-pink-600 transition-all duration-200"
+                    title="Interview Round"
+                  >
+                    <BriefcaseBusiness className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => handleSheduleInterview(row)}
+                    className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200"
+                    title="Interview Schedule"
+                  >
+                    <CalendarCheck className="h-4 w-4" />
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() =>
+                    setState({
+                      isOpenInterest: true,
+                      message: "",
+                      applicantName: row?.username,
+                      applicantId: row?.id,
+                    })
+                  }
+                  className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200"
+                  title="Send Interest"
+                >
+                  <Mail className="h-4 w-4" />
+                </button>
+              )}
+
+              <button
+                onClick={() => handleDelete(row)}
+                className="flex items-center justify-center rounded-lg text-red-600 transition-all duration-200"
+                title="Delete"
+              >
+                <IconTrash className="h-4 w-4" />
+              </button>
+            </div>
+          )
+        },
       },
     ];
 

@@ -41,7 +41,7 @@ let isSessionExpiredHandled = false;
 // };
 
 const showTokenExpiredAlert = () => {
-  if (isSessionExpiredHandled) return; // 🚨 prevent multiple alerts
+  if (isSessionExpiredHandled) return;
   isSessionExpiredHandled = true;
 
   const userConfirmed = window.confirm(
@@ -49,6 +49,7 @@ const showTokenExpiredAlert = () => {
   );
 
   localStorage.clear();
+  sessionStorage.clear();
 
   if (userConfirmed) {
     window.location.href = "/auth/signin";
@@ -136,6 +137,7 @@ export const instance = (): AxiosInstance => {
             } else {
               processQueue(err, null);
               localStorage.clear();
+              sessionStorage.clear();
               window.location.href = "/auth/signin";
             }
             reject(err);

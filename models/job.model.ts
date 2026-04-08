@@ -11,11 +11,19 @@ const job = {
         url += `&ordering=${encodeURIComponent(body.ordering)}`;
       }
 
+      if (body?.additional_academic_responsibility_ids) {
+        url += `&additional_academic_responsibility_ids=${encodeURIComponent(body.additional_academic_responsibility_ids)}`;
+      }
+
       if (body.role) {
         url = url + `&role=${body.role}`;
       }
       if (body?.college_id) {
         url = url + `&college=${body.college_id}`;
+      }
+
+      if (body?.is_approved == "Yes") {
+        url = url + `&is_approved=${true}`;
       }
 
       if (body?.department_id) {

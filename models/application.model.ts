@@ -195,6 +195,10 @@ const application = {
       if (body?.institution) {
         url += `?institution=${encodeURIComponent(body.institution)}`;
       }
+
+      if (body?.job) {
+        url += `?job=${encodeURIComponent(body.job)}`;
+      }
       instance()
         .get(url)
         .then((res) => {

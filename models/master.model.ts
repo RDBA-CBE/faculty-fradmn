@@ -805,6 +805,53 @@ const master = {
     });
     return promise;
   },
+
+  // Additional Academic Responsibilities APIs
+  additional_academic_responsibilities_list: (body: any = {}, page = 1) => {
+    let promise = new Promise((resolve, reject) => {
+      let url = `additional-academic-responsibilities/?page=${page}`;
+      if (body?.search) url += `&search=${encodeURIComponent(body.search)}`;
+      if (body?.pagination == "No") url += `&pagination=${encodeURIComponent(false)}`;
+
+      if (body?.ordering)
+        url += `&ordering=${encodeURIComponent(body.ordering)}`;
+      instance()
+        .get(url)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+
+  create_additional_academic_responsibility: (data: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .post("additional-academic-responsibilities/", data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+
+  update_additional_academic_responsibility: (data: any, id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .patch(`additional-academic-responsibilities/${id}/`, data)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
+
+  delete_additional_academic_responsibility: (id: any) => {
+    let promise = new Promise((resolve, reject) => {
+      instance()
+        .delete(`additional-academic-responsibilities/${id}/`)
+        .then((res) => resolve(res.data))
+        .catch((error) => reject(error.response || error));
+    });
+    return promise;
+  },
 };
 
 export default master;

@@ -167,10 +167,12 @@ const Header = () => {
       };
       const res: any = await Models.auth.logout(body).then(() => {
         localStorage.clear();
+        sessionStorage.clear();
         router.replace("/auth/signin");
       });
     } catch (error) {
       localStorage.clear();
+      sessionStorage.clear();
       router.replace("/auth/signin");
       console.log("error: ", error);
     }
@@ -178,6 +180,7 @@ const Header = () => {
 
   const checkValidToken = async () => {
     localStorage.clear();
+    sessionStorage.clear();
     router.replace("/auth/signin");
   };
 

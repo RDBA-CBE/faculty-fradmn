@@ -65,6 +65,8 @@ import Utils from "@/imports/utils.import";
 import * as Yup from "yup";
 import Link from "next/link";
 
+const SESSION_KEY = "admin_application_page";
+
 const Application = () => {
   const dispatch = useDispatch();
   const router = useRouter();
@@ -179,12 +181,12 @@ const Application = () => {
   const debounceSearch = useDebounce(state.search, 500);
 
   useEffect(() => {
-    profile();
-  }, [dispatch]);
-
-  useEffect(() => {
     dispatch(setPageTitle("Applications"));
-    profile();
+    const savedPage = parseInt(sessionStorage.getItem(SESSION_KEY) || "1", 10);
+    if (savedPage > 1) {
+      setState({ page: savedPage });
+    }
+    profile(savedPage);
     institutionDropdownList(1);
     locationList(1);
     salaryRangeList(1);
@@ -198,6 +200,8 @@ const Application = () => {
 
   useEffect(() => {
     if (profileRef.current) {
+      sessionStorage.removeItem(SESSION_KEY);
+      setState({ page: 1 });
       applicationList(1, null, null, null, state.profile?.id);
     }
   }, [
@@ -220,15 +224,14 @@ const Application = () => {
 
   console.log("✌️collegeList --->", state.collegeList);
 
-  const profile = async () => {
+  const profile = async (initialPage = 1) => {
     try {
       const res: any = await Models.auth.profile();
       setState({ profile: res });
       profileRef.current = true;
       collegeDropdownList(1, "", false, "");
-      applicationList(1, null, null, null, res?.id);
+      applicationList(initialPage, null, null, null, res?.id);
       applicationCount();
-      // loadJobList(1, null, null);
       loadJobList(1, null, false, null, null, null, res?.id);
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -423,6 +426,7 @@ const Application = () => {
 
   const handlePageChange = (pageNumber: number) => {
     setState({ page: pageNumber });
+    sessionStorage.setItem(SESSION_KEY, String(pageNumber));
     const role = state.profile?.role;
     if (role === ROLES.SUPER_ADMIN) {
       applicationList(pageNumber, null, null, null, state.profile?.id);
@@ -1396,6 +1400,11 @@ const Application = () => {
           <div className="group relative"></div>
           {(() => {
             const activeFilters = [];
+            if (state.sortingFilter?.value != 1 && state.sortingFilter)
+              activeFilters.push({
+                key: "sortingFilter",
+                label: `Record: ${state.sortingFilter?.label}`,
+              });
             if (state.institutionFilter)
               activeFilters.push({
                 key: "institutionFilter",
@@ -1453,6 +1462,7 @@ const Application = () => {
                         start_date: null,
                         end_date: null,
                         selectedStatus: null,
+                        sortingFilter:null,
                       })
                     }
                     className="text-xs  text-red-500 hover:underline"
@@ -2188,7 +2198,7 @@ const Application = () => {
                                       },
                                     })
                                   }
-                                  className="flex w-full items-center justify-between p-3 text-left"
+                                  className={`flex w-full items-center justify-between p-3 text-left ${feedback ? "cursor-pointer" : "cursor-default"}`}
                                 >
                                   <p className="text-sm font-medium">
                                     {panel.name}

@@ -83,6 +83,12 @@ const ApplicationDetail = () => {
       { value: "completed", label: "Completed" },
     ],
     isOpenReschedule: false,
+
+    isOpenProfile: false,
+    userProfile: null,
+    profileUserLoading: false,
+    profileActiveTab: "profile",
+    profileActiveSection: "summary",
   });
 
   useEffect(() => {
@@ -91,19 +97,28 @@ const ApplicationDetail = () => {
       fetchApplicationDetail();
       applicationStatusList();
     }
-    profile()
+    profile();
   }, [id, dispatch]);
 
-    const profile = async () => {
-      try {
-        const res: any = await Models.auth.profile();
-        setState({ profile: res });
-   
-      } catch (error) {
-        console.error("Error fetching profile:", error);
-      }
-    };
-  
+  const profile = async () => {
+    try {
+      const res: any = await Models.auth.profile();
+      setState({ profile: res });
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    }
+  };
+
+  const getUser = async () => {
+    try {
+      setState({ profileUserLoading: true, isOpenProfile: true, profileActiveTab: "profile", profileActiveSection: "summary" });
+      const res: any = await Models.auth.getUser(state.application?.applicant);
+      setState({ userProfile: res, profileUserLoading: false });
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      setState({ profileUserLoading: false });
+    }
+  };
 
   const fetchApplicationDetail = async () => {
     try {
@@ -185,7 +200,7 @@ const ApplicationDetail = () => {
     page = 1,
     search = "",
     loadMore = false,
-    deptId = null
+    deptId = null,
   ) => {
     console.log("✌️loadPanelMembers --->");
 
@@ -414,7 +429,6 @@ const ApplicationDetail = () => {
   const app = state.application;
   const job = app?.job_detail;
 
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="">
@@ -481,17 +495,23 @@ const ApplicationDetail = () => {
 
                 <div className="flex items-center gap-3">
                   {app?.applicant ? (
-                    <Link
-                      href={`${FRONTEND_URL}profile/${app?.applicant}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
+                    <button onClick={() => getUser()}>
                       <div className="bg-dblue group flex cursor-pointer items-center gap-3 rounded-lg px-6 py-2 shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl">
                         <UserCog className="h-5 w-5 text-white" />
                         <p className=" text-white">View Profile</p>
                       </div>
-                    </Link>
+                    </button>
                   ) : (
+                    // <Link
+                    //   href={`${FRONTEND_URL}profile/${app?.applicant}`}
+                    //   target="_blank"
+                    //   rel="noopener noreferrer"
+                    // >
+                    //   <div className="bg-dblue group flex cursor-pointer items-center gap-3 rounded-lg px-6 py-2 shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl">
+                    //     <UserCog className="h-5 w-5 text-white" />
+                    //     <p className=" text-white">View Profile</p>
+                    //   </div>
+                    // </Link>
                     <div className="rounded-xl bg-red-100 px-6 py-3 dark:bg-red-900/30">
                       <p className="font-medium text-red-600 dark:text-red-400">
                         Not a register user
@@ -589,12 +609,11 @@ const ApplicationDetail = () => {
                   <Calendar className="text-dyellow h-5 w-5" />{" "}
                 </div>
                 Interview Rounds
-              {state.profile?.role != ROLES.HR && (
-
-                <div className="bg-dblue text-sm flex h-7 w-7 items-center justify-center rounded-full text-white shadow-md">
-                  {state.application?.interview_slots?.length || 0}
-                </div>
-              )}
+                {state.profile?.role != ROLES.HR && (
+                  <div className="bg-dblue flex h-7 w-7 items-center justify-center rounded-full text-sm text-white shadow-md">
+                    {state.application?.interview_slots?.length || 0}
+                  </div>
+                )}
               </div>
               {state.profile?.role == ROLES.HR && (
                 <div className=" flex items-center justify-end">
@@ -644,7 +663,7 @@ const ApplicationDetail = () => {
                             <p className=" text-sm text-gray-500">
                               {formatScheduleDateTime(
                                 round.scheduled_date,
-                                round.scheduled_time
+                                round.scheduled_time,
                               )}
                             </p>
                           </div>
@@ -752,7 +771,7 @@ const ApplicationDetail = () => {
 
                                   <span className="text-xs text-gray-500">
                                     {new Date(
-                                      round.applicant_feedback.submitted_at
+                                      round.applicant_feedback.submitted_at,
                                     ).toLocaleDateString()}
                                   </span>
                                 </div>
@@ -764,7 +783,7 @@ const ApplicationDetail = () => {
                                 ) : round?.response_from_applicant ? (
                                   <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                                     {capitalizeFLetter(
-                                      round.applicant_feedback.feedback_text
+                                      round.applicant_feedback.feedback_text,
                                     )}
                                   </p>
                                 ) : (
@@ -1096,40 +1115,40 @@ const ApplicationDetail = () => {
                 </h4>
                 <span
                   className={`mb-4 inline-block rounded-full px-3 py-1 text-sm shadow-sm ${getStatusColor(
-                    app?.status
+                    app?.status,
                   )}`}
                 >
                   {capitalizeFLetter(app?.status_display)}
                 </span>
-                {state.profile?.role == ROLES.HR &&
-                <CustomSelect
-                  options={state.applicationStatusList}
-                  value={state.appstatus}
-                  onChange={(selectedOption) => {
-                    setState({
-                      appstatus: selectedOption,
-                    });
-                  }}
-                  placeholder="Select Status"
-                  isClearable={false}
-                  required
-                  className="w-full"
-                />}
-                {state.profile?.role == ROLES.HR &&
-
-                <div className="mt-4 flex items-center justify-between">
-                  <button
-                    onClick={() => updateStatus()}
-                    className="bg-dblue group flex items-center gap-2 rounded-lg px-4 py-2  text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
-                  >
-                    {state.btnLoading ? (
-                      <Loader className="h-4 w-4 animate-spin" />
-                    ) : (
-                      "Update Status"
-                    )}
-                  </button>
-                </div>
-                }
+                {state.profile?.role == ROLES.HR && (
+                  <CustomSelect
+                    options={state.applicationStatusList}
+                    value={state.appstatus}
+                    onChange={(selectedOption) => {
+                      setState({
+                        appstatus: selectedOption,
+                      });
+                    }}
+                    placeholder="Select Status"
+                    isClearable={false}
+                    required
+                    className="w-full"
+                  />
+                )}
+                {state.profile?.role == ROLES.HR && (
+                  <div className="mt-4 flex items-center justify-between">
+                    <button
+                      onClick={() => updateStatus()}
+                      className="bg-dblue group flex items-center gap-2 rounded-lg px-4 py-2  text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
+                    >
+                      {state.btnLoading ? (
+                        <Loader className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "Update Status"
+                      )}
+                    </button>
+                  </div>
+                )}
               </div>
               {/* Applicant Summary Card */}
 
@@ -1193,7 +1212,7 @@ const ApplicationDetail = () => {
                 title="Select Department"
                 placeholder="Select Department"
                 options={state?.application?.department_details?.map(
-                  (item: any) => ({ value: item?.id, label: item?.short_name })
+                  (item: any) => ({ value: item?.id, label: item?.short_name }),
                 )}
                 value={state.selectedDepartments}
                 onChange={(e) => {
@@ -1412,7 +1431,7 @@ const ApplicationDetail = () => {
                 title="Select Department"
                 placeholder="Select Department"
                 options={state?.application?.department_details?.map(
-                  (item: any) => ({ value: item?.id, label: item?.short_name })
+                  (item: any) => ({ value: item?.id, label: item?.short_name }),
                 )}
                 value={state.selectedDepartments}
                 onChange={(e) => {
@@ -1457,7 +1476,7 @@ const ApplicationDetail = () => {
                     1,
                     searchTerm,
                     false,
-                    state.application?.department?.id
+                    state.application?.department?.id,
                   );
                 }}
                 loadMore={() => {
@@ -1466,7 +1485,7 @@ const ApplicationDetail = () => {
                       state.panelPage + 1,
                       "",
                       false,
-                      state.application?.department?.id
+                      state.application?.department?.id,
                     );
                   }
                 }}
@@ -1571,6 +1590,339 @@ const ApplicationDetail = () => {
             </div>
           </div>
         )}
+      />
+
+      {/* ── Candidate Profile Modal ── */}
+      <Modal
+        open={state.isOpenProfile}
+        close={() => setState({ isOpenProfile: false, userProfile: null })}
+        subTitle="Applicant Profile"
+        closeIcon
+        maxWidth="max-w-5xl"
+        padding="p-0"
+        renderComponent={() => {
+          const u = state.userProfile;
+          console.log("u --->", u);
+          if (state.profileUserLoading) {
+            return (
+              <div className="flex h-50 items-center justify-center">
+                <IconLoader className="h-8 w-8 animate-spin text-dblue" />
+              </div>
+            );
+          }
+
+          if (!u) return null;
+
+          const sideMenuItems = [
+            { key: "summary", label: "Profile Summary" },
+            { key: "experience", label: "Experience" },
+            { key: "education", label: "Education" },
+            { key: "projects", label: "Projects" },
+            { key: "publications", label: "Publications" },
+            { key: "skills", label: "Skills" },
+            { key: "achievements", label: "Achievements" },
+          ];
+
+          const renderProfileSection = () => {
+            switch (state.profileActiveSection) {
+              case "summary":
+                return (
+                  <div className="space-y-4">
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                      Profile Summary
+                    </h3>
+                    {u?.resume_url && (
+                      <div className="flex items-center gap-2 rounded-lg border border-gray-200 p-3 dark:border-gray-700">
+                        <FileText className="h-4 w-4 shrink-0 text-dblue" />
+                        <span className="text-sm text-gray-700 dark:text-gray-300">Resume</span>
+                        <span className="text-gray-300 dark:text-gray-600">·</span>
+                        <a
+                          href={u.resume_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center gap-1 rounded-md bg-dblue px-3 py-1 text-xs font-medium text-white transition hover:bg-blue-700"
+                        >
+                          <ExternalLink className="h-3 w-3" /> View
+                        </a>
+                      </div>
+                    )}
+                    <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+                      <p className="mb-2 text-sm font-semibold   tracking-wide text-gray-500 dark:text-gray-400">
+                        About
+                      </p>
+                      <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                        {u?.about || "No summary provided."}
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      {[
+                        { icon: <Mail className="h-4 w-4 text-blue-500" />, label: "Email", val: u?.email },
+                        { icon: <Phone className="h-4 w-4 text-green-500" />, label: "Phone", val: u?.phone },
+                        { icon: <MapPin className="h-4 w-4 text-red-500" />, label: "Location", val: u?.current_location },
+                        { icon: <Briefcase className="h-4 w-4 text-purple-500" />, label: "Experience", val: u?.experience },
+                        { icon: <Building className="h-4 w-4 text-orange-500" />, label: "Company", val: u?.current_company },
+                        { icon: <User className="h-4 w-4 text-indigo-500" />, label: "Gender", val: u?.gender },
+                      ].map((item, i) =>
+                        item.val ? (
+                          <div key={i} className="flex items-start gap-2 rounded-lg bg-gray-50 p-3 dark:bg-gray-700/40">
+                            {item.icon}
+                            <div>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">{item.label}</p>
+                              <p className="text-sm font-medium text-gray-800 dark:text-white">{item.val}</p>
+                            </div>
+                          </div>
+                        ) : null
+                      )}
+                    </div>
+                  </div>
+                );
+
+              case "experience":
+                return (
+                  <div className="space-y-4">
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">Experience</h3>
+                    {u?.experiences?.length ? u.experiences.map((exp: any, i: number) => (
+                      <div key={i} className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <p className="font-semibold text-gray-800 dark:text-white">{exp.designation}</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">{exp.company}</p>
+                          </div>
+                          {/* {exp.currently_working && (
+                            <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-700">
+                              Current
+                            </span>
+                          )} */}
+                        </div>
+                        <p className="mt-1 text-xs text-gray-500">
+                          {exp.start_date ? moment(exp.start_date).format("MMM YYYY") : ""}{" "}
+                          {exp.end_date ? `– ${moment(exp.end_date).format("MMM YYYY")}` : exp.currently_working ? "– Present" : ""}
+                        </p>
+                        {exp.job_description && (
+                          <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{exp.job_description}</p>
+                        )}
+                      </div>
+                    )) : <p className="text-sm text-gray-400">No experience records.</p>}
+                  </div>
+                );
+
+              case "education":
+                return (
+                  <div className="space-y-4">
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">Education</h3>
+                    {u?.educations?.length ? u.educations.map((edu: any, i: number) => (
+                      <div key={i} className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+                        <p className="font-semibold text-gray-800 dark:text-white">{edu.degree}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{edu.field}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{edu.institution}</p>
+                        <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
+                          <span>{edu.start_year} – {edu.end_year}</span>
+                          {edu.cgpa && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-blue-700">CGPA: {edu.cgpa}</span>}
+                        </div>
+                      </div>
+                    )) : <p className="text-sm text-gray-400">No education records.</p>}
+                  </div>
+                );
+
+              case "projects":
+                return (
+                  <div className="space-y-4">
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">Projects</h3>
+                    {u?.projects?.length ? u.projects.map((proj: any, i: number) => (
+                      <div key={i} className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="font-semibold text-gray-800 dark:text-white">{proj.project_title}</p>
+                          <span className={`rounded-full px-2 py-0.5 text-xs ${proj.status === "Completed" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>
+                            {proj.status}
+                          </span>
+                        </div>
+                        {proj.duration && <p className="mt-0.5 text-xs text-gray-500">{proj.duration}</p>}
+                        <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{proj.project_description}</p>
+                        {proj.technologies?.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-1">
+                            {proj.technologies.map((tech: string, j: number) => (
+                              <span key={j} className="rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                                {tech}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        {proj.link && (
+                          <a href={proj.link} target="_blank" rel="noreferrer" className="mt-2 flex items-center gap-1 text-xs text-blue-600 hover:underline">
+                            <ExternalLink className="h-3 w-3" /> {proj.link}
+                          </a>
+                        )}
+                        {proj.funded && proj.funding_details && (
+                          <p className="mt-1 text-xs text-gray-500">Funded: {proj.funding_details}</p>
+                        )}
+                      </div>
+                    )) : <p className="text-sm text-gray-400">No projects.</p>}
+                  </div>
+                );
+
+              case "publications":
+                return (
+                  <div className="space-y-4">
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">Publications</h3>
+                    {u?.publications?.length ? u.publications.map((pub: any, i: number) => (
+                      <div key={i} className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+                        <p className="font-semibold text-gray-800 dark:text-white">{pub.publication_title}</p>
+                        <p className="mt-0.5 text-sm text-gray-600 dark:text-gray-400">{pub.publication_journal}</p>
+                        <div className="mt-1 flex flex-wrap gap-2 text-xs text-gray-500">
+                          {pub.publication_year && <span>Year: {pub.publication_year}</span>}
+                          {pub.publication_volume && <span>Vol: {pub.publication_volume}</span>}
+                          {pub.publication_issue && <span>Issue: {pub.publication_issue}</span>}
+                        </div>
+                        {pub.publication_description && (
+                          <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{pub.publication_description}</p>
+                        )}
+                      </div>
+                    )) : <p className="text-sm text-gray-400">No publications.</p>}
+                  </div>
+                );
+
+              case "skills":
+                return (
+                  <div className="space-y-4">
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">Skills</h3>
+                    {u?.skills?.length ? (
+                      <div className="flex flex-wrap gap-2">
+                        {u.skills.map((skill: any, i: number) => (
+                          <span key={i} className="rounded-full  bg-dblue px-3 py-1 text-sm font-medium text-white">
+                            {skill.name}
+                          </span>
+                        ))}
+                      </div>
+                    ) : <p className="text-sm text-gray-400">No skills listed.</p>}
+                  </div>
+                );
+
+              case "achievements":
+                return (
+                  <div className="space-y-4">
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">Achievements</h3>
+                    {u?.achievements?.length ? u.achievements.map((ach: any, i: number) => (
+                      <div key={i} className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="font-semibold text-gray-800 dark:text-white">{ach.achievement_title}</p>
+                          {ach.achievement_file_url && (
+                            <a href={ach.achievement_file_url} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs text-dblue hover:underline">
+                              <ExternalLink className="h-3 w-3 text-dblue" /> View
+                            </a>
+                          )}
+                        </div>
+                        <p className="mt-0.5 text-sm text-gray-600 dark:text-gray-400">{ach.organization}</p>
+                        {ach.achievement_description && (
+                          <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{ach.achievement_description}</p>
+                        )}
+                      </div>
+                    )) : <p className="text-sm text-gray-400">No achievements.</p>}
+                  </div>
+                );
+
+              default:
+                return null;
+            }
+          };
+
+          return (
+            <div className="flex flex-col">
+              {/* Profile Header */}
+              <div className="flex items-center gap-4 border-b border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-800/50">
+                <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-blue-600 text-lg font-bold text-white">
+                  {u?.profile_logo_url ? (
+                    <img src={u.profile_logo_url} alt={u.username} className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="text-sm font-medium text-white ">{u?.first_name?.[0]}{u?.last_name?.[0]}</span>
+                  )}
+
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-gray-900 dark:text-white">{u?.username || `${u?.first_name} ${u?.last_name}`}</p>
+                  {u?.email && <p className="text-sm text-gray-500 dark:text-gray-400">{u.email}</p>}
+                 
+                </div>
+              </div>
+
+              {/* Tabs: Profile | Qualifications */}
+              <div className="flex border-b border-gray-200 dark:border-gray-700">
+                {["profile", "qualifications"].map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setState({ profileActiveTab: tab })}
+                    className={`px-6 py-3 text-sm font-medium capitalize transition-colors ${
+                      state.profileActiveTab === tab
+                        ? "border-b-2 border-blue-600 text-dblue"
+                        : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+
+              {/* Tab Content */}
+              {state.profileActiveTab === "profile" ? (
+                <div className="flex" style={{ minHeight: "420px" }}>
+                  {/* Left Side Menu */}
+                  <div className="w-48 shrink-0 border-r border-gray-200 bg-gray-50 py-4 dark:border-gray-700 dark:bg-gray-800/50">
+                    {sideMenuItems.map((item) => (
+                      <button
+                        key={item.key}
+                        onClick={() => setState({ profileActiveSection: item.key })}
+                        className={`w-full px-4 py-2.5 text-left text-sm transition-colors ${
+                          state.profileActiveSection === item.key
+                            ? "bg-dblue font-semibold text-white"
+                            : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Right Content */}
+                  <div className="flex-1 overflow-y-auto p-5">
+                    {renderProfileSection()}
+                  </div>
+                </div>
+              ) : (
+                <div className="p-6">
+                  <h3 className="mb-4 text-base font-semibold text-gray-800 dark:text-white">
+                    Academic Qualifications
+                  </h3>
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    {[
+                      { label: "PhD Completed", key: "phd_completed", icon: <GraduationCap className="h-5 w-5" /> },
+                      { label: "NET Cleared", key: "net_cleared", icon: <Award className="h-5 w-5" /> },
+                      { label: "SET Cleared", key: "set_cleared", icon: <Award className="h-5 w-5" /> },
+                      { label: "SLET Cleared", key: "slet_cleared", icon: <Award className="h-5 w-5" /> },
+                    ].map((q) => (
+                      <div
+                        key={q.key}
+                        className={`flex flex-col items-center gap-2 rounded-xl border p-2 ${
+                          u?.[q.key]
+                            ? "border-green-200 bg-green-50 dark:border-green-700 dark:bg-green-900/20"
+                            : "border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50"
+                        }`}
+                      >
+                        <div className={u?.[q.key] ? "text-green-600 dark:text-green-400" : "text-gray-400"}>
+                          {q.icon}
+                        </div>
+                        <p className={`text-center text-sm font-medium ${u?.[q.key] ? "text-green-700 dark:text-green-400" : "text-gray-500 dark:text-gray-400"}`}>
+                          {q.label}
+                        </p>
+                        <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${u?.[q.key] ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300" : "bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"}`}>
+                          {u?.[q.key] ? "Yes" : "No"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        }}
       />
     </div>
   );

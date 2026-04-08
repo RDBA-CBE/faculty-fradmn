@@ -53,6 +53,8 @@ import Utils from "@/imports/utils.import";
 import * as Yup from "yup";
 import Link from "next/link";
 
+const SESSION_KEY = "ins_application_page";
+
 const Application = () => {
   const dispatch = useDispatch();
   const router = useRouter();
@@ -167,12 +169,12 @@ const Application = () => {
   const debounceSearch = useDebounce(state.search, 500);
 
   useEffect(() => {
-    profile();
-  }, [dispatch]);
-
-  useEffect(() => {
     dispatch(setPageTitle("Applications"));
-    profile();
+    const savedPage = parseInt(sessionStorage.getItem(SESSION_KEY) || "1", 10);
+    if (savedPage > 1) {
+      setState({ page: savedPage });
+    }
+    profile(savedPage);
     institutionDropdownList(1);
     locationList(1);
     salaryRangeList(1);
@@ -186,7 +188,8 @@ const Application = () => {
 
   useEffect(() => {
     if (profileRef.current) {
-      const role = state.profile?.role;
+      sessionStorage.removeItem(SESSION_KEY);
+      setState({ page: 1 });
       applicationList(1, state.profile?.institution?.id);
     }
   }, [
@@ -207,13 +210,13 @@ const Application = () => {
     state.filterCollege,
   ]);
 
-  const profile = async () => {
+  const profile = async (initialPage = 1) => {
     try {
       const res: any = await Models.auth.profile();
       setState({ profile: res });
       profileRef.current = true;
       collegeDropdownList(1, "", false, res?.institution?.id);
-      applicationList(1, res?.institution?.id);
+      applicationList(initialPage, res?.institution?.id);
       loadJobList(1, null, false, null, null, null, res?.id);
       applicationCount(res?.institution?.id);
     } catch (error) {
@@ -389,8 +392,7 @@ const Application = () => {
 
   const handlePageChange = (pageNumber: number) => {
     setState({ page: pageNumber });
-    const role = state.profile?.role;
-
+    sessionStorage.setItem(SESSION_KEY, String(pageNumber));
     applicationList(pageNumber, state.profile?.institution?.id);
   };
 
@@ -1194,7 +1196,7 @@ const handleBulkDelete = () => {
             options={RECORDS_FOR_INS_ADMIN}
             value={state.sortingFilter}
             onChange={(e) => setState({ sortingFilter: e })}
-            placeholder={"Own Records"}
+            placeholder={"All Records"}
             isClearable={false}
           />
           <button
@@ -1209,16 +1211,17 @@ const handleBulkDelete = () => {
           <div className="group relative"></div>
           {(() => {
             const activeFilters = [];
-            if (state.institutionFilter)
+            if (state.sortingFilter?.value != 1 && state.sortingFilter)
               activeFilters.push({
-                key: "institutionFilter",
-                label: `Inst: ${state.institutionFilter.label}`,
+                key: "sortingFilter",
+                label: `Record: ${state.sortingFilter?.label}`,
               });
-            if (state.collegeFilter)
+            if (state.filterCollege)
               activeFilters.push({
-                key: "collegeFilter",
-                label: `College: ${state.collegeFilter.label}`,
+                key: "filterCollege",
+                label: `College: ${state.filterCollege.label}`,
               });
+           
             if (state.departmentFilter)
               activeFilters.push({
                 key: "departmentFilter",
@@ -1260,12 +1263,13 @@ const handleBulkDelete = () => {
                   <button
                     onClick={() =>
                       setState({
-                        institutionFilter: null,
+                        filterCollege: null,
                         collegeFilter: null,
                         departmentFilter: null,
                         start_date: null,
                         end_date: null,
                         selectedStatus: null,
+                        sortingFilter:null
                       })
                     }
                     className="text-xs  text-red-500 hover:underline"
@@ -2001,7 +2005,8 @@ const handleBulkDelete = () => {
                                       },
                                     })
                                   }
-                                  className="flex w-full items-center justify-between p-3 text-left"
+                                  className={`flex w-full items-center justify-between p-3 text-left ${feedback ? "cursor-pointer" : "cursor-default"}`}
+
                                 >
                                   <p className="text-sm font-medium">
                                     {panel.name}

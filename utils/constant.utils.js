@@ -469,6 +469,10 @@ export const OwnmenuConfig = {
           href: "/faculty/master/master_department",
         },
         {
+          label: "Additional Acedemic Responsibilities",
+          href: "/faculty/master/additional_academic_responsibilities",
+        },
+        {
           label: "Panel Members",
           href: "/faculty/master/panel",
         },
@@ -494,6 +498,7 @@ export const OwnmenuConfig = {
           label: "Salary Range",
           href: "/faculty/master/salary_range",
         },
+       
         // {
         //   label: "Skill",
         //   href: "/faculty/master/skill",
@@ -570,6 +575,10 @@ export const OwnmenuConfig = {
       label: "Master",
       key: "master",
       children: [
+        {
+          label: "Additional Acedemic Responsibilities",
+          href: "/faculty/master/additional_academic_responsibilities",
+        },
         {
           label: "Panel Members",
           href: "/faculty/master/ins_panel",
