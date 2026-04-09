@@ -23,6 +23,7 @@ import { useRouter } from "next/router";
 import UpdatePropertyImagePreview from "@/components/ImageUploadWithPreview/ImageUploadWithPreview.component";
 import CheckboxInput from "@/components/FormFields/CheckBoxInput.component";
 import IconLoader from "@/components/Icon/IconLoader";
+import { BellRing } from "lucide-react";
 
 export default function Newjob() {
   const router = useRouter();
@@ -1412,7 +1413,8 @@ export default function Newjob() {
                 />
 
                 <CheckboxInput
-                        label={<span className="flex items-center gap-1">Immediate Hiring <IconBellBing className="h-4 w-4 text-success" /></span>}
+                        label={<span className="flex items-center gap-1">Immediate Hiring <BellRing
+                           className="h-4 w-4 text-success" /></span>}
                         className="mt-8 w-fit"
                         checked={state.immediateHiring}
                         labelStyle="font-bold text-md"
