@@ -158,9 +158,9 @@ const Job_Urgency = () => {
     <div className="mb-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-2">
-          <h1 className="page-ti text-transparent">Job Urgency</h1>
+          <h1 className="page-ti text-transparent">Job Validation</h1>
           <p className="text-gray-600 dark:text-gray-400">
-          Manage job urgency
+          Manage job validation
           </p>
         </div>
         <button
@@ -169,7 +169,7 @@ const Job_Urgency = () => {
         >
           <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
           <IconPlus className="relative z-10 h-5 w-5" />
-          <span className="relative z-10">Add Job Urgency</span>
+          <span className="relative z-10">Add Job Validation</span>
         </button>
       </div>
     </div>
@@ -192,7 +192,7 @@ const Job_Urgency = () => {
       <div className="mb-4">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-bold text-gray-800 dark:text-white">
-          Job Urgency List
+          Job Validation List
           </h3>
           <div className="flex items-center gap-4">
             
@@ -284,7 +284,7 @@ const Job_Urgency = () => {
       <Modal
         open={state.showModal}
         close={handleCloseModal}
-        subTitle={`${state.editId ? "Update" : "Add New"} Job Urgency`}
+        subTitle={`${state.editId ? "Update" : "Add New"} Job Validation`}
         closeIcon
         renderComponent={() => (
           <div className="relative">

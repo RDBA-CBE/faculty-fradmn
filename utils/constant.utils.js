@@ -118,8 +118,8 @@ export const menuConfig = {
           href: "/faculty/master/experience",
         },
         {
-          label: "Job Urgency",
-          href: "/faculty/master/job_urgency",
+          label: "Job Validation",
+          href: "/faculty/master/job_validation",
         },
 
         {
@@ -224,8 +224,8 @@ export const menuConfig = {
           href: "/faculty/master/experience",
         },
         {
-          label: "Job Urgency",
-          href: "/faculty/master/job_urgency",
+          label: "Job Validation",
+          href: "/faculty/master/job_validation",
         },
 
         // {
@@ -330,8 +330,8 @@ export const menuConfig = {
           href: "/faculty/master/experience",
         },
         {
-          label: "Job Urgency",
-          href: "/faculty/master/job_urgency",
+          label: "Job Validation",
+          href: "/faculty/master/job_validation",
         },
 
         // {
@@ -481,8 +481,8 @@ export const OwnmenuConfig = {
           href: "/faculty/master/experience",
         },
         {
-          label: "Job Urgency",
-          href: "/faculty/master/job_urgency",
+          label: "Job Validation",
+          href: "/faculty/master/job_validation",
         },
 
         {
