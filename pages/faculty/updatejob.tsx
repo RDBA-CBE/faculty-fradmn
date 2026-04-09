@@ -8,6 +8,7 @@ import {
   toISO,
   useSetState,
 } from "@/utils/function.utils";
+import IconBellBing from "@/components/Icon/IconBellBing";
 import React, { useCallback, useEffect, useRef } from "react";
 import TextInput from "@/components/FormFields/TextInput.component";
 import CustomSelect from "@/components/FormFields/CustomSelect.component";
@@ -1411,7 +1412,7 @@ export default function Newjob() {
                 />
 
                 <CheckboxInput
-                        label="Immediate Hiring"
+                        label={<span className="flex items-center gap-1">Immediate Hiring <IconBellBing className="h-4 w-4 text-success" /></span>}
                         className="mt-8 w-fit"
                         checked={state.immediateHiring}
                         labelStyle="font-bold text-md"
