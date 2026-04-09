@@ -208,6 +208,7 @@ export const CreateNewJob = Yup.object().shape({
   jobRole: Yup.string().required("Job role is required").nullable(true),
 
   priority: Yup.string().required("Job urgency is required"),
+  immediateHiring: Yup.boolean() ,
   // deadline: Yup.string().required("Deadline is required"),
   // startDate: Yup.string().required("Start date is required"),
   // endDate: Yup.string().required("End date is required"),

@@ -1615,6 +1615,7 @@ const ApplicationDetail = () => {
 
           const sideMenuItems = [
             { key: "summary", label: "Profile Summary" },
+            { key: "responsibility", label: "Academic Responsibilities" },
             { key: "experience", label: "Experience" },
             { key: "education", label: "Education" },
             { key: "projects", label: "Projects" },
@@ -1674,6 +1675,22 @@ const ApplicationDetail = () => {
                         ) : null
                       )}
                     </div>
+                  </div>
+                );
+
+                case "responsibility":
+                return (
+                  <div className="space-y-4">
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">Academic Responsibilities</h3>
+                    {u?.additional_academic_responsibilities?.length ? (
+                      <div className="flex flex-wrap gap-2">
+                        {u.additional_academic_responsibilities.map((resp: any, i: number) => (
+                          <span key={i} className="rounded-full  bg-dblue px-3 py-1 text-sm font-medium text-white">
+                            {resp.responsibility_title}
+                          </span>
+                        ))}
+                      </div>
+                    ) : <p className="text-sm text-gray-400">No academic responsibilities listed.</p>}
                   </div>
                 );
 
