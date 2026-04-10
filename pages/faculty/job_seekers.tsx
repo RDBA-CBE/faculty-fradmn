@@ -759,9 +759,9 @@ console.log('master_experience --->', res);
       <div className="mb-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
-            <h1 className="page-ti text-transparent">Job Seeker Management</h1>
+            <h1 className="page-ti text-transparent">Find Right Talents</h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Manage job seeker users and their information
+             Find and Manage right talents and their information
             </p>
           </div>
         </div>
@@ -826,7 +826,7 @@ console.log('master_experience --->', res);
         <div className="mb-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-bold text-gray-800 dark:text-white">
-              Job Seeker List
+              Right Talents List
             </h3>
             <div className="flex items-center gap-4">
               {state.selectedRecords.length > 0 && (

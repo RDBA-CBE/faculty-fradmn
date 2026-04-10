@@ -603,7 +603,7 @@ export const OwnmenuConfig = {
     {
       type: "link",
       icon: "IconMenuUsers",
-      label: "Job Seekers",
+      label: "Find Right Talents",
       href: "/faculty/job_seekers",
     },
 
