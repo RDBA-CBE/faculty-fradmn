@@ -163,8 +163,10 @@ const auth = {
       if (body?.department_master_id) {
         url += `&department_master_id=${encodeURIComponent(body?.department_master_id)}`;
       }
-
       
+      if (body?.additional_academic_responsibility_ids) {
+        url += `&additional_academic_responsibility_ids=${encodeURIComponent(body?.additional_academic_responsibility_ids)}`;
+      }
 
       instance()
         .get(url)

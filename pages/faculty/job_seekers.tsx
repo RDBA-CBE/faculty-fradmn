@@ -124,6 +124,10 @@ const Users = () => {
       label: "Own Record",
     },
     isOpenRound: false,
+
+    academicResponsibilityFilter: null,
+    academicResponsibilityList: [],
+    academicResponsibilityLoading: false,
   });
 
   const debounceSearch = useDebounce(state.search, 500);
@@ -132,7 +136,8 @@ const Users = () => {
     dispatch(setPageTitle("Users"));
     profile();
     master_department();
-    master_experience()
+    master_experience();
+    academicResponsibilityList();
   }, [dispatch]);
 
   useEffect(() => {
@@ -160,10 +165,10 @@ const Users = () => {
     debounceSearch,
     state.statusFilter,
     state.sortBy,
-
     state.sortingFilter,
     state.refFilter,
-    state.experience
+    state.experience,
+    state.academicResponsibilityFilter,
   ]);
 
   const profile = async () => {
@@ -210,6 +215,26 @@ const Users = () => {
       });
     } catch (error) {
       setState({ loading: false, userList: [], userCount: 0 });
+    }
+  };
+
+  const academicResponsibilityList = async () => {
+    try {
+      setState({ academicResponsibilityLoading: true });
+      const res: any = await Models.master.additional_academic_responsibilities_list(
+        { pagination: "No" },
+        1
+      );
+      const dropdown = res?.map((item: any) => ({
+        value: item.id,
+        label: item.responsibility_title,
+      }));
+      setState({
+        academicResponsibilityList: dropdown || [],
+        academicResponsibilityLoading: false,
+      });
+    } catch (error) {
+      setState({ academicResponsibilityLoading: false });
     }
   };
 
@@ -298,7 +323,10 @@ console.log('master_experience --->', res);
       body.experience_id = state.experience?.label;
     }
 
-    
+    if (state.academicResponsibilityFilter?.length > 0) {
+      body.additional_academic_responsibility_ids =
+        state.academicResponsibilityFilter.map((item: any) => item.value);
+    }
 
     return body;
   };
@@ -777,6 +805,17 @@ console.log('master_experience --->', res);
               onChange={(e) => setState({ experience: e })}
               placeholder="Select experience"
               isClearable={true}
+            />
+          </div>
+          <div className="group relative">
+            <CustomSelect
+              options={state.academicResponsibilityList}
+              value={state.academicResponsibilityFilter}
+              onChange={(e) => setState({ academicResponsibilityFilter: e })}
+              placeholder="Academic Responsibility"
+              isClearable={true}
+              isMulti={true}
+              loading={state.academicResponsibilityLoading}
             />
           </div>
         </div>
