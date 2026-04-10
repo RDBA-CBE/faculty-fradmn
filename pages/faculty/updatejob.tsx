@@ -1481,7 +1481,7 @@ export default function Newjob() {
                   error={state.error?.qualification}
                   required
                 />
-                 {/* <CustomSelect
+                 <CustomSelect
                   options={state.academicResponsibilityList}
                   value={state.academicResponsibility}
                   onChange={(selectedOption) =>
@@ -1492,7 +1492,7 @@ export default function Newjob() {
                   isMulti={true}
                   loading={state.academicResponsibilityLoading}
                   title="Academic Responsibilities"
-                /> */}
+                />
               </div>
 
              
