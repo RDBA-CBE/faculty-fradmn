@@ -327,7 +327,7 @@ const Dashboard = () => {
         },
         {
           id: 4,
-          label: "Identified Talents",
+          label: "Talents Identified",
           value: body.outreached,
           color: "text-[#dd22cc]",
           bg: "bg-indigo-100",
@@ -1223,7 +1223,7 @@ const Dashboard = () => {
     } else if (state.activeCard == 3) {
       title = "Interview Scheduled List";
     } else if (state.activeCard == 4) {
-      title = "Identified Talents List";
+      title = "Talents Identified List";
     } else if (state.activeCard == 5) {
       title = "Job Postings";
     }
@@ -1579,7 +1579,7 @@ const Dashboard = () => {
                 state.activeCard == 3
                   ? "Search applications..."
                   : state.activeCard == 4
-                  ? "Search identified talents..."
+                  ? "Search talents identified..."
                   : "Search jobs..."
               }
               value={state.search}
