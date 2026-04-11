@@ -74,14 +74,12 @@ const Category = () => {
 
   // https://user-service.88.222.213.249.nip.io/api/interview-panels/?page=1&college_id=154&institution_id=236
   const panelList = async (page = 1, clgId) => {
-    console.log("✌️page --->", page);
     try {
       setState({ loading: true });
 
       const body: any = {};
       if (state.search) body.search = state.search;
       if (clgId) body.college_id = clgId;
-console.log('✌️body --->', body);
 
       const res: any = await Models.master.panel_list(body, page);
 
@@ -97,6 +95,7 @@ console.log('✌️body --->', body);
           label: item?.department?.college?.short_name,
           value: item?.department?.college?.id,
         },
+        decision_maker: item?.decision_maker,
       }));
 
       setState({
@@ -203,6 +202,7 @@ console.log('✌️body --->', body);
   };
 
   const handleEdit = (row) => {
+    console.log('✌️row --->', row);
     setState({
       editId: row?.id,
       showModal: true,
