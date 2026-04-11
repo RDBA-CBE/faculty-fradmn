@@ -2933,7 +2933,7 @@ const Dashboard = () => {
                 <div className="flex items-end gap-3">
                   <div className="flex-1">
                     <CustomSelect
-                      options={state.applicationStatusesList}
+                      options={state.applicationStatusList}
                       value={state.appstatus}
                       onChange={(e) => setState({ appstatus: e })}
                       placeholder="Select final status"
