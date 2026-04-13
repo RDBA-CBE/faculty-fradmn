@@ -124,6 +124,10 @@ const Users = () => {
       label: "Own Record",
     },
     isOpenRound: false,
+
+    academicResponsibilityFilter: null,
+    academicResponsibilityList: [],
+    academicResponsibilityLoading: false,
   });
 
   const debounceSearch = useDebounce(state.search, 500);
@@ -132,7 +136,8 @@ const Users = () => {
     dispatch(setPageTitle("Users"));
     profile();
     master_department();
-    master_experience()
+    master_experience();
+    academicResponsibilityList();
   }, [dispatch]);
 
   useEffect(() => {
@@ -160,10 +165,10 @@ const Users = () => {
     debounceSearch,
     state.statusFilter,
     state.sortBy,
-
     state.sortingFilter,
     state.refFilter,
-    state.experience
+    state.experience,
+    state.academicResponsibilityFilter,
   ]);
 
   const profile = async () => {
@@ -210,6 +215,26 @@ const Users = () => {
       });
     } catch (error) {
       setState({ loading: false, userList: [], userCount: 0 });
+    }
+  };
+
+  const academicResponsibilityList = async () => {
+    try {
+      setState({ academicResponsibilityLoading: true });
+      const res: any = await Models.master.additional_academic_responsibilities_list(
+        { pagination: "No" },
+        1
+      );
+      const dropdown = res?.map((item: any) => ({
+        value: item.id,
+        label: item.responsibility_title,
+      }));
+      setState({
+        academicResponsibilityList: dropdown || [],
+        academicResponsibilityLoading: false,
+      });
+    } catch (error) {
+      setState({ academicResponsibilityLoading: false });
     }
   };
 
@@ -298,7 +323,10 @@ console.log('master_experience --->', res);
       body.experience_id = state.experience?.label;
     }
 
-    
+    if (state.academicResponsibilityFilter?.length > 0) {
+      body.additional_academic_responsibility_ids =
+        state.academicResponsibilityFilter.map((item: any) => item.value);
+    }
 
     return body;
   };
@@ -731,9 +759,9 @@ console.log('master_experience --->', res);
       <div className="mb-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
-            <h1 className="page-ti text-transparent">Job Seeker Management</h1>
+            <h1 className="page-ti text-transparent">Find Right Talents</h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Manage job seeker users and their information
+             Find and Manage right talents and their information
             </p>
           </div>
         </div>
@@ -779,6 +807,17 @@ console.log('master_experience --->', res);
               isClearable={true}
             />
           </div>
+          <div className="group relative">
+            <CustomSelect
+              options={state.academicResponsibilityList}
+              value={state.academicResponsibilityFilter}
+              onChange={(e) => setState({ academicResponsibilityFilter: e })}
+              placeholder="Academic Responsibility"
+              isClearable={true}
+              isMulti={true}
+              loading={state.academicResponsibilityLoading}
+            />
+          </div>
         </div>
       </div>
 
@@ -787,7 +826,7 @@ console.log('master_experience --->', res);
         <div className="mb-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-bold text-gray-800 dark:text-white">
-              Job Seeker List
+              Right Talents List
             </h3>
             <div className="flex items-center gap-4">
               {state.selectedRecords.length > 0 && (

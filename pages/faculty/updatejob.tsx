@@ -8,6 +8,7 @@ import {
   toISO,
   useSetState,
 } from "@/utils/function.utils";
+import IconBellBing from "@/components/Icon/IconBellBing";
 import React, { useCallback, useEffect, useRef } from "react";
 import TextInput from "@/components/FormFields/TextInput.component";
 import CustomSelect from "@/components/FormFields/CustomSelect.component";
@@ -22,6 +23,7 @@ import { useRouter } from "next/router";
 import UpdatePropertyImagePreview from "@/components/ImageUploadWithPreview/ImageUploadWithPreview.component";
 import CheckboxInput from "@/components/FormFields/CheckBoxInput.component";
 import IconLoader from "@/components/Icon/IconLoader";
+import { BellRing } from "lucide-react";
 
 export default function Newjob() {
   const router = useRouter();
@@ -89,6 +91,7 @@ export default function Newjob() {
     error: {},
     applyType: { value: "internal", label: "Internal" },
     isCollegeEmail: true,
+    immediateHiring: false,
     alternativeEmail: "",
     applyLink: "",
     academicResponsibility: [],
@@ -169,6 +172,7 @@ export default function Newjob() {
             value: res?.priority_obj?.id,
             label: res?.priority_obj?.name,
           },
+          immediateHiring: res?.immediate_join || false,
           jobType: {
             value: res?.job_type_obj?.id,
             label: res?.job_type_obj?.name,
@@ -672,6 +676,7 @@ export default function Newjob() {
         description: state.description,
         applyType: state.applyType?.value,
         isCollegeEmail: state.isCollegeEmail,
+        immediateHiring: state.immediateHiring,
         alternativeEmail: state.alternativeEmail,
         applyLink: state.applyLink,
         jobRole: state.jobRole?.value,
@@ -708,6 +713,7 @@ export default function Newjob() {
         is_approved:
           state.is_approved ?? state.profile?.role == ROLES.HR ? true : false,
         priority_id: state.priority?.value,
+        immediate_join: state.immediateHiring,
       };
 
       if (state.profile?.role == ROLES.SUPER_ADMIN) {
@@ -1333,7 +1339,7 @@ export default function Newjob() {
                     />
                   </>
                 )}
-                <CustomSelect
+                {/* <CustomSelect
                   options={state.priorityList}
                   value={state.priority}
                   onChange={(option) => handleFieldChange("priority", option)}
@@ -1342,7 +1348,7 @@ export default function Newjob() {
                   isClearable={true}
                   error={state.error?.priority}
                   required
-                />
+                /> */}
 
                 <CustomSelect
                   options={state.salaryRangeList}
@@ -1395,7 +1401,31 @@ export default function Newjob() {
                   min={state.startDate}
                 />
 
-                <TextInput
+                <CustomSelect
+                  options={state.priorityList}
+                  value={state.priority}
+                  onChange={(option) => handleFieldChange("priority", option)}
+                  placeholder="Select Job Validity Period"
+                  title=" Job Validity Period"
+                  isClearable={true}
+                  error={state.error?.priority}
+                  required
+                />
+
+                <CheckboxInput
+                        label={<span className="flex items-center gap-1">Immediate Hiring <BellRing
+                           className="h-4 w-4 text-success" /></span>}
+                        className="mt-8 w-fit"
+                        checked={state.immediateHiring}
+                        labelStyle="font-bold text-md"
+                        onChange={(e) =>
+                          setState({
+                            immediateHiring: e,
+                          })
+                        }
+                      />
+
+                {/* <TextInput
                   name="deadline"
                   type="date"
                   title="Deadline"
@@ -1405,7 +1435,7 @@ export default function Newjob() {
                   }
                   min={state.startDate}
                   max={state.endDate}
-                />
+                /> */}
 
                 <TextInput
                   name="numberOfOpenings"

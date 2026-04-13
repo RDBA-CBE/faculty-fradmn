@@ -4,7 +4,7 @@ interface InputProps {
     type?: 'checkbox' | 'radio'; // Added type prop
     checked: boolean;
     onChange: (checked: boolean) => void;
-    label: string;
+    label: React.ReactNode;
     name?: string;
     className?: string;
     error?: string;

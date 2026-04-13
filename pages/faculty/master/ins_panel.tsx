@@ -89,6 +89,7 @@ const Category = () => {
           label: item?.department?.college?.short_name,
           value: item?.department?.college?.id,
         },
+        decision_maker: item?.decision_maker,
       }));
 
       setState({

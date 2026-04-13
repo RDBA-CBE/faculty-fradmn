@@ -104,7 +104,7 @@ const Category = () => {
           value: item?.department?.college?.id,
         },
         institution:item?.department?.institution?.institution_name,
-
+        decision_maker: item?.decision_maker,
       }));
 
       setState({

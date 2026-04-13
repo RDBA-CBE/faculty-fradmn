@@ -183,7 +183,7 @@ const SidebarDynamic = () => {
           <PerfectScrollbar className="relative h-[calc(100vh-80px)]">
         
             <AnimateHeight duration={300} height={showOwn ? "auto" : 0}>
-              <ul className="relative space-y-0.5 p-4 py-0 font-semibold">
+              <ul className="relative space-y-0.5 p-4 py-2 font-semibold">
                 {getOwnMenu()?.length > 0 && renderMenu(getOwnMenu())}
               </ul>
             </AnimateHeight>

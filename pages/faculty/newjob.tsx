@@ -8,6 +8,7 @@ import {
   toISO,
   useSetState,
 } from "@/utils/function.utils";
+import IconBellBing from "@/components/Icon/IconBellBing";
 import React, { useCallback, useEffect, useRef } from "react";
 import TextInput from "@/components/FormFields/TextInput.component";
 import CustomSelect from "@/components/FormFields/CustomSelect.component";
@@ -21,6 +22,7 @@ import moment from "moment";
 import { useRouter } from "next/router";
 import UpdatePropertyImagePreview from "@/components/ImageUploadWithPreview/ImageUploadWithPreview.component";
 import CheckboxInput from "@/components/FormFields/CheckBoxInput.component";
+import { BellRing } from "lucide-react";
 
 export default function Newjob() {
   const router = useRouter();
@@ -91,6 +93,7 @@ export default function Newjob() {
     location: [],
     applyType: { value: "internal", label: "Internal" },
     isCollegeEmail: true,
+    immediateHiring: false,
     alternativeEmail: "",
     applyLink: "",
     academicResponsibility: [],
@@ -524,6 +527,7 @@ export default function Newjob() {
         // salary: state.salary?.value,
 
         priority: state.priority?.value,
+        immediateHiring: state.immediateHiring,
         // deadline: state.deadline,
         // startDate: state.startDate,
         // endDate: state.endDate,
@@ -571,6 +575,7 @@ export default function Newjob() {
 
         is_approved: state.profile?.role == ROLES.HR ? true : false,
         priority_id: state.priority?.value,
+        immediate_join: state.immediateHiring,
       };
 
       if (state.profile?.role == ROLES.SUPER_ADMIN) {
@@ -1182,7 +1187,7 @@ export default function Newjob() {
                     />
                   </>
                 )}
-                <CustomSelect
+                {/* <CustomSelect
                   options={state.priorityList}
                   value={state.priority}
                   onChange={(option) => handleFieldChange("priority", option)}
@@ -1191,7 +1196,7 @@ export default function Newjob() {
                   isClearable={true}
                   error={state.error?.priority}
                   required
-                />
+                /> */}
 
                 <CustomSelect
                   options={state.salaryRangeList}
@@ -1244,7 +1249,30 @@ export default function Newjob() {
                   min={state.startDate}
                 />
 
-                <TextInput
+                <CustomSelect
+                  options={state.priorityList}
+                  value={state.priority}
+                  onChange={(option) => handleFieldChange("priority", option)}
+                  placeholder="Select Job Validity Period"
+                  title=" Job Validity Period"
+                  isClearable={true}
+                  error={state.error?.priority}
+                  required
+                />
+
+                <CheckboxInput
+                        label={<span className="flex items-center gap-1">Immediate Hiring <BellRing className="h-4 w-4 text-success" /></span>}
+                        className="mt-8 w-fit"
+                        checked={state.immediateHiring}
+                        labelStyle="font-bold text-md"
+                        onChange={(e) =>
+                          setState({
+                            immediateHiring: e,
+                          })
+                        }
+                      />
+
+                {/* <TextInput
                   name="deadline"
                   type="date"
                   title="Deadline"
@@ -1254,7 +1282,7 @@ export default function Newjob() {
                   }
                   min={state.startDate}
                   max={state.endDate}
-                />
+                /> */}
 
                 <TextInput
                   name="numberOfOpenings"
