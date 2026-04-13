@@ -210,7 +210,7 @@ const Application = () => {
           state.profile?.institution?.id,
           null,
           null,
-          state.profile?.id
+          state.profile?.id,
         );
       } else if (role === ROLES.HR) {
         setState({
@@ -224,7 +224,7 @@ const Application = () => {
           null,
           state.profile?.college?.map((item) => item?.college_id),
           null,
-          state.profile?.id
+          state.profile?.id,
         );
       } else if (role === ROLES.HOD) {
         applicationList(
@@ -232,7 +232,7 @@ const Application = () => {
           null,
           null,
           state.profile?.department?.department_id,
-          state.profile?.id
+          state.profile?.id,
         );
       }
     }
@@ -284,18 +284,24 @@ const Application = () => {
           "",
           false,
           res?.college?.map((college) => college.college_id),
-          null
+          null,
         );
         applicationList(
           initialPage,
           null,
           res?.college?.map((college) => college.college_id),
           null,
-          res?.id
+          res?.id,
         );
         loadJobList(1, null, false, null, null, null, res?.id);
       } else if (res?.role == ROLES.HOD) {
-        applicationList(initialPage, null, null, res?.department?.department_id, res?.id);
+        applicationList(
+          initialPage,
+          null,
+          null,
+          res?.department?.department_id,
+          res?.id,
+        );
         loadJobList(1, null, false, null, null, null, res?.id);
       }
     } catch (error) {
@@ -306,7 +312,10 @@ const Application = () => {
   const applicationStatusList = async () => {
     try {
       setState({ applicationStatusLoading: true });
-      const res: any = await Models.master.application_status_list();
+      const body = {
+        rexclude_applied_interview: "Yes",
+      };
+      const res: any = await Models.master.application_status_list(body);
       const dropdown = res?.map((item) => ({
         value: item.id,
         label: item.name,
@@ -340,13 +349,12 @@ const Application = () => {
     }
   };
 
-
   const applicationList = async (
     page,
     institutionId = null,
     collegeId = null,
     deptId = null,
-    profileId = null
+    profileId = null,
   ) => {
     try {
       setState({ loading: true });
@@ -406,13 +414,13 @@ const Application = () => {
         },
         college_name: item?.job_detail?.college?.short_name,
         department_name: item?.department_details?.map(
-          (item) => item?.short_name
+          (item) => item?.short_name,
         ),
         interview_status:
           item?.interview_slots?.length > 0
             ? item?.interview_slots[item?.interview_slots.length - 1]?.status
             : "-",
-            job_id:item?.job
+        job_id: item?.job,
       }));
       setState({
         loading: false,
@@ -436,9 +444,9 @@ const Application = () => {
   const applicationCount = async (college) => {
     try {
       setState({ applicationCountLoading: true });
-      const body={
-        college
-      }
+      const body = {
+        college,
+      };
       const res: any = await Models.application.application_counts(body);
       setState({ applicationCount: res });
     } catch (error) {
@@ -503,7 +511,7 @@ const Application = () => {
         state.profile?.institution?.id,
         null,
         null,
-        state.profile?.id
+        state.profile?.id,
       );
     } else if (role === ROLES.HR) {
       applicationList(
@@ -511,7 +519,7 @@ const Application = () => {
         null,
         state.profile?.college?.map((item) => item?.college_id),
         null,
-        state.profile?.id
+        state.profile?.id,
       );
     } else if (role === ROLES.HOD) {
       applicationList(
@@ -519,7 +527,7 @@ const Application = () => {
         null,
         null,
         state.profile?.department?.department_id,
-        state.profile?.id
+        state.profile?.id,
       );
     }
   };
@@ -578,7 +586,7 @@ const Application = () => {
           state.profile?.institution?.id,
           null,
           null,
-          state.profile?.id
+          state.profile?.id,
         );
       } else if (role === ROLES.HR) {
         applicationList(
@@ -586,7 +594,7 @@ const Application = () => {
           null,
           state.profile?.college?.map((item) => item?.college_id),
           null,
-          state.profile?.id
+          state.profile?.id,
         );
       } else if (role === ROLES.HOD) {
         applicationList(
@@ -594,9 +602,10 @@ const Application = () => {
           null,
           null,
           state.profile?.department?.department_id,
-          state.profile?.id
+          state.profile?.id,
         );
       }
+      applicationCount(state.profile?.college?.map((item) => item?.college_id));
     } catch (error) {
       Failure("Failed to update status. Please try again.");
     }
@@ -617,7 +626,7 @@ const Application = () => {
           state.profile?.institution?.id,
           null,
           null,
-          state.profile?.id
+          state.profile?.id,
         );
       } else if (role === ROLES.HR) {
         applicationList(
@@ -625,7 +634,7 @@ const Application = () => {
           null,
           state.profile?.college?.map((item) => item?.college_id),
           null,
-          state.profile?.id
+          state.profile?.id,
         );
       } else if (role === ROLES.HOD) {
         applicationList(
@@ -633,7 +642,7 @@ const Application = () => {
           null,
           null,
           state.profile?.department?.department_id,
-          state.profile?.id
+          state.profile?.id,
         );
       }
     } catch (error) {
@@ -649,14 +658,14 @@ const Application = () => {
       () => {
         Swal.fire("Cancelled", "Your Record is safe :)", "info");
       },
-      "Are you sure want to delete record?"
+      "Are you sure want to delete record?",
     );
   };
 
   const institutionDropdownList = async (
     page,
     search = "",
-    loadMore = false
+    loadMore = false,
   ) => {
     try {
       setState({ institutionLoading: true });
@@ -684,7 +693,7 @@ const Application = () => {
     search = "",
     loadMore = false,
     institutionId = null,
-    createdBy = null
+    createdBy = null,
   ) => {
     try {
       setState({ collegeLoading: true });
@@ -719,7 +728,7 @@ const Application = () => {
     search = "",
     loadMore = false,
     collegeId = null,
-    createdBy = null
+    createdBy = null,
   ) => {
     try {
       setState({ departmentLoading: true });
@@ -848,7 +857,7 @@ const Application = () => {
         "",
         false,
         selectedOption.value,
-        state.profile?.id
+        state.profile?.id,
       );
     }
   };
@@ -866,7 +875,7 @@ const Application = () => {
         "",
         false,
         selectedOption.value,
-        state.profile?.id
+        state.profile?.id,
       );
     }
   };
@@ -943,7 +952,7 @@ const Application = () => {
     institutionId = null,
     collegeId = null,
     deptId = null,
-    created_by = null
+    created_by = null,
   ) => {
     try {
       setState({ jobLoading: true });
@@ -977,7 +986,7 @@ const Application = () => {
     page = 1,
     search = "",
     loadMore = false,
-    job = null
+    job = null,
   ) => {
     try {
       const body = {
@@ -1009,7 +1018,7 @@ const Application = () => {
     page = 1,
     search = "",
     loadMore = false,
-    deptId = null
+    deptId = null,
   ) => {
     try {
       setState({ panelMemberLoading: true });
@@ -1037,7 +1046,7 @@ const Application = () => {
     page = 1,
     search = "",
     loadMore = false,
-    deptIds
+    deptIds,
   ) => {
     try {
       setState({ applicantsLoading: true });
@@ -1074,7 +1083,7 @@ const Application = () => {
       const validation = {
         selectedJobs: state.selectedJobs.map((j) => j.value),
         selectedDepartments: state.selectedDepartments?.map(
-          (item) => item?.value
+          (item) => item?.value,
         ),
         interviewSlot: state.interviewSlot
           ? moment(state.interviewSlot).format("YYYY-MM-DD HH:mm")
@@ -1167,10 +1176,11 @@ const Application = () => {
       handleUpdateStatus("", "");
       if (state.appstatus?.label == "Rejected") {
         const filter = state.selectedRecords?.filter(
-          (item) => item != state.application?.id
+          (item) => item != state.application?.id,
         );
         setState({ selectedRecords: filter });
       }
+      applicationCount(state.profile?.college?.map((item) => item?.college_id));
     } catch (error) {
       setState({ btnLoading: false, isOpenRound: false });
 
@@ -1181,7 +1191,7 @@ const Application = () => {
   const bulkSelect = async () => {
     try {
       const responses = await Promise.all(
-        state.selectedRecords.map((id) => Models.application.details(id))
+        state.selectedRecords.map((id) => Models.application.details(id)),
       );
 
       console.log("✌️responses --->", responses);
@@ -1369,8 +1379,12 @@ const Application = () => {
 
             <div className="flex flex-col">
               <p className="text-2xl  leading-none text-gray-900 dark:text-white">
-                {state.applicationCount?.applications_by_status?.["Interview Scheduled"] ||
-                  state.applicationCount?.applications_by_status?.["interview scheduled"] ||
+                {state.applicationCount?.applications_by_status?.[
+                  "Interview Scheduled"
+                ] ||
+                  state.applicationCount?.applications_by_status?.[
+                    "interview scheduled"
+                  ] ||
                   0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -1528,8 +1542,8 @@ const Application = () => {
                         start_date: null,
                         end_date: null,
                         selectedStatus: null,
-                        filterCollege:null,
-                        sortingFilter:null,
+                        filterCollege: null,
+                        sortingFilter: null,
                       })
                     }
                     className="text-xs  text-red-500 hover:underline"
@@ -1580,14 +1594,14 @@ const Application = () => {
             records={state.applicationList}
             fetching={state.loading}
             selectedRecords={state.applicationList?.filter((record) =>
-              state.selectedRecords.includes(record.id)
+              state.selectedRecords.includes(record.id),
             )}
             onSelectedRecordsChange={(records) => {
               const currentPageIds = state.applicationList?.map(
-                (r: any) => r.id
+                (r: any) => r.id,
               );
               const otherPageSelections = state.selectedRecords?.filter(
-                (id) => !currentPageIds.includes(id)
+                (id) => !currentPageIds.includes(id),
               );
               const newSelections = records?.map((r: any) => r.id);
               setState({
@@ -1976,7 +1990,7 @@ const Application = () => {
                     1,
                     searchTerm,
                     false,
-                    state.selectedJobs
+                    state.selectedJobs,
                   );
                 }}
                 loadMore={() => {
@@ -1985,7 +1999,7 @@ const Application = () => {
                       state.deptPage + 1,
                       "",
                       true,
-                      state.selectedJobs
+                      state.selectedJobs,
                     );
                 }}
                 isMulti
@@ -2010,7 +2024,7 @@ const Application = () => {
                     1,
                     searchTerm,
                     false,
-                    state.selectedDepartments
+                    state.selectedDepartments,
                   );
                 }}
                 loadMore={() => {
@@ -2019,7 +2033,7 @@ const Application = () => {
                       state.appPage + 1,
                       "",
                       false,
-                      state.selectedDepartments
+                      state.selectedDepartments,
                     );
                   }
                 }}
@@ -2047,7 +2061,7 @@ const Application = () => {
                     1,
                     searchTerm,
                     false,
-                    state.selectedDepartments
+                    state.selectedDepartments,
                   );
                 }}
                 loadMore={() => {
@@ -2056,7 +2070,7 @@ const Application = () => {
                       state.panelPage + 1,
                       "",
                       false,
-                      state.selectedDepartments
+                      state.selectedDepartments,
                     );
                   }
                 }}
@@ -2245,7 +2259,7 @@ const Application = () => {
                           <p className="text-xs text-gray-500">
                             {formatScheduleDateTime(
                               round.scheduled_date,
-                              round.scheduled_time
+                              round.scheduled_time,
                             )}
                           </p>
                           <svg
@@ -2290,8 +2304,11 @@ const Application = () => {
                                       },
                                     })
                                   }
-                                  className={`flex w-full items-center justify-between p-3 text-left ${feedback ? "cursor-pointer" : "cursor-default"}`}
-
+                                  className={`flex w-full items-center justify-between p-3 text-left ${
+                                    feedback
+                                      ? "cursor-pointer"
+                                      : "cursor-default"
+                                  }`}
                                 >
                                   <p className="text-sm font-medium">
                                     {panel.name}
@@ -2450,34 +2467,33 @@ const Application = () => {
                   );
                 })}
               </div>
-             
             </div>
             <div className="rounded-xl border bg-gray-50 p-2">
-                <div className="flex items-center justify-between">
-                  {/* Status */}
-                  <div>
-                    <p className="text-xs text-gray-500">Application Status</p>
-                    <span className="mt-1 inline-block rounded bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
-                      {capitalizeFLetter(
-                        state.application?.status || "Pending"
-                      )}
-                    </span>
-                  </div>
-
-                  {/* View Application Button */}
-                  <button
-                    onClick={() => {
-                      setState({isOpenRound:false})
-                      router.push(`/faculty/application_detail?id=${state.application?.id}`)
-                      // navigate or open application
-                      // viewApplication(state.application?.id);
-                    }}
-                    className="flex items-center gap-2 rounded border border-blue-600 px-2 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
-                  >
-                    View Application
-                  </button>
+              <div className="flex items-center justify-between">
+                {/* Status */}
+                <div>
+                  <p className="text-xs text-gray-500">Application Status</p>
+                  <span className="mt-1 inline-block rounded bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
+                    {capitalizeFLetter(state.application?.status || "Pending")}
+                  </span>
                 </div>
+
+                {/* View Application Button */}
+                <button
+                  onClick={() => {
+                    setState({ isOpenRound: false });
+                    router.push(
+                      `/faculty/application_detail?id=${state.application?.id}`,
+                    );
+                    // navigate or open application
+                    // viewApplication(state.application?.id);
+                  }}
+                  className="flex items-center gap-2 rounded border border-blue-600 px-2 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
+                >
+                  View Application
+                </button>
               </div>
+            </div>
             {/* Fixed Bottom Section */}
             <div className="sticky bottom-0 border-t bg-white p-4">
               <div className="flex items-end gap-3">
@@ -2538,7 +2554,7 @@ const Application = () => {
                         institutionDropdownList(
                           state.institutionPage + 1,
                           "",
-                          true
+                          true,
                         )
                       }
                       loading={state.institutionLoading}
@@ -2560,7 +2576,7 @@ const Application = () => {
                         searchTerm,
                         false,
                         institutionId,
-                        state.profile?.id
+                        state.profile?.id,
                       );
                     }}
                     loadMore={() => {
@@ -2574,7 +2590,7 @@ const Application = () => {
                           "",
                           true,
                           institutionId,
-                          state.profile?.id
+                          state.profile?.id,
                         );
                     }}
                     loading={state.collegeLoading}
@@ -2594,7 +2610,7 @@ const Application = () => {
                           searchTerm,
                           false,
                           collegeId,
-                          state.profile?.id
+                          state.profile?.id,
                         );
                     }}
                     loadMore={() => {
@@ -2606,7 +2622,7 @@ const Application = () => {
                           "",
                           true,
                           collegeId,
-                          state.profile?.id
+                          state.profile?.id,
                         );
                     }}
                     loading={state.departmentLoading}

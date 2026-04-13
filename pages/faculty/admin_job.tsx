@@ -605,6 +605,7 @@ const Job = () => {
             : "Job approved successfully!"
         );
         callJobListByRole(state.page);
+        jobCount()
       } catch (error) {
         Failure(
           row.is_approved ? "Failed to unapprove job" : "Failed to approve job"
@@ -1213,15 +1214,12 @@ const Job = () => {
                       <IconEye className="h-4 w-4" />
                     </button>
                     {/* {state.profile?.role == ROLES.HR && ( */}
-                    <button
+                    {/* <button
                       onClick={(e) => {
                         e.stopPropagation();
 
-                        // if (state.profile?.role == ROLES.HR) {
                         handleApprove(row);
-                        // }
                       }}
-                      // onClick={() => handleToggleStatus(row)}
                       className={`flex items-center justify-center rounded-lg ${
                         row?.job_status === "published"
                           ? "text-red-600 "
@@ -1230,7 +1228,7 @@ const Job = () => {
                       title={"Job Status"}
                     >
                       <CheckCircle className="h-4 w-4" />
-                    </button>
+                    </button> */}
                     {/* )} */}
                     {/* <button
                       onClick={(e) => {

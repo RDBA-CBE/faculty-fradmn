@@ -596,6 +596,7 @@ const Job = () => {
             : "Job approved successfully!",
         );
         callJobListByRole(state.page);
+        jobCount(state.profile?.college?.map((item) => item?.college_id))
       } catch (error) {
         Failure(
           row.is_approved ? "Failed to unapprove job" : "Failed to approve job",
