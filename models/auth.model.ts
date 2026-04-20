@@ -108,7 +108,9 @@ const auth = {
         url = url + `&experience_id=${body.experience_id}`;
       }
 
-      
+      if (body.user_id) {
+        url = url + `&user_id=${body.user_id}`;
+      }
 
       if (body.reveal_name == "Yes") {
         url = url + `&reveal_name=${true}`;

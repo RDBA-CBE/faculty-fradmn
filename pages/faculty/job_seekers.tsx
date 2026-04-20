@@ -24,13 +24,25 @@ import useDebounce from "@/hook/useDebounce";
 import Swal from "sweetalert2";
 import { FRONTEND_URL, PREFERENCES, ROLES } from "@/utils/constant.utils";
 import {
+  Award,
+  Briefcase,
   BriefcaseBusiness,
+  Building,
   CalendarCheck,
   Clock,
+  ExternalLink,
+  FileText,
+  GraduationCap,
   Heart,
+  Hourglass,
   Mail,
+  MapPin,
   MessageSquare,
+  Phone,
+  Send,
+  User,
   UserCheck,
+  UserPlus,
 } from "lucide-react";
 import TextArea from "@/components/FormFields/TextArea.component";
 import CustomeDatePicker from "@/components/datePicker";
@@ -48,6 +60,8 @@ const Users = () => {
     statusFilter: null,
     showModal: false,
     loading: false,
+    isOpenInteresteds: false,
+    interestedsRow: null,
     submitting: false,
     sortBy: "",
     sortOrder: "asc",
@@ -128,6 +142,11 @@ const Users = () => {
     academicResponsibilityFilter: null,
     academicResponsibilityList: [],
     academicResponsibilityLoading: false,
+    profileUserLoading: false,
+    isOpenProfile: false,
+    userProfile: null,
+    profileActiveTab: "profile",
+    profileActiveSection: "summary",
   });
 
   const debounceSearch = useDebounce(state.search, 500);
@@ -176,7 +195,12 @@ const Users = () => {
       const res: any = await Models.auth.profile();
       console.log("profile --->", res);
       setState({ profile: res });
-      jobList(1,"",false,res?.college?.map((item) => item?.college_id));
+      jobList(
+        1,
+        "",
+        false,
+        res?.college?.map((item) => item?.college_id),
+      );
     } catch (error) {
       console.error("Error fetching institutions:", error);
     }
@@ -203,9 +227,10 @@ const Users = () => {
         current_location: item?.current_location,
         current_position: item?.current_position,
         department_master: item?.department_master?.short_name,
-        publication_count:item?.publication_count,
-        project_count:item?.project_count,
-        hr_interview_status:item?.hr_interview_status,
+        publication_count: item?.publication_count,
+        project_count: item?.project_count,
+        hr_interview_status: item?.hr_interview_status,
+        interesteds: item?.interesteds,
       }));
 
       setState({
@@ -221,10 +246,11 @@ const Users = () => {
   const academicResponsibilityList = async () => {
     try {
       setState({ academicResponsibilityLoading: true });
-      const res: any = await Models.master.additional_academic_responsibilities_list(
-        { pagination: "No" },
-        1
-      );
+      const res: any =
+        await Models.master.additional_academic_responsibilities_list(
+          { pagination: "No" },
+          1,
+        );
       const dropdown = res?.map((item: any) => ({
         value: item.id,
         label: item.responsibility_title,
@@ -238,11 +264,7 @@ const Users = () => {
     }
   };
 
-  const master_department = async (
-    page = 1,
-    search = "",
-    loadMore = false,
-  ) => {
+  const master_department = async (page = 1, search = "", loadMore = false) => {
     try {
       const body: any = {};
       if (search) {
@@ -264,11 +286,7 @@ const Users = () => {
     }
   };
 
-  const master_experience = async (
-    page = 1,
-    search = "",
-    loadMore = false,
-  ) => {
+  const master_experience = async (page = 1, search = "", loadMore = false) => {
     try {
       const body: any = {};
       if (search) {
@@ -276,7 +294,7 @@ const Users = () => {
       }
       body.pagination = "No";
       const res: any = await Models.master.experience_list(body, page);
-console.log('master_experience --->', res);
+      console.log("master_experience --->", res);
       const dropdown = Dropdown(res?.results, "name");
       setState({
         master_experience: loadMore
@@ -294,6 +312,10 @@ console.log('master_experience --->', res);
     const body: any = {};
 
     body.active_job_seeker = "Yes";
+    const user_id = localStorage.getItem("userId");
+    if (user_id) {
+      body.user_id = user_id;
+    }
 
     body.role = ROLES.APPLICANT;
 
@@ -410,7 +432,7 @@ console.log('master_experience --->', res);
     showDeleteAlert(
       () => deleteRecord(row.id),
       () => Swal.fire("Cancelled", "Record is safe", "info"),
-      "Are you sure you want to delete this record?"
+      "Are you sure you want to delete this record?",
     );
   };
 
@@ -428,8 +450,24 @@ console.log('master_experience --->', res);
     showDeleteAlert(
       () => bulkDeleteRecords(),
       () => Swal.fire("Cancelled", "Your Records are safe :)", "info"),
-      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`
+      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`,
     );
+  };
+
+  const getUser = async (row) => {
+    try {
+      setState({
+        profileUserLoading: true,
+        isOpenProfile: true,
+        profileActiveTab: "profile",
+        profileActiveSection: "summary",
+      });
+      const res: any = await Models.auth.getUser(row?.id);
+      setState({ userProfile: res, profileUserLoading: false });
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      setState({ profileUserLoading: false });
+    }
   };
 
   const bulkDeleteRecords = async () => {
@@ -447,11 +485,12 @@ console.log('master_experience --->', res);
 
   const getColumns = (): any[] => {
     const isAnonymous = (row: any) => {
-      if(!row?.reveal_name){
-        return row?.hr_interview_status == "Accepted" ? false:true;
+      if (!row?.reveal_name) {
+        const is_responses = row?.interesteds?.some((item: any) => item?.is_status == "Accepted");
+        return is_responses? false : true;
       }
       return false;
-    }
+    };
 
     const safeUser = (row: any) => {
       if (!isAnonymous(row)) return row;
@@ -471,9 +510,9 @@ console.log('master_experience --->', res);
         sortable: true,
         render: (row: any) => {
           const user = safeUser(row);
-          const showFullActions =
-            row?.reveal_name || row?.hr_interview_status === "Accepted";
-          return showFullActions ? (
+          const showFullActions = row?.reveal_name;
+          const is_responses = row?.interesteds?.some((item: any) => item?.is_status == "Accepted");
+          return showFullActions || is_responses ? (
             <a
               title={user.username}
               href={`${FRONTEND_URL}profile/${row?.id}`}
@@ -559,53 +598,33 @@ console.log('master_experience --->', res);
         ),
       },
 
-  
       {
         accessor: "actions",
         title: "Actions",
         render: (row) => {
+          const showFullActions = row?.reveal_name;
 
-          const showFullActions =
-            row?.reveal_name || row?.hr_interview_status === "Accepted";
+          let is_responses = false;
+          if (row?.interesteds?.length > 0) {
+            const is_response = row?.interesteds?.some(
+              (item: any) => item?.is_status === "Accepted",
+            );
+            if (is_response) {
+              is_responses = true;
+            }
+          }
+          console.log("is_responses --->", is_responses);
 
           return (
             <div className="flex items-center justify-center gap-3">
-              {showFullActions ? (
-                <a
-                  href={`${FRONTEND_URL}profile/${row?.id}`}
-                  target="_blank"
-                  className="flex cursor-pointer items-center justify-center rounded-lg text-green-600 transition-all duration-200"
-                  title="View Profile"
-                >
-                  <IconEye className="h-4 w-4" />
-                </a>
-              ) : (
-                <span
-                  className="flex cursor-not-allowed items-center justify-center rounded-lg text-gray-400 transition-all duration-200"
-                  title="Profile not available"
-                >
-                  <IconEye className="h-4 w-4" />
-                </span>
-              )}
-
-              {showFullActions ? (
-                <>
-                  <button
-                    onClick={() => handleRound(row)}
-                    className="flex items-center justify-center rounded-lg text-pink-600 transition-all duration-200"
-                    title="Interview Round"
-                  >
-                    <BriefcaseBusiness className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => handleSheduleInterview(row)}
-                    className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200"
-                    title="Interview Schedule"
-                  >
-                    <CalendarCheck className="h-4 w-4" />
-                  </button>
-                </>
-              ) : (
+              <div
+                onClick={() => getUser(row)}
+                className="flex cursor-pointer items-center justify-center rounded-lg text-green-600 transition-all duration-200"
+                title="View Profile"
+              >
+                <IconEye className="h-4 w-4" />
+              </div>
+              {/* {(showFullActions || is_responses) && ( */}
                 <button
                   onClick={() =>
                     setState({
@@ -620,7 +639,38 @@ console.log('master_experience --->', res);
                 >
                   <Mail className="h-4 w-4" />
                 </button>
+              {/* )} */}
+              {row?.interesteds?.length > 0 && (
+                <button
+                  onClick={() =>
+                    setState({ isOpenInteresteds: true, interestedsRow: row })
+                  }
+                  className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200"
+                  title="Interested status"
+                >
+                  <Send className="h-4 w-4" />
+                </button>
               )}
+
+              {(showFullActions ||
+                is_responses) && (
+                  <>
+                    <button
+                      onClick={() => handleSheduleInterview(row)}
+                      className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200"
+                      title="Interview Schedule"
+                    >
+                      <CalendarCheck className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => handleRound(row)}
+                      className="flex items-center justify-center rounded-lg text-pink-600 transition-all duration-200"
+                      title="Interview Round"
+                    >
+                      <BriefcaseBusiness className="h-4 w-4" />
+                    </button>
+                  </>
+                )}
 
               <button
                 onClick={() => handleDelete(row)}
@@ -630,7 +680,7 @@ console.log('master_experience --->', res);
                 <IconTrash className="h-4 w-4" />
               </button>
             </div>
-          )
+          );
         },
       },
     ];
@@ -761,7 +811,7 @@ console.log('master_experience --->', res);
           <div className="space-y-2">
             <h1 className="page-ti text-transparent">Find Right Talents</h1>
             <p className="text-gray-600 dark:text-gray-400">
-             Find and Manage right talents and their information
+              Find and Manage right talents and their information
             </p>
           </div>
         </div>
@@ -947,7 +997,7 @@ console.log('master_experience --->', res);
                   1,
                   searchTerm,
                   false,
-                  state.profile?.college?.map((item) => item?.college_id)
+                  state.profile?.college?.map((item) => item?.college_id),
                 );
               }}
               loadMore={() => {
@@ -956,7 +1006,7 @@ console.log('master_experience --->', res);
                     state.jobPage + 1,
                     "",
                     true,
-                    state.profile?.college?.map((item) => item?.college_id)
+                    state.profile?.college?.map((item) => item?.college_id),
                   );
               }}
               loading={state.jobLoading}
@@ -1156,7 +1206,7 @@ console.log('master_experience --->', res);
                         <p className="text-xs text-gray-500">
                           {formatScheduleDateTime(
                             round.scheduled_date,
-                            round.scheduled_time
+                            round.scheduled_time,
                           )}
                         </p>
                       </div>
@@ -1198,6 +1248,689 @@ console.log('master_experience --->', res);
             </div> */}
           </div>
         )}
+      />
+
+      {/* Interesteds Modal */}
+      <Modal
+        open={state.isOpenInteresteds}
+        close={() =>
+          setState({ isOpenInteresteds: false, interestedsRow: null })
+        }
+        subTitle="Interest Details"
+        closeIcon
+        maxWidth="max-w-2xl"
+        renderComponent={() => {
+          const interesteds = state.interestedsRow?.interesteds || [];
+          return (
+            <div>
+              {interesteds.length === 0 ? (
+                <p className="py-2 text-center text-sm text-gray-400">
+                  No interest records found.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {interesteds.map((item: any, i: number) => (
+                    <div
+                      key={i}
+                      className="flex items-center justify-between rounded-lg border border-gray-200 px-4 py-2 dark:border-gray-700"
+                    >
+                      <div className="flex-1">
+                        <p className="font-medium text-gray-900 dark:text-white">
+                          {item?.job?.job_title || "—"}
+                        </p>
+                        <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                          {item?.created_at
+                            ? moment(item.created_at).format(
+                                "DD MMM YYYY, hh:mm A",
+                              )
+                            : "—"}
+                        </p>
+                      </div>
+                      <span
+                        className={`ml-4 rounded-full px-3 py-1 text-xs font-semibold ${
+                          item?.is_status === "Accepted"
+                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                            : item?.is_status === "Rejected"
+                            ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                            : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+                        }`}
+                      >
+                        {item?.is_status || "Pending"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        }}
+      />
+
+      <Modal
+        open={state.isOpenProfile}
+        close={() => setState({ isOpenProfile: false, userProfile: null })}
+        subTitle="Faculty Profile"
+        closeIcon
+        maxWidth="max-w-5xl"
+        padding="p-0"
+        renderComponent={() => {
+          const u = state.userProfile;
+          console.log("u --->", u);
+          const user_id =
+            typeof window !== "undefined"
+              ? localStorage.getItem("userId")
+              : null;
+          if (state.profileUserLoading) {
+            return (
+              <div className="h-50 flex items-center justify-center">
+                <IconLoader className="text-dblue h-8 w-8 animate-spin" />
+              </div>
+            );
+          }
+
+          if (!u) return null;
+
+          const canViewProfile =
+            u?.reveal_name === true ||
+            u?.interesteds?.some(
+              (i: any) =>
+                String(i?.sender?.id) === String(user_id) &&
+                i?.is_status === "Accepted",
+            );
+
+          const sideMenuItems = [
+            { key: "summary", label: "Profile Summary" },
+            { key: "responsibility", label: "Academic Responsibilities" },
+            { key: "experience", label: "Experience" },
+            { key: "education", label: "Education" },
+            { key: "projects", label: "Projects" },
+            { key: "publications", label: "Publications" },
+            { key: "skills", label: "Skills" },
+            { key: "achievements", label: "Achievements" },
+          ];
+
+          const renderProfileSection = () => {
+            switch (state.profileActiveSection) {
+              case "summary":
+                return (
+                  <div className="space-y-4">
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                      Profile Summary
+                    </h3>
+                    {canViewProfile ? (
+                      u?.resume_url && (
+                        <div className="flex items-center gap-2 rounded-lg border border-gray-200 p-3 dark:border-gray-700">
+                          <FileText className="text-dblue h-4 w-4 shrink-0" />
+                          <span className="text-sm text-gray-700 dark:text-gray-300">
+                            Resume
+                          </span>
+                          <span className="text-gray-300 dark:text-gray-600">
+                            ·
+                          </span>
+                          <a
+                            href={u.resume_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="bg-dblue flex items-center gap-1 rounded-md px-3 py-1 text-xs font-medium text-white transition hover:bg-blue-700"
+                          >
+                            <ExternalLink className="h-3 w-3" /> View
+                          </a>
+                        </div>
+                      )
+                    ) : (
+                      <div className="flex items-center gap-2 rounded-lg border border-gray-200 p-3 dark:border-gray-700">
+                        <FileText className="h-4 w-4 shrink-0 text-gray-300" />
+                        <div className="h-3 w-16 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                        <div className="ml-auto h-6 w-12 animate-pulse rounded-md bg-gray-200 dark:bg-gray-700" />
+                      </div>
+                    )}
+                    <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+                      <p className="mb-2 text-sm font-semibold   tracking-wide text-gray-500 dark:text-gray-400">
+                        About
+                      </p>
+                      <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                        {u?.about || "No summary provided."}
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      {[
+                        {
+                          icon: <Mail className="h-4 w-4 text-blue-500" />,
+                          label: "Email",
+                          val: canViewProfile ? u?.email : null,
+                          skeleton: !canViewProfile,
+                        },
+                        {
+                          icon: <Phone className="h-4 w-4 text-green-500" />,
+                          label: "Phone",
+                          val: canViewProfile ? u?.phone : null,
+                          skeleton: !canViewProfile,
+                        },
+                        {
+                          icon: <MapPin className="h-4 w-4 text-red-500" />,
+                          label: "Location",
+                          val: u?.current_location,
+                          skeleton: false,
+                        },
+                        {
+                          icon: (
+                            <Briefcase className="h-4 w-4 text-purple-500" />
+                          ),
+                          label: "Experience",
+                          val: u?.experience,
+                          skeleton: false,
+                        },
+                        {
+                          icon: (
+                            <Building className="h-4 w-4 text-orange-500" />
+                          ),
+                          label: "Company",
+                          val: u?.current_company,
+                          skeleton: false,
+                        },
+                        {
+                          icon: <User className="h-4 w-4 text-indigo-500" />,
+                          label: "Gender",
+                          val: u?.gender,
+                          skeleton: false,
+                        },
+                      ].map((item, i) =>
+                        item.skeleton ? (
+                          <div
+                            key={i}
+                            className="flex items-start gap-2 rounded-lg bg-gray-50 p-3 dark:bg-gray-700/40"
+                          >
+                            {item.icon}
+                            <div className="space-y-1">
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                {item.label}
+                              </p>
+                              <div className="h-3 w-28 animate-pulse rounded bg-gray-200 dark:bg-gray-600" />
+                            </div>
+                          </div>
+                        ) : item.val ? (
+                          <div
+                            key={i}
+                            className="flex items-start gap-2 rounded-lg bg-gray-50 p-3 dark:bg-gray-700/40"
+                          >
+                            {item.icon}
+                            <div>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                {item.label}
+                              </p>
+                              <p className="text-sm font-medium text-gray-800 dark:text-white">
+                                {item.val}
+                              </p>
+                            </div>
+                          </div>
+                        ) : null,
+                      )}
+                    </div>
+                  </div>
+                );
+
+              case "responsibility":
+                return (
+                  <div className="space-y-4">
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                      Academic Responsibilities
+                    </h3>
+                    {u?.additional_academic_responsibilities?.length ? (
+                      <div className="flex flex-wrap gap-2">
+                        {u.additional_academic_responsibilities.map(
+                          (resp: any, i: number) => (
+                            <span
+                              key={i}
+                              className="bg-dblue  rounded-full px-3 py-1 text-sm font-medium text-white"
+                            >
+                              {resp.responsibility_title}
+                            </span>
+                          ),
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-400">
+                        No academic responsibilities listed.
+                      </p>
+                    )}
+                  </div>
+                );
+
+              case "experience":
+                return (
+                  <div className="space-y-4">
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                      Experience
+                    </h3>
+                    {u?.experiences?.length ? (
+                      u.experiences.map((exp: any, i: number) => (
+                        <div
+                          key={i}
+                          className="rounded-lg border border-gray-200 p-4 dark:border-gray-700"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <p className="font-semibold text-gray-800 dark:text-white">
+                                {exp.designation}
+                              </p>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                                {exp.company}
+                              </p>
+                            </div>
+                            {/* {exp.currently_working && (
+                            <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-700">
+                              Current
+                            </span>
+                          )} */}
+                          </div>
+                          <p className="mt-1 text-xs text-gray-500">
+                            {exp.start_date
+                              ? moment(exp.start_date).format("MMM YYYY")
+                              : ""}{" "}
+                            {exp.end_date
+                              ? `– ${moment(exp.end_date).format("MMM YYYY")}`
+                              : exp.currently_working
+                              ? "– Present"
+                              : ""}
+                          </p>
+                          {exp.job_description && (
+                            <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                              {exp.job_description}
+                            </p>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-400">
+                        No experience records.
+                      </p>
+                    )}
+                  </div>
+                );
+
+              case "education":
+                return (
+                  <div className="space-y-4">
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                      Education
+                    </h3>
+                    {u?.educations?.length ? (
+                      u.educations.map((edu: any, i: number) => (
+                        <div
+                          key={i}
+                          className="rounded-lg border border-gray-200 p-4 dark:border-gray-700"
+                        >
+                          <p className="font-semibold text-gray-800 dark:text-white">
+                            {edu.degree}
+                          </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            {edu.field}
+                          </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            {edu.institution}
+                          </p>
+                          <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
+                            <span>
+                              {edu.start_year} – {edu.end_year}
+                            </span>
+                            {edu.cgpa && (
+                              <span className="rounded-full bg-blue-100 px-2 py-0.5 text-blue-700">
+                                CGPA: {edu.cgpa}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-400">
+                        No education records.
+                      </p>
+                    )}
+                  </div>
+                );
+
+              case "projects":
+                return (
+                  <div className="space-y-4">
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                      Projects
+                    </h3>
+                    {u?.projects?.length ? (
+                      u.projects.map((proj: any, i: number) => (
+                        <div
+                          key={i}
+                          className="rounded-lg border border-gray-200 p-4 dark:border-gray-700"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="font-semibold text-gray-800 dark:text-white">
+                              {proj.project_title}
+                            </p>
+                            <span
+                              className={`rounded-full px-2 py-0.5 text-xs ${
+                                proj.status === "Completed"
+                                  ? "bg-green-100 text-green-700"
+                                  : "bg-yellow-100 text-yellow-700"
+                              }`}
+                            >
+                              {proj.status}
+                            </span>
+                          </div>
+                          {proj.duration && (
+                            <p className="mt-0.5 text-xs text-gray-500">
+                              {proj.duration}
+                            </p>
+                          )}
+                          <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                            {proj.project_description}
+                          </p>
+                          {proj.technologies?.length > 0 && (
+                            <div className="mt-2 flex flex-wrap gap-1">
+                              {proj.technologies.map(
+                                (tech: string, j: number) => (
+                                  <span
+                                    key={j}
+                                    className="rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                                  >
+                                    {tech}
+                                  </span>
+                                ),
+                              )}
+                            </div>
+                          )}
+                          {proj.link && (
+                            <a
+                              href={proj.link}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="mt-2 flex items-center gap-1 text-xs text-blue-600 hover:underline"
+                            >
+                              <ExternalLink className="h-3 w-3" /> {proj.link}
+                            </a>
+                          )}
+                          {proj.funded && proj.funding_details && (
+                            <p className="mt-1 text-xs text-gray-500">
+                              Funded: {proj.funding_details}
+                            </p>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-400">No projects.</p>
+                    )}
+                  </div>
+                );
+
+              case "publications":
+                return (
+                  <div className="space-y-4">
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                      Publications
+                    </h3>
+                    {u?.publications?.length ? (
+                      u.publications.map((pub: any, i: number) => (
+                        <div
+                          key={i}
+                          className="rounded-lg border border-gray-200 p-4 dark:border-gray-700"
+                        >
+                          <p className="font-semibold text-gray-800 dark:text-white">
+                            {pub.publication_title}
+                          </p>
+                          <p className="mt-0.5 text-sm text-gray-600 dark:text-gray-400">
+                            {pub.publication_journal}
+                          </p>
+                          <div className="mt-1 flex flex-wrap gap-2 text-xs text-gray-500">
+                            {pub.publication_year && (
+                              <span>Year: {pub.publication_year}</span>
+                            )}
+                            {pub.publication_volume && (
+                              <span>Vol: {pub.publication_volume}</span>
+                            )}
+                            {pub.publication_issue && (
+                              <span>Issue: {pub.publication_issue}</span>
+                            )}
+                          </div>
+                          {pub.publication_description && (
+                            <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                              {pub.publication_description}
+                            </p>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-400">No publications.</p>
+                    )}
+                  </div>
+                );
+
+              case "skills":
+                return (
+                  <div className="space-y-4">
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                      Skills
+                    </h3>
+                    {u?.skills?.length ? (
+                      <div className="flex flex-wrap gap-2">
+                        {u.skills.map((skill: any, i: number) => (
+                          <span
+                            key={i}
+                            className="bg-dblue  rounded-full px-3 py-1 text-sm font-medium text-white"
+                          >
+                            {skill.name}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-400">No skills listed.</p>
+                    )}
+                  </div>
+                );
+
+              case "achievements":
+                return (
+                  <div className="space-y-4">
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                      Achievements
+                    </h3>
+                    {u?.achievements?.length ? (
+                      u.achievements.map((ach: any, i: number) => (
+                        <div
+                          key={i}
+                          className="rounded-lg border border-gray-200 p-4 dark:border-gray-700"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="font-semibold text-gray-800 dark:text-white">
+                              {ach.achievement_title}
+                            </p>
+                            {ach.achievement_file_url && (
+                              <a
+                                href={ach.achievement_file_url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-dblue flex items-center gap-1 text-xs hover:underline"
+                              >
+                                <ExternalLink className="text-dblue h-3 w-3" />{" "}
+                                View
+                              </a>
+                            )}
+                          </div>
+                          <p className="mt-0.5 text-sm text-gray-600 dark:text-gray-400">
+                            {ach.organization}
+                          </p>
+                          {ach.achievement_description && (
+                            <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                              {ach.achievement_description}
+                            </p>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-400">No achievements.</p>
+                    )}
+                  </div>
+                );
+
+              default:
+                return null;
+            }
+          };
+
+          return (
+            <div className="flex flex-col">
+              {/* Profile Header */}
+              <div className="flex items-center gap-4 border-b border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-800/50">
+                {canViewProfile ? (
+                  <>
+                    <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-blue-600 text-lg font-bold text-white">
+                      {u?.profile_logo_url ? (
+                        <img
+                          src={u.profile_logo_url}
+                          alt={u.username}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-sm font-medium text-white">
+                          {u?.first_name?.[0]}
+                          {u?.last_name?.[0]}
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-lg font-bold text-gray-900 dark:text-white">
+                        {u?.username || `${u?.first_name} ${u?.last_name}`}
+                      </p>
+                      {u?.email && (
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {u.email}
+                        </p>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="h-10 w-10 animate-pulse rounded-full bg-gray-300 dark:bg-gray-600" />
+                    <div className="space-y-2">
+                      <div className="h-4 w-32 animate-pulse rounded bg-gray-300 dark:bg-gray-600" />
+                      <div className="h-3 w-48 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Tabs: Profile | Qualifications */}
+              <div className="flex border-b border-gray-200 dark:border-gray-700">
+                {["profile", "qualifications"].map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setState({ profileActiveTab: tab })}
+                    className={`px-6 py-3 text-sm font-medium capitalize transition-colors ${
+                      state.profileActiveTab === tab
+                        ? "text-dblue border-b-2 border-blue-600"
+                        : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+
+              {/* Tab Content */}
+              {state.profileActiveTab === "profile" ? (
+                <div className="flex" style={{ minHeight: "420px" }}>
+                  {/* Left Side Menu */}
+                  <div className="w-48 shrink-0 border-r border-gray-200 bg-gray-50 py-4 dark:border-gray-700 dark:bg-gray-800/50">
+                    {sideMenuItems.map((item) => (
+                      <button
+                        key={item.key}
+                        onClick={() =>
+                          setState({ profileActiveSection: item.key })
+                        }
+                        className={`w-full px-4 py-2.5 text-left text-sm transition-colors ${
+                          state.profileActiveSection === item.key
+                            ? "bg-dblue font-semibold text-white"
+                            : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Right Content */}
+                  <div className="flex-1 overflow-y-auto p-5">
+                    {renderProfileSection()}
+                  </div>
+                </div>
+              ) : (
+                <div className="p-6">
+                  <h3 className="mb-4 text-base font-semibold text-gray-800 dark:text-white">
+                    Academic Qualifications
+                  </h3>
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    {[
+                      {
+                        label: "PhD Completed",
+                        key: "phd_completed",
+                        icon: <GraduationCap className="h-5 w-5" />,
+                      },
+                      {
+                        label: "NET Cleared",
+                        key: "net_cleared",
+                        icon: <Award className="h-5 w-5" />,
+                      },
+                      {
+                        label: "SET Cleared",
+                        key: "set_cleared",
+                        icon: <Award className="h-5 w-5" />,
+                      },
+                      {
+                        label: "SLET Cleared",
+                        key: "slet_cleared",
+                        icon: <Award className="h-5 w-5" />,
+                      },
+                    ].map((q) => (
+                      <div
+                        key={q.key}
+                        className={`flex flex-col items-center gap-2 rounded-xl border p-2 ${
+                          u?.[q.key]
+                            ? "border-green-200 bg-green-50 dark:border-green-700 dark:bg-green-900/20"
+                            : "border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50"
+                        }`}
+                      >
+                        <div
+                          className={
+                            u?.[q.key]
+                              ? "text-green-600 dark:text-green-400"
+                              : "text-gray-400"
+                          }
+                        >
+                          {q.icon}
+                        </div>
+                        <p
+                          className={`text-center text-sm font-medium ${
+                            u?.[q.key]
+                              ? "text-green-700 dark:text-green-400"
+                              : "text-gray-500 dark:text-gray-400"
+                          }`}
+                        >
+                          {q.label}
+                        </p>
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                            u?.[q.key]
+                              ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+                              : "bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
+                          }`}
+                        >
+                          {u?.[q.key] ? "Yes" : "No"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        }}
       />
     </div>
   );
