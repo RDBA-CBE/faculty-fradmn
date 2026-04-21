@@ -412,7 +412,7 @@ const Users = () => {
   ) => {
     try {
       setState({ collegeLoading: true });
-      const body: any = { search,pagination:"No" };
+      const body: any = { search, pagination: "No" };
 
       if (institutionId) {
         body.institution = institutionId;
@@ -577,7 +577,7 @@ const Users = () => {
       }
 
       const res: any = await Models.college.list(page, body);
-      const dropdown = Dropdown(res?.results, "college_name");
+      const dropdown = Dropdown(res?.results, "short_name");
 
       setState({
         collegeLoading: false,
@@ -961,6 +961,11 @@ const Users = () => {
       handleCloseModal();
     } catch (error: any) {
       console.log("✌️error --->", error);
+
+      if (error?.error) {
+        Failure(error?.error);
+        return;
+      }
 
       // Handle API errors with specific field messages
       if (error?.data) {
