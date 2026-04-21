@@ -359,6 +359,7 @@ export default function Newjob() {
     try {
       const res: any = await Models.department.list(page, {
         college: collegeId,
+        pagination : "No"
       });
       const options = res?.results?.map((item: any) => ({
         value: item.id,
