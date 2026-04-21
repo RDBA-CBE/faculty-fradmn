@@ -1222,7 +1222,7 @@ const CollegeAndDepartment = () => {
 
         {/* </div> */}
 
-        <CustomSelect
+        {/* <CustomSelect
           options={state.hrOptions}
           value={state.college_hr}
           onChange={(selectedOption) => {
@@ -1241,7 +1241,7 @@ const CollegeAndDepartment = () => {
           }
           loading={state.hrLoading}
           title="Assign HR"
-        />
+        /> */}
         <CustomSelect
           options={state.locOptions}
           value={state.location_id}
