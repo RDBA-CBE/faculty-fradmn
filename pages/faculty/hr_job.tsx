@@ -436,7 +436,7 @@ const Job = () => {
   ) => {
     try {
       setState({ departmentLoading: true });
-      const body: any = { search };
+      const body: any = { search,pagination:"No" };
       if (collegeIds) {
         body.college = collegeIds;
       }

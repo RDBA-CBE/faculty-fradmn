@@ -741,6 +741,7 @@ const Application = () => {
       if (createdBy) {
         body.created_by = createdBy;
       }
+      body.pagination = "No";
       // body.team = "No";
       const res: any = await Models.department.list(page, body);
       const dropdown = res?.results?.map((item) => ({
