@@ -513,10 +513,9 @@ const Users = () => {
           const showFullActions = row?.reveal_name;
           const is_responses = row?.interesteds?.some((item: any) => item?.is_status == "Accepted");
           return showFullActions || is_responses ? (
-            <a
+            <div
+              onClick={() => getUser(row)}
               title={user.username}
-              href={`${FRONTEND_URL}profile/${row?.id}`}
-              target="_blank"
               className={`cursor-pointer font-medium ${
                 isAnonymous(row)
                   ? "italic text-gray-400"
@@ -524,11 +523,13 @@ const Users = () => {
               }`}
             >
               {truncateText(user.username)}
-            </a>
+            </div>
           ) : (
             <span
+            onClick={() => getUser(row)}
+
               title={user.username}
-              className={`cursor-default font-medium ${
+              className={`cursor-pointer font-medium ${
                 isAnonymous(row)
                   ? "italic text-gray-400"
                   : "text-gray-900 dark:text-white"
@@ -672,13 +673,13 @@ const Users = () => {
                   </>
                 )}
 
-              <button
+              {/* <button
                 onClick={() => handleDelete(row)}
                 className="flex items-center justify-center rounded-lg text-red-600 transition-all duration-200"
                 title="Delete"
               >
                 <IconTrash className="h-4 w-4" />
-              </button>
+              </button> */}
             </div>
           );
         },
@@ -1353,12 +1354,15 @@ const Users = () => {
             switch (state.profileActiveSection) {
               case "summary":
                 return (
-                  <div className="space-y-4">
+                  <div className="space-y-2">
                     <h3 className="text-base font-semibold text-gray-800 dark:text-white">
                       Profile Summary
                     </h3>
+                    <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                      Resume
+                    </h4>
                     {canViewProfile ? (
-                      u?.resume_url && (
+                      u?.resume_url ? (
                         <div className="flex items-center gap-2 rounded-lg border border-gray-200 p-3 dark:border-gray-700">
                           <FileText className="text-dblue h-4 w-4 shrink-0" />
                           <span className="text-sm text-gray-700 dark:text-gray-300">
@@ -1376,6 +1380,13 @@ const Users = () => {
                             <ExternalLink className="h-3 w-3" /> View
                           </a>
                         </div>
+                      ) : (
+                        <div className="flex items-center gap-2 rounded-lg border border-gray-200 p-3 dark:border-gray-700">
+                          <FileText className="h-4 w-4 shrink-0 text-gray-400" />
+                          <span className="text-sm text-gray-400 dark:text-gray-500">
+                            No resume provided
+                          </span>
+                        </div>
                       )
                     ) : (
                       <div className="flex items-center gap-2 rounded-lg border border-gray-200 p-3 dark:border-gray-700">
@@ -1386,7 +1397,7 @@ const Users = () => {
                     )}
                     <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
                       <p className="mb-2 text-sm font-semibold   tracking-wide text-gray-500 dark:text-gray-400">
-                        About
+                        Profile Summary
                       </p>
                       <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
                         {u?.about || "No summary provided."}
