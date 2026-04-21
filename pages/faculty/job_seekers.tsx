@@ -637,7 +637,7 @@ const Users = () => {
                   className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200"
                   title="Send Interest"
                 >
-                  <Mail className="h-4 w-4" />
+                  <Send className="h-4 w-4" />
                 </button>
               {/* )} */}
               {row?.interesteds?.length > 0 && (
@@ -648,7 +648,7 @@ const Users = () => {
                   className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200"
                   title="Interested status"
                 >
-                  <Send className="h-4 w-4" />
+                  <Mail className="h-4 w-4" />
                 </button>
               )}
 
