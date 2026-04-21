@@ -16,6 +16,10 @@ const college_dept = {
         url += `&institution=${encodeURIComponent(body.institution)}`;
       }
 
+      if (body?.pagination == "No") {
+        url += `&pagination=${encodeURIComponent(false)}`;
+      }
+
       if (body?.created_by) {
         url += `&created_by=${encodeURIComponent(body.created_by)}`;
       }

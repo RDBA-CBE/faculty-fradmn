@@ -135,7 +135,6 @@ const Users = () => {
     },
     isOpenRound: false,
     hr_request: false,
-
   });
 
   const debounceSearch = useDebounce(state.search, 500);
@@ -179,7 +178,6 @@ const Users = () => {
     state.superAdminDepartmentFilter,
     state.sortingFilter,
     state.hr_request,
-
   ]);
 
   const profile = async (isTabChange = true) => {
@@ -252,7 +250,7 @@ const Users = () => {
         jobList(
           1,
           "",
-          res?.college?.map((item) => item?.college_id)
+          res?.college?.map((item) => item?.college_id),
         );
         // superAdminDepartmentList(1, "", false, res?.college?.college_id);
       }
@@ -297,15 +295,15 @@ const Users = () => {
         experience: item?.experience,
         status: item?.status,
         college:
-        state.activeTab == ROLES.HR && state.hr_request
-          ? [item?.college]
-          : item?.colleges?.map((item) => item?.short_name),
+          state.activeTab == ROLES.HR && state.hr_request
+            ? [item?.college]
+            : item?.colleges?.map((item) => item?.short_name),
         institution:
-        state.activeTab == ROLES.HR
-          ? state.hr_request
-            ? item?.institution
-            : item?.institution?.name
-          : item?.institution?.name,
+          state.activeTab == ROLES.HR
+            ? state.hr_request
+              ? item?.institution
+              : item?.institution?.name
+            : item?.institution?.name,
 
         institutionData: state.hr_request
           ? item?.institution
@@ -315,7 +313,7 @@ const Users = () => {
         genderData: item?.gender
           ? { label: capitalizeFLetter(item?.gender), value: item?.gender }
           : null,
-          collegeData: state.hr_request
+        collegeData: state.hr_request
           ? item?.college
           : item?.colleges
           ? item?.colleges?.map((c) => ({
@@ -365,6 +363,14 @@ const Users = () => {
       }
     }
 
+    if (state.activeTab == ROLES.HR && state.superAdminInstitutionFilter) {
+      body.institution_id = state.superAdminInstitutionFilter?.value;
+    }
+
+    if (state.activeTab == ROLES.HR && state.superAdminCollegeFilter) {
+      body.college_id = state.superAdminCollegeFilter?.value;
+    }
+
     if (state.sortBy) {
       body.ordering =
         state.sortOrder === "desc" ? `-${state.sortBy}` : state.sortBy;
@@ -402,11 +408,11 @@ const Users = () => {
     page,
     search = "",
     loadMore = false,
-    institutionId = null
+    institutionId = null,
   ) => {
     try {
       setState({ collegeLoading: true });
-      const body: any = { search };
+      const body: any = { search,pagination:"No" };
 
       if (institutionId) {
         body.institution = institutionId;
@@ -415,7 +421,7 @@ const Users = () => {
       }
 
       const res: any = await Models.college.list(page, body);
-      const dropdown = Dropdown(res?.results, "college_name");
+      const dropdown = Dropdown(res?.results, "short_name");
 
       setState({
         collegeLoading: false,
@@ -495,7 +501,7 @@ const Users = () => {
         state.superAdminDepartmentPage + 1,
         "",
         true,
-        collegeId
+        collegeId,
       );
     }
   };
@@ -504,7 +510,7 @@ const Users = () => {
     page,
     search = "",
     loadMore = false,
-    collegeId
+    collegeId,
   ) => {
     try {
       setState({ departmentLoading: true });
@@ -561,7 +567,7 @@ const Users = () => {
     page,
     search = "",
     loadMore = false,
-    institutionId = null
+    institutionId = null,
   ) => {
     try {
       setState({ collegeLoading: true });
@@ -638,7 +644,7 @@ const Users = () => {
     page,
     search = "",
     loadMore = false,
-    institutionId = null
+    institutionId = null,
   ) => {
     try {
       setState({ hodCollegeLoading: true });
@@ -668,7 +674,7 @@ const Users = () => {
     page,
     search = "",
     loadMore = false,
-    collegeId = null
+    collegeId = null,
   ) => {
     try {
       setState({ departmentLoading: true });
@@ -698,7 +704,7 @@ const Users = () => {
     page,
     search = "",
     loadMore = false,
-    collegeId = null
+    collegeId = null,
   ) => {
     try {
       setState({ departmentLoading: true });
@@ -818,7 +824,7 @@ const Users = () => {
           1,
           "",
           false,
-          row?.collegeData?.length > 0 ? row?.collegeData[0] : null
+          row?.collegeData?.length > 0 ? row?.collegeData[0] : null,
         );
       }
     }
@@ -851,7 +857,7 @@ const Users = () => {
     showDeleteAlert(
       () => deleteRecord(row.id),
       () => Swal.fire("Cancelled", "Record is safe", "info"),
-      "Are you sure you want to delete this record?"
+      "Are you sure you want to delete this record?",
     );
   };
 
@@ -869,7 +875,7 @@ const Users = () => {
     showDeleteAlert(
       () => bulkDeleteRecords(),
       () => Swal.fire("Cancelled", "Your Records are safe :)", "info"),
-      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`
+      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`,
     );
   };
 
@@ -900,7 +906,7 @@ const Users = () => {
         status: "active",
         gender: state.gender?.value,
         education_qualification: capitalizeFLetter(
-          state.education_qualification
+          state.education_qualification,
         ),
       };
 
@@ -980,11 +986,9 @@ const Users = () => {
         return;
       }
 
-      if(error?.response?.data?.error){
-        Failure((error?.response?.data?.error));
-
+      if (error?.response?.data?.error) {
+        Failure(error?.response?.data?.error);
       }
-
     } finally {
       setState({ submitting: false });
     }
@@ -1179,7 +1183,7 @@ const Users = () => {
                 state.collegePage + 1,
                 "",
                 true,
-                state.selectedHRInstitution
+                state.selectedHRInstitution,
               )
             }
             loading={state.collegeLoading}
@@ -1288,7 +1292,7 @@ const Users = () => {
                   1,
                   searchTerm,
                   false,
-                  state.selectedHODInstitution
+                  state.selectedHODInstitution,
                 )
               }
               placeholder="Select College"
@@ -1299,7 +1303,7 @@ const Users = () => {
                   state.hodCollegePage + 1,
                   "",
                   true,
-                  state.selectedHODInstitution
+                  state.selectedHODInstitution,
                 )
               }
               loading={state.hodCollegeLoading}
@@ -1330,7 +1334,7 @@ const Users = () => {
                   state.departmentPage + 1,
                   "",
                   true,
-                  state.college?.value
+                  state.college?.value,
                 )
               }
               loading={state.departmentLoading}
@@ -1355,7 +1359,7 @@ const Users = () => {
                   1,
                   searchTerm,
                   false,
-                  state.selectedHODCollege
+                  state.selectedHODCollege,
                 )
               }
               placeholder="Select Department"
@@ -1366,7 +1370,7 @@ const Users = () => {
                   state.departmentPage + 1,
                   "",
                   true,
-                  state.selectedHODCollege
+                  state.selectedHODCollege,
                 )
               }
               loading={state.departmentLoading}
@@ -1629,7 +1633,7 @@ const Users = () => {
                     className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
                     title="Edit"
                   >
-                   Approve
+                    Approve
                   </button>
                   <button
                     onClick={() => handleDelete(row)}
@@ -1982,16 +1986,14 @@ const Users = () => {
                   )}
                 </>
               )}
-             
-                  {state.activeTab == ROLES.HR && (
-                    <CheckboxInput
-                      checked={state.hr_request}
-                      onChange={(e) =>
-                        setState({ hr_request: !state.hr_request })
-                      }
-                      label="HR Request"
-                    />
-                  )}
+
+              {state.activeTab == ROLES.HR && (
+                <CheckboxInput
+                  checked={state.hr_request}
+                  onChange={(e) => setState({ hr_request: !state.hr_request })}
+                  label="HR Request"
+                />
+              )}
               {/* {state.profile?.role === ROLES.HR &&
                 state.activeTab == "applicant" && (
                   <CheckboxInput
@@ -2221,7 +2223,7 @@ const Users = () => {
                 jobList(
                   1,
                   searchTerm,
-                  state.profile?.college?.map((item) => item?.college_id)
+                  state.profile?.college?.map((item) => item?.college_id),
                 );
               }}
               loadMore={() => {
@@ -2229,7 +2231,7 @@ const Users = () => {
                   jobList(
                     state.jobPage + 1,
                     "",
-                    state.profile?.college?.map((item) => item?.college_id)
+                    state.profile?.college?.map((item) => item?.college_id),
                   );
               }}
               loading={state.jobLoading}
@@ -2429,7 +2431,7 @@ const Users = () => {
                         <p className="text-xs text-gray-500">
                           {formatScheduleDateTime(
                             round.scheduled_date,
-                            round.scheduled_time
+                            round.scheduled_time,
                           )}
                         </p>
                       </div>
