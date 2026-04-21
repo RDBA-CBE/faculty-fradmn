@@ -922,6 +922,10 @@ const Users = () => {
       if (state.activeTab === "hr") {
         body.college = state.college?.map((item) => Number(item.value));
       }
+      if(state.selectedHRInstitution?.value){
+        body.institution = state.selectedHRInstitution?.value;
+      }
+
 
       // Add qualification and experience for hod and applicant
       if (state.activeTab === "hod" || state.activeTab === "applicant") {
