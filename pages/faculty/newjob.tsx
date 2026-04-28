@@ -435,6 +435,7 @@ export default function Newjob() {
           tools: {
             list: {
               class: require("@editorjs/list"),
+              inlineToolbar:true
             },
           },
         });
@@ -456,6 +457,7 @@ export default function Newjob() {
           tools: {
             list: {
               class: require("@editorjs/list"),
+              inlineToolbar:true
             },
           },
         });
@@ -477,6 +479,7 @@ export default function Newjob() {
           tools: {
             list: {
               class: require("@editorjs/list"),
+              inlineToolbar:true
             },
           },
         });
@@ -707,8 +710,8 @@ export default function Newjob() {
         .ce-toolbar__plus {
           left: 0 !important;
         }
-        .ce-toolbar__actions {
-          right: 0 !important;
+        .ce-inline-toolbar {
+          z-index: 40 !important;
         }
       `}</style>
       {/* Header */}
