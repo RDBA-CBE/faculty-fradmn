@@ -134,7 +134,6 @@ export default function Newjob() {
           },
         });
         fetchColleges(res?.institution?.institution?.id, 1);
-
       } else if (res?.role == ROLES.HR) {
         setState({
           profile: res,
@@ -354,7 +353,7 @@ export default function Newjob() {
       const res: any =
         await Models.master.additional_academic_responsibilities_list(
           { pagination: "No" },
-          1
+          1,
         );
       const dropdown = res?.map((item: any) => ({
         value: item.id,
@@ -495,7 +494,7 @@ export default function Newjob() {
     try {
       const res: any = await Models.department.list(page, {
         college: collegeId,
-        pagination : "No"
+        pagination: "No",
       });
       const options = res?.results?.map((item: any) => ({
         value: item.id,
@@ -571,7 +570,7 @@ export default function Newjob() {
           tools: {
             list: {
               class: require("@editorjs/list"),
-              inlineToolbar:true
+              inlineToolbar: true,
             },
           },
         });
@@ -595,7 +594,7 @@ export default function Newjob() {
           tools: {
             list: {
               class: require("@editorjs/list"),
-              inlineToolbar:true
+              inlineToolbar: true,
             },
           },
         });
@@ -617,7 +616,7 @@ export default function Newjob() {
           tools: {
             list: {
               class: require("@editorjs/list"),
-              inlineToolbar:true
+              inlineToolbar: true,
             },
           },
         });
@@ -732,7 +731,10 @@ export default function Newjob() {
         body.department = state.department?.map((dept: any) => dept.value);
       } else if (state.profile?.role == ROLES.HR) {
         body.institution = state.profile?.institution?.id;
-        body.college = state.profile?.college?.college_id;
+        body.college =
+          state.profile?.college?.length > 0
+            ? state.college?.value
+            : state.profile?.college?.college_id;
         // body.department = state.department?.value;
         body.department = state.department?.map((dept: any) => dept.value);
       } else {
@@ -1105,8 +1107,6 @@ export default function Newjob() {
                   loading={state.catLoading}
                   title="Select category"
                 />
-
-               
               </div>
             </div>
           </div>
@@ -1167,7 +1167,7 @@ export default function Newjob() {
                         state.collegeHasMore &&
                         fetchColleges(
                           state.institution?.value,
-                          state.collegePage + 1
+                          state.collegePage + 1,
                         )
                       }
                       required
@@ -1187,7 +1187,7 @@ export default function Newjob() {
                         state.departmentHasMore &&
                         fetchDepartments(
                           state.college?.value,
-                          state.departmentPage + 1
+                          state.departmentPage + 1,
                         )
                       }
                       required
@@ -1208,13 +1208,11 @@ export default function Newjob() {
                       title="College"
                       options={state.collegeList}
                       value={state.college}
-                      onChange={(option) =>{
+                      onChange={(option) => {
                         setState({ department: [] });
 
-                        handleFieldChange("college", option)
-
-                      }
-                      }
+                        handleFieldChange("college", option);
+                      }}
                       placeholder="Select college"
                       error={state.error?.college}
                       disabled={!state.institution}
@@ -1222,7 +1220,7 @@ export default function Newjob() {
                         state.collegeHasMore &&
                         fetchColleges(
                           state.institution?.value,
-                          state.collegePage + 1
+                          state.collegePage + 1,
                         )
                       }
                       required
@@ -1242,7 +1240,7 @@ export default function Newjob() {
                         state.departmentHasMore &&
                         fetchDepartments(
                           state.college?.value,
-                          state.departmentPage + 1
+                          state.departmentPage + 1,
                         )
                       }
                       required
@@ -1268,7 +1266,6 @@ export default function Newjob() {
                         }))}
                         value={state.college}
                         onChange={(option) => {
-
                           handleFieldChange("college", option);
                         }}
                         placeholder="Select college"
@@ -1278,7 +1275,7 @@ export default function Newjob() {
                           state.collegeHasMore &&
                           fetchColleges(
                             state.institution?.value,
-                            state.collegePage + 1
+                            state.collegePage + 1,
                           )
                         }
                         required
@@ -1314,7 +1311,7 @@ export default function Newjob() {
                         state.departmentHasMore &&
                         fetchDepartments(
                           state.college?.value,
-                          state.departmentPage + 1
+                          state.departmentPage + 1,
                         )
                       }
                       required
@@ -1420,17 +1417,21 @@ export default function Newjob() {
                 />
 
                 <CheckboxInput
-                        label={<span className="flex items-center gap-1">Immediate Hiring <BellRing
-                           className="h-4 w-4 text-success" /></span>}
-                        className="mt-8 w-fit"
-                        checked={state.immediateHiring}
-                        labelStyle="font-bold text-md"
-                        onChange={(e) =>
-                          setState({
-                            immediateHiring: e,
-                          })
-                        }
-                      />
+                  label={
+                    <span className="flex items-center gap-1">
+                      Immediate Hiring{" "}
+                      <BellRing className="h-4 w-4 text-success" />
+                    </span>
+                  }
+                  className="mt-8 w-fit"
+                  checked={state.immediateHiring}
+                  labelStyle="font-bold text-md"
+                  onChange={(e) =>
+                    setState({
+                      immediateHiring: e,
+                    })
+                  }
+                />
 
                 {/* <TextInput
                   name="deadline"
@@ -1488,7 +1489,7 @@ export default function Newjob() {
                   error={state.error?.qualification}
                   required
                 />
-                 <CustomSelect
+                <CustomSelect
                   options={state.academicResponsibilityList}
                   value={state.academicResponsibility}
                   onChange={(selectedOption) =>
@@ -1502,7 +1503,6 @@ export default function Newjob() {
                 />
               </div>
 
-             
               <div className="mt-5">
                 <CustomSelect
                   title="Apply Type"
@@ -1544,7 +1544,7 @@ export default function Newjob() {
                           onChange={(e) =>
                             handleFieldChange(
                               "alternativeEmail",
-                              e.target.value
+                              e.target.value,
                             )
                           }
                           error={state.error?.alternativeEmail}

@@ -70,6 +70,7 @@ const Job = () => {
     showFilterModal: false,
     loading: false,
     submitting: false,
+    duplicatingJobId: null,
     sortBy: "",
     sortOrder: "asc",
     logData: [],
@@ -661,6 +662,81 @@ const Job = () => {
     router.push(`/faculty/updatejob?id=${row.id}`);
   };
 
+  const handleDuplicateJob = async (row: any) => {
+    try {
+      setState({ duplicatingJobId: row?.id });
+      const res: any = await Models.job.details(row?.id);
+
+      const body: any = {
+        job_title:
+          res?.roles?.length > 0 ? res?.roles?.[0]?.role_name : res?.job_title,
+        job_description: res?.job_description
+          ? capitalizeFLetter(res?.job_description)
+          : "",
+        job_type_id: res?.job_type_obj?.id,
+        experiences: res?.experiences?.id,
+        qualification: res?.qualification
+          ? capitalizeFLetter(res?.qualification)
+          : "",
+        salary_range_id: res?.salary_range_obj?.id,
+        location_ids:
+          res?.locations?.length > 0
+            ? res?.locations?.map((item: any) => item?.id)
+            : [],
+        number_of_openings: Number(res?.number_of_openings || 0),
+        last_date: res?.last_date
+          ? moment(res?.last_date).format("YYYY-MM-DD")
+          : "",
+        deadline: res?.deadline ? moment(res?.deadline).format("YYYY-MM-DD") : "",
+        start_date: res?.start_date
+          ? moment(res?.start_date).format("YYYY-MM-DD")
+          : "",
+        responsibility: res?.responsibility || null,
+        is_approved: false,
+        priority_id: res?.priority_obj?.id,
+        immediate_join: !!res?.immediate_join,
+        institution: res?.institution?.id,
+        college: res?.college?.id,
+        department:
+          res?.department?.length > 0
+            ? res?.department?.map((dept: any) => dept?.id)
+            : [],
+        category_ids:
+          res?.categories?.length > 0
+            ? res?.categories?.map((cat: any) => cat?.id)
+            : [],
+        role_ids:
+          res?.roles?.length > 0 ? res?.roles?.map((role: any) => role?.id) : [],
+        additional_academic_responsibility_ids:
+          res?.additional_academic_responsibilities?.length > 0
+            ? res?.additional_academic_responsibilities?.map((item: any) => item?.id)
+            : [],
+      };
+
+      if (res?.apply_link) {
+        body.user_collage_email = false;
+        body.apply_link = res?.apply_link;
+        body.alternative_email = "";
+      } else {
+        body.user_collage_email = !!res?.user_collage_email;
+        body.apply_link = "";
+        body.alternative_email = res?.user_collage_email
+          ? ""
+          : res?.alternative_email || "";
+      }
+
+      console.log("✌️body --->", body);
+      const formData = buildFormData(body);
+      await Models.job.create(formData);
+      Success("Job duplicated successfully.");
+      setState({ duplicatingJobId: null, selectedRecords: [] });
+      callJobListByRole(1);
+    } catch (error: any) {
+      setState({ duplicatingJobId: null });
+      Failure(error?.data?.error || "Failed to duplicate job");
+    }
+  };
+
   return (
     <div className="min-h-screen dark:from-gray-900 dark:to-gray-800">
       {/* Header Section */}
@@ -1028,13 +1104,27 @@ const Job = () => {
                 title: "Title",
                 sortable: true,
                 render: (row: any) => (
-                  <Link
-                    href={`/faculty/job_details?id=${row?.id}`}
-                    title={row?.job_title}
-                    className=" cursor-pointer text-gray-900 dark:text-white"
-                  >
-                    {truncateText(row?.job_title)}
-                  </Link>
+                  <div className="flex flex-col">
+                    <Link
+                      href={`/faculty/job_details?id=${row?.id}`}
+                      title={row?.job_title}
+                      className="cursor-pointer text-gray-900 dark:text-white"
+                    >
+                      {truncateText(row?.job_title)}
+                    </Link>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDuplicateJob(row);
+                      }}
+                      className="mt-1 w-fit text-xs font-medium text-blue-600 underline hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                      disabled={state.duplicatingJobId === row?.id}
+                    >
+                      {state.duplicatingJobId === row?.id
+                        ? "Duplicating..."
+                        : "Duplicate"}
+                    </button>
+                  </div>
                 ),
               },
               {
