@@ -605,12 +605,22 @@ export default function Newjob() {
         body.job_image = state.newImages?.[0];
       }
       if (state.applyType?.value == "internal") {
+        // if (!state.isCollegeEmail) {
+        //   body.alternative_email = state.alternativeEmail;
+        //   body.user_collage_email = state.isCollegeEmail;
+        //   body.apply_link = "";
+        // } else {
+        //   body.alternative_email = "";
+        //   body.user_collage_email = false;
+        //   body.apply_link = "";
+        // }
+
         if (state.isCollegeEmail) {
-          body.alternative_email = state.alternativeEmail;
+          body.alternative_email = "";
           body.user_collage_email = state.isCollegeEmail;
           body.apply_link = "";
         } else {
-          body.alternative_email = "";
+          body.alternative_email = state.alternativeEmail;
           body.user_collage_email = false;
           body.apply_link = "";
         }
