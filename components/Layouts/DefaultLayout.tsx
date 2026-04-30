@@ -10,11 +10,13 @@ import Setting from './Setting';
 import Portals from '../../components/Portals';
 import { useRouter } from 'next/router';
 import SidebarDynamic from './SidebarDynamic';
+import AppTour, { TOUR_KEY, STEPS_BY_ROUTE } from '@/components/DashboardTour';
 
 const DefaultLayout = ({ children }: PropsWithChildren) => {
     const router = useRouter();
     const [showLoader, setShowLoader] = useState(true);
     const [showTopButton, setShowTopButton] = useState(false);
+    const [tourRun, setTourRun] = useState(false);
     const themeConfig = useSelector((state: IRootState) => state.themeConfig);
     const [animation, setAnimation] = useState(themeConfig.animation);
     const dispatch = useDispatch();
@@ -33,6 +35,16 @@ const DefaultLayout = ({ children }: PropsWithChildren) => {
     };
 
     useEffect(() => {
+        // Listen for manual trigger from header Start Tour button (when already on same page)
+        const handler = () => {
+            setTourRun(false);
+            setTimeout(() => setTourRun(true), 150);
+        };
+        window.addEventListener('start-dashboard-tour', handler);
+        return () => window.removeEventListener('start-dashboard-tour', handler);
+    }, []);
+
+    useEffect(() => {
         window.addEventListener('scroll', onScrollHandler);
 
         const screenLoader = document.getElementsByClassName('screen_loader');
@@ -42,13 +54,14 @@ const DefaultLayout = ({ children }: PropsWithChildren) => {
             }, 200);
         }
 
-        router.events.on('beforeHistoryChange', () => {
-            setAnimation(themeConfig.animation);
-        });
+        const historyHandler = () => setAnimation(themeConfig.animation);
+        router.events.on('beforeHistoryChange', historyHandler);
+
         return () => {
-            window.removeEventListener('onscroll', onScrollHandler);
+            window.removeEventListener('scroll', onScrollHandler);
+            router.events.off('beforeHistoryChange', historyHandler);
         };
-    });
+    }, []);
 
     useEffect(() => {
         setAnimation(themeConfig.animation);
@@ -59,6 +72,31 @@ const DefaultLayout = ({ children }: PropsWithChildren) => {
             setAnimation('');
         }, 1100);
     }, [router.asPath]);
+
+    // When route changes, check if Start Tour button set the pending flag
+    useEffect(() => {
+        if ((window as any).__startDashboardTour) {
+            (window as any).__startDashboardTour = false;
+            const hasTour = !!STEPS_BY_ROUTE[router.pathname];
+            if (hasTour) {
+                // Small delay to let the page render its DOM elements
+                setTimeout(() => {
+                    setTourRun(false);
+                    setTimeout(() => setTourRun(true), 100);
+                }, 1500);
+            }
+        }
+    }, [router.pathname]);
+
+    // Auto-start on first visit only if current page has steps and tour not done
+    useEffect(() => {
+        if (typeof window !== 'undefined' && !localStorage.getItem(TOUR_KEY)) {
+            const hasTour = !!STEPS_BY_ROUTE[router.pathname];
+            if (hasTour) {
+                setTimeout(() => setTourRun(true), 1500);
+            }
+        }
+    }, [router.pathname]);
 
     return (
         <App>
@@ -103,6 +141,7 @@ const DefaultLayout = ({ children }: PropsWithChildren) => {
                 {/* END APP SETTING LAUNCHER */}
                 <div className={`${themeConfig.navbar} main-container min-h-screen text-black dark:text-white-dark`}>
                     {/* BEGIN SIDEBAR */}
+                    <AppTour run={tourRun} onFinish={() => setTourRun(false)} />
                     <SidebarDynamic />
                     <Header />
                     {/* END SIDEBAR */}

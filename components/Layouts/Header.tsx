@@ -41,6 +41,9 @@ import { capitalizeFLetter, useSetState } from "@/utils/function.utils";
 import { userData } from "@/store/userConfigSlice";
 import Models from "@/imports/models.import";
 import IconCaretsDown from "../Icon/IconCaretsDown";
+import { TOUR_KEY } from "@/components/DashboardTour";
+import { STEPS_BY_ROUTE } from "@/components/DashboardTour";
+import { FaWalking } from "react-icons/fa";
 
 const Header = () => {
   const router = useRouter();
@@ -614,27 +617,65 @@ const Header = () => {
                 </ul>
               </Dropdown>
             </div> */}
+            <button
+              type="button"
+              onClick={() => {
+                const hasTour = !!STEPS_BY_ROUTE[router.pathname];
+                if (hasTour) {
+                  // Current page has tour — trigger directly without clearing key
+                  (window as any).__startDashboardTour = true;
+                  window.dispatchEvent(new CustomEvent("start-dashboard-tour"));
+                } else {
+                  // No tour for this page — navigate to dashboard and start tour there
+                  // Do NOT clear TOUR_KEY here; DefaultLayout will handle it on route change
+                  (window as any).__startDashboardTour = true;
+                  router.push("/");
+                }
+              }}
+              className="flex items-center gap-1.5 rounded-lg border border-[#1E3786] px-3 py-1.5 text-xs font-semibold text-dblue hover:bg-[#1E3786] hover:text-white transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 18h6" />
+                <path d="M10 22h4" />
+                <path d="M12 2a7 7 0 0 0-4 12c.5.5 1 1.5 1 2h6c0-.5.5-1.5 1-2a7 7 0 0 0-4-12z" />
+              </svg>
+              {/* <FaWalking/> */}
+              User Guide
+            </button>
+
             <div className="dropdown flex shrink-0">
               <Dropdown
                 offset={[0, 8]}
                 placement={`${isRtl ? "bottom-start" : "bottom-end"}`}
                 btnClassName="relative group block"
                 button={
-                  <img
-                    className="h-9 w-9 rounded-full object-cover saturate-50 group-hover:saturate-100"
-                    src="/assets/images/user-profile.jpeg"
-                    alt="userProfile"
-                  />
+                  // <img
+                  //   className="tour-profile h-9 w-9 rounded-full object-cover saturate-50 group-hover:saturate-100"
+                  //   src="/assets/images/user-profile.jpeg"
+                  //   alt="userProfile"
+                  // />
+                  <div className="relative">
+                  <div className="tour-profile flex h-9 w-9 items-center justify-center rounded-full bg-dblue text-md font-bold text-white shadow-lg">
+                    {state.name?.charAt(0)?.toUpperCase()}
+                  </div>
+                  
+                </div>
                 }
               >
                 <ul className="w-[230px] !py-0 font-semibold text-dark dark:text-white-dark dark:text-white-light/90">
                   <li>
                     <div className="flex items-center px-4 py-4">
-                      <img
+                      {/* <img
                         className="h-10 w-10 rounded-md object-cover"
                         src="/assets/images/user-profile.jpeg"
                         alt="userProfile"
-                      />
+                      /> */}
+                      <div className="relative">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-md bg-dblue text-md font-bold text-white shadow-lg">
+                    {state.name?.charAt(0)?.toUpperCase()}
+                  </div>
+                  </div>
+                      
                       <div className="truncate ltr:pl-4 rtl:pr-4">
                         <h4 className="text-base">
                           {state.name}

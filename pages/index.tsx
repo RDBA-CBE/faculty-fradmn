@@ -1619,7 +1619,7 @@ const Dashboard = () => {
     <div className="min-h-screen dark:from-gray-900 dark:to-gray-800">
       {/* Stat Cards */}
       <div
-        className={`mb-3 grid grid-cols-2 gap-4 sm:grid-cols-3 ${
+        className={`tour-stat-cards mb-3 grid grid-cols-2 gap-4 sm:grid-cols-3 ${
           state.profile?.role == ROLES.HR ? "xl:grid-cols-5" : "xl:grid-cols-4"
         } `}
       >
@@ -1664,7 +1664,7 @@ const Dashboard = () => {
           </div>
         </div>
         <div className="mb-5 rounded-2xl backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
-          <div className="flex items-center justify-between gap-5">
+          <div className="tour-filters flex items-center justify-between gap-5">
             <TextInput
               placeholder={
                 state.activeCard == 1 ||
@@ -1909,7 +1909,7 @@ const Dashboard = () => {
         <DataTable
           noRecordsText="No data found"
           highlightOnHover
-          className="table-hover mb-4 whitespace-nowrap"
+          className="tour-app-table table-hover mb-4 whitespace-nowrap"
           records={
             state.activeCard == 1 ||
             state.activeCard == 2 ||
@@ -2627,7 +2627,7 @@ const Dashboard = () => {
 
       {/* Row 1 */}
       <div className="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <div className="panel xl:col-span-2">
+        <div className="tour-overview-chart panel xl:col-span-2">
           <h5 className="mb-4 text-lg font-semibold">
             Jobs, Applications & Registrations Overview
           </h5>
@@ -2642,7 +2642,7 @@ const Dashboard = () => {
           )}
         </div>
 
-        <div className="panel xl:col-span-1">
+        <div className="tour-experience-chart panel xl:col-span-1">
           <h5 className="mb-4 text-lg font-semibold">
             Applications by Experience
           </h5>
@@ -2669,7 +2669,7 @@ const Dashboard = () => {
 
       {/* Row 2 */}
       <div className="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <div className="panel">
+        <div className="tour-interview-chart panel">
           <h5 className="mb-3 text-lg font-semibold">Interviews Scheduled</h5>
 
           {isMounted && (
@@ -2684,7 +2684,7 @@ const Dashboard = () => {
           )}
         </div>
 
-        <div className="panel">
+        <div className="tour-decision-chart panel">
           <h5 className="mb-3 text-lg font-semibold">Decisions</h5>
 
           {isMounted && (
@@ -2699,7 +2699,7 @@ const Dashboard = () => {
           )}
         </div>
 
-        <div className="panel">
+        <div className="tour-funnel-chart panel">
           <h5
             className="mb-6 text-lg font-semibold"
             style={{ wordWrap: "break-word" }}
