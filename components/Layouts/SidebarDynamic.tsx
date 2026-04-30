@@ -82,7 +82,7 @@ const SidebarDynamic = () => {
             <Link
               href={item.href || "#"}
               target={item.external ? "_blank" : "_self"}
-              className="group"
+              className={`group tour-sidebar-${item.label.toLowerCase().replace(/[^a-z0-9]/g, "-")}`}
             >
               <div className="flex items-center">
                 {Icon && (
@@ -104,7 +104,7 @@ const SidebarDynamic = () => {
               type="button"
               className={`${
                 currentMenu === item.key ? "active" : ""
-              } nav-link group w-full`}
+              } nav-link group w-full tour-sidebar-${item.label.toLowerCase().replace(/[^a-z0-9]/g, "-")}`}
               onClick={() => toggleMenu(item.key)}
             >
               <div className="flex items-center">

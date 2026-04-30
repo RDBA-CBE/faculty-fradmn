@@ -750,7 +750,7 @@ const Job = () => {
           </div>
           <button
             onClick={() => router.push("newjob")}
-            className="bg-dblue group relative inline-flex transform items-center gap-2 overflow-hidden rounded-lg px-4 py-2  text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+            className="tour-add-job bg-dblue group relative inline-flex transform items-center gap-2 overflow-hidden rounded-lg px-4 py-2  text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
           >
             <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
             <IconPlus className="relative z-10 h-5 w-5" />
@@ -760,7 +760,7 @@ const Job = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="mb-6 flex gap-4">
+      <div className="tour-job-stats mb-6 flex gap-4">
         <div
           onClick={() => {
             setState({ statusFilter: null });
@@ -844,7 +844,7 @@ const Job = () => {
       </div>
 
       {/* Filters Section */}
-      <div className="mb-5 rounded-2xl  backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
+      <div className="tour-job-filters mb-5 rounded-2xl  backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
         <div className="flex items-center justify-between gap-5">
           <TextInput
             placeholder="Search jobs..."
@@ -1075,7 +1075,7 @@ const Job = () => {
           </div>
         </div>
 
-        <div className=" overflow-x-auto border border-gray-200 bg-white ">
+        <div className=" overflow-x-auto border border-gray-200 bg-white tour-job-table">
           <DataTable
             noRecordsText="No jobs found"
             highlightOnHover
@@ -1276,7 +1276,7 @@ const Job = () => {
                 accessor: "actions",
                 title: "Actions",
                 render: (row: any) => (
-                  <div className="flex items-center justify-center gap-3">
+                  <div className="tour-job-actions flex items-center justify-center gap-3">
                     <button
                       onClick={() =>
                         router.push(`/faculty/job_details?id=${row.id}`)

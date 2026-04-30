@@ -1168,7 +1168,7 @@ const Application = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="mb-6 flex gap-4">
+      <div className="tour-myapp-stats mb-6 flex gap-4">
         <div
           onClick={() =>
             setState({
@@ -1276,7 +1276,7 @@ const Application = () => {
       </div>
 
       {/* Filters Section */}
-      <div className="mb-5 rounded-2xl backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
+      <div className="tour-myapp-filters mb-5 rounded-2xl backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
         <div className="flex items-center justify-between gap-5">
           <TextInput
             placeholder="Search applications..."
@@ -1505,7 +1505,7 @@ const Application = () => {
             </div>
           </div>
         </div>
-        <div className="overflow-x-auto border border-gray-200 bg-white ">
+        <div className="overflow-x-auto border border-gray-200 bg-white tour-myapp-table">
           <DataTable
             noRecordsText="No applications found"
             highlightOnHover
@@ -1685,7 +1685,7 @@ const Application = () => {
                 title: "Actions",
                 textAlignment: "center",
                 render: (row: any) => (
-                  <div className="flex items-center justify-center gap-3">
+                  <div className="tour-myapp-actions flex items-center justify-center gap-3">
                     <button
                       onClick={() => handleEdit(row)}
                       className="flex  items-center justify-center rounded-lg  text-green-900 transition-all duration-200 "

@@ -478,7 +478,7 @@ const ApplicationDetail = () => {
           {/* Main Content (Left Column) */}
           <div className="space-y-4 lg:col-span-2">
             {/* Applicant Header */}
-            <div className="rounded-lg border bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+            <div className="rounded-lg border bg-white p-4 dark:border-gray-700 dark:bg-gray-800 tour-detail-applicant">
               {/* Profile Header */}
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
@@ -495,7 +495,7 @@ const ApplicationDetail = () => {
 
                 <div className="flex items-center gap-3">
                   {app?.applicant ? (
-                    <button onClick={() => getUser()}>
+                    <button onClick={() => getUser()} className="tour-detail-view-profile">
                       <div className="bg-dblue group flex cursor-pointer items-center gap-3 rounded-lg px-6 py-2 shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl">
                         <UserCog className="h-5 w-5 text-white" />
                         <p className=" text-white">View Profile</p>
@@ -603,7 +603,7 @@ const ApplicationDetail = () => {
                 </div>
               </div>
             </div>
-            <div className=" flex items-center justify-between">
+            <div className=" flex items-center justify-between tour-detail-rounds">
               <div className="page-ti  flex items-center gap-3 text-gray-900 dark:text-white">
                 <div className="flex items-center justify-center rounded-xl">
                   <Calendar className="text-dyellow h-5 w-5" />{" "}
@@ -619,7 +619,7 @@ const ApplicationDetail = () => {
                 <div className=" flex items-center justify-end">
                   <button
                     onClick={() => setState({ showInterviewModal: true })}
-                    className="bg-dblue group relative inline-flex transform items-center gap-2 overflow-hidden rounded-lg px-4 py-2 text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+                    className="tour-detail-schedule bg-dblue group relative inline-flex transform items-center gap-2 overflow-hidden rounded-lg px-4 py-2 text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
                   >
                     <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
                     <UserCheck className="relative z-10 h-5 w-5" />
@@ -633,7 +633,7 @@ const ApplicationDetail = () => {
 
             {/* Interview Details */}
             {state.application?.interview_slots?.length > 0 && (
-              <div className=" dark:border-gray-700">
+              <div className="tour-detail-rounds-list dark:border-gray-700">
                 <div className="space-y-4">
                   {state.application?.interview_slots?.map((round, index) => (
                     <div
@@ -990,7 +990,7 @@ const ApplicationDetail = () => {
               </div>
             )}
 
-            <div className="rounded-lg border bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+            <div className="rounded-lg border bg-white p-4 dark:border-gray-700 dark:bg-gray-800 tour-detail-job">
               <h3 className="mb-4 text-lg text-gray-900 dark:text-white">
                 Job Information
               </h3>
@@ -1109,7 +1109,7 @@ const ApplicationDetail = () => {
           <div className="lg:col-span-1">
             <div className="sticky top-24 space-y-4">
               {/* Final Decision Card */}
-              <div className="rounded-lg border bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+              <div className="rounded-lg border bg-white p-6 dark:border-gray-700 dark:bg-gray-800 tour-detail-status">
                 <h4 className="mb-4 text-xl text-gray-800 dark:text-white">
                   Application Status
                 </h4>
@@ -1160,7 +1160,7 @@ const ApplicationDetail = () => {
                   </h4>
                   <button
                     onClick={handleDownloadResume}
-                    className="bg-dblue flex w-full items-center justify-center gap-2 rounded-lg px-6 py-2.5 text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
+                    className="tour-detail-resume bg-dblue flex w-full items-center justify-center gap-2 rounded-lg px-6 py-2.5 text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
                   >
                     <IconDownload className="h-5 w-5" />
                     Download Resume

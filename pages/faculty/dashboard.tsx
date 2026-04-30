@@ -380,7 +380,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen dark:from-gray-900 dark:to-gray-800">
       {/* Stat Cards */}
-      <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-5">
+      <div className="tour-stat-cards mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-5">
         {statCards.map((card) => (
           <div
             key={card.label}
@@ -411,7 +411,7 @@ const Dashboard = () => {
       </div>
 
       {/* Filters */}
-      <div className="mb-6 flex flex-wrap items-center gap-2">
+      <div className="tour-filters mb-6 flex flex-wrap items-center gap-2">
         {filterLables?.map((p) => (
           <button
             key={p.value}
@@ -454,7 +454,7 @@ const Dashboard = () => {
 
       {/* Row 1 */}
       <div className="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <div className="panel xl:col-span-2">
+        <div className="tour-overview-chart panel xl:col-span-2">
           <h5 className="mb-4 text-lg font-semibold">Jobs, Applications & Registrations Overview</h5>
 
           {isMounted && (
@@ -467,7 +467,7 @@ const Dashboard = () => {
           )}
         </div>
 
-        <div className="panel xl:col-span-1">
+        <div className="tour-experience-chart panel xl:col-span-1">
           <h5 className="mb-4 text-lg font-semibold">
             Applications by Experience
           </h5>
@@ -485,7 +485,7 @@ const Dashboard = () => {
 
       {/* Row 2 */}
       <div className="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <div className="panel">
+        <div className="tour-interview-chart panel">
           <h5 className="mb-3 text-lg font-semibold">Interviews Scheduled</h5>
 
           {isMounted && (
@@ -500,7 +500,7 @@ const Dashboard = () => {
           )}
         </div>
 
-        <div className="panel">
+        <div className="tour-decision-chart panel">
           <h5 className="mb-3 text-lg font-semibold">Decisions</h5>
 
           {isMounted && (
@@ -515,7 +515,7 @@ const Dashboard = () => {
           )}
         </div>
 
-        <div className="panel">
+        <div className="tour-funnel-chart panel">
           <h5
             className="mb-6 text-lg font-semibold"
             style={{ wordWrap: "break-word" }}

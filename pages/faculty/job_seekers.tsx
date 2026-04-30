@@ -626,7 +626,7 @@ const Users = () => {
           console.log("is_responses --->", is_responses);
 
           return (
-            <div className="flex items-center justify-center gap-3">
+            <div className="tour-seekers-actions flex items-center justify-center gap-3">
               <div
                 onClick={() => getUser(row)}
                 className="flex cursor-pointer items-center justify-center rounded-lg text-green-600 transition-all duration-200"
@@ -827,7 +827,7 @@ const Users = () => {
         </div>
       </div>
 
-      <div className="mb-4 rounded-2xl  backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
+      <div className="tour-seekers-filters mb-4 rounded-2xl  backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
         <div className="flex flex-wrap items-center gap-4">
           <div className="group relative w-fit">
             <TextInput
@@ -908,7 +908,7 @@ const Users = () => {
           </div>
         </div>
 
-        <div className="overflow-x-aut border border-gray-200 bg-white">
+        <div className="overflow-x-aut border border-gray-200 bg-white tour-seekers-table">
           <DataTable
             noRecordsText={`No job seeker found`}
             highlightOnHover

@@ -1859,7 +1859,7 @@ const Users = () => {
           {state.activeTab !== ROLES.APPLICANT && (
             <button
               onClick={() => setState({ showModal: true })}
-              className="bg-dblue group relative inline-flex transform items-center gap-2 overflow-hidden rounded-lg px-4 py-2  text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+              className="tour-users-add-btn bg-dblue group relative inline-flex transform items-center gap-2 overflow-hidden rounded-lg px-4 py-2  text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
             >
               <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
               <IconPlus className="relative z-10 h-5 w-5" />
@@ -1870,7 +1870,7 @@ const Users = () => {
       </div>
 
       {/* Tabs */}
-      <div className="mb-4">
+      <div className="tour-users-tabs mb-4">
         <div className="inline-flex rounded-lg bg-white p-1 dark:bg-gray-800">
           {state.profile?.role === ROLES.SUPER_ADMIN && (
             <button
@@ -1899,7 +1899,7 @@ const Users = () => {
       </div>
 
       {/* Filters Section */}
-      <div className="mb-4 rounded-2xl  backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
+      <div className="tour-users-filters mb-4 rounded-2xl  backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
         {/* <div className="mb-2 flex items-center gap-2">
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
             Filters
@@ -2069,7 +2069,7 @@ const Users = () => {
           </div>
         </div>
 
-        <div className="overflow-x-aut border border-gray-200 bg-white">
+        <div className="overflow-x-aut border border-gray-200 bg-white tour-users-table">
           <DataTable
             noRecordsText={`No ${getTabLabel().toLowerCase()} found`}
             highlightOnHover
