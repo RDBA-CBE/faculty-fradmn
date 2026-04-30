@@ -36,10 +36,22 @@ import {
 } from "@/utils/constant.utils";
 import CheckboxInput from "@/components/FormFields/CheckBoxInput.component";
 import {
+  AlertCircle,
+  Award,
+  Briefcase,
+  Building,
   CalendarCheck,
   Clock,
+  Eye,
+  ExternalLink,
+  FileText,
+  GraduationCap,
   Heart,
+  Mail,
+  MapPin,
   MessageSquare,
+  Phone,
+  User,
   UserCheck,
 } from "lucide-react";
 import TextArea from "@/components/FormFields/TextArea.component";
@@ -135,6 +147,13 @@ const Users = () => {
     },
     isOpenRound: false,
     hr_request: false,
+    isOpenProfile: false,
+    userProfile: null,
+    profileUserLoading: false,
+    profileActiveTab: "profile",
+    profileActiveSection: "summary",
+    isOpenDeleteRequest: false,
+    selectedDeleteRequest: null,
   });
 
   const debounceSearch = useDebounce(state.search, 500);
@@ -289,9 +308,14 @@ const Users = () => {
             : item?.username || "",
         email: item?.email,
         phone: item?.phone,
-        department: item?.department?.name,
-        position: item?.position,
+        // department: item?.department?.name,
+        position: item?.current_position,
         qualification: item?.education_qualification,
+        publication: item?.publication_count,
+        project: item?.project_count,
+        location: item?.current_location,
+        reason_text: item?.reason_text,
+        department: item?.department?.department_master_name,
         experience: item?.experience,
         status: item?.status,
         college:
@@ -922,10 +946,9 @@ const Users = () => {
       if (state.activeTab === "hr") {
         body.college = state.college?.map((item) => Number(item.value));
       }
-      if(state.selectedHRInstitution?.value){
+      if (state.selectedHRInstitution?.value) {
         body.institution = state.selectedHRInstitution?.value;
       }
-
 
       // Add qualification and experience for hod and applicant
       if (state.activeTab === "hod" || state.activeTab === "applicant") {
@@ -1539,7 +1562,7 @@ const Users = () => {
           ),
         },
       ];
-    } else {
+    } else if (state.activeTab === ROLES.HR) {
       baseColumns = [
         {
           accessor: "username",
@@ -1674,24 +1697,168 @@ const Users = () => {
           ),
         },
       ];
-    }
+    } else if (state.activeTab === ROLES.APPLICANT) {
+      baseColumns = [
+        {
+          accessor: "username",
+          title: "Name",
+          sortable: true,
+          render: (row: any) => (
+            <div
+              title={row.username}
+              className={` font-medium ${"text-gray-900 dark:text-white"}`}
+            >
+              {truncateText(row?.username)}
+            </div>
+          ),
+        },
+        {
+          accessor: "location",
+          title: "Location",
+          sortable: true,
 
-    if (state.activeTab === "hod") {
-      baseColumns.splice(3, 0);
+          render: (row: any) => (
+            <div
+              title={row?.location}
+              className="text-gray-600 dark:text-gray-400"
+            >
+              {truncateText(row?.location)}
+            </div>
+          ),
+        },
 
-      baseColumns.splice(3, 0, {
-        accessor: "department",
-        title: "Department",
-        sortable: true,
-        render: (row: any) => (
-          <div
-            title={row?.department}
-            className="text-gray-600 dark:text-gray-400"
-          >
-            {truncateText(row?.department)}
-          </div>
-        ),
-      });
+        {
+          accessor: "experience",
+          title: "Experience",
+          sortable: true,
+
+          render: (row: any) => (
+            <div
+              title={row?.experience}
+              className="text-gray-600 dark:text-gray-400"
+            >
+              {row?.experience}
+            </div>
+          ),
+        },
+        {
+          accessor: "position",
+          title: "Current Position",
+          sortable: true,
+
+          render: (row: any) => (
+            <div
+              title={row?.position}
+              className="text-gray-600 dark:text-gray-400"
+            >
+              {truncateText(row?.position)}
+            </div>
+          ),
+        },
+
+        {
+          accessor: "department",
+          title: "Department",
+          sortable: true,
+
+          render: (row: any) => (
+            <div
+              title={row?.department}
+              className="text-gray-600 dark:text-gray-400"
+            >
+              {truncateText(row?.department)}
+            </div>
+          ),
+        },
+
+        {
+          accessor: "publication",
+          title: "Publications",
+          sortable: true,
+
+          render: (row: any) => (
+            <div
+              title={row?.publication}
+              className="text-gray-600 dark:text-gray-400"
+            >
+              {row?.publication}
+            </div>
+          ),
+        },
+
+        {
+          accessor: "project",
+          title: "Projects",
+          sortable: true,
+
+          render: (row: any) => (
+            <div
+              title={row?.project}
+              className="text-gray-600 dark:text-gray-400"
+            >
+              {row?.project}
+            </div>
+          ),
+        },
+
+        {
+          accessor: "actions",
+          title: "Actions",
+          render: (row) => (
+            <div className="flex items-center justify-center gap-3">
+              {state.activeTab == ROLES.HR && state.hr_request ? (
+                <>
+                  <button
+                    onClick={() => handleEdit(row)}
+                    className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
+                    title="Edit"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    onClick={() => handleDelete(row)}
+                    className="flex items-center justify-center rounded-lg  text-red-600 transition-all duration-200"
+                    title="Delete"
+                  >
+                    Reject
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => getUser(row?.id)}
+                    className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
+                    title="View"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </button>
+                  {row?.reason_text && (
+                    <button
+                      onClick={() =>
+                        setState({
+                          isOpenDeleteRequest: true,
+                          selectedDeleteRequest: row,
+                        })
+                      }
+                      className="flex items-center justify-center rounded-lg text-amber-600 transition-all duration-200"
+                      title="View delete request"
+                    >
+                      <AlertCircle className="h-4 w-4" />
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleDelete(row)}
+                    className="flex items-center justify-center rounded-lg  text-red-600 transition-all duration-200"
+                    title="Delete"
+                  >
+                    <IconTrash className="h-4 w-4" />
+                  </button>
+                </>
+              )}
+            </div>
+          ),
+        },
+      ];
     }
 
     // if (state.activeTab === "hod" || state.activeTab === "applicant") {
@@ -1724,7 +1891,7 @@ const Users = () => {
       return "Institution Admin";
     if (state.activeTab === "hr") return "HR";
     if (state.activeTab === "hod") return "HOD";
-    return "Job Seeker";
+    return "Faculty";
   };
 
   const sendInterest = async () => {
@@ -1843,6 +2010,22 @@ const Users = () => {
     }
   };
 
+  const getUser = async (applicantId: any) => {
+    try {
+      setState({
+        profileUserLoading: true,
+        isOpenProfile: true,
+        profileActiveTab: "profile",
+        profileActiveSection: "summary",
+      });
+      const res: any = await Models.auth.getUser(applicantId);
+      setState({ userProfile: res, profileUserLoading: false });
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      setState({ profileUserLoading: false });
+    }
+  };
+
   return (
     <div className="min-h-screen dark:from-gray-900 dark:to-gray-800">
       {/* Header Section */}
@@ -1895,6 +2078,16 @@ const Users = () => {
           >
             HR
           </button>
+          <button
+            onClick={() => handleTabChange("applicant")}
+            className={`rounded-md px-2 py-1 text-sm font-medium transition-all duration-200 ${
+              state.activeTab === "applicant"
+                ? "bg-lyellow text-black shadow-sm dark:bg-gray-700 dark:text-blue-400"
+                : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+            }`}
+          >
+            Faculty
+          </button>
         </div>
       </div>
 
@@ -1919,9 +2112,7 @@ const Users = () => {
           {(state.profile?.role === ROLES.INSTITUTION_ADMIN ||
             state.profile?.role === ROLES.SUPER_ADMIN) && (
             <>
-              {(state.activeTab == "hr" ||
-                state.activeTab == "hod" ||
-                state.activeTab == "applicant") && (
+              {(state.activeTab == "hr" || state.activeTab == "hod") && (
                 <>
                   {state.profile?.role === ROLES.SUPER_ADMIN && (
                     <CustomSelect
@@ -2071,6 +2262,9 @@ const Users = () => {
 
         <div className="overflow-x-aut border border-gray-200 bg-white">
           <DataTable
+            key={`users-${state.activeTab}-${
+              state.hr_request ? "request" : "default"
+            }`}
             noRecordsText={`No ${getTabLabel().toLowerCase()} found`}
             highlightOnHover
             className="table-hover whitespace-nowrap"
@@ -2480,6 +2674,574 @@ const Users = () => {
                 </button>
               </div>
             </div> */}
+          </div>
+        )}
+      />
+
+      <Modal
+        open={state.isOpenProfile}
+        close={() => setState({ isOpenProfile: false, userProfile: null })}
+        subTitle="Applicant Profile"
+        closeIcon
+        maxWidth="max-w-5xl"
+        padding="p-0"
+        renderComponent={() => {
+          const u = state.userProfile;
+          if (state.profileUserLoading) {
+            return (
+              <div className="h-50 flex items-center justify-center">
+                <IconLoader className="text-dblue h-8 w-8 animate-spin" />
+              </div>
+            );
+          }
+
+          if (!u) return null;
+
+          const sideMenuItems = [
+            { key: "summary", label: "Profile Summary" },
+            { key: "responsibility", label: "Academic Responsibilities" },
+            { key: "experience", label: "Experience" },
+            { key: "education", label: "Education" },
+            { key: "projects", label: "Projects" },
+            { key: "publications", label: "Publications" },
+            { key: "skills", label: "Skills" },
+            { key: "achievements", label: "Achievements" },
+          ];
+
+          const renderProfileSection = () => {
+            switch (state.profileActiveSection) {
+              case "summary":
+                return (
+                  <div className="space-y-4">
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                      Profile Summary
+                    </h3>
+                    {u?.resume_url && (
+                      <div className="flex items-center gap-2 rounded-lg border border-gray-200 p-3 dark:border-gray-700">
+                        <FileText className="text-dblue h-4 w-4 shrink-0" />
+                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                          Resume
+                        </span>
+                        <span className="text-gray-300 dark:text-gray-600">
+                          ·
+                        </span>
+                        <a
+                          href={u.resume_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="bg-dblue flex items-center gap-1 rounded-md px-3 py-1 text-xs font-medium text-white transition hover:bg-blue-700"
+                        >
+                          <ExternalLink className="h-3 w-3" /> View
+                        </a>
+                      </div>
+                    )}
+                    <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+                      <p className="mb-2 text-sm font-semibold tracking-wide text-gray-500 dark:text-gray-400">
+                        About
+                      </p>
+                      <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                        {u?.about || "No summary provided."}
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      {[
+                        {
+                          icon: <Mail className="h-4 w-4 text-blue-500" />,
+                          label: "Email",
+                          val: u?.email,
+                        },
+                        {
+                          icon: <Phone className="h-4 w-4 text-green-500" />,
+                          label: "Phone",
+                          val: u?.phone,
+                        },
+                        {
+                          icon: <MapPin className="h-4 w-4 text-red-500" />,
+                          label: "Location",
+                          val: u?.current_location,
+                        },
+                        {
+                          icon: (
+                            <Briefcase className="h-4 w-4 text-purple-500" />
+                          ),
+                          label: "Experience",
+                          val: u?.experience,
+                        },
+                        {
+                          icon: (
+                            <Building className="h-4 w-4 text-orange-500" />
+                          ),
+                          label: "Company",
+                          val: u?.current_company,
+                        },
+                        {
+                          icon: <User className="h-4 w-4 text-indigo-500" />,
+                          label: "Gender",
+                          val: u?.gender,
+                        },
+                      ].map((item, i) =>
+                        item.val ? (
+                          <div
+                            key={i}
+                            className="flex items-start gap-2 rounded-lg bg-gray-50 p-3 dark:bg-gray-700/40"
+                          >
+                            {item.icon}
+                            <div>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                {item.label}
+                              </p>
+                              <p className="text-sm font-medium text-gray-800 dark:text-white">
+                                {item.val}
+                              </p>
+                            </div>
+                          </div>
+                        ) : null,
+                      )}
+                    </div>
+                  </div>
+                );
+
+              case "responsibility":
+                return (
+                  <div className="space-y-4">
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                      Academic Responsibilities
+                    </h3>
+                    {u?.additional_academic_responsibilities?.length ? (
+                      <div className="flex flex-wrap gap-2">
+                        {u.additional_academic_responsibilities.map(
+                          (resp: any, i: number) => (
+                            <span
+                              key={i}
+                              className="bg-dblue rounded-full px-3 py-1 text-sm font-medium text-white"
+                            >
+                              {resp.responsibility_title}
+                            </span>
+                          ),
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-400">
+                        No academic responsibilities listed.
+                      </p>
+                    )}
+                  </div>
+                );
+
+              case "experience":
+                return (
+                  <div className="space-y-4">
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                      Experience
+                    </h3>
+                    {u?.experiences?.length ? (
+                      u.experiences.map((exp: any, i: number) => (
+                        <div
+                          key={i}
+                          className="rounded-lg border border-gray-200 p-4 dark:border-gray-700"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <p className="font-semibold text-gray-800 dark:text-white">
+                                {exp.designation}
+                              </p>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                                {exp.company}
+                              </p>
+                            </div>
+                          </div>
+                          <p className="mt-1 text-xs text-gray-500">
+                            {exp.start_date
+                              ? moment(exp.start_date).format("MMM YYYY")
+                              : ""}{" "}
+                            {exp.end_date
+                              ? `– ${moment(exp.end_date).format("MMM YYYY")}`
+                              : exp.currently_working
+                              ? "– Present"
+                              : ""}
+                          </p>
+                          {exp.job_description && (
+                            <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                              {exp.job_description}
+                            </p>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-400">
+                        No experience records.
+                      </p>
+                    )}
+                  </div>
+                );
+
+              case "education":
+                return (
+                  <div className="space-y-4">
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                      Education
+                    </h3>
+                    {u?.educations?.length ? (
+                      u.educations.map((edu: any, i: number) => (
+                        <div
+                          key={i}
+                          className="rounded-lg border border-gray-200 p-4 dark:border-gray-700"
+                        >
+                          <p className="font-semibold text-gray-800 dark:text-white">
+                            {edu.degree}
+                          </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            {edu.field}
+                          </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            {edu.institution}
+                          </p>
+                          <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
+                            <span>
+                              {edu.start_year} – {edu.end_year}
+                            </span>
+                            {edu.cgpa && (
+                              <span className="rounded-full bg-blue-100 px-2 py-0.5 text-blue-700">
+                                CGPA: {edu.cgpa}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-400">
+                        No education records.
+                      </p>
+                    )}
+                  </div>
+                );
+
+              case "projects":
+                return (
+                  <div className="space-y-4">
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                      Projects
+                    </h3>
+                    {u?.projects?.length ? (
+                      u.projects.map((proj: any, i: number) => (
+                        <div
+                          key={i}
+                          className="rounded-lg border border-gray-200 p-4 dark:border-gray-700"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="font-semibold text-gray-800 dark:text-white">
+                              {proj.project_title}
+                            </p>
+                            <span
+                              className={`rounded-full px-2 py-0.5 text-xs ${
+                                proj.status === "Completed"
+                                  ? "bg-green-100 text-green-700"
+                                  : "bg-yellow-100 text-yellow-700"
+                              }`}
+                            >
+                              {proj.status}
+                            </span>
+                          </div>
+                          {proj.duration && (
+                            <p className="mt-0.5 text-xs text-gray-500">
+                              {proj.duration}
+                            </p>
+                          )}
+                          <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                            {proj.project_description}
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-400">No projects.</p>
+                    )}
+                  </div>
+                );
+
+              case "publications":
+                return (
+                  <div className="space-y-4">
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                      Publications
+                    </h3>
+                    {u?.publications?.length ? (
+                      u.publications.map((pub: any, i: number) => (
+                        <div
+                          key={i}
+                          className="rounded-lg border border-gray-200 p-4 dark:border-gray-700"
+                        >
+                          <p className="font-semibold text-gray-800 dark:text-white">
+                            {pub.publication_title}
+                          </p>
+                          <p className="mt-0.5 text-sm text-gray-600 dark:text-gray-400">
+                            {pub.publication_journal}
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-400">No publications.</p>
+                    )}
+                  </div>
+                );
+
+              case "skills":
+                return (
+                  <div className="space-y-4">
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                      Skills
+                    </h3>
+                    {u?.skills?.length ? (
+                      <div className="flex flex-wrap gap-2">
+                        {u.skills.map((skill: any, i: number) => (
+                          <span
+                            key={i}
+                            className="bg-dblue rounded-full px-3 py-1 text-sm font-medium text-white"
+                          >
+                            {skill.name}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-400">No skills listed.</p>
+                    )}
+                  </div>
+                );
+
+              case "achievements":
+                return (
+                  <div className="space-y-4">
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                      Achievements
+                    </h3>
+                    {u?.achievements?.length ? (
+                      u.achievements.map((ach: any, i: number) => (
+                        <div
+                          key={i}
+                          className="rounded-lg border border-gray-200 p-4 dark:border-gray-700"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="font-semibold text-gray-800 dark:text-white">
+                              {ach.achievement_title}
+                            </p>
+                            {ach.achievement_file_url && (
+                              <a
+                                href={ach.achievement_file_url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-dblue flex items-center gap-1 text-xs hover:underline"
+                              >
+                                <ExternalLink className="text-dblue h-3 w-3" />{" "}
+                                View
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-400">No achievements.</p>
+                    )}
+                  </div>
+                );
+
+              default:
+                return null;
+            }
+          };
+
+          return (
+            <div className="flex flex-col">
+              <div className="flex items-center gap-4 border-b border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-800/50">
+                <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-blue-600 text-lg font-bold text-white">
+                  {u?.profile_logo_url ? (
+                    <img
+                      src={u.profile_logo_url}
+                      alt={u.username}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-sm font-medium text-white">
+                      {u?.first_name?.[0]}
+                      {u?.last_name?.[0]}
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-gray-900 dark:text-white">
+                    {u?.username || `${u?.first_name} ${u?.last_name}`}
+                  </p>
+                  {u?.email && (
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {u.email}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex border-b border-gray-200 dark:border-gray-700">
+                {["profile", "qualifications"].map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setState({ profileActiveTab: tab })}
+                    className={`px-6 py-3 text-sm font-medium capitalize transition-colors ${
+                      state.profileActiveTab === tab
+                        ? "text-dblue border-b-2 border-blue-600"
+                        : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+
+              {state.profileActiveTab === "profile" ? (
+                <div className="flex" style={{ minHeight: "420px" }}>
+                  <div className="w-48 shrink-0 border-r border-gray-200 bg-gray-50 py-4 dark:border-gray-700 dark:bg-gray-800/50">
+                    {sideMenuItems.map((item) => (
+                      <button
+                        key={item.key}
+                        onClick={() =>
+                          setState({ profileActiveSection: item.key })
+                        }
+                        className={`w-full px-4 py-2.5 text-left text-sm transition-colors ${
+                          state.profileActiveSection === item.key
+                            ? "bg-dblue font-semibold text-white"
+                            : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex-1 overflow-y-auto p-5">
+                    {renderProfileSection()}
+                  </div>
+                </div>
+              ) : (
+                <div className="p-6">
+                  <h3 className="mb-4 text-base font-semibold text-gray-800 dark:text-white">
+                    Academic Qualifications
+                  </h3>
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    {[
+                      {
+                        label: "PhD Completed",
+                        key: "phd_completed",
+                        icon: <GraduationCap className="h-5 w-5" />,
+                      },
+                      {
+                        label: "NET Cleared",
+                        key: "net_cleared",
+                        icon: <Award className="h-5 w-5" />,
+                      },
+                      {
+                        label: "SET Cleared",
+                        key: "set_cleared",
+                        icon: <Award className="h-5 w-5" />,
+                      },
+                      {
+                        label: "SLET Cleared",
+                        key: "slet_cleared",
+                        icon: <Award className="h-5 w-5" />,
+                      },
+                    ].map((q) => (
+                      <div
+                        key={q.key}
+                        className={`flex flex-col items-center gap-2 rounded-xl border p-2 ${
+                          u?.[q.key]
+                            ? "border-green-200 bg-green-50 dark:border-green-700 dark:bg-green-900/20"
+                            : "border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50"
+                        }`}
+                      >
+                        <div
+                          className={
+                            u?.[q.key]
+                              ? "text-green-600 dark:text-green-400"
+                              : "text-gray-400"
+                          }
+                        >
+                          {q.icon}
+                        </div>
+                        <p
+                          className={`text-center text-sm font-medium ${
+                            u?.[q.key]
+                              ? "text-green-700 dark:text-green-400"
+                              : "text-gray-500 dark:text-gray-400"
+                          }`}
+                        >
+                          {q.label}
+                        </p>
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                            u?.[q.key]
+                              ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+                              : "bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
+                          }`}
+                        >
+                          {u?.[q.key] ? "Yes" : "No"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        }}
+      />
+
+      <Modal
+        subTitle="Account Deletion Request"
+        closeIcon
+        open={state.isOpenDeleteRequest}
+        close={() =>
+          setState({ isOpenDeleteRequest: false, selectedDeleteRequest: null })
+        }
+        maxWidth="max-w-lg"
+        renderComponent={() => (
+          <div className="space-y-4">
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-900/20">
+              <p className="text-sm font-semibold text-amber-700 dark:text-amber-300">
+                User requested account deletion
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3">
+              <div className="rounded-lg border border-gray-200 p-3 dark:border-gray-700">
+                <p className="text-xs text-gray-500 dark:text-gray-400">Email</p>
+                <p className="text-sm font-medium text-gray-800 dark:text-white">
+                  {state.selectedDeleteRequest?.email || "—"}
+                </p>
+              </div>
+              <div className="rounded-lg border border-gray-200 p-3 dark:border-gray-700">
+                <p className="text-xs text-gray-500 dark:text-gray-400">Phone</p>
+                <p className="text-sm font-medium text-gray-800 dark:text-white">
+                  {state.selectedDeleteRequest?.phone || "—"}
+                </p>
+              </div>
+              <div className="rounded-lg border border-gray-200 p-3 dark:border-gray-700">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Reason
+                </p>
+                <p className="whitespace-pre-wrap text-sm font-medium text-gray-800 dark:text-white">
+                  {state.selectedDeleteRequest?.reason_text || "—"}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex justify-end border-t border-gray-200 pt-4 dark:border-gray-700">
+              <button
+                type="button"
+                onClick={() =>
+                  setState({
+                    isOpenDeleteRequest: false,
+                    selectedDeleteRequest: null,
+                  })
+                }
+                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+              >
+                Close
+              </button>
+            </div>
           </div>
         )}
       />
