@@ -57,20 +57,12 @@ const Category = () => {
   }, [dispatch]);
 
   useEffect(() => {
+    if (!state.profile) return;
     panelList(
       1,
-      state.profile?.college?.map((item) => item?.college_id)
+      state.profile?.college?.map((item) => item?.college_id),
     );
-  }, [debounceSearch, state.sortBy]);
-
-  useEffect(() => {
-    if (state.profile) {
-      panelList(
-        1,
-        state.profile?.college?.map((item) => item?.college_id)
-      );
-    }
-  }, [state.profile]);
+  }, [state.profile, debounceSearch, state.sortBy]);
 
   // https://user-service.88.222.213.249.nip.io/api/interview-panels/?page=1&college_id=154&institution_id=236
   const panelList = async (page = 1, clgId) => {
@@ -112,25 +104,13 @@ const Category = () => {
     try {
       const res: any = await Models.auth.profile();
       setState({ profile: res });
-      if (res?.role == ROLES.SUPER_ADMIN) {
-        departmentList(1, "", false, "", "");
-      } else if (res?.role == ROLES.INSTITUTION_ADMIN) {
-        departmentList(1, "", false, res?.institution?.id, "");
-      } else if (res?.role == ROLES.HR) {
-        setState({
-          collegeList: res?.college?.map((item) => ({
-            value: item?.college_id,
-            label: item?.short_name,
-          })),
-        });
-      } else if (res?.role == ROLES.HOD) {
-        setState({
-          department: {
-            label: res?.department?.department_name,
-            value: res?.department?.id,
-          },
-        });
-      }
+
+      setState({
+        collegeList: res?.college?.map((item) => ({
+          value: item?.college_id,
+          label: item?.short_name,
+        })),
+      });
     } catch (error) {
       console.error("Error fetching profile:", error);
     }
@@ -141,7 +121,7 @@ const Category = () => {
     search = "",
     loadMore = false,
     institutionId = null,
-    collegeId = null
+    collegeId = null,
   ) => {
     try {
       setState({ deptLoading: true });
@@ -181,7 +161,7 @@ const Category = () => {
     setState({ page: pageNumber });
     panelList(
       pageNumber,
-      state.profile?.college?.map((item) => item?.college_id)
+      state.profile?.college?.map((item) => item?.college_id),
     );
   };
 
@@ -202,7 +182,7 @@ const Category = () => {
   };
 
   const handleEdit = (row) => {
-    console.log('✌️row --->', row);
+    console.log("✌️row --->", row);
     setState({
       editId: row?.id,
       showModal: true,
@@ -232,7 +212,7 @@ const Category = () => {
     showDeleteAlert(
       () => deleteRecord(row.id),
       () => Swal.fire("Cancelled", "Record is safe", "info"),
-      "Are you sure you want to delete this panel member?"
+      "Are you sure you want to delete this panel member?",
     );
   };
 
@@ -242,7 +222,7 @@ const Category = () => {
       Success("Panel member deleted successfully!");
       panelList(
         state.page,
-        state.profile?.college?.map((item) => item?.college_id)
+        state.profile?.college?.map((item) => item?.college_id),
       );
     } catch (error) {
       Failure("Failed to delete experience");
@@ -277,7 +257,7 @@ const Category = () => {
       handleCloseModal();
       panelList(
         state.page,
-        state.profile?.college?.map((item) => item?.college_id)
+        state.profile?.college?.map((item) => item?.college_id),
       );
     } catch (error) {
       if (error instanceof Yup.ValidationError) {
@@ -334,7 +314,7 @@ const Category = () => {
       () => {
         Swal.fire("Cancelled", "Your Records are safe :)", "info");
       },
-      `Are you sure want to delete ${state.selectedRecords?.length} record(s)?`
+      `Are you sure want to delete ${state.selectedRecords?.length} record(s)?`,
     );
   };
 
@@ -344,12 +324,12 @@ const Category = () => {
         await Models.master.delete_panel(id);
       }
       Success(
-        `${state.selectedRecords?.length} panel member deleted successfully!`
+        `${state.selectedRecords?.length} panel member deleted successfully!`,
       );
       setState({ selectedRecords: [] });
       panelList(
         state.page,
-        state.profile?.college?.map((item) => item?.college_id)
+        state.profile?.college?.map((item) => item?.college_id),
       );
     } catch (error) {
       Failure("Failed to delete panel member. Please try again.");
@@ -434,7 +414,7 @@ const Category = () => {
             records={state.panelList}
             fetching={state.loading}
             selectedRecords={state.panelList?.filter((record) =>
-              state.selectedRecords?.includes(record.id)
+              state.selectedRecords?.includes(record.id),
             )}
             onSelectedRecordsChange={(records) =>
               setState({ selectedRecords: records.map((r) => r.id) })
@@ -539,7 +519,7 @@ const Category = () => {
               });
               panelList(
                 1,
-                state.profile?.college?.map((item) => item?.college_id)
+                state.profile?.college?.map((item) => item?.college_id),
               );
             }}
             minHeight={200}

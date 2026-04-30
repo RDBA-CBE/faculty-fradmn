@@ -29,6 +29,7 @@ import {
   BriefcaseBusiness,
   Building,
   CalendarCheck,
+  CalendarX2,
   Clock,
   ExternalLink,
   FileText,
@@ -362,9 +363,17 @@ const Users = () => {
       if (search) body.search = search;
       body.is_approved = "Yes";
       const res: any = await Models.job.list(page, body);
+      console.log("✌️res --->", res);
       const dropdown = res?.results?.map((item) => ({
         value: item?.id,
-        label: item?.roles?.[0]?.role_name,
+        label: `${item?.roles?.[0]?.role_name || ""}${
+          item?.department?.length > 0
+            ? ` (${item.department
+                .map((dept: any) => dept?.name)
+                .filter(Boolean)
+                .join(", ")})`
+            : ""
+        }`,
       }));
 
       setState({
@@ -1193,37 +1202,49 @@ const Users = () => {
 
               {/* Rounds */}
               <div className="space-y-4 pb-6">
-                {state.interview_round_list?.map((round) => (
-                  <div
-                    key={round.id}
-                    className="rounded-lg border bg-white px-3 py-2 shadow-sm"
-                  >
-                    {/* Round Header */}
-                    <div className=" flex items-center justify-between">
-                      <div>
-                        <p className="font-semibold">
-                          {capitalizeFLetter(round.round_name)}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {formatScheduleDateTime(
-                            round.scheduled_date,
-                            round.scheduled_time,
-                          )}
-                        </p>
-                      </div>
+                {state.interview_round_list?.length > 0 ? (
+                  state.interview_round_list?.map((round) => (
+                    <div
+                      key={round.id}
+                      className="rounded-lg border bg-white px-3 py-2 shadow-sm"
+                    >
+                      {/* Round Header */}
+                      <div className=" flex items-center justify-between">
+                        <div>
+                          <p className="font-semibold">
+                            {capitalizeFLetter(round.round_name)}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {formatScheduleDateTime(
+                              round.scheduled_date,
+                              round.scheduled_time,
+                            )}
+                          </p>
+                        </div>
 
-                      <span
-                        className={`rounded px-3 py-1 text-xs font-semibold ${
-                          round.status === "completed"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-yellow-100 text-yellow-700"
-                        }`}
-                      >
-                        {capitalizeFLetter(round.status)}
-                      </span>
+                        <span
+                          className={`rounded px-3 py-1 text-xs font-semibold ${
+                            round.status === "completed"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-yellow-100 text-yellow-700"
+                          }`}
+                        >
+                          {capitalizeFLetter(round.status)}
+                        </span>
+                      </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50 py-10 text-center dark:border-gray-700 dark:bg-gray-800">
+                    <CalendarX2 className="mb-2 h-10 w-10 text-gray-400" />
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                      No interview rounds
+                    </p>
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      Interview rounds are not scheduled yet.
+                    </p>
                   </div>
-                ))}
+                )}
               </div>
             </div>
 
@@ -1262,6 +1283,7 @@ const Users = () => {
         maxWidth="max-w-2xl"
         renderComponent={() => {
           const interesteds = state.interestedsRow?.interesteds || [];
+          console.log("✌️interesteds --->", interesteds);
           return (
             <div>
               {interesteds.length === 0 ? (
@@ -1277,7 +1299,19 @@ const Users = () => {
                     >
                       <div className="flex-1">
                         <p className="font-medium text-gray-900 dark:text-white">
-                          {item?.job?.job_title || "—"}
+                          {item?.job?.job_title
+                            ? (() => {
+                                const deptNames =
+                                  item?.job?.department
+                                    ?.map((dept: any) => dept?.department_name)
+                                    .filter(Boolean) || [];
+                                return `${item.job.job_title}${
+                                  deptNames.length > 0
+                                    ? ` (${deptNames.join(", ")})`
+                                    : ""
+                                }`;
+                              })()
+                            : "—"}
                         </p>
                         <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                           {item?.created_at

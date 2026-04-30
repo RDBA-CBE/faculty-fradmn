@@ -196,7 +196,7 @@ export default function Newjob() {
             res?.department?.length > 0
               ? res?.department?.map((dept: any) => ({
                   value: dept?.id,
-                  label: dept?.short_name,
+                  label: dept?.name,
                 }))
               : [],
 
@@ -498,7 +498,7 @@ export default function Newjob() {
       });
       const options = res?.results?.map((item: any) => ({
         value: item.id,
-        label: item.short_name,
+        label: item.department_name,
       }));
       setState({
         departmentList:

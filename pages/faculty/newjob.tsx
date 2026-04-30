@@ -363,7 +363,7 @@ export default function Newjob() {
       });
       const options = res?.results?.map((item: any) => ({
         value: item.id,
-        label: item.short_name,
+        label: item.department_name,
       }));
       setState({
         departmentList:
