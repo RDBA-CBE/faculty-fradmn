@@ -698,7 +698,6 @@ const master = {
       if (body?.search) url += `&search=${encodeURIComponent(body.search)}`;
       if (body?.pagination === "No") url += `&pagination=false`;
       if (body?.pagination === "Yes") url += `&pagination=true`;
-
       if (body?.department_id) url += `&department_id=${body.department_id}`;
       if (body?.ordering) url += `&ordering=${body.ordering}`;
       if (body?.is_approved == "Yes") url += `&is_approved=${true}`;

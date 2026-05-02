@@ -53,6 +53,7 @@ const Master_department = () => {
     dispatch(setPageTitle("Department Management"));
     deptList(1);
     categoryList(1);
+    dropdowndeptList()
   }, [dispatch]);
 
   useEffect(() => {
@@ -71,7 +72,7 @@ const Master_department = () => {
         body.ordering =
           state.sortOrder === "desc" ? `-${state.sortBy}` : state.sortBy;
       }
-      body.pagination = "Yes"
+      body.pagination = "Yes";
       const res: any = await Models.master.dept_list(body, page);
       console.log("✌️res --->", res);
 
@@ -82,6 +83,7 @@ const Master_department = () => {
         is_approved: item?.is_approved,
 
         job_categories: item?.job_categories,
+        grouped_department: item?.grouped_department,
       }));
 
       setState({
@@ -89,6 +91,36 @@ const Master_department = () => {
         count: res?.count,
         loading: false,
         page: page,
+      });
+    } catch {
+      setState({ loading: false });
+    }
+  };
+
+  const dropdowndeptList = async () => {
+    try {
+      setState({ loading: true });
+
+      const body: any = {};
+      if (state.search) body.search = state.search;
+
+      if (state.sortBy) {
+        body.ordering =
+          state.sortOrder === "desc" ? `-${state.sortBy}` : state.sortBy;
+      }
+      body.pagination = "No";
+      const res: any = await Models.master.dept_list(body, 1);
+      console.log("✌️res --->", res);
+
+      const data = res?.results?.map((item: any) => ({
+        value: item.id,
+        label: item.short_name,
+       
+      }));
+
+      setState({
+        dropdowndeptList: data,
+        loading: false,
       });
     } catch {
       setState({ loading: false });
@@ -134,6 +166,7 @@ const Master_department = () => {
       errors: {},
       submitting: false,
       job_category_id: null,
+      grouped_department:[]
     });
   };
 
@@ -144,10 +177,13 @@ const Master_department = () => {
       name: row.name,
       short_name: row.short_name,
       is_approved: row?.is_approved,
+      grouped_department: row?.grouped_department?row?.grouped_department?.map((item) => ({
+        value: item.id,
+        label: item.short_name,
+      })):[],
     });
-    if(row?.job_categories?.length>0){
-      setState({job_category_id:Dropdown(row?.job_categories,"name")
-      })
+    if (row?.job_categories?.length > 0) {
+      setState({ job_category_id: Dropdown(row?.job_categories, "name") });
     }
   };
 
@@ -155,7 +191,7 @@ const Master_department = () => {
     showDeleteAlert(
       () => deleteRecord(row.id),
       () => Swal.fire("Cancelled", "Record is safe", "info"),
-      "Are you sure you want to delete this department?"
+      "Are you sure you want to delete this department?",
     );
   };
 
@@ -177,6 +213,7 @@ const Master_department = () => {
         name: capitalizeFLetter(state.name),
         short_name: capitalizeFLetter(state.short_name),
         job_category_id: state.job_category_id?.map((item) => item?.value),
+        grouped_department: state.grouped_department?.length>0?state.grouped_department?.map((item) => item?.value):[],
       };
 
       await Utils.Validation.master_dept.validate(body, { abortEarly: false });
@@ -215,7 +252,7 @@ const Master_department = () => {
       () => {
         Swal.fire("Cancelled", "Your Records are safe :)", "info");
       },
-      `Are you sure want to delete ${state.selectedRecords?.length} record(s)?`
+      `Are you sure want to delete ${state.selectedRecords?.length} record(s)?`,
     );
   };
 
@@ -225,7 +262,7 @@ const Master_department = () => {
         await Models.master.delete_dept(id);
       }
       Success(
-        `${state.selectedRecords?.length} department deleted successfully!`
+        `${state.selectedRecords?.length} department deleted successfully!`,
       );
       setState({ selectedRecords: [] });
       deptList(state.page);
@@ -256,12 +293,12 @@ const Master_department = () => {
         Success(
           row.is_approved
             ? "Job unapproved successfully!"
-            : "Job approved successfully!"
+            : "Job approved successfully!",
         );
         deptList(state.page);
       } catch (error) {
         Failure(
-          row.is_approved ? "Failed to unapprove job" : "Failed to approve job"
+          row.is_approved ? "Failed to unapprove job" : "Failed to approve job",
         );
       }
     }
@@ -345,7 +382,7 @@ const Master_department = () => {
             records={state.deptList}
             fetching={state.loading}
             selectedRecords={state.deptList?.filter((record) =>
-              state.selectedRecords?.includes(record.id)
+              state.selectedRecords?.includes(record.id),
             )}
             onSelectedRecordsChange={(records) =>
               setState({ selectedRecords: records.map((r) => r.id) })
@@ -494,6 +531,17 @@ const Master_department = () => {
                 error={state.errors.job_category_id}
                 loading={state.catLoading}
                 required
+                isMulti
+              />
+
+              <CustomSelect
+                title="Department Group"
+                placeholder="Department Group"
+                options={state.dropdowndeptList}
+                value={state.grouped_department}
+                onChange={(e) => setState({ grouped_department: e })}
+                isClearable={true}
+                loading={state.dropdowndeptLoading}
                 isMulti
               />
             </div>
