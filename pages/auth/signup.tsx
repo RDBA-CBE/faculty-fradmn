@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { useDispatch } from "react-redux";
 import { setPageTitle } from "../../store/themeConfigSlice";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import BlankLayout from "@/components/Layouts/BlankLayout";
 import IconMail from "@/components/Icon/IconMail";
@@ -22,11 +22,16 @@ import * as Yup from "yup";
 import IconLockDots from "@/components/Icon/IconLockDots";
 import IconEyeOff from "@/components/Icon/IconEyeOff";
 import IconEye from "@/components/Icon/IconEye";
+import { CAPTCHA_SITE_KEY, ROLES } from "@/utils/constant.utils";
+import ReCAPTCHA from "react-google-recaptcha";
 
 const RegisterBoxed = () => {
   const dispatch = useDispatch();
 
   const router = useRouter();
+
+  const [loginCaptchaToken, setLoginCaptchaToken] = useState("");
+  
 
   const [state, setState] = useSetState({
     showPassword: false,
@@ -55,7 +60,8 @@ const RegisterBoxed = () => {
         phone: state.phone,
         user_type: state.assignRole?.value,
         password: state.password,
-        terms_accepted:true
+        terms_accepted:true,
+        recaptcha_token: loginCaptchaToken,
       };
       console.log("✌️body --->", body);
 
@@ -261,6 +267,14 @@ const RegisterBoxed = () => {
                   Sign in
                 </button> */}
                 {/* <PrimaryButton text={"Sign In"} /> */}
+
+                <div className="flex w-full items-center justify-center py-2">
+                <ReCAPTCHA
+                  sitekey={CAPTCHA_SITE_KEY}
+                  onChange={(token) => setLoginCaptchaToken(token || "")}
+                />
+                </div>
+
                 <PrimaryButton
                   type="submit"
                   text="Submit"

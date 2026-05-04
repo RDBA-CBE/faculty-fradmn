@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useDispatch } from "react-redux";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { setPageTitle } from "../../store/themeConfigSlice";
 import { useRouter } from "next/router";
 import BlankLayout from "@/components/Layouts/BlankLayout";
@@ -19,11 +19,16 @@ import * as Yup from "yup";
 import Models from "@/imports/models.import";
 import PrimaryButton from "@/components/FormFields/PrimaryButton.component";
 import { userData } from "@/store/userConfigSlice";
-import { ROLES } from "@/utils/constant.utils";
+import { CAPTCHA_SITE_KEY, ROLES } from "@/utils/constant.utils";
+import ReCAPTCHA from "react-google-recaptcha";
+
 
 const LoginBoxed = () => {
   const dispatch = useDispatch();
   const router = useRouter();
+
+  const [loginCaptchaToken, setLoginCaptchaToken] = useState("");
+
 
   const [state, setState] = useSetState({
     showPassword: false,
@@ -44,6 +49,7 @@ const LoginBoxed = () => {
       const body = {
         email: state.email.trim(),
         password: state.password,
+        recaptcha_token: loginCaptchaToken,
       };
 
       await Utils.Validation.login.validate(body, { abortEarly: false });
@@ -157,6 +163,13 @@ const LoginBoxed = () => {
                   <p className="text-base font-medium leading-normal text-white-dark underline">
                     Forget Password
                   </p>
+                </div>
+
+                <div className="flex w-full items-center justify-center py-2">
+                  <ReCAPTCHA
+                    sitekey={CAPTCHA_SITE_KEY}
+                    onChange={(token) => setLoginCaptchaToken(token || "")}
+                  />
                 </div>
                 {/* <button
                   type="submit"

@@ -7,6 +7,8 @@ export const CLIENT_ID =
 export const BACKEND_URL = "https://user-service.88.222.213.249.nip.io/api/";
 export const FRONTEND_URL = "https://www.facultypro.in/";
 
+export const  CAPTCHA_SITE_KEY = "6LeEe9gsAAAAAKddSPmwNUF4J-v7zaz8CgeKZ7n3"
+
 
 export const ROLES = {
   SUPER_ADMIN: "super_admin",
