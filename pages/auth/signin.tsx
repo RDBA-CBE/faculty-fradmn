@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useDispatch } from "react-redux";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { setPageTitle } from "../../store/themeConfigSlice";
 import { useRouter } from "next/router";
 import BlankLayout from "@/components/Layouts/BlankLayout";
@@ -10,6 +10,7 @@ import IconInstagram from "@/components/Icon/IconInstagram";
 import IconFacebookCircle from "@/components/Icon/IconFacebookCircle";
 import IconTwitter from "@/components/Icon/IconTwitter";
 import IconGoogle from "@/components/Icon/IconGoogle";
+import IconX from "@/components/Icon/IconX";
 import TextInput from "@/components/FormFields/TextInput.component";
 import { Failure, Success, useSetState } from "@/utils/function.utils";
 import IconEye from "@/components/Icon/IconEye";
@@ -28,7 +29,67 @@ const LoginBoxed = () => {
   const router = useRouter();
 
   const [loginCaptchaToken, setLoginCaptchaToken] = useState("");
+  const captchaRef = useRef<any>(null);
+  const captchaVerifiedRef = useRef(false);
+  const captchaPopupOpenRef = useRef(false);
+  const [captchaPopupRect, setCaptchaPopupRect] = useState<DOMRect | null>(null);
+  const [captchaLoaded, setCaptchaLoaded] = useState(false);
+  const isResettingRef = useRef(false);
 
+  const resetCaptcha = () => {
+    isResettingRef.current = true;
+    captchaRef.current?.reset();
+    setLoginCaptchaToken("");
+    captchaVerifiedRef.current = false;
+    captchaPopupOpenRef.current = false;
+    setCaptchaPopupRect(null);
+    setTimeout(() => { isResettingRef.current = false; }, 500);
+  };
+
+  // Detect when reCAPTCHA image popup opens/closes
+  useEffect(() => {
+    let debounceTimer: any = null;
+
+    const updatePopupState = () => {
+      if (isResettingRef.current) return;
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        const iframe = document.querySelector<HTMLIFrameElement>("iframe[src*='recaptcha'][src*='bframe']");
+        if (iframe) {
+          const rect = iframe.getBoundingClientRect();
+          const isVisible = rect.width > 0 && rect.height > 0;
+          captchaPopupOpenRef.current = isVisible;
+          setCaptchaPopupRect(isVisible ? rect : null);
+        } else {
+          captchaPopupOpenRef.current = false;
+          setCaptchaPopupRect(null);
+        }
+      }, 100);
+    };
+
+    const observer = new MutationObserver(updatePopupState);
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["style"] });
+    return () => { observer.disconnect(); clearTimeout(debounceTimer); };
+  }, []);
+
+  // Outside click — only resets when image popup is open and user has NOT verified
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (!captchaPopupOpenRef.current) return;
+      if (captchaVerifiedRef.current) return;
+      const iframe = document.querySelector<HTMLIFrameElement>("iframe[src*='recaptcha'][src*='bframe']");
+      if (!iframe) return;
+      const rect = iframe.getBoundingClientRect();
+      const isInsidePopup =
+        e.clientX >= rect.left &&
+        e.clientX <= rect.right &&
+        e.clientY >= rect.top &&
+        e.clientY <= rect.bottom;
+      if (!isInsidePopup) resetCaptcha();
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const [state, setState] = useSetState({
     showPassword: false,
@@ -52,7 +113,27 @@ const LoginBoxed = () => {
         recaptcha_token: loginCaptchaToken,
       };
 
-      await Utils.Validation.login.validate(body, { abortEarly: false });
+      const validationErrors: any = {};
+
+      try {
+        await Utils.Validation.login.validate(body, { abortEarly: false });
+      } catch (yupError) {
+        if (yupError instanceof Yup.ValidationError) {
+          yupError.inner.forEach((err) => {
+            validationErrors[err.path] = err?.message;
+          });
+        }
+      }
+
+      if (!loginCaptchaToken) {
+        validationErrors.loginCaptchaInput = "Please complete the captcha";
+      }
+
+      if (Object.keys(validationErrors).length > 0) {
+        setState({ error: validationErrors, btnLoading: false });
+        return;
+      }
+
       const res: any = await Models.auth.login(body);
       Success("Login Successfully");
       localStorage.setItem("token", res.access);
@@ -61,24 +142,13 @@ const LoginBoxed = () => {
       localStorage.setItem("role", res.user?.role);
       if (res.user?.role == ROLES.HOD) {
         router.replace("/faculty/my_job");
-      }else{
+      } else {
         router.replace("/");
       }
-
       setState({ btnLoading: false });
     } catch (error) {
-      if (error instanceof Yup.ValidationError) {
-        const validationErrors = {};
-        error.inner.forEach((err) => {
-          validationErrors[err.path] = err?.message;
-        });
-        console.log("✌️validationErrors --->", validationErrors);
-
-        setState({ error: validationErrors, btnLoading: false });
-      } else {
-        Failure(error?.error);
-        setState({ btnLoading: false });
-      }
+      Failure(error?.error);
+      setState({ btnLoading: false });
     }
   };
 
@@ -137,7 +207,7 @@ const LoginBoxed = () => {
                   title="Email"
                   placeholder="Enter Email"
                   value={state.email}
-                  onChange={(e) => setState({ email: e.target.value })}
+                  onChange={(e) => setState({ email: e.target.value, error: { ...state.error, email: undefined } })}
                   error={state.error?.email}
                   icon={<IconMail fill={true} />}
                 />
@@ -147,7 +217,7 @@ const LoginBoxed = () => {
                   type={state.showPassword ? "text" : "password"}
                   placeholder="Enter Password"
                   className="form-input ps-10 placeholder:text-white-dark"
-                  onChange={(e) => setState({ password: e.target.value })}
+                  onChange={(e) => setState({ password: e.target.value, error: { ...state.error, password: undefined } })}
                   value={state.password}
                   error={state.error?.password}
                   icon={<IconLockDots fill={true} />}
@@ -158,19 +228,40 @@ const LoginBoxed = () => {
                 />
                 <div
                   className="flex cursor-pointer justify-end"
-                  onClick={() => router.push("/auth/forget-password")}
+                 
                 >
-                  <p className="text-base font-medium leading-normal text-white-dark underline">
+                  <p className="text-base font-medium leading-normal text-white-dark underline"  onClick={() => router.push("/auth/forget-password")}>
                     Forget Password
                   </p>
                 </div>
 
-                <div className="flex w-full items-center justify-center py-2">
+                <div className="relative flex w-full flex-col items-center justify-center py-2">
                   <ReCAPTCHA
+                    ref={captchaRef}
                     sitekey={CAPTCHA_SITE_KEY}
-                    onChange={(token) => setLoginCaptchaToken(token || "")}
+                    asyncScriptOnLoad={() => setCaptchaLoaded(true)}
+                    onChange={(token) => {
+                      setLoginCaptchaToken(token || "");
+                      if (token) {
+                        captchaVerifiedRef.current = true;
+                        setState({ error: { ...state.error, loginCaptchaInput: undefined } });
+                      }
+                    }}
+                    onExpired={() => resetCaptcha()}
                   />
+                  {!captchaLoaded && (
+                    <div className="absolute inset-0 flex items-center justify-center rounded border border-gray-300 bg-gray-50">
+                      <svg className="h-6 w-6 animate-spin text-gray-400" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                      </svg>
+                    </div>
+                  )}
+                  {state.error?.loginCaptchaInput && (
+                    <p className="mt-1 text-sm text-red-600">{state.error.loginCaptchaInput}</p>
+                  )}
                 </div>
+                
                 {/* <button
                   type="submit"
                   className="btn bg-dblue !mt-6 w-full border-0 uppercase shadow-[0_10px_20px_-10px_rgba(67,97,238,0.44)]"
