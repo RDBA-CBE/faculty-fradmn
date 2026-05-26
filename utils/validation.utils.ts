@@ -214,7 +214,7 @@ export const CreateNewJob = Yup.object().shape({
   // endDate: Yup.string().required("End date is required"),
 
   experience: Yup.string().required("Experience is required"),
-  qualification: Yup.string().required("Qualification is required"),
+  qualification: Yup.mixed().required("Qualification is required"),
   // keyResponsibility: Yup.object()
   //   .test("has-blocks", "Key responsibilities are required", (value: any) => {
   //     if (

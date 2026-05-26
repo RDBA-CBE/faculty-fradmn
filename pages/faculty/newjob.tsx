@@ -31,6 +31,7 @@ export default function Newjob() {
   const editorRef = useRef(null);
   const keyResponsibilityEditorRef = useRef(null);
   const professionalSkillsEditorRef = useRef(null);
+  const qualificationEditorRef = useRef(null);
   const section1Ref = useRef(null);
   const section2Ref = useRef(null);
   const section3Ref = useRef(null);
@@ -38,6 +39,7 @@ export default function Newjob() {
   const section5Ref = useRef(null);
   const isEditorInitialized = useRef(false);
   const isKeyResponsibilityEditorInitialized = useRef(false);
+  const isQualificationEditorInitialized = useRef(false);
   const isProfessionalSkillsEditorInitialized = useRef(false);
 
   const [state, setState] = useSetState({
@@ -82,6 +84,7 @@ export default function Newjob() {
     tagLoading: false,
     editorInstance: null,
     keyResponsibilityEditorInstance: null,
+    qualificationEditorInstance: null,
     professionalSkillsEditorInstance: null,
     responsibilityData: null,
     editorData: {
@@ -445,6 +448,28 @@ export default function Newjob() {
 
     if (
       typeof window !== "undefined" &&
+      qualificationEditorRef.current &&
+      !isQualificationEditorInitialized.current
+    ) {
+      isQualificationEditorInitialized.current = true;
+
+      import("@editorjs/editorjs").then(({ default: EditorJS }) => {
+        const editor = new EditorJS({
+          holder: qualificationEditorRef.current,
+          placeholder: "List required qualifications...",
+          tools: {
+            list: {
+              class: require("@editorjs/list"),
+              inlineToolbar: true,
+            },
+          },
+        });
+        setState({ qualificationEditorInstance: editor });
+      });
+    }
+
+    if (
+      typeof window !== "undefined" &&
       keyResponsibilityEditorRef.current &&
       !isKeyResponsibilityEditorInitialized.current
     ) {
@@ -500,6 +525,13 @@ export default function Newjob() {
         isKeyResponsibilityEditorInitialized.current = false;
       }
       if (
+        state.qualificationEditorInstance &&
+        isQualificationEditorInitialized.current
+      ) {
+        state.qualificationEditorInstance?.destroy?.();
+        isQualificationEditorInitialized.current = false;
+      }
+      if (
         state.professionalSkillsEditorInstance &&
         isProfessionalSkillsEditorInitialized.current
       ) {
@@ -517,6 +549,8 @@ export default function Newjob() {
     setState({ btnLoading: true });
     const keyResponsibilityData =
       await state.keyResponsibilityEditorInstance?.save();
+    const qualificationData =
+      await state.qualificationEditorInstance?.save();
 
     try {
       const validation = {
@@ -537,7 +571,7 @@ export default function Newjob() {
         // endDate: state.endDate,
 
         experience: state.experience?.value,
-        qualification: state.qualification,
+        // qualification: qualificationData,
         // keyResponsibility: keyResponsibilityData,
 
         description: state.description,
@@ -560,7 +594,7 @@ export default function Newjob() {
 
         job_type_id: state.jobType?.value,
         experiences: state.experience?.value,
-        qualification: capitalizeFLetter(state.qualification),
+        new_job_qualification: qualificationData,
         salary_range_id: state.salary?.value,
         location_ids: state.location?.map((item) => item?.value),
 
@@ -1331,7 +1365,7 @@ export default function Newjob() {
                   error={state.error?.experience}
                   required
                 />
-                <TextInput
+                {/* <TextInput
                   name="qualification"
                   title="Qualification"
                   placeholder="Required qualifications..."
@@ -1341,7 +1375,8 @@ export default function Newjob() {
                   }
                   error={state.error?.qualification}
                   required
-                />
+                /> */}
+               
 
                 <CustomSelect
                   options={state.academicResponsibilityList}
@@ -1358,7 +1393,30 @@ export default function Newjob() {
               </div>
 
            
+           <div className="mt-5">
+                 
+                    <h2 className="flex items-center gap-2 text-sm font-bold text-[#374151] ">
+                     
+                      Qualification
+                    </h2>
+                  
+                  <div className="pt-2">
+                    <div className="overflow-hidden rounded-lg border-2 border-dashed border-gray-300 transition-colors ">
+                      <div
+                        ref={qualificationEditorRef}
+                        id="qualificationEditor"
+                        className="max-h-[400px] min-h-[250px] overflow-y-auto p-4"
+                      ></div>
+                    </div>
+                    {state.error?.qualification && (
+                      <p className="mt-2 text-sm text-red-600">
+                        {state.error.qualification}
+                      </p>
+                    )}
+                  </div>
+                </div>
               <div className="mt-5">
+                 
                 <CustomSelect
                   title="Apply Type"
                   options={[
