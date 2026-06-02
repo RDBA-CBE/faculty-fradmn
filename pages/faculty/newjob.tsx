@@ -571,7 +571,7 @@ export default function Newjob() {
         // endDate: state.endDate,
 
         experience: state.experience?.value,
-        // qualification: qualificationData,
+        qualification: qualificationData,
         // keyResponsibility: keyResponsibilityData,
 
         description: state.description,

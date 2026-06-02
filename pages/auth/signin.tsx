@@ -147,6 +147,9 @@ const LoginBoxed = () => {
       }
       setState({ btnLoading: false });
     } catch (error) {
+      setLoginCaptchaToken("")
+    captchaRef.current?.reset();
+
       Failure(error?.error);
       setState({ btnLoading: false });
     }

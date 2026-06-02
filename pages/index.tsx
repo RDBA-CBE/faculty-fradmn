@@ -99,7 +99,7 @@ const Dashboard = () => {
 
   const isDark = useSelector(
     (state: IRootState) =>
-      state.themeConfig.theme === "dark" || state.themeConfig.isDarkMode,
+      state.themeConfig.theme === "dark" || state.themeConfig.isDarkMode
   );
 
   const isRtl =
@@ -152,7 +152,7 @@ const Dashboard = () => {
     userProfile: null,
     profileActiveTab: "profile",
     profileActiveSection: "summary",
-    isOpenInteresteds:false
+    isOpenInteresteds: false,
   });
 
   const debounceSearch = useDebounce(state.search, 500);
@@ -205,7 +205,7 @@ const Dashboard = () => {
           from: moment(fromDate).format("YYYY-MM-DD"),
           to: moment(toDate).format("YYYY-MM-DD"),
         },
-        state.profile,
+        state.profile
       );
     }
   }, [fromDate, toDate]);
@@ -495,7 +495,7 @@ const Dashboard = () => {
     collegeId = null,
     deptId = null,
     profileId = null,
-    statusId = null,
+    statusId = null
   ) => {
     try {
       setState({ loading: true });
@@ -682,7 +682,7 @@ const Dashboard = () => {
     search = "",
     loadMore = false,
     institutionId = null,
-    createdBy = null,
+    createdBy = null
   ) => {
     try {
       setState({ collegeLoading: true });
@@ -796,7 +796,7 @@ const Dashboard = () => {
     page = 1,
     search = "",
     loadMore = false,
-    catId = null,
+    catId = null
   ) => {
     try {
       const body: any = {};
@@ -844,7 +844,7 @@ const Dashboard = () => {
           colleges,
           null,
           state.profile?.id,
-          dropdown?.id,
+          dropdown?.id
         );
       else if (role === ROLES.HOD)
         applicationList(1, null, null, deptId, state.profile?.id, dropdown?.id);
@@ -888,7 +888,7 @@ const Dashboard = () => {
       const d = new Date(bucket);
       return `${MONTHS[d.getUTCMonth()]} ${String(d.getUTCDate()).padStart(
         2,
-        "0",
+        "0"
       )}`;
     }
     // 6m/1y: "September" → "September"
@@ -907,7 +907,7 @@ const Dashboard = () => {
       "December",
     ];
     const monthIndex = fullMonths.findIndex(
-      (m) => m.toLowerCase() === bucket.toLowerCase(),
+      (m) => m.toLowerCase() === bucket.toLowerCase()
     );
     if (monthIndex !== -1) {
       return MONTHS[monthIndex];
@@ -952,7 +952,7 @@ const Dashboard = () => {
           legendClick: function (
             chartContext: any,
             seriesIndex: any,
-            config: any,
+            config: any
           ) {
             const isSolo =
               config.globals.collapsedSeriesIndices.length ===
@@ -1133,8 +1133,8 @@ const Dashboard = () => {
       ins?: any,
       college?: any,
       dept?: any,
-      profileId?: any,
-    ) => void,
+      profileId?: any
+    ) => void
   ) => {
     const role = state.profile?.role;
     if (role === ROLES.SUPER_ADMIN) {
@@ -1145,7 +1145,7 @@ const Dashboard = () => {
         state.profile?.institution?.id,
         null,
         null,
-        state.profile?.id,
+        state.profile?.id
       );
     } else if (role === ROLES.HR) {
       listFn(
@@ -1153,7 +1153,7 @@ const Dashboard = () => {
         null,
         state.profile?.college?.map((c: any) => c?.college_id),
         null,
-        state.profile?.id,
+        state.profile?.id
       );
     } else if (role === ROLES.HOD) {
       listFn(
@@ -1161,7 +1161,7 @@ const Dashboard = () => {
         null,
         null,
         state.profile?.department?.department_id,
-        state.profile?.id,
+        state.profile?.id
       );
     }
   };
@@ -1180,7 +1180,7 @@ const Dashboard = () => {
       jobList(
         pageNumber,
         null,
-        state.profile?.college?.map((item) => item?.college_id),
+        state.profile?.college?.map((item) => item?.college_id)
       );
     }
   };
@@ -1196,7 +1196,7 @@ const Dashboard = () => {
           state.profile?.institution?.id,
           null,
           null,
-          state.profile?.id,
+          state.profile?.id
         );
       } else if (role === ROLES.HR) {
         applicationList(
@@ -1204,7 +1204,7 @@ const Dashboard = () => {
           null,
           state.profile?.college?.map((item) => item?.college_id),
           null,
-          state.profile?.id,
+          state.profile?.id
         );
       } else if (role === ROLES.HOD) {
         applicationList(
@@ -1212,7 +1212,7 @@ const Dashboard = () => {
           null,
           null,
           state.profile?.department?.department_id,
-          state.profile?.id,
+          state.profile?.id
         );
       }
     } catch (error) {
@@ -1235,12 +1235,14 @@ const Dashboard = () => {
       const body = {
         applicant_id: row?.id,
       };
-      const res: any = await Models.interview.user_interview_list(body);
+      const res: any = await Models.application.details(row?.id);
+      console.log("res", res);
+
+      // const res: any = await Models.interview.user_interview_list(body);
       // const res: any = await Models.application.details(row?.id);
 
       setState({
-        interview_round_list: res?.items,
-
+        interview_round_list: res?.interview_slots,
         loading: false,
         appstatus: row?.application_status,
       });
@@ -1290,7 +1292,7 @@ const Dashboard = () => {
     console.log("✌️row --->", row);
     if (!row?.reveal_name) {
       const is_responses = row?.interesteds?.some(
-        (item: any) => item?.is_status == "Accepted",
+        (item: any) => item?.is_status == "Accepted"
       );
       return is_responses ? false : true;
     }
@@ -1371,18 +1373,18 @@ const Dashboard = () => {
         Success(
           row.is_approved
             ? "Job unapproved successfully!"
-            : "Job approved successfully!",
+            : "Job approved successfully!"
         );
         jobList(
           state.page,
           null,
           state.profile?.college?.map((c: any) => c.college_id),
-          null,
+          null
         );
         fetchDashboard("", state.profile);
       } catch (error) {
         Failure(
-          row.is_approved ? "Failed to unapprove job" : "Failed to approve job",
+          row.is_approved ? "Failed to unapprove job" : "Failed to approve job"
         );
       }
     }
@@ -1392,7 +1394,7 @@ const Dashboard = () => {
     showDeleteAlert(
       () => deleteRecord(row?.id),
       () => Swal.fire("Cancelled", "Record is safe", "info"),
-      "Are you sure you want to delete this job?",
+      "Are you sure you want to delete this job?"
     );
   };
 
@@ -1404,7 +1406,7 @@ const Dashboard = () => {
         state.page,
         null,
         state.profile?.college?.map((c: any) => c.college_id),
-        null,
+        null
       );
       fetchDashboard("", state.profile);
     } catch (error) {
@@ -1523,7 +1525,7 @@ const Dashboard = () => {
   const institutionDropdownList = async (
     page,
     search = "",
-    loadMore = false,
+    loadMore = false
   ) => {
     try {
       setState({ institutionLoading: true });
@@ -1551,7 +1553,7 @@ const Dashboard = () => {
     search = "",
     loadMore = false,
     collegeId = null,
-    createdBy = null,
+    createdBy = null
   ) => {
     try {
       setState({ departmentLoading: true });
@@ -1703,7 +1705,7 @@ const Dashboard = () => {
                     institutionDropdownList(
                       state.institutionPage + 1,
                       "",
-                      true,
+                      true
                     );
                   }
                 }}
@@ -2159,7 +2161,7 @@ const Dashboard = () => {
                       const user = safeUser(row);
                       const showFullActions = row?.reveal_name;
                       const is_responses = row?.interesteds?.some(
-                        (item: any) => item?.is_status == "Accepted",
+                        (item: any) => item?.is_status == "Accepted"
                       );
                       console.log("✌️is_responses --->", is_responses);
                       return showFullActions || is_responses ? (
@@ -2236,7 +2238,7 @@ const Dashboard = () => {
                       let is_responses = false;
                       if (row?.interesteds?.length > 0) {
                         const is_response = row?.interesteds?.some(
-                          (item: any) => item?.is_status === "Accepted",
+                          (item: any) => item?.is_status === "Accepted"
                         );
                         if (is_response) {
                           is_responses = true;
@@ -2434,7 +2436,7 @@ const Dashboard = () => {
                           <Clock className="h-3 w-3" />
                         )}
                         {capitalizeFLetter(
-                          (row as any).is_approved ? "Approved" : "Pending",
+                          (row as any).is_approved ? "Approved" : "Pending"
                         ) || "-"}
                       </span>
                     ),
@@ -2752,7 +2754,7 @@ const Dashboard = () => {
                   }
                   return acc;
                 },
-                [],
+                []
               )}
             />
           )}
@@ -2781,7 +2783,9 @@ const Dashboard = () => {
 
               {/* Rounds */}
               <div className="space-y-4 pb-6">
-                {state.interview_round_list?.map((round) => (
+              {state.interview_round_list?.length>0 ?
+
+                state.interview_round_list?.map((round) => (
                   <div
                     key={round.id}
                     className="rounded-lg border bg-white px-3 py-2 shadow-sm"
@@ -2795,7 +2799,7 @@ const Dashboard = () => {
                         <p className="text-xs text-gray-500">
                           {formatScheduleDateTime(
                             round.scheduled_date,
-                            round.scheduled_time,
+                            round.scheduled_time
                           )}
                         </p>
                       </div>
@@ -2811,7 +2815,10 @@ const Dashboard = () => {
                       </span>
                     </div>
                   </div>
-                ))}
+                )):
+
+                <div className="flex items-center justify-center"> No interview found</div>
+              }
               </div>
             </div>
 
@@ -2920,7 +2927,7 @@ const Dashboard = () => {
                 jobFilterList(
                   1,
                   searchTerm,
-                  state.profile?.college?.map((item) => item?.college_id),
+                  state.profile?.college?.map((item) => item?.college_id)
                 );
               }}
               loadMore={() => {
@@ -2928,7 +2935,7 @@ const Dashboard = () => {
                   jobFilterList(
                     state.jobPage + 1,
                     "",
-                    state.profile?.college?.map((item) => item?.college_id),
+                    state.profile?.college?.map((item) => item?.college_id)
                   );
               }}
               loading={state.jobLoading}
@@ -3128,7 +3135,7 @@ const Dashboard = () => {
             u?.interesteds?.some(
               (i: any) =>
                 String(i?.sender?.id) === String(user_id) &&
-                i?.is_status === "Accepted",
+                i?.is_status === "Accepted"
             );
 
           const sideMenuItems = [
@@ -3266,7 +3273,7 @@ const Dashboard = () => {
                               </p>
                             </div>
                           </div>
-                        ) : null,
+                        ) : null
                       )}
                     </div>
                   </div>
@@ -3288,7 +3295,7 @@ const Dashboard = () => {
                             >
                               {resp.responsibility_title}
                             </span>
-                          ),
+                          )
                         )}
                       </div>
                     ) : (
@@ -3436,7 +3443,7 @@ const Dashboard = () => {
                                   >
                                     {tech}
                                   </span>
-                                ),
+                                )
                               )}
                             </div>
                           )}
@@ -3766,7 +3773,7 @@ const Dashboard = () => {
                         <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                           {item?.created_at
                             ? moment(item.created_at).format(
-                                "DD MMM YYYY, hh:mm A",
+                                "DD MMM YYYY, hh:mm A"
                               )
                             : "—"}
                         </p>

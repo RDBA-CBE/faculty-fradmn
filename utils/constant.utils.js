@@ -6,6 +6,7 @@ export const CLIENT_ID =
 // export const BACKEND_URL = "http://88.222.213.249/api/";
 export const BACKEND_URL = "https://user-service.88.222.213.249.nip.io/api/";
 export const FRONTEND_URL = "https://www.facultypro.in/";
+export const CALENDAR_CLIENT_ID = "596515769268-9ptrlqpjek4s92d5m127vha73jqpo9fn.apps.googleusercontent.com"
 
 export const  CAPTCHA_SITE_KEY = "6LeEe9gsAAAAAKddSPmwNUF4J-v7zaz8CgeKZ7n3"
 

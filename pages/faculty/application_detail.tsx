@@ -48,7 +48,7 @@ import {
   ClipboardList,
   ArrowLeft,
 } from "lucide-react";
-import { FRONTEND_URL, ROLES } from "@/utils/constant.utils";
+import { CALENDAR_CLIENT_ID, FRONTEND_URL, ROLES } from "@/utils/constant.utils";
 import Link from "next/link";
 import CustomSelect from "@/components/FormFields/CustomSelect.component";
 import CustomeDatePicker from "@/components/datePicker";
@@ -76,6 +76,7 @@ const ApplicationDetail = () => {
     panelMembers: [],
     selectedApplicants: [],
     requestForChange: false,
+    googleAuthCode: "",
     roundName: "",
     interviewStatus: null,
     interviewStatusList: [
@@ -93,12 +94,27 @@ const ApplicationDetail = () => {
 
   useEffect(() => {
     dispatch(setPageTitle("Application Details"));
-    if (id) {
-      fetchApplicationDetail();
-      applicationStatusList();
-    }
     profile();
-  }, [id, dispatch]);
+  }, []);
+
+  useEffect(() => {
+    if (!id) return;
+    fetchApplicationDetail();
+    applicationStatusList();
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+    if (code) {
+      const savedForm = sessionStorage.getItem("interviewFormState");
+      const restored = savedForm ? JSON.parse(savedForm) : {};
+      setState({ googleAuthCode: code, showInterviewModal: true, ...restored });
+      sessionStorage.removeItem("interviewFormState");
+      window.history.replaceState(
+        {},
+        "",
+        `${window.location.pathname}?id=${id}`
+      );
+    }
+  }, [id]);
 
   const profile = async () => {
     try {
@@ -111,7 +127,12 @@ const ApplicationDetail = () => {
 
   const getUser = async () => {
     try {
-      setState({ profileUserLoading: true, isOpenProfile: true, profileActiveTab: "profile", profileActiveSection: "summary" });
+      setState({
+        profileUserLoading: true,
+        isOpenProfile: true,
+        profileActiveTab: "profile",
+        profileActiveSection: "summary",
+      });
       const res: any = await Models.auth.getUser(state.application?.applicant);
       setState({ userProfile: res, profileUserLoading: false });
     } catch (error) {
@@ -200,7 +221,7 @@ const ApplicationDetail = () => {
     page = 1,
     search = "",
     loadMore = false,
-    deptId = null,
+    deptId = null
   ) => {
     console.log("✌️loadPanelMembers --->");
 
@@ -252,12 +273,9 @@ const ApplicationDetail = () => {
         abortEarly: false,
       });
 
-      const body = {
+      const body: any = {
         position_ids: [state.application?.job_detail?.id],
-        // department_id: state.selectedDepartments?.map((item)=>item?.value),
         department_id: state.selectedDepartments?.value,
-        // department_id: state?.selectedDepartments?.map((item) => item?.value),
-
         scheduled_date: moment(state.interviewSlot).format("YYYY-MM-DD HH:mm"),
         panel_ids: state.panelMembers.map((p) => p.value),
         application_ids: [state.application?.id],
@@ -265,8 +283,12 @@ const ApplicationDetail = () => {
         round_name: state.roundName,
         status: "Scheduled",
         interview_link: state.interview_link,
+        // ...(state.googleAuthCode && { code: state.googleAuthCode }),
+        // google_hr_id:state.profile?.id
       };
-      console.log("✌️body --->", body);
+      if (!state.google_calendar_connected_at && state.googleAuthCode) {
+        body.code = state.googleAuthCode;
+      }
 
       await Models.interview.create(body);
       Success("Interview schedule created successfully!");
@@ -283,7 +305,9 @@ const ApplicationDetail = () => {
         interviewStatus: null,
         submitting: false,
         interview_link: "",
+        googleAuthCode: "",
       });
+      sessionStorage.removeItem("interviewFormState");
       setState({ submitting: false });
       fetchApplicationDetail();
     } catch (error) {
@@ -330,7 +354,7 @@ const ApplicationDetail = () => {
         abortEarly: false,
       });
 
-      const body = {
+      const body: any = {
         position_ids: [state.application?.job_detail?.id],
         // department_id: state.selectedDepartments?.map((item)=>item?.value),
         // department_id: state.application?.department?.id,
@@ -346,6 +370,9 @@ const ApplicationDetail = () => {
         status: "reschedule",
         interview_link: state.interview_link,
       };
+      if (!state.google_calendar_connected_at && state.googleAuthCode) {
+        body.code = state.googleAuthCode;
+      }
       console.log("✌️body --->", body);
 
       await Models.interview.update(body, state.rescheduleId);
@@ -364,6 +391,7 @@ const ApplicationDetail = () => {
         submitting: false,
         interview_link: "",
         rescheduleId: null,
+        googleAuthCode:false
       });
 
       fetchApplicationDetail();
@@ -478,7 +506,7 @@ const ApplicationDetail = () => {
           {/* Main Content (Left Column) */}
           <div className="space-y-4 lg:col-span-2">
             {/* Applicant Header */}
-            <div className="rounded-lg border bg-white p-4 dark:border-gray-700 dark:bg-gray-800 tour-detail-applicant">
+            <div className="tour-detail-applicant rounded-lg border bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
               {/* Profile Header */}
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
@@ -495,7 +523,10 @@ const ApplicationDetail = () => {
 
                 <div className="flex items-center gap-3">
                   {app?.applicant ? (
-                    <button onClick={() => getUser()} className="tour-detail-view-profile">
+                    <button
+                      onClick={() => getUser()}
+                      className="tour-detail-view-profile"
+                    >
                       <div className="bg-dblue group flex cursor-pointer items-center gap-3 rounded-lg px-6 py-2 shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl">
                         <UserCog className="h-5 w-5 text-white" />
                         <p className=" text-white">View Profile</p>
@@ -603,7 +634,7 @@ const ApplicationDetail = () => {
                 </div>
               </div>
             </div>
-            <div className=" flex items-center justify-between tour-detail-rounds">
+            <div className=" tour-detail-rounds flex items-center justify-between">
               <div className="page-ti  flex items-center gap-3 text-gray-900 dark:text-white">
                 <div className="flex items-center justify-center rounded-xl">
                   <Calendar className="text-dyellow h-5 w-5" />{" "}
@@ -663,7 +694,7 @@ const ApplicationDetail = () => {
                             <p className=" text-sm text-gray-500">
                               {formatScheduleDateTime(
                                 round.scheduled_date,
-                                round.scheduled_time,
+                                round.scheduled_time
                               )}
                             </p>
                           </div>
@@ -771,7 +802,7 @@ const ApplicationDetail = () => {
 
                                   <span className="text-xs text-gray-500">
                                     {new Date(
-                                      round.applicant_feedback.submitted_at,
+                                      round.applicant_feedback.submitted_at
                                     ).toLocaleDateString()}
                                   </span>
                                 </div>
@@ -783,7 +814,7 @@ const ApplicationDetail = () => {
                                 ) : round?.response_from_applicant ? (
                                   <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                                     {capitalizeFLetter(
-                                      round.applicant_feedback.feedback_text,
+                                      round.applicant_feedback.feedback_text
                                     )}
                                   </p>
                                 ) : (
@@ -990,7 +1021,7 @@ const ApplicationDetail = () => {
               </div>
             )}
 
-            <div className="rounded-lg border bg-white p-4 dark:border-gray-700 dark:bg-gray-800 tour-detail-job">
+            <div className="tour-detail-job rounded-lg border bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
               <h3 className="mb-4 text-lg text-gray-900 dark:text-white">
                 Job Information
               </h3>
@@ -1109,13 +1140,13 @@ const ApplicationDetail = () => {
           <div className="lg:col-span-1">
             <div className="sticky top-24 space-y-4">
               {/* Final Decision Card */}
-              <div className="rounded-lg border bg-white p-6 dark:border-gray-700 dark:bg-gray-800 tour-detail-status">
+              <div className="tour-detail-status rounded-lg border bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
                 <h4 className="mb-4 text-xl text-gray-800 dark:text-white">
                   Application Status
                 </h4>
                 <span
                   className={`mb-4 inline-block rounded-full px-3 py-1 text-sm shadow-sm ${getStatusColor(
-                    app?.status,
+                    app?.status
                   )}`}
                 >
                   {capitalizeFLetter(app?.status_display)}
@@ -1188,6 +1219,7 @@ const ApplicationDetail = () => {
             roundName: "",
             requestForChange: false,
             interviewStatus: null,
+            googleAuthCode: "",
           })
         }
         renderComponent={() => (
@@ -1212,7 +1244,7 @@ const ApplicationDetail = () => {
                 title="Select Department"
                 placeholder="Select Department"
                 options={state?.application?.department_details?.map(
-                  (item: any) => ({ value: item?.id, label: item?.short_name }),
+                  (item: any) => ({ value: item?.id, label: item?.short_name })
                 )}
                 value={state.selectedDepartments}
                 onChange={(e) => {
@@ -1320,23 +1352,76 @@ const ApplicationDetail = () => {
                 }
                 error={state.errors?.interview_link}
               />
-
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="requestForChange"
-                  checked={state.requestForChange}
-                  onChange={(e) =>
-                    setState({ requestForChange: e.target.checked })
-                  }
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <label
-                  htmlFor="requestForChange"
-                  className="text-sm font-medium text-gray-700 dark:text-gray-300"
-                >
-                  Request for Change
-                </label>
+              <div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="requestForChange"
+                    checked={state.requestForChange}
+                    onChange={(e) =>
+                      setState({ requestForChange: e.target.checked })
+                    }
+                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <label
+                    htmlFor="requestForChange"
+                    className="pt-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
+                    Request for Change
+                  </label>
+                </div>
+                {!state.profile?.google_calendar_connected_at && (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="connectGoogleCalendar"
+                      checked={!!state.googleAuthCode}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          // Save current form state before redirect
+                          sessionStorage.setItem(
+                            "interviewFormState",
+                            JSON.stringify({
+                              selectedDepartments: state.selectedDepartments,
+                              panelMembers: state.panelMembers,
+                              interviewSlot: state.interviewSlot,
+                              roundName: state.roundName,
+                              requestForChange: state.requestForChange,
+                              interview_link: state.interview_link,
+                            })
+                          );
+                          const url = new URL(window.location.href);
+                          url.searchParams.delete("code");
+                          const redirectUri = url.toString();
+                          const googleAuthUrl =
+                            `https://accounts.google.com/o/oauth2/v2/auth?` +
+                             `client_id=${CALENDAR_CLIENT_ID}&` +
+                            `redirect_uri=https://user-service.88.222.213.249.nip.io/auth/google/callback&` +
+                            `response_type=code&` +
+                            `scope=https://www.googleapis.com/auth/calendar&` +
+                            `access_type=offline&` +
+                            `prompt=consent&` +
+                            `state=${encodeURIComponent(redirectUri)}`;
+                          window.location.href = googleAuthUrl;
+                        } else {
+                          setState({ googleAuthCode: "" });
+                        }
+                      }}
+                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <label
+                      htmlFor="connectGoogleCalendar"
+                      className="pt-2  text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
+                      Connect Google Calendar
+                      {state.googleAuthCode && (
+                        <span className="ml-2 text-xs text-green-600">
+                          ✓ Connected
+                        </span>
+                      )}
+                    </label>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1355,6 +1440,7 @@ const ApplicationDetail = () => {
                     requestForChange: false,
                     interviewStatus: null,
                     interview_link: "",
+                    googleAuthCode: "",
                   })
                 }
                 className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
@@ -1431,7 +1517,7 @@ const ApplicationDetail = () => {
                 title="Select Department"
                 placeholder="Select Department"
                 options={state?.application?.department_details?.map(
-                  (item: any) => ({ value: item?.id, label: item?.short_name }),
+                  (item: any) => ({ value: item?.id, label: item?.short_name })
                 )}
                 value={state.selectedDepartments}
                 onChange={(e) => {
@@ -1476,7 +1562,7 @@ const ApplicationDetail = () => {
                     1,
                     searchTerm,
                     false,
-                    state.application?.department?.id,
+                    state.application?.department?.id
                   );
                 }}
                 loadMore={() => {
@@ -1485,7 +1571,7 @@ const ApplicationDetail = () => {
                       state.panelPage + 1,
                       "",
                       false,
-                      state.application?.department?.id,
+                      state.application?.department?.id
                     );
                   }
                 }}
@@ -1538,23 +1624,76 @@ const ApplicationDetail = () => {
                 }
                 error={state.errors?.interview_link}
               />
-
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="requestForChange"
-                  checked={state.requestForChange}
-                  onChange={(e) =>
-                    setState({ requestForChange: e.target.checked })
-                  }
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <label
-                  htmlFor="requestForChange"
-                  className="text-sm font-medium text-gray-700 dark:text-gray-300"
-                >
-                  Request for Change
-                </label>
+              <div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="requestForChange"
+                    checked={state.requestForChange}
+                    onChange={(e) =>
+                      setState({ requestForChange: e.target.checked })
+                    }
+                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <label
+                    htmlFor="requestForChange"
+                    className="pt-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
+                    Request for Change
+                  </label>
+                </div>
+                {!state.profile?.google_calendar_connected_at && (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="connectGoogleCalendar"
+                      checked={!!state.googleAuthCode}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          // Save current form state before redirect
+                          sessionStorage.setItem(
+                            "interviewFormState",
+                            JSON.stringify({
+                              selectedDepartments: state.selectedDepartments,
+                              panelMembers: state.panelMembers,
+                              interviewSlot: state.interviewSlot,
+                              roundName: state.roundName,
+                              requestForChange: state.requestForChange,
+                              interview_link: state.interview_link,
+                            })
+                          );
+                          const url = new URL(window.location.href);
+                          url.searchParams.delete("code");
+                          const redirectUri = url.toString();
+                          const googleAuthUrl =
+                            `https://accounts.google.com/o/oauth2/v2/auth?` +
+                            `client_id=${CALENDAR_CLIENT_ID}&` +
+                            `redirect_uri=https://user-service.88.222.213.249.nip.io/auth/google/callback&` +
+                            `response_type=code&` +
+                            `scope=https://www.googleapis.com/auth/calendar&` +
+                            `access_type=offline&` +
+                            `prompt=consent&` +
+                            `state=${encodeURIComponent(redirectUri)}`;
+                          window.location.href = googleAuthUrl;
+                        } else {
+                          setState({ googleAuthCode: "" });
+                        }
+                      }}
+                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <label
+                      htmlFor="connectGoogleCalendar"
+                      className="pt-2  text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
+                      Connect Google Calendar
+                      {state.googleAuthCode && (
+                        <span className="ml-2 text-xs text-green-600">
+                          ✓ Connected
+                        </span>
+                      )}
+                    </label>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1605,8 +1744,8 @@ const ApplicationDetail = () => {
           console.log("u --->", u);
           if (state.profileUserLoading) {
             return (
-              <div className="flex h-50 items-center justify-center">
-                <IconLoader className="h-8 w-8 animate-spin text-dblue" />
+              <div className="h-50 flex items-center justify-center">
+                <IconLoader className="text-dblue h-8 w-8 animate-spin" />
               </div>
             );
           }
@@ -1634,14 +1773,18 @@ const ApplicationDetail = () => {
                     </h3>
                     {u?.resume_url && (
                       <div className="flex items-center gap-2 rounded-lg border border-gray-200 p-3 dark:border-gray-700">
-                        <FileText className="h-4 w-4 shrink-0 text-dblue" />
-                        <span className="text-sm text-gray-700 dark:text-gray-300">Resume</span>
-                        <span className="text-gray-300 dark:text-gray-600">·</span>
+                        <FileText className="text-dblue h-4 w-4 shrink-0" />
+                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                          Resume
+                        </span>
+                        <span className="text-gray-300 dark:text-gray-600">
+                          ·
+                        </span>
                         <a
                           href={u.resume_url}
                           target="_blank"
                           rel="noreferrer"
-                          className="flex items-center gap-1 rounded-md bg-dblue px-3 py-1 text-xs font-medium text-white transition hover:bg-blue-700"
+                          className="bg-dblue flex items-center gap-1 rounded-md px-3 py-1 text-xs font-medium text-white transition hover:bg-blue-700"
                         >
                           <ExternalLink className="h-3 w-3" /> View
                         </a>
@@ -1657,19 +1800,54 @@ const ApplicationDetail = () => {
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       {[
-                        { icon: <Mail className="h-4 w-4 text-blue-500" />, label: "Email", val: u?.email },
-                        { icon: <Phone className="h-4 w-4 text-green-500" />, label: "Phone", val: u?.phone },
-                        { icon: <MapPin className="h-4 w-4 text-red-500" />, label: "Location", val: u?.current_location },
-                        { icon: <Briefcase className="h-4 w-4 text-purple-500" />, label: "Experience", val: u?.experience },
-                        { icon: <Building className="h-4 w-4 text-orange-500" />, label: "Company", val: u?.current_company },
-                        { icon: <User className="h-4 w-4 text-indigo-500" />, label: "Gender", val: u?.gender },
+                        {
+                          icon: <Mail className="h-4 w-4 text-blue-500" />,
+                          label: "Email",
+                          val: u?.email,
+                        },
+                        {
+                          icon: <Phone className="h-4 w-4 text-green-500" />,
+                          label: "Phone",
+                          val: u?.phone,
+                        },
+                        {
+                          icon: <MapPin className="h-4 w-4 text-red-500" />,
+                          label: "Location",
+                          val: u?.current_location,
+                        },
+                        {
+                          icon: (
+                            <Briefcase className="h-4 w-4 text-purple-500" />
+                          ),
+                          label: "Experience",
+                          val: u?.experience,
+                        },
+                        {
+                          icon: (
+                            <Building className="h-4 w-4 text-orange-500" />
+                          ),
+                          label: "Company",
+                          val: u?.current_company,
+                        },
+                        {
+                          icon: <User className="h-4 w-4 text-indigo-500" />,
+                          label: "Gender",
+                          val: u?.gender,
+                        },
                       ].map((item, i) =>
                         item.val ? (
-                          <div key={i} className="flex items-start gap-2 rounded-lg bg-gray-50 p-3 dark:bg-gray-700/40">
+                          <div
+                            key={i}
+                            className="flex items-start gap-2 rounded-lg bg-gray-50 p-3 dark:bg-gray-700/40"
+                          >
                             {item.icon}
                             <div>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">{item.label}</p>
-                              <p className="text-sm font-medium text-gray-800 dark:text-white">{item.val}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                {item.label}
+                              </p>
+                              <p className="text-sm font-medium text-gray-800 dark:text-white">
+                                {item.val}
+                              </p>
                             </div>
                           </div>
                         ) : null
@@ -1678,162 +1856,303 @@ const ApplicationDetail = () => {
                   </div>
                 );
 
-                case "responsibility":
+              case "responsibility":
                 return (
                   <div className="space-y-4">
-                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">Academic Responsibilities</h3>
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                      Academic Responsibilities
+                    </h3>
                     {u?.additional_academic_responsibilities?.length ? (
                       <div className="flex flex-wrap gap-2">
-                        {u.additional_academic_responsibilities.map((resp: any, i: number) => (
-                          <span key={i} className="rounded-full  bg-dblue px-3 py-1 text-sm font-medium text-white">
-                            {resp.responsibility_title}
-                          </span>
-                        ))}
+                        {u.additional_academic_responsibilities.map(
+                          (resp: any, i: number) => (
+                            <span
+                              key={i}
+                              className="bg-dblue  rounded-full px-3 py-1 text-sm font-medium text-white"
+                            >
+                              {resp.responsibility_title}
+                            </span>
+                          )
+                        )}
                       </div>
-                    ) : <p className="text-sm text-gray-400">No academic responsibilities listed.</p>}
+                    ) : (
+                      <p className="text-sm text-gray-400">
+                        No academic responsibilities listed.
+                      </p>
+                    )}
                   </div>
                 );
 
               case "experience":
                 return (
                   <div className="space-y-4">
-                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">Experience</h3>
-                    {u?.experiences?.length ? u.experiences.map((exp: any, i: number) => (
-                      <div key={i} className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
-                        <div className="flex items-start justify-between gap-2">
-                          <div>
-                            <p className="font-semibold text-gray-800 dark:text-white">{exp.designation}</p>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">{exp.company}</p>
-                          </div>
-                          {/* {exp.currently_working && (
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                      Experience
+                    </h3>
+                    {u?.experiences?.length ? (
+                      u.experiences.map((exp: any, i: number) => (
+                        <div
+                          key={i}
+                          className="rounded-lg border border-gray-200 p-4 dark:border-gray-700"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <p className="font-semibold text-gray-800 dark:text-white">
+                                {exp.designation}
+                              </p>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                                {exp.company}
+                              </p>
+                            </div>
+                            {/* {exp.currently_working && (
                             <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-700">
                               Current
                             </span>
                           )} */}
+                          </div>
+                          <p className="mt-1 text-xs text-gray-500">
+                            {exp.start_date
+                              ? moment(exp.start_date).format("MMM YYYY")
+                              : ""}{" "}
+                            {exp.end_date
+                              ? `– ${moment(exp.end_date).format("MMM YYYY")}`
+                              : exp.currently_working
+                              ? "– Present"
+                              : ""}
+                          </p>
+                          {exp.job_description && (
+                            <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                              {exp.job_description}
+                            </p>
+                          )}
                         </div>
-                        <p className="mt-1 text-xs text-gray-500">
-                          {exp.start_date ? moment(exp.start_date).format("MMM YYYY") : ""}{" "}
-                          {exp.end_date ? `– ${moment(exp.end_date).format("MMM YYYY")}` : exp.currently_working ? "– Present" : ""}
-                        </p>
-                        {exp.job_description && (
-                          <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{exp.job_description}</p>
-                        )}
-                      </div>
-                    )) : <p className="text-sm text-gray-400">No experience records.</p>}
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-400">
+                        No experience records.
+                      </p>
+                    )}
                   </div>
                 );
 
               case "education":
                 return (
                   <div className="space-y-4">
-                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">Education</h3>
-                    {u?.educations?.length ? u.educations.map((edu: any, i: number) => (
-                      <div key={i} className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
-                        <p className="font-semibold text-gray-800 dark:text-white">{edu.degree}</p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">{edu.field}</p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">{edu.institution}</p>
-                        <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
-                          <span>{edu.start_year} – {edu.end_year}</span>
-                          {edu.cgpa && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-blue-700">CGPA: {edu.cgpa}</span>}
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                      Education
+                    </h3>
+                    {u?.educations?.length ? (
+                      u.educations.map((edu: any, i: number) => (
+                        <div
+                          key={i}
+                          className="rounded-lg border border-gray-200 p-4 dark:border-gray-700"
+                        >
+                          <p className="font-semibold text-gray-800 dark:text-white">
+                            {edu.degree}
+                          </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            {edu.field}
+                          </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            {edu.institution}
+                          </p>
+                          <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
+                            <span>
+                              {edu.start_year} – {edu.end_year}
+                            </span>
+                            {edu.cgpa && (
+                              <span className="rounded-full bg-blue-100 px-2 py-0.5 text-blue-700">
+                                CGPA: {edu.cgpa}
+                              </span>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    )) : <p className="text-sm text-gray-400">No education records.</p>}
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-400">
+                        No education records.
+                      </p>
+                    )}
                   </div>
                 );
 
               case "projects":
                 return (
                   <div className="space-y-4">
-                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">Projects</h3>
-                    {u?.projects?.length ? u.projects.map((proj: any, i: number) => (
-                      <div key={i} className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
-                        <div className="flex items-start justify-between gap-2">
-                          <p className="font-semibold text-gray-800 dark:text-white">{proj.project_title}</p>
-                          <span className={`rounded-full px-2 py-0.5 text-xs ${proj.status === "Completed" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>
-                            {proj.status}
-                          </span>
-                        </div>
-                        {proj.duration && <p className="mt-0.5 text-xs text-gray-500">{proj.duration}</p>}
-                        <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{proj.project_description}</p>
-                        {proj.technologies?.length > 0 && (
-                          <div className="mt-2 flex flex-wrap gap-1">
-                            {proj.technologies.map((tech: string, j: number) => (
-                              <span key={j} className="rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                                {tech}
-                              </span>
-                            ))}
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                      Projects
+                    </h3>
+                    {u?.projects?.length ? (
+                      u.projects.map((proj: any, i: number) => (
+                        <div
+                          key={i}
+                          className="rounded-lg border border-gray-200 p-4 dark:border-gray-700"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="font-semibold text-gray-800 dark:text-white">
+                              {proj.project_title}
+                            </p>
+                            <span
+                              className={`rounded-full px-2 py-0.5 text-xs ${
+                                proj.status === "Completed"
+                                  ? "bg-green-100 text-green-700"
+                                  : "bg-yellow-100 text-yellow-700"
+                              }`}
+                            >
+                              {proj.status}
+                            </span>
                           </div>
-                        )}
-                        {proj.link && (
-                          <a href={proj.link} target="_blank" rel="noreferrer" className="mt-2 flex items-center gap-1 text-xs text-blue-600 hover:underline">
-                            <ExternalLink className="h-3 w-3" /> {proj.link}
-                          </a>
-                        )}
-                        {proj.funded && proj.funding_details && (
-                          <p className="mt-1 text-xs text-gray-500">Funded: {proj.funding_details}</p>
-                        )}
-                      </div>
-                    )) : <p className="text-sm text-gray-400">No projects.</p>}
+                          {proj.duration && (
+                            <p className="mt-0.5 text-xs text-gray-500">
+                              {proj.duration}
+                            </p>
+                          )}
+                          <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                            {proj.project_description}
+                          </p>
+                          {proj.technologies?.length > 0 && (
+                            <div className="mt-2 flex flex-wrap gap-1">
+                              {proj.technologies.map(
+                                (tech: string, j: number) => (
+                                  <span
+                                    key={j}
+                                    className="rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                                  >
+                                    {tech}
+                                  </span>
+                                )
+                              )}
+                            </div>
+                          )}
+                          {proj.link && (
+                            <a
+                              href={proj.link}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="mt-2 flex items-center gap-1 text-xs text-blue-600 hover:underline"
+                            >
+                              <ExternalLink className="h-3 w-3" /> {proj.link}
+                            </a>
+                          )}
+                          {proj.funded && proj.funding_details && (
+                            <p className="mt-1 text-xs text-gray-500">
+                              Funded: {proj.funding_details}
+                            </p>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-400">No projects.</p>
+                    )}
                   </div>
                 );
 
               case "publications":
                 return (
                   <div className="space-y-4">
-                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">Publications</h3>
-                    {u?.publications?.length ? u.publications.map((pub: any, i: number) => (
-                      <div key={i} className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
-                        <p className="font-semibold text-gray-800 dark:text-white">{pub.publication_title}</p>
-                        <p className="mt-0.5 text-sm text-gray-600 dark:text-gray-400">{pub.publication_journal}</p>
-                        <div className="mt-1 flex flex-wrap gap-2 text-xs text-gray-500">
-                          {pub.publication_year && <span>Year: {pub.publication_year}</span>}
-                          {pub.publication_volume && <span>Vol: {pub.publication_volume}</span>}
-                          {pub.publication_issue && <span>Issue: {pub.publication_issue}</span>}
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                      Publications
+                    </h3>
+                    {u?.publications?.length ? (
+                      u.publications.map((pub: any, i: number) => (
+                        <div
+                          key={i}
+                          className="rounded-lg border border-gray-200 p-4 dark:border-gray-700"
+                        >
+                          <p className="font-semibold text-gray-800 dark:text-white">
+                            {pub.publication_title}
+                          </p>
+                          <p className="mt-0.5 text-sm text-gray-600 dark:text-gray-400">
+                            {pub.publication_journal}
+                          </p>
+                          <div className="mt-1 flex flex-wrap gap-2 text-xs text-gray-500">
+                            {pub.publication_year && (
+                              <span>Year: {pub.publication_year}</span>
+                            )}
+                            {pub.publication_volume && (
+                              <span>Vol: {pub.publication_volume}</span>
+                            )}
+                            {pub.publication_issue && (
+                              <span>Issue: {pub.publication_issue}</span>
+                            )}
+                          </div>
+                          {pub.publication_description && (
+                            <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                              {pub.publication_description}
+                            </p>
+                          )}
                         </div>
-                        {pub.publication_description && (
-                          <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{pub.publication_description}</p>
-                        )}
-                      </div>
-                    )) : <p className="text-sm text-gray-400">No publications.</p>}
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-400">No publications.</p>
+                    )}
                   </div>
                 );
 
               case "skills":
                 return (
                   <div className="space-y-4">
-                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">Skills</h3>
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                      Skills
+                    </h3>
                     {u?.skills?.length ? (
                       <div className="flex flex-wrap gap-2">
                         {u.skills.map((skill: any, i: number) => (
-                          <span key={i} className="rounded-full  bg-dblue px-3 py-1 text-sm font-medium text-white">
+                          <span
+                            key={i}
+                            className="bg-dblue  rounded-full px-3 py-1 text-sm font-medium text-white"
+                          >
                             {skill.name}
                           </span>
                         ))}
                       </div>
-                    ) : <p className="text-sm text-gray-400">No skills listed.</p>}
+                    ) : (
+                      <p className="text-sm text-gray-400">No skills listed.</p>
+                    )}
                   </div>
                 );
 
               case "achievements":
                 return (
                   <div className="space-y-4">
-                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">Achievements</h3>
-                    {u?.achievements?.length ? u.achievements.map((ach: any, i: number) => (
-                      <div key={i} className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
-                        <div className="flex items-start justify-between gap-2">
-                          <p className="font-semibold text-gray-800 dark:text-white">{ach.achievement_title}</p>
-                          {ach.achievement_file_url && (
-                            <a href={ach.achievement_file_url} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs text-dblue hover:underline">
-                              <ExternalLink className="h-3 w-3 text-dblue" /> View
-                            </a>
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                      Achievements
+                    </h3>
+                    {u?.achievements?.length ? (
+                      u.achievements.map((ach: any, i: number) => (
+                        <div
+                          key={i}
+                          className="rounded-lg border border-gray-200 p-4 dark:border-gray-700"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="font-semibold text-gray-800 dark:text-white">
+                              {ach.achievement_title}
+                            </p>
+                            {ach.achievement_file_url && (
+                              <a
+                                href={ach.achievement_file_url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-dblue flex items-center gap-1 text-xs hover:underline"
+                              >
+                                <ExternalLink className="text-dblue h-3 w-3" />{" "}
+                                View
+                              </a>
+                            )}
+                          </div>
+                          <p className="mt-0.5 text-sm text-gray-600 dark:text-gray-400">
+                            {ach.organization}
+                          </p>
+                          {ach.achievement_description && (
+                            <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                              {ach.achievement_description}
+                            </p>
                           )}
                         </div>
-                        <p className="mt-0.5 text-sm text-gray-600 dark:text-gray-400">{ach.organization}</p>
-                        {ach.achievement_description && (
-                          <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{ach.achievement_description}</p>
-                        )}
-                      </div>
-                    )) : <p className="text-sm text-gray-400">No achievements.</p>}
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-400">No achievements.</p>
+                    )}
                   </div>
                 );
 
@@ -1848,16 +2167,27 @@ const ApplicationDetail = () => {
               <div className="flex items-center gap-4 border-b border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-800/50">
                 <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-blue-600 text-lg font-bold text-white">
                   {u?.profile_logo_url ? (
-                    <img src={u.profile_logo_url} alt={u.username} className="h-full w-full object-cover" />
+                    <img
+                      src={u.profile_logo_url}
+                      alt={u.username}
+                      className="h-full w-full object-cover"
+                    />
                   ) : (
-                    <span className="text-sm font-medium text-white ">{u?.first_name?.[0]}{u?.last_name?.[0]}</span>
+                    <span className="text-sm font-medium text-white ">
+                      {u?.first_name?.[0]}
+                      {u?.last_name?.[0]}
+                    </span>
                   )}
-
                 </div>
                 <div>
-                  <p className="text-lg font-bold text-gray-900 dark:text-white">{u?.username || `${u?.first_name} ${u?.last_name}`}</p>
-                  {u?.email && <p className="text-sm text-gray-500 dark:text-gray-400">{u.email}</p>}
-                 
+                  <p className="text-lg font-bold text-gray-900 dark:text-white">
+                    {u?.username || `${u?.first_name} ${u?.last_name}`}
+                  </p>
+                  {u?.email && (
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {u.email}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -1869,7 +2199,7 @@ const ApplicationDetail = () => {
                     onClick={() => setState({ profileActiveTab: tab })}
                     className={`px-6 py-3 text-sm font-medium capitalize transition-colors ${
                       state.profileActiveTab === tab
-                        ? "border-b-2 border-blue-600 text-dblue"
+                        ? "text-dblue border-b-2 border-blue-600"
                         : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                     }`}
                   >
@@ -1886,7 +2216,9 @@ const ApplicationDetail = () => {
                     {sideMenuItems.map((item) => (
                       <button
                         key={item.key}
-                        onClick={() => setState({ profileActiveSection: item.key })}
+                        onClick={() =>
+                          setState({ profileActiveSection: item.key })
+                        }
                         className={`w-full px-4 py-2.5 text-left text-sm transition-colors ${
                           state.profileActiveSection === item.key
                             ? "bg-dblue font-semibold text-white"
@@ -1910,10 +2242,26 @@ const ApplicationDetail = () => {
                   </h3>
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                     {[
-                      { label: "PhD Completed", key: "phd_completed", icon: <GraduationCap className="h-5 w-5" /> },
-                      { label: "NET Cleared", key: "net_cleared", icon: <Award className="h-5 w-5" /> },
-                      { label: "SET Cleared", key: "set_cleared", icon: <Award className="h-5 w-5" /> },
-                      { label: "SLET Cleared", key: "slet_cleared", icon: <Award className="h-5 w-5" /> },
+                      {
+                        label: "PhD Completed",
+                        key: "phd_completed",
+                        icon: <GraduationCap className="h-5 w-5" />,
+                      },
+                      {
+                        label: "NET Cleared",
+                        key: "net_cleared",
+                        icon: <Award className="h-5 w-5" />,
+                      },
+                      {
+                        label: "SET Cleared",
+                        key: "set_cleared",
+                        icon: <Award className="h-5 w-5" />,
+                      },
+                      {
+                        label: "SLET Cleared",
+                        key: "slet_cleared",
+                        icon: <Award className="h-5 w-5" />,
+                      },
                     ].map((q) => (
                       <div
                         key={q.key}
@@ -1923,13 +2271,31 @@ const ApplicationDetail = () => {
                             : "border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50"
                         }`}
                       >
-                        <div className={u?.[q.key] ? "text-green-600 dark:text-green-400" : "text-gray-400"}>
+                        <div
+                          className={
+                            u?.[q.key]
+                              ? "text-green-600 dark:text-green-400"
+                              : "text-gray-400"
+                          }
+                        >
                           {q.icon}
                         </div>
-                        <p className={`text-center text-sm font-medium ${u?.[q.key] ? "text-green-700 dark:text-green-400" : "text-gray-500 dark:text-gray-400"}`}>
+                        <p
+                          className={`text-center text-sm font-medium ${
+                            u?.[q.key]
+                              ? "text-green-700 dark:text-green-400"
+                              : "text-gray-500 dark:text-gray-400"
+                          }`}
+                        >
                           {q.label}
                         </p>
-                        <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${u?.[q.key] ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300" : "bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"}`}>
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                            u?.[q.key]
+                              ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+                              : "bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
+                          }`}
+                        >
                           {u?.[q.key] ? "Yes" : "No"}
                         </span>
                       </div>

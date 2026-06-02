@@ -59,7 +59,7 @@ import {
 import CustomeDatePicker from "@/components/datePicker";
 import PrivateRouter from "@/hook/privateRouter";
 import moment from "moment";
-import { RECORDS, ROLES, STATUS_COLOR } from "@/utils/constant.utils";
+import { CALENDAR_CLIENT_ID,  RECORDS, ROLES, STATUS_COLOR } from "@/utils/constant.utils";
 import Utils from "@/imports/utils.import";
 import * as Yup from "yup";
 import Link from "next/link";
@@ -155,6 +155,7 @@ const Application = () => {
     panelMembers: [],
     selectedApplicants: [],
     requestForChange: false,
+    googleAuthCode: "",
     roundName: "",
     interviewStatus: null,
 
@@ -185,7 +186,17 @@ const Application = () => {
     if (savedPage > 1) {
       setState({ page: savedPage });
     }
-    profile(savedPage);
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+    const savedForm = sessionStorage.getItem("interviewFormState");
+    if (code && savedForm) {
+      const restored = JSON.parse(savedForm);
+      sessionStorage.removeItem("interviewFormState");
+      window.history.replaceState({}, "", window.location.pathname);
+      profile(savedPage, { googleAuthCode: code, showInterviewModal: true, ...restored }, restored);
+    } else {
+      profile(savedPage);
+    }
     institutionDropdownList(1);
     locationList(1);
     salaryRangeList(1);
@@ -256,12 +267,32 @@ const Application = () => {
 
   console.log("✌️collegeList --->", state.collegeList);
 
-  const profile = async (initialPage = 1) => {
+  const profile = async (initialPage = 1, restoreState: any = null, restored: any = null) => {
     try {
       const res: any = await Models.auth.profile();
       setState({ profile: res });
       profileRef.current = true;
 
+      if (restoreState) {
+        setState(restoreState);
+        if (restored?.selectedDepartments?.length > 0) {
+          loadPanelMembers(1, "", false, restored.selectedDepartments);
+          // Pass profile id directly since state.profile not yet set
+          const body: any = { department: restored.selectedDepartments?.map((item) => item?.value) };
+          body.created_by = res?.id;
+          body.team = "No";
+          Models.application.list(1, body).then((appRes: any) => {
+            const dropdown = appRes?.results?.map((item) => ({
+              value: item.id,
+              label: `${item.first_name} ${item.last_name}`,
+            }));
+            setState({ applicantsList: dropdown, appPage: 1, appNext: appRes?.next });
+          });
+        }
+        if (restored?.selectedJobs?.length > 0) {
+          loadDepartmentsByJobs(1, "", false, restored.selectedJobs);
+        }
+      }
       if (res?.role == ROLES.SUPER_ADMIN) {
         collegeDropdownList(1, "", false, "", res.id);
         applicationList(initialPage, null, null, null, res?.id);
@@ -1102,7 +1133,7 @@ const Application = () => {
         abortEarly: false,
       });
 
-      const body = {
+      const body:any = {
         position_ids: state.selectedJobs.map((j) => j.value),
         // department_id: state.selectedDepartments?.map((item)=>item?.value),
         department_id: state.selectedDepartments[0]?.value,
@@ -1115,6 +1146,9 @@ const Application = () => {
         status: "Scheduled",
         interview_link: state.interview_link ?? "",
       };
+      if (!state.google_calendar_connected_at && state.googleAuthCode) {
+        body.code = state.googleAuthCode;
+      }
       console.log("✌️body --->", body);
 
       await Models.interview.create(body);
@@ -1133,7 +1167,9 @@ const Application = () => {
         submitting: false,
         interview_link: "",
         selectedRecords: [],
+        googleAuthCode: "",
       });
+      sessionStorage.removeItem("interviewFormState");
       profile();
     } catch (error) {
       if (error instanceof Yup.ValidationError) {
@@ -1931,6 +1967,7 @@ const Application = () => {
             roundName: "",
             requestForChange: false,
             interviewStatus: null,
+            googleAuthCode: "",
           })
         }
         renderComponent={() => (
@@ -2122,7 +2159,7 @@ const Application = () => {
                 }
                 error={state.errors?.interview_link}
               />
-
+<div>
               <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
@@ -2135,13 +2172,67 @@ const Application = () => {
                 />
                 <label
                   htmlFor="requestForChange"
-                  className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                  className="text-sm pt-2 font-medium text-gray-700 dark:text-gray-300"
                 >
                   Request for Change
                 </label>
               </div>
+             {!state.profile?.google_calendar_connected_at && (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="connectGoogleCalendar"
+                      checked={!!state.googleAuthCode}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          // Save current form state before redirect
+                          sessionStorage.setItem(
+                            "interviewFormState",
+                            JSON.stringify({
+                              selectedJobs: state.selectedJobs,
+                              selectedDepartments: state.selectedDepartments,
+                              selectedApplicants: state.selectedApplicants,
+                              panelMembers: state.panelMembers,
+                              interviewSlot: state.interviewSlot,
+                              roundName: state.roundName,
+                              requestForChange: state.requestForChange,
+                              interview_link: state.interview_link,
+                            })
+                          );
+                          const url = new URL(window.location.href);
+                          url.searchParams.delete("code");
+                          const redirectUri = url.toString();
+                          const googleAuthUrl =
+                            `https://accounts.google.com/o/oauth2/v2/auth?` +
+                            `client_id=${CALENDAR_CLIENT_ID}&` +
+                            `redirect_uri=https://user-service.88.222.213.249.nip.io/auth/google/callback&` +
+                            `response_type=code&` +
+                            `scope=https://www.googleapis.com/auth/calendar&` +
+                            `access_type=offline&` +
+                            `prompt=consent&` +
+                            `state=${encodeURIComponent(redirectUri)}`;
+                          window.location.href = googleAuthUrl;
+                        } else {
+                          setState({ googleAuthCode: "" });
+                        }
+                      }}
+                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <label
+                      htmlFor="connectGoogleCalendar"
+                      className="pt-2  text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
+                      Connect Google Calendar
+                      {state.googleAuthCode && (
+                        <span className="ml-2 text-xs text-green-600">
+                          ✓ Connected
+                        </span>
+                      )}
+                    </label>
+                  </div>
+                )} 
             </div>
-
+            </div>
             <div className="mt-6 flex gap-3">
               <button
                 onClick={() =>
@@ -2157,6 +2248,7 @@ const Application = () => {
                     requestForChange: false,
                     interviewStatus: null,
                     interview_link: "",
+                    googleAuthCode: "",
                   })
                 }
                 className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
