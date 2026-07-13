@@ -458,6 +458,11 @@ const Job = () => {
   const bodyData = () => {
     const body: any = {};
     const userId = localStorage.getItem("userId");
+
+   
+    body.ordering = "-updated_at" ;
+   
+
     if (state.search) {
       body.search = state.search;
     }
