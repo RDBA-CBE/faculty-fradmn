@@ -546,6 +546,7 @@ const Dashboard = () => {
         id: item?.id,
         applied_date: item?.created_at,
         job_title: item?.job_detail?.job_title,
+        job_short_title: item?.job_detail?.short_name,
         resume: item?.resume,
         application_status: {
           value: item?.application_status?.id,
@@ -608,6 +609,7 @@ const Dashboard = () => {
       const tableData = res?.results?.map((item) => ({
         id: item.id,
         job_title: item.roles?.length > 0 ? item?.roles?.[0]?.role_name : "",
+        job_short_title: item.roles?.length > 0 ? item?.roles?.[0]?.short_name : "",
 
         job_description: item.job_description,
 
@@ -1972,7 +1974,7 @@ const Dashboard = () => {
                         title={row?.applicant_name}
                         className="text-gray-600 dark:text-gray-400"
                       >
-                        {truncateText(row?.applicant_name)}
+                        {row?.applicant_name}
                       </Link>
                     ),
                   },
@@ -1990,7 +1992,7 @@ const Dashboard = () => {
                   //   ),
                   // },
                   {
-                    accessor: "job_title",
+                    accessor: "job_short_title",
                     title: "Job Title",
                     sortable: true,
                     render: (row: any) => (
@@ -2001,7 +2003,7 @@ const Dashboard = () => {
                         className="cursor-pointer text-gray-600 dark:text-gray-400"
                         title={row?.job_title}
                       >
-                        {truncateText(row?.job_title)}
+                        {row?.job_short_title}
                       </div>
                     ),
                   },
@@ -2185,7 +2187,7 @@ const Dashboard = () => {
                               : "text-gray-900 dark:text-white"
                           }`}
                         >
-                          {truncateText(user.username)}
+                          {user.username}
                         </div>
                       ) : (
                         <span
@@ -2197,7 +2199,7 @@ const Dashboard = () => {
                               : "text-gray-900 dark:text-white"
                           }`}
                         >
-                          {truncateText(user.username)}
+                          {user.username}
                         </span>
                       );
                     },
@@ -2330,7 +2332,7 @@ const Dashboard = () => {
                 ]
               : [
                   {
-                    accessor: "job_title",
+                    accessor: "job_short_title",
                     title: "Job Title",
                     sortable: true,
                     render: (row: any) => (
@@ -2341,7 +2343,7 @@ const Dashboard = () => {
                         className="cursor-pointer text-gray-900 dark:text-white"
                         title={row?.job_title}
                       >
-                        {truncateText(row?.job_title)}
+                        {row?.job_short_title}
                       </div>
                     ),
                   },

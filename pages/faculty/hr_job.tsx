@@ -231,6 +231,7 @@ const Job = () => {
       const tableData = res?.results?.map((item) => ({
         id: item.id,
         job_title: item.roles?.length > 0 ? item?.roles?.[0]?.role_name : "",
+        job_short_title: item.roles?.length > 0 ? item?.roles?.[0]?.short_name : "",
         job_description: item.job_description,
 
         college_name: item?.college?.name,
@@ -1106,17 +1107,17 @@ const Job = () => {
             }
             columns={[
               {
-                accessor: "job_title",
+                accessor: "job_short_title",
                 title: "Title",
                 sortable: true,
                 render: (row: any) => (
-                  <div className="flex flex-col">
+                  <div className="flex flex-col min-w-[130px]">
                     <Link
                       href={`/faculty/job_details?id=${row?.id}`}
-                      title={row?.job_title}
+                      title={row?.job_short_title}
                       className="cursor-pointer text-gray-900 dark:text-white"
                     >
-                      {truncateText(row?.job_title)}
+                      {row?.job_short_title}
                     </Link>
                     <button
                       onClick={(e) => {
@@ -1281,6 +1282,7 @@ const Job = () => {
               {
                 accessor: "actions",
                 title: "Actions",
+                textAlignment: "center",
                 render: (row: any) => (
                   <div className="tour-job-actions flex items-center justify-center gap-3">
                     <button

@@ -228,6 +228,7 @@ const Job = () => {
       const tableData = res?.results?.map((item) => ({
         id: item.id,
         job_title: item.roles?.length > 0 ? item?.roles?.[0]?.role_name : "",
+        job_short_title: item.roles?.length > 0 ? item?.roles?.[0]?.short_name : "",
         job_description: item.job_description,
 
         college_name: item?.college?.name,
@@ -1049,7 +1050,7 @@ const Job = () => {
             }
             columns={[
               {
-                accessor: "job_title",
+                accessor: "job_short_title",
                 title: "Title",
                 sortable: true,
                 render: (row: any) => (
@@ -1058,7 +1059,7 @@ const Job = () => {
                     title={row?.job_title}
                     className=" cursor-pointer text-gray-900 dark:text-white"
                   >
-                    {truncateText(row?.job_title)}
+                    {row?.job_short_title}
                   </Link>
                 ),
               },

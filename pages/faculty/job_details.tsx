@@ -428,7 +428,7 @@ const JobDetails = () => {
                     className="cursor-pointer text-gray-900 dark:text-white"
                     title={`${row?.first_name} ${row?.last_name}`}
                   >
-                    {truncateText(`${row?.first_name} ${row?.last_name}`)}
+                    {`${row?.first_name} ${row?.last_name}`}
                   </Link>
                 ),
               },
@@ -451,7 +451,7 @@ const JobDetails = () => {
                 title: "Email",
                 render: (row: any) => (
                   <span className="text-gray-600 dark:text-gray-400">
-                    {truncateText(row?.email)}
+                    {row?.email}
                   </span>
                 ),
               },

@@ -536,7 +536,7 @@ const Users = () => {
                   : "text-gray-900 dark:text-white"
               }`}
             >
-              {truncateText(user.username)}
+              {user.username}
             </div>
           ) : (
             <span
@@ -549,7 +549,7 @@ const Users = () => {
                   : "text-gray-900 dark:text-white"
               }`}
             >
-              {truncateText(user.username)}
+              {user.username}
             </span>
           );
         },
@@ -616,6 +616,7 @@ const Users = () => {
       {
         accessor: "actions",
         title: "Actions",
+         textAlignment: "center",
         render: (row) => {
           const showFullActions = row?.reveal_name;
 

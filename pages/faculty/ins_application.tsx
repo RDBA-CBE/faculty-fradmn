@@ -300,6 +300,7 @@ const Application = () => {
         id: item?.id,
         applied_date: item?.created_at,
         job_title: item?.job_detail?.job_title,
+        job_short_title: item?.job_detail?.short_name,
         resume: item?.resume,
         application_status: {
           value: item?.application_status?.id,
@@ -1352,7 +1353,7 @@ const handleBulkDelete = () => {
                 ),
               },
               {
-                accessor: "job_title",
+                accessor: "job_short_title",
                 title: "Job Title",
                 sortable: true,
                 render: (row) => (
@@ -1361,7 +1362,7 @@ const handleBulkDelete = () => {
                     title={row?.job_title}
                     className="text-gray-600 dark:text-gray-400"
                   >
-                    {truncateText(row?.job_title)}
+                    {row?.job_short_title}
                   </Link>
                 ),
               },
