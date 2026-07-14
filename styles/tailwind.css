@@ -931,3 +931,7 @@ body > div[style*="z-index:2000000000"] > div:not(:has(iframe)) {
   border-left: 1px solid #1E3786;
   padding-left: 4px;
 }
+
+.mantine-9cumsf{
+  color: #0a0a0a;
+}

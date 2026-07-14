@@ -845,7 +845,7 @@ const CollegeAndDepartment = () => {
     {
       accessor: "actions",
       title: "Actions",
-       textAlignment: "center",
+      textAlignment: "center" as const,
       render: (row) => (
         <div className="flex items-center justify-center gap-2">
           <button
