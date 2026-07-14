@@ -1599,7 +1599,7 @@ const Application = () => {
         <div className="mb-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-bold text-gray-800 dark:text-white">
-              Application List
+              Applicants List
             </h3>
 
             <div className="text-sm text-black">

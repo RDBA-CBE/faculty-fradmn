@@ -325,9 +325,9 @@ const Dashboard = () => {
           id: 2,
           label: "Application Updates",
           value: body.application_update,
-          color: "text-orange-600",
+          color: "text-[#000]",
           bg: "bg-info-light",
-          mainbg: "bg-green-100",
+          mainbg: "bg-[#d2c1f7f2]",
           icon: <IconUsers className="h-7 w-7" />,
           href: "/faculty/dashboard/applications",
           sub: null,
@@ -347,9 +347,10 @@ const Dashboard = () => {
           id: 4,
           label: "Talents Identified",
           value: body.outreached,
-          color: "text-[#dd22cc]",
-          bg: "bg-indigo-100",
-          mainbg: "bg-[#d2c1f7f2]",
+          color: "text-green-700",
+          bg: "bg-warning-light",
+          mainbg: "bg-green-100",
+          
           icon: <IconUser className="h-7 w-7" />,
           href: "/faculty/dashboard/job",
           sub: null,
@@ -1641,7 +1642,7 @@ const Dashboard = () => {
         {state.cards?.map((card) => (
           <div
             key={card.label}
-            className={`panel rounded-lg p-4 ${
+            className={`panel rounded-lg p-4 !border-none ${
               card.href
                 ? "cursor-pointer transition-shadow hover:shadow-md"
                 : ""

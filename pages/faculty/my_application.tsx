@@ -1408,11 +1408,11 @@ const Application = () => {
               selectedStatus: { value: 6, label: "Interview Scheduled" },
             })
           }
-          className="cursor-pointer rounded-lg border border-gray-200 bg-indigo-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700"
+          className="cursor-pointer rounded-lg border border-gray-200 bg-[#d2c1f7f2] px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700"
         >
           <div className="flex items-center gap-5">
             <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
-              <Clock className="h-10 w-10 text-indigo-600" />
+              <Clock className="h-10 w-10 text-[#7349cff2]" />
             </div>
 
             <div className="flex flex-col">
@@ -1602,7 +1602,7 @@ const Application = () => {
           <div className="flex items-center justify-between">
             {/* Left */}
             <h3 className="text-lg font-bold text-gray-800 dark:text-white">
-              Application List
+              Applicants List
             </h3>
 
             {/* Right */}

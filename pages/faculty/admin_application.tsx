@@ -1181,11 +1181,11 @@ const Application = () => {
               selectedStatus: null,
             })
           }
-          className="cursor-pointer rounded-lg border border-gray-200 bg-blue-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700"
+          className="cursor-pointer rounded-lg border border-gray-200 bg-[#1e3786] px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700"
         >
           <div className="flex items-center gap-5">
             <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
-              <FileText className="text-dblue h-10 w-10" />
+              <FileText className="text-white h-10 w-10" />
             </div>
 
             <div className="flex flex-col">
@@ -1484,7 +1484,7 @@ const Application = () => {
           <div className="flex items-center justify-between">
             {/* Left */}
             <h3 className="text-lg font-bold text-gray-800 dark:text-white">
-              Application List
+              Applicants List
             </h3>
 
             <div className="flex items-center gap-4">

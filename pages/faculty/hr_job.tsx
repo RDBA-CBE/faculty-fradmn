@@ -1061,7 +1061,7 @@ const Job = () => {
         <div className=" mb-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-bold text-gray-800 dark:text-white">
-              Jobs List
+              Jobs Listings
             </h3>
             <div className="flex items-center gap-4">
               {state.selectedRecords.length > 0 && (
