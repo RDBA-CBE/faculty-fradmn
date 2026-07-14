@@ -1184,7 +1184,7 @@ const CollegeAndDepartment = () => {
       sortable: true,
       render: ({ institution_name }) => (
         <div title={institution_name} className="font-medium text-gray-900 dark:text-white">
-          {truncateText(institution_name)}
+          {institution_name}
 
         </div>
       ),
@@ -1196,7 +1196,7 @@ const CollegeAndDepartment = () => {
       sortable: true,
       render: ({ college_email }) => (
         <span title={college_email} className="text-gray-600 dark:text-gray-400">
-          {truncateText(college_email)}
+          {college_email}
 
         </span>
       ),

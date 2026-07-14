@@ -959,7 +959,7 @@ const Institution = () => {
                     className="cursor-pointer font-medium text-gray-900 dark:text-white"
                     title={row?.institution_name}
                   >
-                    {truncateText(row?.institution_name, 10)}
+                    {truncateText(row?.institution_name, 30)}
                   </div>
                 ),
               },

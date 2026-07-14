@@ -1452,7 +1452,7 @@ const Users = () => {
               title={row.username}
               className={` font-medium ${"text-gray-900 dark:text-white"}`}
             >
-              {truncateText(row?.username)}
+              {row?.username}
             </div>
           ),
         },
@@ -1466,7 +1466,7 @@ const Users = () => {
               title={row?.institution}
               className="text-gray-600 dark:text-gray-400"
             >
-              {truncateText(row?.institution)}
+              {row?.institution}
             </div>
           ),
         },
@@ -1573,7 +1573,7 @@ const Users = () => {
               title={row.username}
               className={` font-medium ${"text-gray-900 dark:text-white"}`}
             >
-              {truncateText(row?.username)}
+              {row?.username}
             </div>
           ),
         },
@@ -1587,7 +1587,7 @@ const Users = () => {
               title={row?.institution}
               className="text-gray-600 dark:text-gray-400"
             >
-              {truncateText(row?.institution)}
+              {row?.institution}
             </div>
           ),
         },
@@ -1617,7 +1617,7 @@ const Users = () => {
                   title={firstDept}
                   className="text-sm font-medium text-gray-700 dark:text-gray-300"
                 >
-                  {truncateText(firstDept)}
+                  {firstDept}
                 </span>
 
                 {/* Avatars */}
@@ -1708,7 +1708,7 @@ const Users = () => {
               title={row.username}
               className={` font-medium ${"text-gray-900 dark:text-white"}`}
             >
-              {truncateText(row?.username)}
+              {row?.username}
             </div>
           ),
         },
@@ -1722,7 +1722,7 @@ const Users = () => {
               title={row?.location}
               className="text-gray-600 dark:text-gray-400"
             >
-              {truncateText(row?.location)}
+              {row?.location}
             </div>
           ),
         },
@@ -1751,7 +1751,7 @@ const Users = () => {
               title={row?.position}
               className="text-gray-600 dark:text-gray-400"
             >
-              {truncateText(row?.position)}
+              {row?.position}
             </div>
           ),
         },
@@ -1766,7 +1766,7 @@ const Users = () => {
               title={row?.department}
               className="text-gray-600 dark:text-gray-400"
             >
-              {truncateText(row?.department)}
+              {row?.department}
             </div>
           ),
         },

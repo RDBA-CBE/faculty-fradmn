@@ -45,7 +45,7 @@ export const Failure = (message: string) => {
   });
 };
 
-export const truncateText = (text: string, maxLength: number = 10) => {
+export const truncateText = (text: string, maxLength: number = 25) => {
   if (!text) return "";
 
   const capitalized =
