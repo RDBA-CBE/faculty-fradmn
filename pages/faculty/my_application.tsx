@@ -1436,7 +1436,7 @@ const Application = () => {
       <div className="tour-myapp-filters mb-5 rounded-2xl backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
         <div className="flex items-center justify-between gap-5">
           <TextInput
-            placeholder="Search applications..."
+            placeholder="Search applicants..."
             value={state.search}
             onChange={(e) => setState({ search: e.target.value })}
             icon={<IconSearch className="h-4 w-4" />}

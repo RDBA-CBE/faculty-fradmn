@@ -1082,6 +1082,7 @@ const Job = () => {
 
         <div className=" overflow-x-auto border border-gray-200 bg-white tour-job-table">
           <DataTable
+            
             noRecordsText="No jobs found"
             highlightOnHover
             className="table-hover whitespace-nowrap"

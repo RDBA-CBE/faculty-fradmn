@@ -76,6 +76,7 @@ const Master_department = () => {
       const data = res?.results?.map((item: any) => ({
         id: item.id,
         role_name: item.role_name,
+        short_name: item.short_name,
       }));
 
       setState({
@@ -99,6 +100,7 @@ const Master_department = () => {
       showModal: false,
       editId: null,
       role_name: "",
+      short_name:"",
       errors: {},
       submitting: false,
     });
@@ -109,6 +111,7 @@ const Master_department = () => {
       editId: row?.id,
       showModal: true,
       role_name: row.role_name,
+      short_name: row.short_name
     });
   };
 
@@ -136,6 +139,7 @@ const Master_department = () => {
 
       const body = {
         role_name: capitalizeFLetter(state.role_name),
+        short_name: capitalizeFLetter(state.short_name),
       };
 
       await Utils.Validation.master_job_role.validate(body, {
@@ -297,6 +301,17 @@ const Master_department = () => {
                   </div>
                 ),
               },
+
+               {
+                accessor: "short_name",
+                title: "Short Name",
+                sortable: true,
+                render: ({ short_name }) => (
+                  <div className="font-medium text-gray-900 dark:text-white">
+                    {short_name}
+                  </div>
+                ),
+              },
               {
                 accessor: "actions",
                 title: "Actions",
@@ -368,7 +383,22 @@ const Master_department = () => {
                 error={state.errors.role_name}
                 required
               />
+
+              <TextInput
+                title="Short Name"
+                placeholder="Enter Short name"
+                value={state.short_name}
+                onChange={(e) =>
+                  setState({
+                    short_name: e.target.value,
+                    errors: { ...state.errors, short_name: "" },
+                  })
+                }
+                error={state.errors.short_name}
+                required
+              />
             </div>
+
 
             <div className="mt-8 flex flex-col-reverse gap-3 border-t border-gray-200 pt-6 dark:border-gray-700 sm:flex-row sm:justify-end">
               <button

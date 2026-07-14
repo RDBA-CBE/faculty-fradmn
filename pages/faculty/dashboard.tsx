@@ -16,6 +16,7 @@ import IconCalendar from "@/components/Icon/IconCalendar";
 import IconChecks from "@/components/Icon/IconChecks";
 import Funnel from "@/components/funnelChart";
 import PrivateRouter from "@/hook/privateRouter";
+import IconPlus from "@/components/Icon/IconPlus";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -379,6 +380,16 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen dark:from-gray-900 dark:to-gray-800">
+      <div className = " flex justify-between mb-2">
+        <button
+                    onClick={() => router.push("newjob")}
+                    className="ms-auto tour-add-job bg-dblue group relative inline-flex transform items-center gap-2 overflow-hidden rounded-lg px-4 py-2  text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+                  >
+                    <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+                    <IconPlus className="relative z-10 h-5 w-5" />
+                    <span className="relative z-10">Add Jobs</span>
+                  </button>
+      </div>
       {/* Stat Cards */}
       <div className="tour-stat-cards mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-5">
         {statCards.map((card) => (

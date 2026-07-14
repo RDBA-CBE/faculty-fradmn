@@ -139,8 +139,13 @@ const Users = () => {
       label: "Own Record",
     },
     isOpenRound: false,
-
     academicResponsibilityFilter: null,
+    // Bulk actions
+    showBulkInterestModal: false,
+    bulkMessage: "",
+    bulkInterestJob: null,
+    bulkSendLoading: false,
+    showBulkInterviewModal: false,
     academicResponsibilityList: [],
     academicResponsibilityLoading: false,
     profileUserLoading: false,
@@ -725,6 +730,98 @@ const Users = () => {
     }
   };
 
+  // Bulk send interest to all selected records
+  const bulkSendInterest = async () => {
+    try {
+      setState({ bulkSendLoading: true });
+      const body = {
+        message: capitalizeFLetter(state.bulkMessage),
+        applicant_ids: state.selectedRecords,
+        sender_id: state.profile?.id,
+        job_id: state.bulkInterestJob?.value,
+        hr_interview_status: "Sent Interest",
+      };
+      await Models.application.send_interest(body);
+      Success(`Interest sent to ${state.selectedRecords.length} talent(s) successfully!`);
+      setState({
+        showBulkInterestModal: false,
+        bulkMessage: "",
+        bulkInterestJob: null,
+        bulkSendLoading: false,
+        selectedRecords: [],
+      });
+    } catch (error) {
+      Failure("Failed to send bulk interest.");
+      setState({ bulkSendLoading: false });
+    }
+  };
+
+  const openBulkScheduleInterview = () => {
+    if (state.selectedRecords.length === 0) return;
+    setState({
+      showBulkInterviewModal: true,
+      interviewSlot: "",
+      roundName: "",
+      requestForChange: false,
+      interview_link: "",
+      errors: {},
+    });
+  };
+
+  // Override createInterview to support bulk scheduling
+  const createInterviewBulk = async () => {
+    try {
+      setState({ submitting: true });
+
+      const validation = {
+        interviewSlot: state.interviewSlot
+          ? moment(state.interviewSlot).format("YYYY-MM-DD HH:mm")
+          : "",
+        roundName: state.roundName,
+      };
+
+      await Utils.Validation.user_interview.validate(validation, {
+        abortEarly: false,
+      });
+
+      const body = {
+        scheduled_date: moment(state.interviewSlot).format("YYYY-MM-DD HH:mm"),
+        applicant_ids: state.selectedRecords,
+        response_from_applicant: state.requestForChange,
+        round_name: state.roundName,
+        status: "Scheduled",
+        interview_link: state.interview_link ?? "",
+        sender_id: state.profile?.id,
+      };
+
+      await Models.interview.create_user_interview(body);
+
+      Success(`Interview scheduled for ${state.selectedRecords.length} talent(s) successfully!`);
+      setState({
+        showBulkInterviewModal: false,
+        errors: {},
+        interviewSlot: "",
+        roundName: "",
+        requestForChange: false,
+        submitting: false,
+        interview_link: "",
+        selectedRecords: [],
+        bulkApplicantIds: [],
+      });
+    } catch (error) {
+      if (error instanceof Yup.ValidationError) {
+        const validationErrors = {};
+        error.inner.forEach((err) => {
+          validationErrors[err.path] = err?.message;
+        });
+        setState({ errors: validationErrors, submitting: false });
+      } else {
+        Failure(error?.error);
+        setState({ submitting: false });
+      }
+    }
+  };
+
   const handleSheduleInterview = (row) => {
     setState({
       showInterviewModal: true,
@@ -888,18 +985,24 @@ const Users = () => {
             <h3 className="text-lg font-bold text-gray-800 dark:text-white">
               Right Talents List
             </h3>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               {state.selectedRecords.length > 0 && (
-                <button
-                  onClick={() => handleBulkDelete()}
-                  className=" group relative inline-flex transform items-center gap-2 overflow-hidden rounded-md border border-red-500  px-3 py-1 text-red-500 shadow-lg transition-all duration-200 "
-                >
-                  <div className=" absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
-                  <IconTrash className="h-4 w-4" />
-                  <span className="relative z-10 text-[13px]">
-                    Delete ({state.selectedRecords?.length})
-                  </span>
-                </button>
+                <>
+                  <button
+                    onClick={() => setState({ showBulkInterestModal: true, bulkMessage: "", bulkInterestJob: null })}
+                    className="flex items-center gap-2 rounded-lg border border-blue-500 px-3 py-1.5 text-sm text-blue-600 transition hover:bg-blue-50"
+                  >
+                    <Send className="h-4 w-4" />
+                    Send Interest ({state.selectedRecords.length})
+                  </button>
+                  <button
+                    onClick={openBulkScheduleInterview}
+                    className="flex items-center gap-2 rounded-lg border border-green-500 px-3 py-1.5 text-sm text-green-600 transition hover:bg-green-50"
+                  >
+                    <CalendarCheck className="h-4 w-4" />
+                    Schedule Interview ({state.selectedRecords.length})
+                  </button>
+                </>
               )}
               <div className="text-sm text-black">
                 {state.userCount} records found
@@ -915,16 +1018,12 @@ const Users = () => {
             className="table-hover whitespace-nowrap"
             records={state.userList}
             fetching={state.loading}
-            // selectedRecords={state.userList.filter((record) =>
-            //   state.selectedRecords.includes(record.id)
-            // )}
-            // onSelectedRecordsChange={(records) =>
-            //   setState({ selectedRecords: records.map((r: any) => r.id) })
-            // }
-            // isRecordSelectable={(record: any) =>
-            //   state.activeTab === ROLES.APPLICANT ? record.is_interested : true
-            // }
-
+            selectedRecords={state.userList.filter((record: any) =>
+              state.selectedRecords.includes(record.id)
+            )}
+            onSelectedRecordsChange={(records) =>
+              setState({ selectedRecords: records.map((r: any) => r.id) })
+            }
             customLoader={
               <div className="flex items-center justify-center py-12">
                 <div className="flex items-center gap-3">
@@ -962,7 +1061,7 @@ const Users = () => {
         </div>
       </div>
 
-      {state.selectedRecords?.length > 0 && (
+      {/* {state.selectedRecords?.length > 0 && (
         <div className="fixed bottom-6 right-9 z-50">
           <button
             // onClick={bulkSelect}
@@ -977,7 +1076,62 @@ const Users = () => {
             </span>
           </button>
         </div>
-      )}
+      )} */}
+
+      <Modal
+        subTitle={`Send Interest to ${state.selectedRecords.length} Talent(s)`}
+        closeIcon
+        open={state.showBulkInterestModal}
+        close={() => setState({ showBulkInterestModal: false, bulkMessage: "", bulkInterestJob: null })}
+        isFullWidth={false}
+        maxWidth="max-w-2xl"
+        renderComponent={() => (
+          <div className="relative">
+            <TextArea
+              title="Message"
+              placeholder="Enter message"
+              value={state.bulkMessage}
+              onChange={(e) => setState({ bulkMessage: e.target.value })}
+            />
+            <CustomSelect
+              title="Select Job"
+              options={state.jobList}
+              value={state.bulkInterestJob}
+              onChange={(e) => setState({ bulkInterestJob: e })}
+              placeholder="Select job"
+              isClearable={true}
+              onSearch={(searchTerm) =>
+                jobList(1, searchTerm, false, state.profile?.college?.map((item) => item?.college_id))
+              }
+              loadMore={() =>
+                state.jobNext &&
+                jobList(state.jobPage + 1, "", true, state.profile?.college?.map((item) => item?.college_id))
+              }
+              loading={state.jobLoading}
+            />
+            <div className="mt-8 flex flex-col-reverse gap-3 border-t border-gray-200 pt-6 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={() => setState({ showBulkInterestModal: false, bulkMessage: "", bulkInterestJob: null })}
+                className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={bulkSendInterest}
+                disabled={state.bulkSendLoading}
+                className="bg-dblue inline-flex items-center justify-center rounded-lg px-8 py-2 text-sm font-medium text-white hover:shadow-xl disabled:opacity-50"
+              >
+                {state.bulkSendLoading ? (
+                  <IconLoader className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  `Send to ${state.selectedRecords.length} Talent(s)`
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+      />
 
       <Modal
         subTitle={`Send Interest (${state.applicantName})`}
@@ -1044,6 +1198,70 @@ const Users = () => {
                   "Send"
                 )}
                 <span className="relative z-10"></span>
+              </button>
+            </div>
+          </div>
+        )}
+      />
+
+      <Modal
+        subTitle={`Schedule Interview for ${state.selectedRecords.length} Talent(s)`}
+        closeIcon
+        open={state.showBulkInterviewModal}
+        close={() => setState({ showBulkInterviewModal: false, errors: {}, interviewSlot: "", roundName: "", requestForChange: false, interview_link: "" })}
+        renderComponent={() => (
+          <div className="space-y-5">
+            <TextInput
+              title="Round Name"
+              placeholder="Enter round name (e.g., Technical Round 1)"
+              value={state.roundName}
+              onChange={(e) => setState({ roundName: e.target.value, errors: { ...state.errors, roundName: "" } })}
+              error={state.errors?.roundName}
+              required
+            />
+            <CustomeDatePicker
+              title="Interview Slot"
+              value={state.interviewSlot}
+              placeholder="Choose Date & Time"
+              onChange={(e) => setState({ interviewSlot: e, errors: { ...state.errors, interviewSlot: "" } })}
+              showTimeSelect={true}
+              required
+              usePortal={false}
+              minDate={new Date()}
+              error={state.errors?.interviewSlot}
+            />
+            <TextInput
+              title="Interview Link"
+              placeholder="Enter interview link"
+              value={state.interview_link}
+              onChange={(e) => setState({ interview_link: e.target.value, errors: { ...state.errors, interview_link: "" } })}
+              error={state.errors?.interview_link}
+            />
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="bulkRequestForChange"
+                checked={state.requestForChange}
+                onChange={(e) => setState({ requestForChange: e.target.checked })}
+                className="h-4 w-4 rounded border-gray-300 text-blue-600"
+              />
+              <label htmlFor="bulkRequestForChange" className="text-sm font-medium text-gray-700">
+                Request for Change
+              </label>
+            </div>
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => setState({ showBulkInterviewModal: false, errors: {}, interviewSlot: "", roundName: "", requestForChange: false, interview_link: "" })}
+                className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={createInterviewBulk}
+                disabled={state.submitting}
+                className="bg-dblue flex-1 rounded-lg px-4 py-2 text-white hover:shadow-lg disabled:opacity-50"
+              >
+                {state.submitting ? "Scheduling..." : `Schedule for ${state.selectedRecords.length} Talent(s)`}
               </button>
             </div>
           </div>

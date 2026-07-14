@@ -120,3 +120,11 @@ table tr .mantine-Checkbox-root {
 .mantine-ScrollArea-viewport > div:first-child > div {
     @apply bg-none;
 }
+
+
+.mantine-6thd3f.mantine-6thd3f thead tr th{
+     position: sticky;
+  top: 0;
+  z-index: 10;
+  background: white;
+}
