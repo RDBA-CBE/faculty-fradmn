@@ -313,9 +313,9 @@ const Dashboard = () => {
           id: 1,
           label: "Applications",
           value: body.applications,
-          color: "text-orange-600",
-          bg: "bg-info-light",
-          mainbg: "bg-orange-100",
+          color: "text-dblue",
+          bg: "bg-white/70",
+          mainbg: "bg-blue-100",
           icon: <IconUsers className="h-7 w-7" />,
           href: "/faculty/dashboard/applications",
           sub: null,
@@ -325,8 +325,8 @@ const Dashboard = () => {
           id: 2,
           label: "Application Updates",
           value: body.application_update,
-          color: "text-[#000]",
-          bg: "bg-info-light",
+          color: "text-[#5f16ff]",
+          bg: "bg-white/70",
           mainbg: "bg-[#d2c1f7f2]",
           icon: <IconUsers className="h-7 w-7" />,
           href: "/faculty/dashboard/applications",
@@ -337,7 +337,7 @@ const Dashboard = () => {
           label: "Interviews Scheduled",
           value: body.interviews,
           color: "text-pink-600",
-          bg: "bg-warning-light",
+          bg: "bg-white/70",
           mainbg: "bg-pink-100",
           icon: <IconCalendar className="h-7 w-7" />,
           href: "/faculty/dashboard/interview",
@@ -348,7 +348,7 @@ const Dashboard = () => {
           label: "Talents Identified",
           value: body.outreached,
           color: "text-green-700",
-          bg: "bg-warning-light",
+          bg: "bg-white/70",
           mainbg: "bg-green-100",
           
           icon: <IconUser className="h-7 w-7" />,
@@ -359,9 +359,9 @@ const Dashboard = () => {
           id: 5,
           label: "Job Postings",
           value: body.activeJobs,
-          color: "text-dblue",
-          bg: "bg-primary-light",
-          mainbg: "bg-blue-100",
+          color: "text-orange-600",
+          bg: "bg-white/70",
+          mainbg: "bg-orange-100",
           icon: <IconBriefcase className="h-7 w-7" />,
           href: "/faculty/dashboard/job",
           sub: null,
@@ -374,9 +374,9 @@ const Dashboard = () => {
           id: 1,
           label: "Applications",
           value: body.applications,
-          color: "text-orange-600",
-          bg: "bg-info-light",
-          mainbg: "bg-orange-100",
+          color: "text-dblue",
+          bg: "bg-white/70",
+          mainbg: "bg-blue-100",
           icon: <IconUsers className="h-7 w-7" />,
           href: "/faculty/dashboard/applications",
           sub: null,
@@ -386,9 +386,9 @@ const Dashboard = () => {
           id: 2,
           label: "Application Updates",
           value: body.application_update,
-          color: "text-orange-600",
-          bg: "bg-info-light",
-          mainbg: "bg-green-100",
+          color: "text-[#5f16ff]",
+          bg: "bg-white/70",
+          mainbg: "bg-[#d2c1f7f2]",
           icon: <IconUsers className="h-7 w-7" />,
           href: "/faculty/dashboard/applications",
           sub: null,
@@ -398,7 +398,7 @@ const Dashboard = () => {
           label: "Interviews Scheduled",
           value: body.interviews,
           color: "text-pink-600",
-          bg: "bg-warning-light",
+          bg: "bg-white/70",
           mainbg: "bg-pink-100",
           icon: <IconCalendar className="h-7 w-7" />,
           href: "/faculty/dashboard/interview",
@@ -409,9 +409,9 @@ const Dashboard = () => {
           id: 5,
           label: "Job Postings",
           value: body.activeJobs,
-          color: "text-dblue",
-          bg: "bg-primary-light",
-          mainbg: "bg-blue-100",
+          color: "text-orange-600",
+          bg: "bg-white/70",
+          mainbg: "bg-orange-100",
           icon: <IconBriefcase className="h-7 w-7" />,
           href: "/faculty/dashboard/job",
           sub: null,
@@ -1623,7 +1623,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen dark:from-gray-900 dark:to-gray-800">
-      <div className = "mb-2 flex justify-between">
+      <div className = "mb-5 flex justify-between">
               <button
                           onClick={() => router.push("faculty/newjob")}
                           className="ms-auto tour-add-job bg-dblue group relative inline-flex transform items-center gap-2 overflow-hidden rounded-lg px-4 py-2  text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
@@ -1653,7 +1653,7 @@ const Dashboard = () => {
             }}
           >
             <div className="flex items-center gap-3">
-              <div className={`${card.bg} rounded-lg p-2 ${card.color}`}>
+              <div className={`${card.bg} rounded-full p-2 ${card.color}`}>
                 {card.icon}
               </div>
 

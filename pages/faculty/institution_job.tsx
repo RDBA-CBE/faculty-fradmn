@@ -667,11 +667,11 @@ const Job = () => {
           onClick={() => {
             setState({ statusFilter: null });
           }}
-          className="cursor-pointer rounded-lg border border-gray-200 bg-blue-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700"
+          className="flex-1 cursor-pointer rounded-lg  border-gray-200 bg-blue-100 px-4 py-4  transition hover:shadow-md dark:border-gray-700"
         >
           <div className="flex items-center gap-5">
-            <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
-              <Briefcase className="text-dblue h-10 w-10" />
+            <div className="flex  items-center justify-center bg-white/70 rounded-full p-2 dark:border-gray-700">
+              <Briefcase className="text-dblue h-7 w-7" />
             </div>
 
             <div className="flex flex-col">
@@ -688,11 +688,11 @@ const Job = () => {
           onClick={() =>
             setState({ statusFilter: { value: "approved", label: "Approved" } })
           }
-          className="cursor-pointer rounded-lg border border-gray-200 bg-green-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700"
+          className="flex-1 cursor-pointer rounded-lg  border-gray-200 bg-green-100 px-4 py-4  transition hover:shadow-md dark:border-gray-700"
         >
           <div className="flex items-center gap-5 ">
-            <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
-              <CheckCircle className="h-10 w-10 text-green-600" />
+            <div className="flex  items-center justify-center bg-white/70 rounded-full p-2 dark:border-gray-700">
+              <CheckCircle className="h-7 w-7 text-green-600" />
             </div>
 
             <div className="flex flex-col">
@@ -709,11 +709,11 @@ const Job = () => {
           onClick={() =>
             setState({ statusFilter: { value: "pending", label: "Pending" } })
           }
-          className="cursor-pointer  rounded-lg border border-gray-200 bg-yellow-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700"
+          className="flex-1 cursor-pointer  rounded-lg  border-gray-200 bg-yellow-100 px-4 py-4  transition hover:shadow-md dark:border-gray-700"
         >
           <div className="flex items-center gap-5">
-            <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
-              <Hourglass className="h-10 w-10 text-yellow-600" />
+            <div className="flex  items-center justify-center bg-white/70 rounded-full p-2 dark:border-gray-700">
+              <Hourglass className="h-7 w-7 text-yellow-600" />
             </div>
 
             <div className="flex flex-col">
@@ -726,6 +726,7 @@ const Job = () => {
             </div>
           </div>
         </div>
+        <div className="flex-1"></div>
         {/* <div className="rounded-lg border border-gray-200 bg-red-100 px-4 py-3 shadow-sm transition hover:shadow-md dark:border-gray-700">
           <div className="flex items-center gap-5">
             <div className="flex  items-center justify-center rounded-lg dark:border-gray-700">
