@@ -1,5 +1,6 @@
 import { DataTable } from "mantine-datatable";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
+import ReactDOM from "react-dom";
 import { useDispatch } from "react-redux";
 import { setPageTitle } from "../../store/themeConfigSlice";
 import TextInput from "@/components/FormFields/TextInput.component";
@@ -153,6 +154,10 @@ const Users = () => {
     userProfile: null,
     profileActiveTab: "profile",
     profileActiveSection: "summary",
+    searchSuggestions: [],
+    showSuggestions: false,
+    search_current_position: "",
+    search_current_location: "",
   });
 
   const debounceSearch = useDebounce(state.search, 500);
@@ -181,6 +186,14 @@ const Users = () => {
       superAdminDepartmentFilter: null,
     });
   }, [state.activeTab]);
+
+  useEffect(() => {
+    if (debounceSearch) {
+      fetchuserSearchPromt(debounceSearch);
+    } else {
+      setState({ searchSuggestions: [], showSuggestions: false });
+    }
+  }, [debounceSearch]);
 
   useEffect(() => {
     if (state.profile) {
@@ -212,10 +225,10 @@ const Users = () => {
     }
   };
 
-  const userList = async (page) => {
+  const userList = async (page, overrides: any = {}) => {
     try {
       setState({ loading: true });
-      const body = bodyData();
+      const body = { ...bodyData(), ...overrides };
       const res: any = await Models.auth.userList(page, body);
 
       const tableData = res?.results?.map((item) => ({
@@ -246,6 +259,50 @@ const Users = () => {
       });
     } catch (error) {
       setState({ loading: false, userList: [], userCount: 0 });
+    }
+  };
+
+
+  const searchInputRef = useRef<HTMLDivElement>(null);
+  const searchValueRef = useRef<string>("");
+  const suggestionPortalRef = useRef<HTMLDivElement>(null);
+  const [dropdownRect, setDropdownRect] = useState<DOMRect | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const inInput = searchInputRef.current?.contains(e.target as Node);
+      const inPortal = suggestionPortalRef.current?.contains(e.target as Node);
+      if (!inInput && !inPortal) {
+        setState({ showSuggestions: false });
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const openSuggestions = (prompt: string) => {
+    if (searchInputRef.current) {
+      setDropdownRect(searchInputRef.current.getBoundingClientRect());
+    }
+    fetchuserSearchPromt(prompt);
+  };
+
+  const fetchuserSearchPromt = async (prompt: string) => {
+    try {
+      const res: any = await Models.auth.prompt_user({ prompt, limit: 50 });
+      const suggestions: { label: string; data: any }[] = [];
+      res?.data?.forEach((user: any) => {
+        user?.display_name?.forEach((item: any) => {
+          const lineKey = Object.keys(item).find((k) => k.startsWith("line") && k !== "data");
+          const val = lineKey ? item[lineKey] : null;
+          if (val && !suggestions.find((s) => s.label === val)) {
+            suggestions.push({ label: val, data: item.data || {} });
+          }
+        });
+      });
+      setState({ searchSuggestions: suggestions, showSuggestions: suggestions.length > 0 });
+    } catch (error) {
+      setState({ searchSuggestions: [], showSuggestions: false });
     }
   };
 
@@ -325,10 +382,10 @@ const Users = () => {
 
     body.role = ROLES.APPLICANT;
 
-    if (state.search) {
-      body.search = state.search;
-      body.reveal_name = "Yes";
-    }
+    // if (state.search) {
+    //   body.search = state.search;
+    //   body.reveal_name = "Yes";
+    // }
 
     if (state.sortBy) {
       body.ordering =
@@ -343,8 +400,16 @@ const Users = () => {
       body.slet_cleared = values.includes(4);
     }
 
+    if (state.search_current_position) {
+      body.current_position = state.search_current_position;
+    }
+
+    if (state.search_current_location) {
+      body.current_location = state.search_current_location;
+    }
+
     if (state.department?.value) {
-      body.department_master_id = state.department?.value;
+      body.department_id = state.department?.value;
     }
 
     if (state.experience?.value) {
@@ -927,14 +992,99 @@ const Users = () => {
 
       <div className="tour-seekers-filters mb-4 rounded-2xl  backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
         <div className="flex flex-wrap items-center gap-4">
-          <div className="group relative w-fit">
-            <TextInput
-              placeholder={`Search job seekers ...`}
-              value={state.search}
-              onChange={(e) => setState({ search: e.target.value })}
-              icon={<IconSearch className="h-4 w-4" />}
-              className="transition-all duration-200 focus:shadow-lg group-hover:shadow-md"
-            />
+          <div className="relative" ref={searchInputRef} style={{ width: 500 }}>
+            <div className="flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 focus-within:ring-2 focus-within:ring-primary">
+              <IconSearch className="mr-2 h-4 w-4 shrink-0 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search job seekers ..."
+                value={state.search}
+                autoComplete="off"
+                className="flex-1 bg-transparent text-sm outline-none"
+                onChange={(e) => {
+                  searchValueRef.current = e.target.value;
+                  setState({ search: e.target.value, showSuggestions: true });
+                }}
+                onFocus={() => openSuggestions(state.search)}
+                onClick={() => openSuggestions(state.search)}
+                onMouseEnter={() => openSuggestions(state.search)}
+              />
+              {state.search && (
+                <button
+                  type="button"
+                  className="ml-2 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-gray-200 text-xs text-gray-500 hover:bg-gray-300 hover:text-gray-700"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    searchValueRef.current = "";
+                    setState({
+                      search: "",
+                      showSuggestions: false,
+                      searchSuggestions: [],
+                      search_current_position: "",
+                      search_current_location: "",
+                      experience: null,
+                      department: null,
+                    });
+                    userList(1, { search: "", current_position: "", current_location: "", experience_id: "", department_id: "" });
+                  }}
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+            {state.showSuggestions && state.searchSuggestions.length > 0 && dropdownRect &&
+              typeof document !== "undefined" &&
+              ReactDOM.createPortal(
+                <div
+                className="overflow-y-auto overscroll-contain scroll-smooth"
+                  ref={suggestionPortalRef}
+                  style={{
+                    position: "fixed",
+                    top: dropdownRect.bottom + 4,
+                    left: dropdownRect.left,
+                    width: dropdownRect.width,
+                    zIndex: 99999,
+                    background: "#fff",
+                    border: "1px solid #e5e7eb",
+                    borderRadius: 8,
+                    boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+                    maxHeight: 320,
+                    // overflowY: "auto",
+                  }}
+                >
+                  {state.searchSuggestions.map((suggestion: { label: string; data: any }, idx: number) => (
+                    <div
+                      key={idx}
+                      className="cursor-pointer px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => {
+                        const d = suggestion.data;
+                        searchValueRef.current = suggestion.label;
+                        setState({
+                          search: suggestion.label,
+                          showSuggestions: false,
+                          search_current_position: d?.current_position || "",
+                          search_current_location: d?.current_location || "",
+                          experience: d?.experience ? { value: d.experience, label: d.experience } : state.experience,
+                          department: d?.department_master_id ? { value: d.department_master_id, label: d.department || "" } : state.department,
+                        });
+                        userList(1, {
+                          // search: suggestion.label,
+                          // reveal_name: "Yes",
+                          ...(d?.current_position ? { current_position: d.current_position } : {}),
+                          ...(d?.current_location ? { current_location: d.current_location } : {}),
+                          ...(d?.experience ? { experience_id: d.experience } : {}),
+                          ...(d?.department_master_id ? { department_master_id: d.department_master_id } : {}),
+                        });
+                      }}
+                    >
+                      {suggestion.label}
+                    </div>
+                  ))}
+                </div>,
+                document.getElementById("popper-portal") || document.body
+              )
+            }
           </div>
 
           <div className="group relative">

@@ -116,6 +116,13 @@ const ApplicationDetail = () => {
     }
   }, [id]);
 
+   useEffect(() => {
+      
+        if(fetchApplicationDetail && id ){
+        readApplicationNotification()
+        }
+      }, [])
+
   const profile = async () => {
     try {
       const res: any = await Models.auth.profile();
@@ -140,6 +147,23 @@ const ApplicationDetail = () => {
       setState({ profileUserLoading: false });
     }
   };
+
+
+  const readApplicationNotification = async () => {
+        try {
+          
+          const body ={
+            user_id: id,
+            notification_type: "application"
+          }
+    
+          const res = await Models.notification.mark_view(body)
+          console.log("notification res", res);
+          
+        } catch (error) {
+          console.log("error", error);
+        }
+      }
 
   const fetchApplicationDetail = async () => {
     try {

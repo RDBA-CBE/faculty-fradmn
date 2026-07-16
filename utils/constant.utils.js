@@ -432,6 +432,7 @@ export const OwnmenuConfig = {
       icon: "IconMenuTables",
       label: "Applications",
       href: "/faculty/admin_application",
+      notifyKey: "new_application_count",
     },
 
     {
@@ -558,6 +559,7 @@ export const OwnmenuConfig = {
       icon: "IconMenuTables",
       label: "Applications",
       href: "/faculty/ins_application",
+      notifyKey: "new_application_count",
     },
     {
       type: "link",
@@ -615,6 +617,7 @@ export const OwnmenuConfig = {
       icon: "IconMenuTables",
       label: "Applications",
       href: "/faculty/my_application",
+      notifyKey: "new_application_count",
     },
     {
       type: "link",

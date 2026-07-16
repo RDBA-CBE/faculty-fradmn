@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/router";
 import { setPageTitle } from "../../store/themeConfigSlice";
+import { clearApplicationCount } from "../../store/notificationSlice";
 import TextInput from "@/components/FormFields/TextInput.component";
 import TextArea from "@/components/FormFields/TextArea.component";
 import CustomSelect from "@/components/FormFields/CustomSelect.component";
@@ -170,6 +171,7 @@ const Application = () => {
 
   useEffect(() => {
     dispatch(setPageTitle("Applications"));
+    dispatch(clearApplicationCount());
     const savedPage = parseInt(sessionStorage.getItem(SESSION_KEY) || "1", 10);
     if (savedPage > 1) {
       setState({ page: savedPage });
@@ -209,6 +211,12 @@ const Application = () => {
     state.sortingFilter,
     state.filterCollege,
   ]);
+
+   useEffect(() => {
+   
+      readApplicationNotification(state.profile.institution.id);
+    
+  }, [state.profile]);
 
   const profile = async (initialPage = 1) => {
     try {
@@ -314,7 +322,8 @@ const Application = () => {
           item?.interview_slots?.length > 0
             ? item?.interview_slots[item?.interview_slots.length - 1]?.status
             : "-",
-            job_id:item?.job
+            job_id:item?.job,
+            is_viewed: item?.is_viewed
       }));
       setState({
         loading: false,
@@ -334,6 +343,17 @@ const Application = () => {
       });
     }
   };
+
+   const readApplicationNotification = async (collegeIds?: number[]) => {
+    try {
+      const institution_id = collegeIds ?? state.profile?.institution.id;
+      if (!institution_id?.length) return;
+      const body = { institution_id };
+      await Models.notification.notification_view(body);
+    } catch (error) {
+      console.log("error", error);
+    }
+  }
 
   const bodyData = () => {
     const userId = localStorage.getItem("userId");
@@ -1346,9 +1366,16 @@ const handleBulkDelete = () => {
                   <Link
                     href={`/faculty/application_detail?id=${row?.id}`}
                     title={row?.applicant_name}
-                    className="text-gray-600 dark:text-gray-400"
+                    className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400"
                   >
-                    {truncateText(row?.applicant_name)}
+                    <span>{row?.applicant_name}</span>
+
+                    {!row?.is_viewed && (
+                      <span
+                        className="-mt-2 h-2 w-2 rounded-full bg-dblue animate-pulse"
+                        title="New Application"
+                      />
+                    )} 
                   </Link>
                 ),
               },

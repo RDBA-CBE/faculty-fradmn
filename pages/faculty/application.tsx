@@ -281,6 +281,12 @@ const Application = () => {
     }
   }, [state.profile]);
 
+  useEffect(() => {
+    if(applicationList && state.profile?.id){
+    readApplicationNotification()
+    }
+  }, [])
+
   const profile = async () => {
     try {
       const res: any = await Models.auth.profile();
@@ -365,6 +371,7 @@ const Application = () => {
           item?.interview_slots?.length > 0
             ? item?.interview_slots[item?.interview_slots.length - 1]?.status
             : "-",
+        is_new: item?.is_new
       }));
       setState({
         loading: false,
@@ -384,6 +391,21 @@ const Application = () => {
       });
     }
   };
+
+  const readApplicationNotification = async () => {
+    try {
+      const body ={
+        user_id: state.profile?.id,
+        notification_type: "application"
+      }
+
+      const res = await Models.notification.mark_view(body)
+      console.log("notification res", res);
+      
+    } catch (error) {
+      console.log("error", error);
+    }
+  } 
 
   const bodyData = () => {
     const body: any = {};

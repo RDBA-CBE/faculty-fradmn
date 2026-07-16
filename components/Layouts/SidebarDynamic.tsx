@@ -11,7 +11,9 @@ import IconCaretsDown from "@/components/Icon/IconCaretsDown";
 import IconCaretDown from "@/components/Icon/IconCaretDown";
 import IconMinus from "@/components/Icon/IconMinus";
 import { menuConfig, OwnmenuConfig, ROLES } from "@/utils/constant.utils";
-import Icons from "@/utils/icons.utils"; // all your icons exported as a map
+import Icons from "@/utils/icons.utils";
+import Models from "@/imports/models.import";
+import { useSetState } from "@mantine/hooks";
 
 const SidebarDynamic = () => {
   const router = useRouter();
@@ -26,6 +28,14 @@ const SidebarDynamic = () => {
   const semidark = useSelector(
     (state: IRootState) => state.themeConfig.semidark
   );
+
+  const [notifications, setNotifications] = useState<Record<string, number>>({});
+  const applicationCountOverride = useSelector((state: IRootState) => state.notification.applicationCount);
+
+  const [state, setState] = useSetState({
+    college_id: null,
+    institution_id: null
+  })
 
   const toggleMenu = (key: string) => {
     setCurrentMenu((old) => (old === key ? "" : key));
@@ -50,11 +60,62 @@ const SidebarDynamic = () => {
 
   useEffect(() => {
     role();
+    profile()
   }, []);
+
+  useEffect(()=> {
+    
+    getNotification()
+  },[state?.college_id, state?.institution_id])
 
   const role = () => {
     const group = localStorage.getItem("role");
     setGroup(group);
+  };
+
+  const profile = async () => {
+      try {
+        const res: any = await Models.auth.profile();
+
+        if (res?.role == ROLES.INSTITUTION_ADMIN) {
+          setState({
+            
+            institution_id : res?.institution?.id
+          })
+        } else if (res?.role == ROLES.HR) {
+          
+            setState({
+            college_id : res?.college?.map((item) => item?.college_id),
+           
+          })
+            
+        } 
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      }
+    };
+
+  const getNotification = async () => {
+    try {
+      const body ={
+        college_id : state?.college_id,
+        institution_id : state?.institution_id
+      }
+      const res: any = await Models.notification.list(body);
+      const counts: Record<string, number> = {};
+      if (res && typeof res === "object") {
+        Object.entries(res).forEach(([key, val]: any) => {
+          if (val && typeof val === "object") {
+            Object.entries(val).forEach(([subKey, count]) => {
+              counts[subKey] = Number(count) || 0;
+            });
+          } else {
+            counts[key] = Number(val) || 0;
+          }
+        });
+      }
+      setNotifications(counts);
+    } catch {}
   };
 
   // Recursive render function
@@ -84,13 +145,25 @@ const SidebarDynamic = () => {
               target={item.external ? "_blank" : "_self"}
               className={`group tour-sidebar-${item.label.toLowerCase().replace(/[^a-z0-9]/g, "-")}`}
             >
-              <div className="flex items-center">
-                {Icon && (
+              <div className="w-full flex justify-between items-center " >
+                <div className="flex items-center">
+                   {Icon && (
                   <Icon className="sidebar-icon shrink-0 !text-[#1E3786]" />
                 )}
                 <span className="text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3">
                   {t(item.label)}
                 </span>
+                </div>
+                {item.notifyKey && (() => {
+                  const count = item.notifyKey === 'new_applications'
+                    ? (applicationCountOverride >= 0 ? applicationCountOverride : notifications[item.notifyKey])
+                    : notifications[item.notifyKey];
+                  return count > 0 ? (
+                    <span className="me-2 bg-dblue relative flex h-5 w-5 items-center justify-center rounded-full text-[11px] text-white">
+                      {count}
+                    </span>
+                  ) : null;
+                })()}
               </div>
             </Link>
           </li>
@@ -151,6 +224,8 @@ const SidebarDynamic = () => {
 
     return OwnmenuConfig?.[group] || OwnmenuConfig.default;
   };
+
+  
 
   return (
     <div className={semidark ? "dark" : ""}>

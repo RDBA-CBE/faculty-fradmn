@@ -104,8 +104,12 @@ const auth = {
         url = url + `&role=${body.role}`;
       }
 
-      if (body.experience_id) {
-        url = url + `&experience_id=${body.experience_id}`;
+       if (body.current_position) {
+        url = url + `&current_position=${body.current_position}`;
+      }
+
+      if (body.current_location) {
+        url = url + `&current_location=${body.current_location}`;
       }
 
       if (body.user_id) {
@@ -120,6 +124,10 @@ const auth = {
       }
       if (body?.college_id) {
         url = url + `&college_id=${body.college_id}`;
+      }
+
+      if (body?.experience_id) {
+        url = url + `&experience=${body.experience_id}`;
       }
 
       if (body?.department_id) {
@@ -178,6 +186,30 @@ const auth = {
         .catch((error) => {
           if (error.response) {
             reject(error.response?.data);
+          } else {
+            reject(error);
+          }
+        });
+    });
+    return promise;
+  },
+
+  prompt_user: (data: any) => {
+    let promise = new Promise((resolve, reject) => {
+      let url = `users/search`;
+      if(data.prompt) url += `?prompt=${data.prompt}`
+      else{
+        url += `?prompt=""`;
+      }
+      if(data.limit) url += `&limit=${data.limit}`;
+      instance()
+        .get(url)
+        .then((res) => {
+          resolve(res.data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            reject(error.response);
           } else {
             reject(error);
           }

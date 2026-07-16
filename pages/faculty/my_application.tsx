@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/router";
 import { setPageTitle } from "../../store/themeConfigSlice";
+import { clearApplicationCount } from "../../store/notificationSlice";
 import TextInput from "@/components/FormFields/TextInput.component";
 import TextArea from "@/components/FormFields/TextArea.component";
 import CustomSelect from "@/components/FormFields/CustomSelect.component";
@@ -182,6 +183,7 @@ const Application = () => {
 
   useEffect(() => {
     dispatch(setPageTitle("Applications"));
+    dispatch(clearApplicationCount());
     const savedPage = parseInt(sessionStorage.getItem(SESSION_KEY) || "1", 10);
     if (savedPage > 1) {
       setState({ page: savedPage });
@@ -265,6 +267,12 @@ const Application = () => {
     state.filterCollege,
   ]);
 
+  useEffect(() => {
+    if (state.profile?.role === ROLES.HR && state.profile?.college?.length > 0) {
+      readApplicationNotification(state.profile.college.map((item) => item?.college_id));
+    }
+  }, [state.profile]);
+
   console.log("✌️collegeList --->", state.collegeList);
 
   const profile = async (initialPage = 1, restoreState: any = null, restored: any = null) => {
@@ -272,6 +280,7 @@ const Application = () => {
       const res: any = await Models.auth.profile();
       setState({ profile: res });
       profileRef.current = true;
+      
 
       if (restoreState) {
         setState(restoreState);
@@ -453,6 +462,7 @@ const Application = () => {
             ? item?.interview_slots[item?.interview_slots.length - 1]?.status
             : "-",
         job_id: item?.job,
+        is_viewed: item?.is_viewed
       }));
       setState({
         loading: false,
@@ -472,6 +482,17 @@ const Application = () => {
       });
     }
   };
+
+  const readApplicationNotification = async (collegeIds?: number[]) => {
+    try {
+      const college_id = collegeIds ?? state.profile?.college?.map((item) => item?.college_id);
+      if (!college_id?.length) return;
+      const body = { college_id };
+      await Models.notification.notification_view(body);
+    } catch (error) {
+      console.log("error", error);
+    }
+  }
 
   const applicationCount = async (college) => {
     try {
@@ -1666,9 +1687,16 @@ const Application = () => {
                   <Link
                     href={`/faculty/application_detail?id=${row?.id}`}
                     title={row?.applicant_name}
-                    className="text-gray-600 dark:text-gray-400"
+                    className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400"
                   >
-                    {row?.applicant_name}
+                    <span>{row?.applicant_name}</span>
+
+                    {!row?.is_viewed && (
+                      <span
+                        className="-mt-2 h-2 w-2 rounded-full bg-dblue animate-pulse"
+                        title="New Application"
+                      />
+                    )} 
                   </Link>
                 ),
               },

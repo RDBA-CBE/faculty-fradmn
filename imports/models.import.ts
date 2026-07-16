@@ -13,6 +13,7 @@ import hodManagement from "@/models/hodManagement.model";
 import application from "@/models/application.model";
 import interview from "@/models/interview";
 import dashboard from "@/models/dashboard.models";
+import notification from "@/models/notification.model";
 
 
 export const Models = {
@@ -27,7 +28,8 @@ export const Models = {
   hodManagement,
   application,
   interview,
-  dashboard
+  dashboard,
+  notification,
 };
 
 export default Models;
