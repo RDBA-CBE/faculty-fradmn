@@ -19,7 +19,7 @@ export default function Modal(props: any) {
   } = props;
 
   return (
-    <Transition appear show={open} as={Fragment}>
+    <Transition appear show={open ?? false} as={Fragment}>
       <Dialog
         as="div"
         open={open}
