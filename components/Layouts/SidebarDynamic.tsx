@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import Link from "next/link";
 import { toggleSidebar } from "../../store/themeConfigSlice";
+import { clearApplicationCount, resetApplicationCount } from "../../store/notificationSlice";
 import AnimateHeight from "react-animate-height";
 import { IRootState } from "../../store";
 import { useState, useEffect } from "react";
@@ -32,6 +33,13 @@ const SidebarDynamic = () => {
   const [notifications, setNotifications] = useState<Record<string, number>>({});
   const applicationCountOverride = useSelector((state: IRootState) => state.notification.applicationCount);
 
+  // Sync Redux clearApplicationCount (set to 0) into local notifications immediately
+  useEffect(() => {
+    if (applicationCountOverride === 0) {
+      setNotifications((prev) => ({ ...prev, new_applications: 0 }));
+    }
+  }, [applicationCountOverride]);
+
   const [state, setState] = useSetState({
     college_id: null,
     institution_id: null
@@ -51,10 +59,19 @@ const SidebarDynamic = () => {
     selector?.classList.add("active");
   };
 
+  const APPLICATION_PAGES = ["/faculty/my_application", "/faculty/admin_application", "/faculty/ins_application"];
+
   useEffect(() => {
     setActiveRoute();
     if (window.innerWidth < 1024 && themeConfig.sidebar) {
       dispatch(toggleSidebar());
+    }
+    if (APPLICATION_PAGES.includes(router.pathname)) {
+      // On application pages, badge is cleared by the page itself via Redux
+      setNotifications((prev) => ({ ...prev, new_applications: 0 }));
+    } else {
+      dispatch(resetApplicationCount());
+      getNotification();
     }
   }, [router.pathname]);
 
@@ -97,6 +114,7 @@ const SidebarDynamic = () => {
 
   const getNotification = async () => {
     try {
+      if (APPLICATION_PAGES.includes(router.pathname)) return;
       const body ={
         college_id : state?.college_id,
         institution_id : state?.institution_id
@@ -144,6 +162,12 @@ const SidebarDynamic = () => {
               href={item.href || "#"}
               target={item.external ? "_blank" : "_self"}
               className={`group tour-sidebar-${item.label.toLowerCase().replace(/[^a-z0-9]/g, "-")}`}
+              onClick={() => {
+                if (item.notifyKey === 'new_applications') {
+                  dispatch(clearApplicationCount());
+                  setNotifications((prev) => ({ ...prev, new_applications: 0 }));
+                }
+              }}
             >
               <div className="w-full flex justify-between items-center " >
                 <div className="flex items-center">
@@ -155,9 +179,7 @@ const SidebarDynamic = () => {
                 </span>
                 </div>
                 {item.notifyKey && (() => {
-                  const count = item.notifyKey === 'new_applications'
-                    ? (applicationCountOverride >= 0 ? applicationCountOverride : notifications[item.notifyKey])
-                    : notifications[item.notifyKey];
+                  const count = notifications[item.notifyKey];
                   return count > 0 ? (
                     <span className="me-2 bg-dblue relative flex h-5 w-5 items-center justify-center rounded-full text-[11px] text-white">
                       {count}

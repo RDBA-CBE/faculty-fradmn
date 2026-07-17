@@ -213,9 +213,9 @@ const Application = () => {
   ]);
 
    useEffect(() => {
-   
+    if (state.profile?.institution?.id) {
       readApplicationNotification(state.profile.institution.id);
-    
+    }
   }, [state.profile]);
 
   const profile = async (initialPage = 1) => {
@@ -347,7 +347,7 @@ const Application = () => {
    const readApplicationNotification = async (collegeIds?: number[]) => {
     try {
       const institution_id = collegeIds ?? state.profile?.institution.id;
-      if (!institution_id?.length) return;
+      // if (!institution_id?.length) return;
       const body = { institution_id };
       await Models.notification.notification_view(body);
     } catch (error) {
@@ -1356,6 +1356,7 @@ const handleBulkDelete = () => {
                 </div>
               </div>
             }
+            rowStyle={(row: any) => !row?.is_viewed ? { backgroundColor: '#EFF6FF', fontWeight: 600 } : {}}
             columns={[
               {
                 accessor: "applicant_name",
@@ -1366,16 +1367,16 @@ const handleBulkDelete = () => {
                   <Link
                     href={`/faculty/application_detail?id=${row?.id}`}
                     title={row?.applicant_name}
-                    className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400"
+                     className={`inline-flex items-center gap-2 ${!row?.is_viewed ? 'text-gray-900 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}
                   >
-                    <span>{row?.applicant_name}</span>
+                    {row?.applicant_name}
 
-                    {!row?.is_viewed && (
+                    {/* {!row?.is_viewed && (
                       <span
                         className="-mt-2 h-2 w-2 rounded-full bg-dblue animate-pulse"
                         title="New Application"
                       />
-                    )} 
+                    )}  */}
                   </Link>
                 ),
               },
@@ -1387,7 +1388,7 @@ const handleBulkDelete = () => {
                   <Link
                     href={`/faculty/job_details?id=${row?.job_id}`}
                     title={row?.job_title}
-                    className="text-gray-600 dark:text-gray-400"
+                    className={!row?.is_viewed ? 'text-gray-900 font-semibold' : 'text-gray-600 dark:text-gray-400'}
                   >
                     {row?.job_short_title}
                   </Link>
@@ -1398,19 +1399,20 @@ const handleBulkDelete = () => {
                 accessor: "college",
                 title: "College",
                 sortable: true,
-                render: ({ college_name }) => (
+                render: (row) => (
                   <div
-                    title={college_name}
-                    className="text-gray-600 dark:text-gray-400"
+                    title={row?.college_name}
+                    className={!row?.is_viewed ? 'text-gray-900 font-semibold' : 'text-gray-600 dark:text-gray-400'}
                   >
-                    {college_name}
+                    {row?.college_name}
                   </div>
                 ),
               },
               {
                 accessor: "department_name",
                 title: "Department",
-                render: ({ department_name }) => {
+                render: (row) => {
+                  const { department_name } = row;
                   if (!department_name || department_name?.length === 0) {
                     return <span className="text-gray-400">-</span>;
                   }
@@ -1427,7 +1429,7 @@ const handleBulkDelete = () => {
                       {/* First department text */}
                       <span
                         title={firstDept}
-                        className="text-sm  text-gray-700 dark:text-gray-300"
+                         className={`text-sm ${!row?.is_viewed ? 'text-gray-900 font-semibold' : 'text-gray-700 dark:text-gray-300'}`}
                       >
                         {firstDept}
                       </span>
@@ -1505,13 +1507,13 @@ const handleBulkDelete = () => {
                 title: "Status",
                 sortable: true,
 
-                render: ({ status }) => (
+                render: (row) => (
                   <span
                     className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-                      STATUS_COLOR[status] || "bg-slate-100 text-slate-800"
-                    }`}
+                      STATUS_COLOR[row?.status] || "bg-slate-100 text-slate-800"
+                    } ${!row?.is_viewed ? 'pt-0.5 font-semibold ring-1 ring-inset ring-current' : ''}`}
                   >
-                    {capitalizeFLetter(status)}
+                    {capitalizeFLetter(row?.status)}
                   </span>
                 ),
               },

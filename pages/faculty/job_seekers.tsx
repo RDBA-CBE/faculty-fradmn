@@ -188,7 +188,7 @@ const Users = () => {
   }, [state.activeTab]);
 
   useEffect(() => {
-    if (debounceSearch) {
+    if (debounceSearch && !justSelectedRef.current) {
       fetchuserSearchPromt(debounceSearch);
     } else {
       setState({ searchSuggestions: [], showSuggestions: false });
@@ -264,9 +264,11 @@ const Users = () => {
 
 
   const searchInputRef = useRef<HTMLDivElement>(null);
+  const searchTextRef = useRef<HTMLInputElement>(null);
   const searchValueRef = useRef<string>("");
   const suggestionPortalRef = useRef<HTMLDivElement>(null);
   const [dropdownRect, setDropdownRect] = useState<DOMRect | null>(null);
+  const justSelectedRef = useRef<boolean>(false);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -300,7 +302,9 @@ const Users = () => {
           }
         });
       });
-      setState({ searchSuggestions: suggestions, showSuggestions: suggestions.length > 0 });
+      if (!justSelectedRef.current) {
+        setState({ searchSuggestions: suggestions, showSuggestions: suggestions.length > 0 });
+      }
     } catch (error) {
       setState({ searchSuggestions: [], showSuggestions: false });
     }
@@ -996,18 +1000,27 @@ const Users = () => {
             <div className="flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 focus-within:ring-2 focus-within:ring-primary">
               <IconSearch className="mr-2 h-4 w-4 shrink-0 text-gray-400" />
               <input
+                ref={searchTextRef}
                 type="text"
                 placeholder="Search job seekers ..."
                 value={state.search}
                 autoComplete="off"
                 className="flex-1 bg-transparent text-sm outline-none"
                 onChange={(e) => {
+                  justSelectedRef.current = false;
                   searchValueRef.current = e.target.value;
                   setState({ search: e.target.value, showSuggestions: true });
                 }}
-                onFocus={() => openSuggestions(state.search)}
-                onClick={() => openSuggestions(state.search)}
-                onMouseEnter={() => openSuggestions(state.search)}
+                onFocus={() => {
+                  justSelectedRef.current = false;
+                  openSuggestions(state.search);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    justSelectedRef.current = false;
+                    openSuggestions(state.search);
+                  }
+                }}
               />
               {state.search && (
                 <button
@@ -1016,6 +1029,8 @@ const Users = () => {
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => {
                     searchValueRef.current = "";
+                    justSelectedRef.current = false;
+                    searchTextRef.current?.blur();
                     setState({
                       search: "",
                       showSuggestions: false,
@@ -1059,6 +1074,8 @@ const Users = () => {
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => {
                         const d = suggestion.data;
+                        justSelectedRef.current = true;
+                        searchTextRef.current?.blur();
                         searchValueRef.current = suggestion.label;
                         setState({
                           search: suggestion.label,
