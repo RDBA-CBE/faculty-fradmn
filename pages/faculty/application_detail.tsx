@@ -670,7 +670,7 @@ const ApplicationDetail = () => {
                   </div>
                 )}
               </div>
-              {state.profile?.role == ROLES.HR && (
+              {state.profile?.role == ROLES.HR && app?.status_display !== "Rejected" && (
                 <div className=" flex items-center justify-end">
                   <button
                     onClick={() => setState({ showInterviewModal: true })}

@@ -1655,6 +1655,7 @@ const Application = () => {
             selectedRecords={state.applicationList?.filter((record) =>
               state.selectedRecords.includes(record.id),
             )}
+            isRecordSelectable={(row: any) => row?.status !== "Rejected"}
             onSelectedRecordsChange={(records) => {
               const currentPageIds = state.applicationList?.map(
                 (r: any) => r.id,
