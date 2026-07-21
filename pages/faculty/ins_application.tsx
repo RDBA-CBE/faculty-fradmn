@@ -212,11 +212,11 @@ const Application = () => {
     state.filterCollege,
   ]);
 
-   useEffect(() => {
-    if (state.profile?.institution?.id) {
-      readApplicationNotification(state.profile.institution.id);
-    }
-  }, [state.profile]);
+  //  useEffect(() => {
+  //   if (state.profile?.institution?.id) {
+  //     readApplicationNotification(state.profile.institution.id);
+  //   }
+  // }, [state.profile]);
 
   const profile = async (initialPage = 1) => {
     try {
@@ -323,7 +323,7 @@ const Application = () => {
             ? item?.interview_slots[item?.interview_slots.length - 1]?.status
             : "-",
             job_id:item?.job,
-            is_viewed: item?.is_viewed
+            // is_viewed: item?.is_viewed
       }));
       setState({
         loading: false,
@@ -1356,7 +1356,7 @@ const handleBulkDelete = () => {
                 </div>
               </div>
             }
-            rowStyle={(row: any) => !row?.is_viewed ? { backgroundColor: '#EFF6FF', fontWeight: 600 } : {}}
+            rowStyle={(row: any) => row?.is_viewed ? { backgroundColor: '#EFF6FF', fontWeight: 600 } : {}}
             columns={[
               {
                 accessor: "applicant_name",
@@ -1367,7 +1367,7 @@ const handleBulkDelete = () => {
                   <Link
                     href={`/faculty/application_detail?id=${row?.id}`}
                     title={row?.applicant_name}
-                     className={`inline-flex items-center gap-2 ${!row?.is_viewed ? 'text-gray-900 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}
+                     className={`inline-flex items-center gap-2 ${row?.is_viewed ? 'text-gray-900 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}
                   >
                     {row?.applicant_name}
 
@@ -1388,7 +1388,7 @@ const handleBulkDelete = () => {
                   <Link
                     href={`/faculty/job_details?id=${row?.job_id}`}
                     title={row?.job_title}
-                    className={!row?.is_viewed ? 'text-gray-900 font-semibold' : 'text-gray-600 dark:text-gray-400'}
+                    className={row?.is_viewed ? 'text-gray-900 font-semibold' : 'text-gray-600 dark:text-gray-400'}
                   >
                     {row?.job_short_title}
                   </Link>
@@ -1402,7 +1402,7 @@ const handleBulkDelete = () => {
                 render: (row) => (
                   <div
                     title={row?.college_name}
-                    className={!row?.is_viewed ? 'text-gray-900 font-semibold' : 'text-gray-600 dark:text-gray-400'}
+                    className={row?.is_viewed ? 'text-gray-900 font-semibold' : 'text-gray-600 dark:text-gray-400'}
                   >
                     {row?.college_name}
                   </div>
@@ -1429,7 +1429,7 @@ const handleBulkDelete = () => {
                       {/* First department text */}
                       <span
                         title={firstDept}
-                         className={`text-sm ${!row?.is_viewed ? 'text-gray-900 font-semibold' : 'text-gray-700 dark:text-gray-300'}`}
+                         className={`text-sm ${row?.is_viewed ? 'text-gray-900 font-semibold' : 'text-gray-700 dark:text-gray-300'}`}
                       >
                         {firstDept}
                       </span>
@@ -1511,7 +1511,7 @@ const handleBulkDelete = () => {
                   <span
                     className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
                       STATUS_COLOR[row?.status] || "bg-slate-100 text-slate-800"
-                    } ${!row?.is_viewed ? 'pt-0.5 font-semibold ring-1 ring-inset ring-current' : ''}`}
+                    } ${row?.is_viewed ? 'pt-0.5 font-semibold ring-1 ring-inset ring-current' : ''}`}
                   >
                     {capitalizeFLetter(row?.status)}
                   </span>

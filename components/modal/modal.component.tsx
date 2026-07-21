@@ -40,7 +40,7 @@ export default function Modal(props: any) {
         </Transition.Child>
 
         {/* Modal Content */}
-        <div className="fixed inset-0 overflow-y-auto">
+        <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center px-4 py-8">
             <Transition.Child
               as={Fragment}
@@ -54,26 +54,12 @@ export default function Modal(props: any) {
               <Dialog.Panel
                 className={`panel w-full ${
                   isFullWidth ? "" : maxWidth
-                } overflow-hidden rounded-lg border-0 p-0 text-black dark:text-white-dark`}
+                } rounded-lg border-0 p-0 text-black dark:text-white-dark`}
+                style={{ overflow: "visible" }}
               >
-                {/* HEADER */}
-                {/* <div className="flex items-center justify-between bg-[#fbfbfb] dark:bg-[#121c2c] px-5 py-3 border-b border-gray-200 dark:border-gray-700">
-                  <h3 className="text-lg font-medium">
-                    {edit ? updateHeader : addHeader}
-                  </h3>
-                  <button
-                    type="button"
-                    onClick={() => close()}
-                    className="text-gray-400 hover:text-gray-800 dark:hover:text-gray-600"
-                  >
-                    <IconX />
-                  </button>
-                </div> */}
-
                 {/* SUBTITLE */}
                 {subTitle || closeIcon ? (
                   <div className="flex items-center justify-between border-b border-gray-200 bg-[#fbfbfb] px-5 py-3 dark:border-gray-700 dark:bg-[#121c2c]">
-                    {/* Left Side Title */}
                     <div className="flex-1">
                       {subTitle && (
                         <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
@@ -81,8 +67,6 @@ export default function Modal(props: any) {
                         </h3>
                       )}
                     </div>
-
-                    {/* Right Side Close Icon */}
                     {closeIcon && (
                       <button
                         type="button"
@@ -96,7 +80,7 @@ export default function Modal(props: any) {
                 ) : null}
 
                 {/* CONTENT */}
-                <div className={`${padding ? padding : "p-5"}`}>
+                <div className={`${padding ? padding : "p-5"}`} style={{ overflow: "visible" }}>
                   {renderComponent()}
                 </div>
               </Dialog.Panel>

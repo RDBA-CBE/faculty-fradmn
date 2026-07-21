@@ -1393,8 +1393,8 @@ const Users = () => {
               placeholder="Choose Date & Time"
               onChange={(e) => setState({ interviewSlot: e, errors: { ...state.errors, interviewSlot: "" } })}
               showTimeSelect={true}
+              usePortal
               required
-              usePortal={false}
               minDate={new Date()}
               error={state.errors?.interviewSlot}
             />
@@ -1474,15 +1474,17 @@ const Users = () => {
                 title="Interview Slot"
                 value={state.interviewSlot}
                 placeholder="Choose From"
-                onChange={(e) =>
+                onChange={(e) =>{
+                  console.log("hello");
+                  
                   setState({
                     interviewSlot: e,
                     errors: { ...state.errors, interviewSlot: "" },
                   })
-                }
+                }}
+                disabled={false}
                 showTimeSelect={true}
                 required
-                usePortal={false}
                 minDate={new Date()}
                 error={state.errors?.interviewSlot}
               />

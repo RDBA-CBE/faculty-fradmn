@@ -1,4 +1,4 @@
-import React from "react";
+import React, { forwardRef } from "react";
 import DatePicker from "react-datepicker";
 import { Calendar } from "lucide-react";
 import "react-datepicker/dist/react-datepicker.css";
@@ -14,9 +14,32 @@ interface CustomeDatePickerProps {
   placeholder?: string;
   minDate?: Date;
   showTimeSelect?: boolean;
-  [key: string]: any;
   usePortal?: boolean;
+  [key: string]: any;
 }
+
+const CustomInput = forwardRef<HTMLInputElement, any>(
+  ({ value, onClick, placeholder, error, className }, ref) => (
+    <div className="relative w-full">
+      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2">
+        <Calendar className="h-4 w-4 text-gray-400" />
+      </div>
+      <input
+        ref={ref}
+        className={`w-full rounded-md border px-3 py-2 pl-7 outline-none focus:ring-2 focus:ring-primary ${
+          error
+            ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+            : "border-gray-300 focus:border-primary"
+        } ${className || ""}`}
+        onClick={onClick}
+        value={value}
+        readOnly
+        placeholder={placeholder || "Follow Up Date"}
+      />
+    </div>
+  )
+);
+CustomInput.displayName = "CustomInput";
 
 const CustomeDatePicker: React.FC<CustomeDatePickerProps> = (props) => {
   const {
@@ -30,28 +53,9 @@ const CustomeDatePicker: React.FC<CustomeDatePickerProps> = (props) => {
     placeholder,
     minDate,
     showTimeSelect,
-    usePortal=true,
+    usePortal,
     ...rest
   } = props;
-
-  const CustomInput = ({ value, onClick }: any) => (
-    <div className="relative w-full ">
-      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2">
-        <Calendar className="h-4 w-4 text-gray-400" />
-      </div>
-      <input
-        className={`w-full rounded-md border px-3 py-2 pl-7 outline-none focus:ring-2 focus:ring-primary ${
-          error
-            ? "border-red-500 focus:border-red-500 focus:ring-red-200"
-            : "border-gray-300 focus:border-primary"
-        } ${className || ""}`}
-        onClick={onClick}
-        value={value}
-        readOnly
-        placeholder={placeholder ? placeholder : "Follow Up Date"}
-      />
-    </div>
-  );
 
   return (
     <div className="w-full">
@@ -68,16 +72,21 @@ const CustomeDatePicker: React.FC<CustomeDatePickerProps> = (props) => {
           timeFormat="HH:mm"
           timeIntervals={15}
           timeCaption="Time"
-          // dateFormat="MMMM d, yyyy h:mm aa"
           dateFormat={showTimeSelect ? "MMMM d, yyyy h:mm aa" : "MMMM d, yyyy"}
           name={name}
           isClearable={!!value}
           shouldCloseOnSelect={true}
-          customInput={<CustomInput />}
+          customInput={
+            <CustomInput
+              placeholder={placeholder}
+              error={error}
+              className={className}
+            />
+          }
           required={required}
           minDate={minDate || undefined}
           wrapperClassName="w-full"
-          popperProps={usePortal ? { strategy: "fixed" } : undefined}
+          popperProps={{ strategy: "fixed" }}
           popperPlacement="bottom-start"
           {...rest}
         />

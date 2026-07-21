@@ -1,5 +1,5 @@
 import { DataTable } from "mantine-datatable";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { setPageTitle } from "../../store/themeConfigSlice";
 import TextInput from "@/components/FormFields/TextInput.component";
@@ -26,6 +26,7 @@ import Modal from "@/components/modal/modal.component";
 import { Models } from "@/imports/models.import";
 import { Success, Failure } from "@/utils/function.utils";
 import useDebounce from "@/hook/useDebounce";
+import { useRouter } from "next/router";
 import { CreateUser } from "@/utils/validation.utils";
 import Swal from "sweetalert2";
 import {
@@ -51,6 +52,9 @@ import * as Validation from "@/utils/validation.utils";
 
 const Users = () => {
   const dispatch = useDispatch();
+  const router = useRouter();
+  const { id } = router.query;
+  const autoOpenedRef = useRef(false);
   const [state, setState] = useSetState({
     activeTab: "institution_admin",
     page: 1,
@@ -81,6 +85,7 @@ const Users = () => {
     showConfirmPassword: false,
     institution: null,
     college: null,
+    job_approval_permission: true,
 
     // Dropdown lists
     institutionList: [],
@@ -150,6 +155,15 @@ const Users = () => {
   }, [dispatch]);
 
   useEffect(() => {
+    if (!router.isReady || !id || !state.userList?.length || autoOpenedRef.current) return;
+    const found = state.userList.find((u: any) => String(u.id) === String(id));
+    if (found) {
+      autoOpenedRef.current = true;
+      handleEdit(found);
+    }
+  }, [router.isReady, id, state.userList]);
+
+  useEffect(() => {
     if (state.profile) {
       userList(1, state.profile?.institution?.id);
     }
@@ -166,12 +180,13 @@ const Users = () => {
       const res: any = await Models.auth.profile();
       console.log("profile --->", res);
       setState({ profile: res });
-      userList(1, res?.institution?.id);
+      const users: any = await userList(1, res?.institution?.id);
       collegeList(1, "", false, res?.institution?.id);
       hrCollegeList(1, "", false, res?.institution?.id);
       setState({
         profile_institution: res?.institution?.name,
       });
+
     } catch (error) {
       console.error("Error fetching institutions:", error);
     }
@@ -214,6 +229,7 @@ const Users = () => {
         job_count: item?.job_count,
         applications_count: item?.applications_count,
         interviews_scheduled_count: item?.interviews_scheduled_count,
+        job_approval_permission: item?.job_approval_permission ,
       }));
 
       setState({
@@ -221,6 +237,7 @@ const Users = () => {
         userList: tableData || [],
         userCount: res?.count || 0,
       });
+      return tableData || [];
     } catch (error) {
       setState({ loading: false, userList: [], userCount: 0 });
     }
@@ -384,6 +401,7 @@ const Users = () => {
       experience: row.experience,
       institution: row?.institutionData,
       gender: row?.genderData,
+      job_approval_permission: row?.job_approval_permission,
     });
 
     if (row?.collegeData?.length > 0) {
@@ -448,6 +466,7 @@ const Users = () => {
         status: "active",
         gender: state.gender?.value,
         profile_institution: state.profile_institution,
+        job_approval_permission: state.job_approval_permission,
       };
 
       body.institution = state.profile?.institution?.id;
@@ -914,7 +933,13 @@ const Users = () => {
                 position="top"
                 disabled={!state.profile_institution}
               />
+              <CheckboxInput
+                checked={state.job_approval_permission}
+                onChange={(e) => setState({ job_approval_permission: !state.job_approval_permission })}
+                label="Can Approve/Unappprove Job Posts"
+              />
             </div>
+            
 
             <div className="mt-8 flex flex-col-reverse gap-3 border-t border-gray-200 pt-6 dark:border-gray-700 sm:flex-row sm:justify-end">
               <button

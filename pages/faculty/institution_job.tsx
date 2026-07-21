@@ -1160,6 +1160,26 @@ const Job = () => {
                     >
                       <IconEye className="h-4 w-4" />
                     </button>
+
+                    {state?.profile?.job_approval_permission &&
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+
+                        // if (state.profile?.role == ROLES.HR) {
+                        handleApprove(row);
+                        // }
+                      }}
+                      // onClick={() => handleToggleStatus(row)}
+                      className={`flex items-center justify-center rounded-lg ${
+                        row?.job_status === "published"
+                          ? "text-red-600 "
+                          : " text-green-600 "
+                      }`}
+                      title={"Job Status"}
+                    >
+                      <CheckCircle className="h-4 w-4" />
+                    </button>}
                     {/* {state.profile?.role == ROLES.HR && ( */}
                     {/* <button
                       onClick={(e) => {

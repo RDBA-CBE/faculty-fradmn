@@ -117,8 +117,10 @@ const ApplicationDetail = () => {
   }, [id]);
 
    useEffect(() => {
+
+      const role = localStorage.getItem("role")
       
-        if(fetchApplicationDetail && id ){
+        if(fetchApplicationDetail && id && role == "hr"){
         readApplicationNotification()
         }
       }, [])

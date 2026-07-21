@@ -1296,7 +1296,7 @@ const Job = () => {
                       <IconEye className="h-4 w-4" />
                     </button>
                     {/* {state.profile?.role == ROLES.HR && ( */}
-                    <button
+                    {state?.profile?.job_approval_permission && <button
                       onClick={(e) => {
                         e.stopPropagation();
 
@@ -1313,7 +1313,7 @@ const Job = () => {
                       title={"Job Status"}
                     >
                       <CheckCircle className="h-4 w-4" />
-                    </button>
+                    </button>}
                     {/* )} */}
                     {/* <button
                       onClick={(e) => {

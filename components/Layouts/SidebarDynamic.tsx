@@ -6,7 +6,7 @@ import { toggleSidebar } from "../../store/themeConfigSlice";
 import { clearApplicationCount, resetApplicationCount } from "../../store/notificationSlice";
 import AnimateHeight from "react-animate-height";
 import { IRootState } from "../../store";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/router";
 import IconCaretsDown from "@/components/Icon/IconCaretsDown";
 import IconCaretDown from "@/components/Icon/IconCaretDown";
@@ -32,13 +32,16 @@ const SidebarDynamic = () => {
 
   const [notifications, setNotifications] = useState<Record<string, number>>({});
   const applicationCountOverride = useSelector((state: IRootState) => state.notification.applicationCount);
+  const pathnameRef = useRef(router.pathname);
 
-  // Sync Redux clearApplicationCount (set to 0) into local notifications immediately
   useEffect(() => {
-    if (applicationCountOverride === 0) {
-      setNotifications((prev) => ({ ...prev, new_applications: 0 }));
-    }
-  }, [applicationCountOverride]);
+    pathnameRef.current = router.pathname;
+  }, [router.pathname]);
+
+  const getNotifyCount = (notifyKey: string) => {
+    if (notifyKey === 'new_applications' && applicationCountOverride === 0) return 0;
+    return notifications[notifyKey] ?? 0;
+  };
 
   const [state, setState] = useSetState({
     college_id: null,
@@ -62,12 +65,24 @@ const SidebarDynamic = () => {
   const APPLICATION_PAGES = ["/faculty/my_application", "/faculty/admin_application", "/faculty/ins_application"];
 
   useEffect(() => {
+    const handleRouteChangeStart = (url: string) => {
+      const path = url.split("?")[0];
+      if (APPLICATION_PAGES.includes(path)) {
+        setNotifications((prev) => ({ ...prev, new_applications: 0 }));
+        dispatch(clearApplicationCount());
+      }
+    };
+
+    router.events.on("routeChangeStart", handleRouteChangeStart);
+    return () => router.events.off("routeChangeStart", handleRouteChangeStart);
+  }, []);
+
+  useEffect(() => {
     setActiveRoute();
     if (window.innerWidth < 1024 && themeConfig.sidebar) {
       dispatch(toggleSidebar());
     }
     if (APPLICATION_PAGES.includes(router.pathname)) {
-      // On application pages, badge is cleared by the page itself via Redux
       setNotifications((prev) => ({ ...prev, new_applications: 0 }));
     } else {
       dispatch(resetApplicationCount());
@@ -114,7 +129,7 @@ const SidebarDynamic = () => {
 
   const getNotification = async () => {
     try {
-      if (APPLICATION_PAGES.includes(router.pathname)) return;
+      if (APPLICATION_PAGES.includes(pathnameRef.current)) return;
       const body ={
         college_id : state?.college_id,
         institution_id : state?.institution_id
@@ -179,7 +194,7 @@ const SidebarDynamic = () => {
                 </span>
                 </div>
                 {item.notifyKey && (() => {
-                  const count = notifications[item.notifyKey];
+                  const count = getNotifyCount(item.notifyKey);
                   return count > 0 ? (
                     <span className="me-2 bg-dblue relative flex h-5 w-5 items-center justify-center rounded-full text-[11px] text-white">
                       {count}

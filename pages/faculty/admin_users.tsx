@@ -92,6 +92,7 @@ const Users = () => {
     showConfirmPassword: false,
     institution: null,
     college: null,
+    job_approval_permission: false,
 
     // Dropdown lists
     institutionList: [],
@@ -311,6 +312,7 @@ const Users = () => {
         // department: item?.department?.name,
         position: item?.current_position,
         qualification: item?.education_qualification,
+        job_approval_permission: state.activeTab == ROLES.HR ? ( item?.job_approval_permission || true ) : ( item?.job_approval_permission || false ),
         publication: item?.publication_count,
         project: item?.project_count,
         location: item?.current_location,
@@ -826,6 +828,7 @@ const Users = () => {
       experience: row.experience,
       institution: row?.institutionData,
       gender: row?.genderData,
+      job_approval_permission : row?.job_approval_permission
     });
     if (state.activeTab === "hod") {
       if (row?.institutionData) {
@@ -932,6 +935,7 @@ const Users = () => {
         education_qualification: capitalizeFLetter(
           state.education_qualification,
         ),
+        job_approval_permission: state.job_approval_permission,
       };
 
       if (state.activeTab === "institution_admin") {
@@ -1150,7 +1154,15 @@ const Users = () => {
           error={state.errors.education_qualification}
           required
         />
+
+        
       </div>
+
+      <CheckboxInput
+                checked={state.job_approval_permission}
+                onChange={(e) => setState({ job_approval_permission: !state.job_approval_permission })}
+                label="Can Approve/Unappprove Job Posts"
+              />
 
       {state.activeTab === "hr" && (
         <>
@@ -1225,6 +1237,8 @@ const Users = () => {
             position="top"
             disabled={!state.selectedHRInstitution}
           />
+
+         
         </>
       )}
       {state.activeTab === "hod" && (

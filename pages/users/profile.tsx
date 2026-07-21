@@ -39,6 +39,8 @@ export default function Profile() {
     username: "",
     email: "",
     profile: null,
+    showJobApprovalConfirm: false,
+    showContactAdminConfirm: false,
   });
 
   useEffect(() => {
@@ -147,6 +149,55 @@ export default function Profile() {
       }
     }
   };
+
+  const updateJobApprovalStatus = async () => {
+    try {
+      setState({ btnLoading: true, showJobApprovalConfirm: false });
+      const userString = localStorage.getItem("userId");
+      if (!userString) return;
+
+      const newValue = !state.profile?.job_approval_permission;
+      const body = { job_approval_permission: newValue };
+
+      await Models.auth.updateUser(userString, body);
+
+      setState({
+        btnLoading: false,
+        profile: { ...state.profile, job_approval_permission: newValue },
+      });
+
+      Success("Job approval status updated successfully");
+    } catch (error) {
+      setState({ btnLoading: false });
+      Failure(error?.error);
+    }
+  };
+
+  const contactAdmin = async () => {
+    try {
+      setState({ btnLoading: true, showContactAdminConfirm: false });
+
+      const body = {
+        institution_id : state?.profile?.institution?.id,
+        hr_id : state?.profile?.id
+      }
+
+       await Models.auth.contact_hr( body);
+
+       Success("Your Request has been sent successfully to admin");
+
+      setState({
+        showContactAdminConfirm: false,
+        btnLoading:false
+      });
+
+
+    } catch (error) {
+      setState({ btnLoading:false });
+
+        Failure(error?.error);
+    }
+  }
 
   return (
     <div className="min-h-screen dark:from-gray-900 dark:to-gray-800">
@@ -303,69 +354,130 @@ export default function Profile() {
                 Security Settings
               </h3>
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Update your password for enhanced security.
+                Manage your password and account preferences.
               </p>
             </div>
 
-            <form className="max-w-xl space-y-6" onSubmit={submitForm}>
-              <TextInput
-                title="Current Password"
-                type={state.showCurrentPassword ? "text" : "password"}
-                value={state.current_password}
-                onChange={(e) =>
-                  setState({ current_password: e.target.value })
-                }
-                error={state.error?.current_password}
-                icon={<IconLockDots fill />}
-                rightIcon={
-                  state.showCurrentPassword ? <IconEyeOff /> : <IconEye />
-                }
-                rightIconOnlick={() =>
-                  setState({
-                    showCurrentPassword: !state.showCurrentPassword,
-                  })
-                }
-                required
-              />
-
-              <TextInput
-                title="New Password"
-                type={state.showPassword ? "text" : "password"}
-                value={state.new_password}
-                onChange={(e) => setState({ new_password: e.target.value })}
-                error={state.error?.new_password}
-                icon={<IconLockDots fill />}
-                rightIcon={state.showPassword ? <IconEyeOff /> : <IconEye />}
-                rightIconOnlick={() =>
-                  setState({ showPassword: !state.showPassword })
-                }
-                required
-              />
-
-              <TextInput
-                title="Confirm Password"
-                type={state.showPassword1 ? "text" : "password"}
-                value={state.confirm_password}
-                onChange={(e) =>
-                  setState({ confirm_password: e.target.value })
-                }
-                error={state.error?.confirm_password}
-                icon={<IconLockDots fill />}
-                rightIcon={state.showPassword1 ? <IconEyeOff /> : <IconEye />}
-                rightIconOnlick={() =>
-                  setState({ showPassword1: !state.showPassword1 })
-                }
-                required
-              />
-
-              <div className="flex justify-end">
-                <PrimaryButton
-                  type="submit"
-                  text="Update Password"
-                  loading={state.btnLoading}
+            {/* Change Password */}
+            <div className="mb-8">
+              <h4 className="mb-5 text-lg font-semibold text-gray-800 dark:text-gray-200">
+                Change Password
+              </h4>
+              <form className="max-w-xl space-y-6" onSubmit={submitForm}>
+                <TextInput
+                  title="Current Password"
+                  type={state.showCurrentPassword ? "text" : "password"}
+                  value={state.current_password}
+                  onChange={(e) =>
+                    setState({ current_password: e.target.value })
+                  }
+                  error={state.error?.current_password}
+                  icon={<IconLockDots fill />}
+                  rightIcon={
+                    state.showCurrentPassword ? <IconEyeOff /> : <IconEye />
+                  }
+                  rightIconOnlick={() =>
+                    setState({
+                      showCurrentPassword: !state.showCurrentPassword,
+                    })
+                  }
+                  required
                 />
-              </div>
-            </form>
+
+                <TextInput
+                  title="New Password"
+                  type={state.showPassword ? "text" : "password"}
+                  value={state.new_password}
+                  onChange={(e) => setState({ new_password: e.target.value })}
+                  error={state.error?.new_password}
+                  icon={<IconLockDots fill />}
+                  rightIcon={state.showPassword ? <IconEyeOff /> : <IconEye />}
+                  rightIconOnlick={() =>
+                    setState({ showPassword: !state.showPassword })
+                  }
+                  required
+                />
+
+                <TextInput
+                  title="Confirm Password"
+                  type={state.showPassword1 ? "text" : "password"}
+                  value={state.confirm_password}
+                  onChange={(e) =>
+                    setState({ confirm_password: e.target.value })
+                  }
+                  error={state.error?.confirm_password}
+                  icon={<IconLockDots fill />}
+                  rightIcon={state.showPassword1 ? <IconEyeOff /> : <IconEye />}
+                  rightIconOnlick={() =>
+                    setState({ showPassword1: !state.showPassword1 })
+                  }
+                  required
+                />
+
+                <div className="flex justify-end">
+                  <PrimaryButton
+                    type="submit"
+                    text="Update Password"
+                    loading={state.btnLoading}
+                  />
+                </div>
+              </form>
+            </div>
+
+            {/* Divider + Job Approval Toggle — HR & Institution Admin only */}
+            {(state.profile?.role === "hr" || state.profile?.role === "institution_admin") && (
+              <>
+                <div className="my-8 border-t border-gray-200 dark:border-gray-700" />
+
+                <div className="flex items-center justify-between gap-6">
+                  <div>
+                    <p className="text-base font-semibold text-gray-800 dark:text-gray-200">
+                      Handle Job Approval Status
+                    </p>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                      {state.profile?.role === "hr" ? (
+                        state.profile.job_approval_permission
+                          ? "You have permission to manage the job statuses (Approve/Unapprove) the job postings."
+                          : "You don't have permission to manage the job statuses (Approve/Unapprove) the job postings. Request your institution admin to provide permission to manage status."
+                      ) : (
+                        "When enabled, you'll have permission to manage the job statuses (Approve/Unapprove) the job postings. If disabled, ensure that your HR's have the necessary permissions to manage the job posting statuses."
+                      )}
+
+                      {state.profile?.role === "hr" && (
+                        !state.profile.job_approval_permission && (
+                          <button 
+                          onClick={()=>setState({showContactAdminConfirm:true})}
+                          disabled={state.btnLoading}
+                          className="flex-1 rounded-lg items-center flex justify-center underline text-sm font-medium text-dblue">
+                            Contact Admin
+
+                          </button>
+                        ))}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={state.profile?.role === "hr"}
+                    onClick={() =>
+                      setState({ showJobApprovalConfirm: true })
+                    }
+                    className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                      state.profile?.role === "hr"
+                        ? "cursor-not-allowed opacity-60"
+                        : "cursor-pointer"
+                    } ${
+                      state.profile.job_approval_permission ? "bg-dblue" : "bg-gray-300 dark:bg-gray-600"
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                        state.profile.job_approval_permission ? "translate-x-5" : "translate-x-0"
+                      }`}
+                    />
+                  </button>
+                </div>
+              </>
+            )}
           </section>
         </main>
       </div>
@@ -432,6 +544,83 @@ export default function Profile() {
                 ) : (
                   "Update Profile"
                 )}
+              </button>
+            </div>
+          </div>
+        )}
+      />
+
+      {/* Job Approval Confirmation Modal */}
+      <Modal
+        open={state.showJobApprovalConfirm}
+        close={() => setState({ showJobApprovalConfirm: false })}
+        renderComponent={() => (
+          <div className="p-6">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-100">
+                <IconLockDots className="h-5 w-5 text-yellow-600" />
+              </div>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Confirm Change
+              </h2>
+            </div>
+            <p className="mb-6 text-sm text-gray-600 dark:text-gray-400">
+              Are you sure you want to{" "}
+              <span className="font-semibold">
+                {state.profile?.job_approval_permission ? "disable" : "enable"}
+              </span>{" "}
+              job approval status? This will affect how job postings are published.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setState({ showJobApprovalConfirm: false })}
+                className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() =>{
+                  updateJobApprovalStatus()
+                }}
+                className="flex-1 rounded-lg bg-dblue px-4 py-2 text-sm font-medium text-white hover:bg-dblue/90"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        )}
+      />
+
+      <Modal
+        open={state.showContactAdminConfirm}
+        close={() => setState({ showContactAdminConfirm: false })}
+        renderComponent={() => (
+          <div className="p-6">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-100">
+                <IconLockDots className="h-5 w-5 text-yellow-600" />
+              </div>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Request Access from Admin
+              </h2>
+            </div>
+            <p className="mb-6 text-sm text-gray-600 dark:text-gray-400">
+              Are you sure you want to request  <span className="text-black font-semibold">Handle Job Approval Status</span> permission from admin? 
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setState({ showContactAdminConfirm: false })}
+                className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() =>{
+                  contactAdmin()
+                }}
+                className="flex-1 rounded-lg bg-dblue px-4 py-2 text-sm font-medium text-white hover:bg-dblue/90"
+              >
+                Confirm
               </button>
             </div>
           </div>
