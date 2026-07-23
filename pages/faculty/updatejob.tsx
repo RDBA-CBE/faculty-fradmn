@@ -17,13 +17,19 @@ import ChipInput from "@/components/FormFields/ChipInput.component";
 import ImageUploadWithPreview from "@/components/ImageUploadWithPreview/ImageUploadWithPreview.component";
 import { CreateNewJob } from "@/utils/validation.utils";
 import { Models } from "@/imports/models.import";
-import { EXPERIENCE, JOB_TYPE, ROLES } from "@/utils/constant.utils";
+import { EXPERIENCE, FRONTEND_URL, JOB_TYPE, ROLES } from "@/utils/constant.utils";
 import moment from "moment";
 import { useRouter } from "next/router";
 import UpdatePropertyImagePreview from "@/components/ImageUploadWithPreview/ImageUploadWithPreview.component";
 import CheckboxInput from "@/components/FormFields/CheckBoxInput.component";
 import IconLoader from "@/components/Icon/IconLoader";
 import { BellRing } from "lucide-react";
+import ParentChildCat, {
+  transformToGroupedOptions,
+} from "@/components/FormFields/parent_child_dropdown";
+import CategorySelector, { transformCategoryData } from "@/components/FormFields/categorySelect";
+import AccordionSelect from "@/components/FormFields/AccordionSelect";
+import Modal from "@/components/modal/modal.component";
 
 export default function UpdateJob() {
   const router = useRouter();
@@ -37,6 +43,9 @@ export default function UpdateJob() {
   const section3Ref = useRef(null);
   const section4Ref = useRef(null);
   const section5Ref = useRef(null);
+  const section6Ref = useRef(null);
+
+
   const qualificationEditorRef = useRef(null);
   const isEditorInitialized = useRef(false);
   const isKeyResponsibilityEditorInitialized = useRef(false);
@@ -102,6 +111,10 @@ export default function UpdateJob() {
     academicResponsibilityList: [],
     academicResponsibilityLoading: false,
     loading: true,
+    isOpen: false,
+    editItem: null,
+    catTitle: "",
+    canonical_url: "",
   });
 
   useEffect(() => {
@@ -116,6 +129,7 @@ export default function UpdateJob() {
     fetchExperience(1);
     jobRoleList();
     academicResponsibilityList();
+    seoCategoryList();
   }, []);
 
   useEffect(() => {
@@ -183,9 +197,9 @@ export default function UpdateJob() {
           },
           salary: res?.salary_range_obj
             ? {
-                value: res?.salary_range_obj?.id,
-                label: res?.salary_range_obj?.name,
-              }
+              value: res?.salary_range_obj?.id,
+              label: res?.salary_range_obj?.name,
+            }
             : null,
           job_status: {
             value: res?.job_status_obj?.id,
@@ -200,9 +214,9 @@ export default function UpdateJob() {
           department:
             res?.department?.length > 0
               ? res?.department?.map((dept: any) => ({
-                  value: dept?.id,
-                  label: dept?.name,
-                }))
+                value: dept?.id,
+                label: dept?.name,
+              }))
               : [],
 
           deadline: res?.deadline
@@ -226,30 +240,30 @@ export default function UpdateJob() {
           tags:
             res?.tags?.length > 0
               ? res?.tags?.map((tag: any) => ({
-                  value: tag?.id,
-                  label: tag?.name,
-                }))
+                value: tag?.id,
+                label: tag?.name,
+              }))
               : [],
           location:
             res?.locations?.length > 0
               ? res?.locations?.map((location: any) => ({
-                  value: location?.id,
-                  label: location?.city,
-                }))
+                value: location?.id,
+                label: location?.city,
+              }))
               : [],
           category:
             res?.categories?.length > 0
-              ? res?.categories?.map((category: any) => ({
-                  value: category?.id,
-                  label: category?.name,
-                }))
-              : [],
+              ? {
+                value: res?.categories?.[0]?.id,
+                label: res?.categories?.[0]?.name,
+              }
+              : null,
           skills:
             res?.skills?.length > 0
               ? res?.skills?.map((skills: any) => ({
-                  value: skills?.id,
-                  label: skills?.name,
-                }))
+                value: skills?.id,
+                label: skills?.name,
+              }))
               : [],
           is_approved: res?.is_approved,
           // jobRole:
@@ -262,16 +276,16 @@ export default function UpdateJob() {
           jobRole:
             res?.roles?.length > 0
               ? {
-                  value: res?.roles?.[0]?.id,
-                  label: res?.roles?.[0]?.role_name,
-                }
+                value: res?.roles?.[0]?.id,
+                label: res?.roles?.[0]?.role_name,
+              }
               : [],
           academicResponsibility:
             res?.additional_academic_responsibilities?.length > 0
               ? res.additional_academic_responsibilities.map((item: any) => ({
-                  value: item.id,
-                  label: item.responsibility_title,
-                }))
+                value: item.id,
+                label: item.responsibility_title,
+              }))
               : [],
         });
         if (res?.job_image) {
@@ -313,6 +327,23 @@ export default function UpdateJob() {
             });
           }
         }
+        // Pre-fill SEO categories - all explicitly selected ids
+        const allSelected = [
+          ...(res?.master_category_ids || []).map((id: number) => ({ id, depth: 0 })),
+          ...(res?.subcategory_ids || []).map((id: number) => ({ id, depth: 1 })),
+          ...(res?.subcategory_child_ids || []).map((id: number) => ({ id, depth: 2 })),
+        ];
+
+        const seoPreFill = {
+          parent_ids: res?.master_category_ids || [],
+          child_ids: res?.subcategory_ids || [],
+          sub_child_ids: res?.subcategory_child_ids || [],
+        };
+
+        setState({
+          seoCategorySelected: allSelected,
+          seoCategory: seoPreFill,
+        });
         setState({ loading: false });
       }
     } catch (error) {
@@ -355,13 +386,63 @@ export default function UpdateJob() {
     }
   };
 
+  const seoCategoryList = async (page = 1, search = "", loadMore = false) => {
+    try {
+      setState({ catLoading: true });
+      const body = {
+        search,
+      };
+      const res: any = await Models.seo.list(1, body);
+      console.log("seoCategoryList --->", res);
+
+      const parent = res?.results?.map((item) => ({
+        value: item?.id,
+        label: capitalizeFLetter(item?.name),
+      }));
+
+      // const dropdown = Dropdown(res?.results, "name");
+      setState({
+        seoCategoryList: transformCategoryData(res?.results || []),
+        rawSeoCategoryList: res?.results || [],
+        parentSeoCategoryList: [
+          // Parents
+          ...res?.results?.map((item: any) => ({
+            value: `parent_${item.id}`,
+            label: capitalizeFLetter(item.name),
+            type: "parent",
+            id: item.id,
+          })),
+          // Subcategories (top-level only, no parent_id)
+          ...(res?.results?.flatMap((item: any) =>
+            (item.subcategories || [])
+              .filter((s: any) => !s.parent_id)
+              .map((s: any) => ({
+                value: `sub_${s.id}`,
+                label: `${capitalizeFLetter(item.name)} > ${capitalizeFLetter(s.name)}`,
+                type: "subcategory",
+                id: s.id,
+                parent_id: item.id,
+              }))
+          ) || []),
+        ],
+        // ,
+        //   catLoading: false,
+        //   catPage: page,
+        //   catNext: res?.next,
+      });
+    } catch (error) {
+      setState({ hrLoading: false });
+      // console.error("Error fetching HR users:", error);
+    }
+  };
+
   const academicResponsibilityList = async () => {
     try {
       setState({ academicResponsibilityLoading: true });
       const res: any =
         await Models.master.additional_academic_responsibilities_list(
           { pagination: "No" },
-          1,
+          1
         );
       const dropdown = res?.map((item: any) => ({
         value: item.id,
@@ -541,15 +622,21 @@ export default function UpdateJob() {
     const handleScroll = () => {
       const section1 = section1Ref.current?.getBoundingClientRect();
       const section2 = section2Ref.current?.getBoundingClientRect();
-      const section5 = section5Ref.current?.getBoundingClientRect();
       const section3 = section3Ref.current?.getBoundingClientRect();
       const section4 = section4Ref.current?.getBoundingClientRect();
+      const section5 = section5Ref.current?.getBoundingClientRect();
+      const section6 = section6Ref.current?.getBoundingClientRect();
 
-      if (section4 && section4.top < 300) {
+
+      const isAtPageBottom =
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 4;
+
+      if ((section5 && section5.top < 300) || isAtPageBottom) {
         setState({ activeStep: 5 });
-      } else if (section3 && section3.top < 300) {
+      } else if (section4 && section4.top < 300) {
         setState({ activeStep: 4 });
-      } else if (section5 && section5.top < 300) {
+      } else if (section3 && section3.top < 300) {
         setState({ activeStep: 3 });
       } else if (section2 && section2.top < 300) {
         setState({ activeStep: 2 });
@@ -558,6 +645,7 @@ export default function UpdateJob() {
       }
     };
 
+    handleScroll();
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -693,8 +781,7 @@ export default function UpdateJob() {
     setState({ btnLoading: true });
     const keyResponsibilityData =
       await state.keyResponsibilityEditorInstance?.save();
-    const qualificationData =
-      await state.qualificationEditorInstance?.save();
+    const qualificationData = await state.qualificationEditorInstance?.save();
 
     try {
       const validation = {
@@ -729,6 +816,18 @@ export default function UpdateJob() {
       console.log("✌️validation --->", validation);
 
       await CreateNewJob.validate(validation, { abortEarly: false });
+
+      // SEO category is required — at least one must be selected
+      const seoCategory = state.seoCategory || {};
+      const hasSeoSelection =
+        (seoCategory.parent_ids?.length > 0) ||
+        (seoCategory.child_ids?.length > 0) ||
+        (seoCategory.sub_child_ids?.length > 0);
+      if (!hasSeoSelection) {
+        Failure("Please select at least one SEO category.");
+        setState({ btnLoading: false, error: { ...state.error, seoCategory: "Please select at least one SEO category." } });
+        return;
+      }
 
       const body: any = {
         // job_title: capitalizeFLetter(state.title),
@@ -812,6 +911,11 @@ export default function UpdateJob() {
         body.category_ids = [];
       }
 
+      // const seoCategory = state.seoCategory || {};
+      body.master_category_ids = seoCategory.parent_ids || [];
+      body.subcategory_ids = seoCategory.child_ids || [];
+      body.subcategory_child_ids = seoCategory.sub_child_ids || [];
+
       if (state.jobRole?.value) {
         body.role_ids = [state.jobRole?.value];
       } else {
@@ -857,7 +961,6 @@ export default function UpdateJob() {
       setState({ btnLoading: false });
     }
   };
-  console.log("✌️state.newImages --->", state.newImages);
 
   const handleFieldChange = (field: string, value: any) => {
     setState({
@@ -878,6 +981,224 @@ export default function UpdateJob() {
     if (field === "college" && value) {
       setState({ department: null, departmentList: [] });
       fetchDepartments(value.value, 1);
+    }
+  };
+
+  const buildJobCanonicalUrl = (seoCategory: any, rawList: any[]): string => {
+    const base = (process.env.NEXT_PUBLIC_SITE_URL || "").replace(/\/$/, "");
+    if (!seoCategory || !rawList?.length) return "";
+
+    const getSlugChain = (nodes: any[], id: number): string[] => {
+      for (const node of nodes) {
+        if (node.id === id) return [node.slug || ""];
+        const sub = node.subcategories || [];
+        for (const s of sub) {
+          if (s.id === id) return [node.slug || "", s.slug || ""];
+          const subsub = s.subcategories || [];
+          for (const ss of subsub) {
+            if (ss.id === id) return [node.slug || "", s.slug || "", ss.slug || ""];
+          }
+        }
+      }
+      return [];
+    };
+
+    const subChildIds = seoCategory.sub_child_ids || [];
+    const childIds = seoCategory.child_ids || [];
+    const parentIds = seoCategory.parent_ids || [];
+
+    let targetId: number | null = null;
+    if (subChildIds.length) targetId = subChildIds[subChildIds.length - 1];
+    else if (childIds.length) targetId = childIds[childIds.length - 1];
+    else if (parentIds.length) targetId = parentIds[parentIds.length - 1];
+
+    if (!targetId) return "";
+    const slugs = getSlugChain(rawList, targetId).filter(Boolean);
+    return slugs.length ? `${base}/${slugs.join("/")}` : "";
+  };
+
+  const buildCanonicalUrl = (parentCategory: any, slug: string, rawList: any[]): string => {
+    const base = (FRONTEND_URL || "").replace(/\/$/, "");
+    const parts: string[] = [];
+    if (parentCategory?.id) {
+      const findSlugs = (nodes: any[], targetId: number, path: string[]): string[] | null => {
+        for (const node of nodes) {
+          if (node.id === targetId) return [...path, node.slug || ""];
+          const sub = node.subcategories || node.children || [];
+          const found = findSlugs(sub, targetId, [...path, node.slug || ""]);
+          if (found) return found;
+        }
+        return null;
+      };
+      const slugPath = findSlugs(rawList, parentCategory.id, []);
+      if (slugPath) parts.push(...slugPath.filter(Boolean));
+    }
+    if (slug) parts.push(slug);
+    return parts.length ? `${base}/${parts.join("/")}` : base;
+  };
+
+  const create_category = async () => {
+    try {
+      setState({ catLoading: true });
+      let res: any;
+
+      if (state.parent_category?.id) {
+        const body: any = {
+          name: state.name,
+          slug: state.slug,
+          description: state.catDescription,
+          title: state.catTitle,
+          canonical_url: state.canonical_url,
+        };
+        const selected = state.parent_category;
+        if (selected.depth === 0) {
+          // Selected main category → new sub is direct child, category_id = selected.id
+          body.category_id = selected.id;
+        } else {
+          // Selected a sub/child → parent_id = selected.id, category_id from its category_id
+          body.parent_id = selected.id;
+          body.category_id = selected.category_id;
+        }
+        res = await Models.seo.create_sub_category(body);
+      } else {
+        const body = { name: state.name, slug: state.slug, description: state.description, title: state.catTitle, canonical_url: state.canonical_url };
+        res = await Models.seo.create_category(body);
+      }
+
+      // Refresh list and auto-select newly created item
+      const listRes: any = await Models.seo.list(1, {});
+      const updatedList = transformCategoryData(listRes?.results || []);
+      const existingSelected = Array.isArray(state.seoCategorySelected) ? state.seoCategorySelected : [];
+      const newDepth = state.parent_category ? (state.parent_category.depth ?? 0) + 1 : 0;
+      const newSelected = res?.id ? { id: res.id, name: res.name, depth: newDepth } : null;
+      setState({
+        seoCategoryList: updatedList,
+        rawSeoCategoryList: listRes?.results || [],
+        seoCategorySelected: newSelected ? [...existingSelected, newSelected] : existingSelected,
+        catLoading: false,
+        isOpen: false,
+        name: "",
+        slug: "",
+        description: "",
+        catTitle: "",
+        canonical_url: "",
+        parent_category: null,
+      });
+    } catch (error) {
+      setState({ catLoading: false });
+      console.log("✌️error --->", error);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setState({
+      isOpen: false,
+      editItem: null,
+      name: "",
+      slug: "",
+      description: "",
+      catTitle: "",
+      canonical_url: "",
+      parent_category: null,
+    });
+  };
+
+  const handleEdit = (item: { id: number; name: string; slug?: string; description?: string; title?: string; category_id?: number; depth: number; ancestors?: any[]; type?: string; parent_id?: number; child_id?: number }) => {
+    let parent_category = null;
+    if (item.ancestors?.length) {
+      const label = item.ancestors.map((a: any) => a.name).join(" > ");
+      const last = item.ancestors[item.ancestors.length - 1];
+      // category_id of the last ancestor = main cat id (ancestors[0].id)
+      parent_category = { id: last.id, label, type: `level${item.depth - 1}`, depth: item.depth - 1, category_id: item.ancestors[0]?.id };
+    }
+    setState({
+      isOpen: true,
+      editItem: item,
+      name: item.name,
+      slug: item.slug || "",
+      description: item.description || "",
+      catTitle: item.title || "",
+      canonical_url: buildCanonicalUrl(parent_category, item.slug || "", state.rawSeoCategoryList || []),
+      parent_category,
+    });
+  };
+
+  const delete_category = (item: { id: number; name: string; depth: number }) => {
+    setState({ deleteConfirmItem: item });
+  };
+
+  const confirm_delete_category = async () => {
+    const item = state.deleteConfirmItem;
+    if (!item) return;
+    try {
+      setState({ catLoading: true, deleteConfirmItem: null });
+      if (item.depth === 0) {
+        await Models.seo.delete_category(item.id);
+      } else {
+        await Models.seo.delete_sub_category(item.id);
+      }
+      const listRes: any = await Models.seo.list(1, {});
+      const existingSelected = Array.isArray(state.seoCategorySelected)
+        ? state.seoCategorySelected.filter((s: any) => s.id !== item.id)
+        : [];
+      const updatedList = transformCategoryData(listRes?.results || []);
+      const parent_ids = existingSelected.filter((s: any) => s.depth === 0).map((s: any) => s.id);
+      const child_ids = existingSelected.filter((s: any) => s.depth === 1).map((s: any) => s.id);
+      const sub_child_ids = existingSelected.filter((s: any) => s.depth === 2).map((s: any) => s.id);
+      setState({
+        seoCategoryList: updatedList,
+        rawSeoCategoryList: listRes?.results || [],
+        seoCategorySelected: existingSelected,
+        seoCategory: { parent_ids, child_ids, sub_child_ids },
+        catLoading: false,
+      });
+    } catch (error) {
+      setState({ catLoading: false });
+      console.log("✌️delete_category error --->", error);
+    }
+  };
+
+  const update_category = async () => {
+    try {
+      setState({ catLoading: true });
+      const item = state.editItem;
+      const body: any = { name: state.name, slug: state.slug, description: state.description, title: state.catTitle, canonical_url: state.canonical_url };
+      if (item?.depth === 0) {
+        await Models.seo.update_parent_cat(body, item.id);
+      } else {
+        const selected = state.parent_category;
+        const subBody: any = { ...body };
+        if (selected) {
+          // selected.depth=0 means main cat selected as parent → parent_id = selected.id, category_id = main cat id (selected itself is main cat)
+          // selected.depth>0 means sub selected → parent_id = selected.id, category_id = selected.category_id (main cat)
+          subBody.parent_id = selected.depth === 0 ? null : selected.id;
+          subBody.category_id = selected.depth === 0 ? selected.id : selected.category_id;
+        } else {
+          // no change to parent, keep existing
+          subBody.category_id = item?.ancestors?.[0]?.id || item?.category_id;
+          subBody.parent_id = item?.depth > 1 ? item?.ancestors?.[item.ancestors.length - 1]?.id : null;
+        }
+        // remove null parent_id
+        if (!subBody.parent_id) delete subBody.parent_id;
+        await Models.seo.update_sub_cat(subBody, item.id);
+      }
+      const listRes: any = await Models.seo.list(1, {});
+      setState({
+        seoCategoryList: transformCategoryData(listRes?.results || []),
+        rawSeoCategoryList: listRes?.results || [],
+        catLoading: false,
+        isOpen: false,
+        editItem: null,
+        name: "",
+        slug: "",
+        description: "",
+        catTitle: "",
+        canonical_url: "",
+        parent_category: null,
+      });
+    } catch (error) {
+      setState({ catLoading: false });
+      console.log("✌️error --->", error);
     }
   };
 
@@ -925,28 +1246,25 @@ export default function UpdateJob() {
               onClick={() => scrollToSection(section1Ref)}
             >
               <div
-                className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition-all ${
-                  state.activeStep >= 1
+                className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition-all ${state.activeStep >= 1
                     ? "bg-dblue text-white"
                     : "bg-gray-200 text-gray-600"
-                }`}
+                  }`}
               >
                 {state.activeStep > 1 ? "✓" : "1"}
               </div>
               <div className="ml-2 hidden lg:block">
                 <p
-                  className={`text-xs font-semibold ${
-                    state.activeStep >= 1 ? "text-gray-900" : "text-gray-500"
-                  }`}
+                  className={`text-xs font-semibold ${state.activeStep >= 1 ? "text-gray-900" : "text-gray-500"
+                    }`}
                 >
                   Basic
                 </p>
               </div>
             </div>
             <div
-              className={`mx-2 h-1 flex-1 ${
-                state.activeStep >= 2 ? "bg-dblue" : "bg-gray-200"
-              }`}
+              className={`mx-2 h-1 flex-1 ${state.activeStep >= 2 ? "bg-dblue" : "bg-gray-200"
+                }`}
             ></div>
 
             <div
@@ -954,28 +1272,25 @@ export default function UpdateJob() {
               onClick={() => scrollToSection(section2Ref)}
             >
               <div
-                className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition-all ${
-                  state.activeStep >= 2
+                className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition-all ${state.activeStep >= 2
                     ? "bg-dblue text-white"
                     : "bg-gray-200 text-gray-600"
-                }`}
+                  }`}
               >
                 {state.activeStep > 2 ? "✓" : "2"}
               </div>
               <div className="ml-2 hidden lg:block">
                 <p
-                  className={`text-xs font-semibold ${
-                    state.activeStep >= 2 ? "text-gray-900" : "text-gray-500"
-                  }`}
+                  className={`text-xs font-semibold ${state.activeStep >= 2 ? "text-gray-900" : "text-gray-500"
+                    }`}
                 >
                   Details
                 </p>
               </div>
             </div>
             <div
-              className={`mx-2 h-1 flex-1 ${
-                state.activeStep >= 3 ? "bg-dblue" : "bg-gray-200"
-              }`}
+              className={`mx-2 h-1 flex-1 ${state.activeStep >= 3 ? "bg-dblue" : "bg-gray-200"
+                }`}
             ></div>
 
             <div
@@ -983,28 +1298,25 @@ export default function UpdateJob() {
               onClick={() => scrollToSection(section3Ref)}
             >
               <div
-                className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition-all ${
-                  state.activeStep >= 3
+                className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition-all ${state.activeStep >= 3
                     ? "bg-dblue text-white"
                     : "bg-gray-200 text-gray-600"
-                }`}
+                  }`}
               >
                 {state.activeStep > 3 ? "✓" : "3"}
               </div>
               <div className="ml-2 hidden lg:block">
                 <p
-                  className={`text-xs font-semibold ${
-                    state.activeStep >= 3 ? "text-gray-900" : "text-gray-500"
-                  }`}
+                  className={`text-xs font-semibold ${state.activeStep >= 3 ? "text-gray-900" : "text-gray-500"
+                    }`}
                 >
                   Description
                 </p>
               </div>
             </div>
             <div
-              className={`mx-2 h-1 flex-1 ${
-                state.activeStep >= 4 ? "bg-dblue" : "bg-gray-200"
-              }`}
+              className={`mx-2 h-1 flex-1 ${state.activeStep >= 4 ? "bg-dblue" : "bg-gray-200"
+                }`}
             ></div>
 
             <div
@@ -1012,29 +1324,26 @@ export default function UpdateJob() {
               onClick={() => scrollToSection(section4Ref)}
             >
               <div
-                className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition-all ${
-                  state.activeStep >= 4
+                className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition-all ${state.activeStep >= 4
                     ? "bg-dblue text-white"
                     : "bg-gray-200 text-gray-600"
-                }`}
+                  }`}
               >
                 {state.activeStep > 4 ? "✓" : "4"}
               </div>
               <div className="ml-2 hidden lg:block">
                 <p
-                  className={`text-xs font-semibold ${
-                    state.activeStep >= 4 ? "text-gray-900" : "text-gray-500"
-                  }`}
+                  className={`text-xs font-semibold ${state.activeStep >= 4 ? "text-gray-900" : "text-gray-500"
+                    }`}
                 >
                   Responsibility
                 </p>
               </div>
             </div>
 
-            {/* <div
-              className={`mx-2 h-1 flex-1 ${
-                state.activeStep >= 5 ? "bg-dblue" : "bg-gray-200"
-              }`}
+            <div
+              className={`mx-2 h-1 flex-1 ${state.activeStep >= 5 ? "bg-dblue" : "bg-gray-200"
+                }`}
             ></div>
 
             <div
@@ -1042,56 +1351,55 @@ export default function UpdateJob() {
               onClick={() => scrollToSection(section5Ref)}
             >
               <div
-                className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition-all ${
-                  state.activeStep >= 5
+                className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition-all ${state.activeStep >= 5
                     ? "bg-dblue text-white"
                     : "bg-gray-200 text-gray-600"
-                }`}
+                  }`}
               >
-                5
+                {state.activeStep > 5 ? "✓" : "5"}
               </div>
               <div className="ml-2 hidden lg:block">
                 <p
-                  className={`text-xs font-semibold ${
-                    state.activeStep >= 5 ? "text-gray-900" : "text-gray-500"
-                  }`}
+                  className={`text-xs font-semibold ${state.activeStep >= 5 ? "text-gray-900" : "text-gray-500"
+                    }`}
                 >
-                  Skills
+                  SEO
                 </p>
               </div>
-            </div> */}
+            </div>
           </div>
         </div>
       </div>
 
-      <div className=" py-4">
-        <div className="space-y-4">
-          {/* Card 1: Basic Information */}
-          <div
-            ref={section1Ref}
-            className="scroll-mt-32 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
-          >
-            <div className="border-b px-6 py-4">
-              <h2 className="flex items-center gap-2 text-lg font-semibold text-black">
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                Basic Information
-              </h2>
-            </div>
-            <div className="space-y-5 p-6">
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                {/* <TextInput
+      <div className="grid  gap-2">
+        <div className="">
+          <div className=" py-4 ">
+            {/* Card 1: Basic Information */}
+            <div
+              ref={section1Ref}
+              className="scroll-mt-32 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+            >
+              <div className="border-b px-6 py-4">
+                <h2 className="flex items-center gap-2 text-lg font-semibold text-black">
+                  <svg
+                    className="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  Basic Information
+                </h2>
+              </div>
+              <div className="space-y-5 p-6">
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                  {/* <TextInput
                   name="title"
                   type="text"
                   title="Job Title"
@@ -1114,40 +1422,41 @@ export default function UpdateJob() {
                   loading={state.locationLoading}
                   isMulti={true}
                 /> */}
-                <CustomSelect
-                  options={state.jobRoleList}
-                  value={state.jobRole}
-                  onChange={(option) => handleFieldChange("jobRole", option)}
-                  placeholder="Select job role"
-                  title="Select Job Role"
-                  required
-                  isClearable={true}
-                  error={state.error?.jobRole}
-                  loading={state.jobRoleLoading}
-                  onSearch={(searchTerm) => jobRoleList(1, searchTerm)}
-                  loadMore={() =>
-                    state.jobRoleNext &&
-                    jobRoleList(state.jobRolePage + 1, "", true)
-                  }
-                />
+                  <CustomSelect
+                    options={state.jobRoleList}
+                    value={state.jobRole}
+                    onChange={(option) => handleFieldChange("jobRole", option)}
+                    placeholder="Select job role"
+                    title="Select Job Role"
+                    required
+                    isClearable={true}
+                    error={state.error?.jobRole}
+                    loading={state.jobRoleLoading}
+                    onSearch={(searchTerm) => jobRoleList(1, searchTerm)}
+                    loadMore={() =>
+                      state.jobRoleNext &&
+                      jobRoleList(state.jobRolePage + 1, "", true)
+                    }
+                  />
 
-                <CustomSelect
-                  options={state.categoryOption}
-                  value={state.category}
-                  onChange={(selectedOption) => {
-                    setState({
-                      category: selectedOption,
-                    });
-                  }}
-                  onSearch={(searchTerm) => categoryList(1, searchTerm)}
-                  placeholder="Select category"
-                  isClearable={true}
-                  loadMore={() =>
-                    state.catNext && categoryList(state.catPage + 1, "", true)
-                  }
-                  loading={state.catLoading}
-                  title="Select category"
-                />
+                  <CustomSelect
+                    options={state.categoryOption}
+                    value={state.category}
+                    onChange={(selectedOption) => {
+                      setState({
+                        category: selectedOption,
+                      });
+                    }}
+                    onSearch={(searchTerm) => categoryList(1, searchTerm)}
+                    placeholder="Select category"
+                    isClearable={true}
+                    loadMore={() =>
+                      state.catNext && categoryList(state.catPage + 1, "", true)
+                    }
+                    loading={state.catLoading}
+                    title="Select category"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -1208,7 +1517,7 @@ export default function UpdateJob() {
                         state.collegeHasMore &&
                         fetchColleges(
                           state.institution?.value,
-                          state.collegePage + 1,
+                          state.collegePage + 1
                         )
                       }
                       required
@@ -1228,7 +1537,7 @@ export default function UpdateJob() {
                         state.departmentHasMore &&
                         fetchDepartments(
                           state.college?.value,
-                          state.departmentPage + 1,
+                          state.departmentPage + 1
                         )
                       }
                       required
@@ -1242,7 +1551,7 @@ export default function UpdateJob() {
                       title="Institution"
                       placeholder="Institution"
                       value={state.profile?.institution?.name}
-                      onChange={(e) => {}}
+                      onChange={(e) => { }}
                       disabled
                     />
                     <CustomSelect
@@ -1261,7 +1570,7 @@ export default function UpdateJob() {
                         state.collegeHasMore &&
                         fetchColleges(
                           state.institution?.value,
-                          state.collegePage + 1,
+                          state.collegePage + 1
                         )
                       }
                       required
@@ -1281,7 +1590,7 @@ export default function UpdateJob() {
                         state.departmentHasMore &&
                         fetchDepartments(
                           state.college?.value,
-                          state.departmentPage + 1,
+                          state.departmentPage + 1
                         )
                       }
                       required
@@ -1294,7 +1603,7 @@ export default function UpdateJob() {
                       title="Institution"
                       placeholder="Institution"
                       value={state.profile?.institution?.name}
-                      onChange={(e) => {}}
+                      onChange={(e) => { }}
                       disabled
                     />
 
@@ -1316,7 +1625,7 @@ export default function UpdateJob() {
                           state.collegeHasMore &&
                           fetchColleges(
                             state.institution?.value,
-                            state.collegePage + 1,
+                            state.collegePage + 1
                           )
                         }
                         required
@@ -1326,7 +1635,7 @@ export default function UpdateJob() {
                         title="College"
                         placeholder="College"
                         value={state.profile?.college?.college_name}
-                        onChange={(e) => {}}
+                        onChange={(e) => { }}
                         disabled
                       />
                     )}
@@ -1352,7 +1661,7 @@ export default function UpdateJob() {
                         state.departmentHasMore &&
                         fetchDepartments(
                           state.college?.value,
-                          state.departmentPage + 1,
+                          state.departmentPage + 1
                         )
                       }
                       required
@@ -1365,21 +1674,21 @@ export default function UpdateJob() {
                       title="Institution"
                       placeholder="Institution"
                       value={state.profile?.institution?.name}
-                      onChange={(e) => {}}
+                      onChange={(e) => { }}
                       disabled
                     />
                     <TextInput
                       title="College"
                       placeholder="College"
                       value={state?.college?.label}
-                      onChange={(e) => {}}
+                      onChange={(e) => { }}
                       disabled
                     />
                     <TextInput
                       title="Department"
                       placeholder="Department"
                       value={state.profile?.department?.department_name}
-                      onChange={(e) => {}}
+                      onChange={(e) => { }}
                       disabled
                     />
                   </>
@@ -1403,7 +1712,7 @@ export default function UpdateJob() {
                   onChange={(option) => handleFieldChange("salary", option)}
                   error={state.error?.salary}
                   isClearable={true}
-                  // required
+                // required
                 />
 
                 {/* <CustomSelect
@@ -1531,7 +1840,6 @@ export default function UpdateJob() {
                   required
                 /> */}
 
-                
                 <CustomSelect
                   options={state.academicResponsibilityList}
                   value={state.academicResponsibility}
@@ -1547,24 +1855,23 @@ export default function UpdateJob() {
               </div>
 
               <div className="mt-5">
-                  <h2 className="flex items-center gap-2 text-sm font-bold text-[#374151] ">
-                     
-                      Qualification
-                    </h2>
-            <div className="pt-2">
-              <div className="overflow-hidden rounded-lg border-2 border-dashed border-gray-300 transition-colors">
-                <div
-                  ref={qualificationEditorRef}
-                  id="qualificationEditor"
-                  className="max-h-[400px] min-h-[250px] overflow-y-auto p-4"
-                ></div>
-              </div>
-              {state.error?.qualification && (
-                <p className="mt-2 text-sm text-red-600">
-                  {state.error.qualification}
-                </p>
-              )}
-            </div>
+                <h2 className="flex items-center gap-2 text-sm font-bold text-[#374151] ">
+                  Qualification
+                </h2>
+                <div className="pt-2">
+                  <div className="overflow-hidden rounded-lg border-2 border-dashed border-gray-300 transition-colors">
+                    <div
+                      ref={qualificationEditorRef}
+                      id="qualificationEditor"
+                      className="max-h-[400px] min-h-[250px] overflow-y-auto p-4"
+                    ></div>
+                  </div>
+                  {state.error?.qualification && (
+                    <p className="mt-2 text-sm text-red-600">
+                      {state.error.qualification}
+                    </p>
+                  )}
+                </div>
               </div>
 
               <div className="mt-5">
@@ -1608,7 +1915,7 @@ export default function UpdateJob() {
                           onChange={(e) =>
                             handleFieldChange(
                               "alternativeEmail",
-                              e.target.value,
+                              e.target.value
                             )
                           }
                           error={state.error?.alternativeEmail}
@@ -1635,58 +1942,64 @@ export default function UpdateJob() {
               </div>
             </div>
           </div>
-          <UpdatePropertyImagePreview
-            existingImages={state.newImages}
-            onImagesChange={(newImages) => setState({ newImages })}
-            onDeleteImage={(imageUrl) => {
-              setState({
-                newImages: state.newImages.filter((img) => img !== imageUrl),
-              });
-            }}
-            maxFiles={1}
-            title="Job Image"
-            description="Upload job logo (JPEG or PNG)"
-            validateDimensions={false}
-            isSingleImage={true}
-          />
-          <div
-            ref={section5Ref}
-            className="scroll-mt-32 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
-          >
-            <div className="border-b px-6 py-4">
-              <h2 className="flex items-center gap-2 text-lg font-semibold text-black">
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                  />
-                </svg>
-                Job Description
-              </h2>
-            </div>
-            <div className="p-6">
-              <TextArea
-                name="description"
-                placeholder="Job descriptions..."
-                value={state.description}
-                onChange={(e) =>
-                  handleFieldChange("description", e.target.value)
-                }
-                rows={10}
-              />
+          <div className="pt-4">
+            <UpdatePropertyImagePreview
+              existingImages={state.newImages}
+              onImagesChange={(newImages) => setState({ newImages })}
+              onDeleteImage={(imageUrl) => {
+                setState({
+                  newImages: state.newImages.filter((img) => img !== imageUrl),
+                });
+              }}
+              maxFiles={1}
+              title="Job Image"
+              description="Upload job logo (JPEG or PNG)"
+              validateDimensions={false}
+              isSingleImage={true}
+            />
+          </div>
+          <div className="py-4">
+
+            <div
+              ref={section3Ref}
+              className="scroll-mt-32 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+            >
+              <div className="border-b px-6 py-4">
+                <h2 className="flex items-center gap-2 text-lg font-semibold text-black">
+                  <svg
+                    className="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                    />
+                  </svg>
+                  Job Description
+                </h2>
+              </div>
+              <div className="p-6">
+                <TextArea
+                  name="description"
+                  placeholder="Job descriptions..."
+                  value={state.description}
+                  onChange={(e) =>
+                    handleFieldChange("description", e.target.value)
+                  }
+                  rows={10}
+                />
+              </div>
             </div>
           </div>
 
-          {/* Card 3: Key Responsibility */}
+
+          {/* Card 4: Key Responsibility */}
           <div
-            ref={section3Ref}
+            ref={section4Ref}
             className="scroll-mt-32 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
           >
             <div className="border-b px-6 py-4">
@@ -1720,6 +2033,60 @@ export default function UpdateJob() {
                   {state.error.keyResponsibility}
                 </p>
               )}
+            </div>
+          </div>
+
+          <div className="py-4">
+            <div
+              ref={section5Ref}
+              className="scroll-mt-32 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+            >
+              <div className="border-b px-6 py-4 gap-5 flex items-center">
+                <h2 className="flex items-center gap-2 text-lg font-semibold text-black">
+                  <svg
+                    className="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                    />
+                  </svg>
+                  SEO
+                </h2>
+                <span
+                  onClick={() => setState({ isOpen: true })}
+                  className="cursor-pointer text-md font-bold  underline text-dblue"
+                >
+                  New Category
+                </span>
+              </div>
+              <div className="p-4 sm:p-6">
+                <div className="grid grid-cols-1 gap-5">
+
+                  <div className="w-full overflow-hidden">
+                    <CategorySelector
+                      key={`${state.seoCategoryList?.length}`}
+                      categoryData={state.seoCategoryList}
+                      value={state.seoCategorySelected}
+                      onChange={(payload, rawSelected) => {
+                        setState({ seoCategory: payload, seoCategorySelected: rawSelected, error: { ...state.error, seoCategory: undefined } });
+                      }}
+                      onEdit={handleEdit}
+                      onDelete={delete_category}
+                    />
+                  </div>
+                  {state.error?.seoCategory && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {state.error.seoCategory}
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1821,7 +2188,133 @@ export default function UpdateJob() {
             </button>
           </div>
         </div>
+
+
       </div>
+
+      <Modal
+        closeIcon
+        maxWidth="max-w-3xl"
+        subTitle={state.editItem ? `Edit "${state.editItem.name}"` : "Add new category"}
+        open={state.isOpen}
+        close={handleCloseModal}
+        renderComponent={() => (
+          <div className="w-full">
+            <div className="min-h-[400px]">
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-1">
+                  <>
+                    <TextInput
+                      title="Category Name"
+                      placeholder="Category Name"
+                      value={state.name}
+                      onChange={(e) => setState({ name: e.target.value })}
+                      required
+                    />
+                    <TextInput
+                      title="Title"
+                      placeholder="Title"
+                      value={state.catTitle}
+                      onChange={(e) => setState({ catTitle: e.target.value })}
+                    />
+                    {(!state.editItem || state.editItem?.depth > 0) && (
+                      <AccordionSelect
+                        title="Parent Category"
+                        apiData={state.rawSeoCategoryList || []}
+                        value={state.parent_category}
+                        onChange={(option) => {
+                          handleFieldChange("parent_category", option);
+                          setState({ canonical_url: buildCanonicalUrl(option, state.slug, state.rawSeoCategoryList || []) });
+                        }}
+                        placeholder="Select parent category"
+                        excludeId={state.editItem?.id}
+                      />
+                    )}
+
+                    <TextInput
+                      title="Slug"
+                      placeholder="slug"
+                      value={state.slug}
+                      onChange={(e) => {
+                        const slug = e.target.value;
+                        setState({ slug, canonical_url: buildCanonicalUrl(state.parent_category, slug, state.rawSeoCategoryList || []) });
+                      }}
+                    />
+                    <TextInput
+                      title="Canonical URL"
+                      placeholder="Canonical URL"
+                      value={state.canonical_url}
+                      onChange={(e) => setState({ canonical_url: e.target.value })}
+                      disabled
+                    />
+                    <TextArea
+                      title="Description"
+                      placeholder="Description"
+                      value={state.description}
+                      onChange={(e) => {
+                        setState({ description: e.target.value });
+                      }}
+                    />
+                  </>
+                </div>
+              </div>
+            </div>
+
+            {/* Navigation Footer */}
+            <div className="flex justify-end ">
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleCloseModal()}
+                  className="rounded-lg border px-6 py-2"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => state.editItem ? update_category() : create_category()}
+                  className="bg-dblue rounded-lg px-6 py-2 text-white"
+                  disabled={state.catLoading}
+                >
+                  {state.catLoading ? (state.editItem ? "Updating..." : "Creating...") : (state.editItem ? "Update" : "Create")}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      />
+
+      <Modal
+        closeIcon
+        maxWidth="max-w-sm"
+        subTitle="Delete Category"
+        open={!!state.deleteConfirmItem}
+        close={() => setState({ deleteConfirmItem: null })}
+        renderComponent={() => (
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">
+              Are you sure you want to delete{" "}
+              <span className="font-semibold text-gray-900">"{state.deleteConfirmItem?.name}"</span>?
+              This cannot be undone.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setState({ deleteConfirmItem: null })}
+                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirm_delete_category}
+                disabled={state.catLoading}
+                className="rounded-lg bg-dblue px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60"
+              >
+                {state.catLoading ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        )}
+      />
     </div>
   );
 }

@@ -14,6 +14,8 @@ import application from "@/models/application.model";
 import interview from "@/models/interview";
 import dashboard from "@/models/dashboard.models";
 import notification from "@/models/notification.model";
+import seo from "@/models/seo.model";
+
 
 
 export const Models = {
@@ -30,6 +32,8 @@ export const Models = {
   interview,
   dashboard,
   notification,
+  seo
+
 };
 
 export default Models;

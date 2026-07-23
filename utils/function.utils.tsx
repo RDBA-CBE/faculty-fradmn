@@ -144,9 +144,9 @@ export const capitalizeFLetter = (string = "") => {
 };
 
 export const Dropdown = (arr: any, label: string) => {
-  const array = arr?.map((item: any) => ({
+  const array = arr?.filter(Boolean).map((item: any) => ({
     value: item?.id,
-    label: item[label],
+    label: item?.[label] || "",
   }));
   return array;
 };
@@ -638,5 +638,16 @@ export const formatScheduleDateTime = (date, time) => {
     hour: "2-digit",
     minute: "2-digit",
     hour12: true,
+  });
+};
+
+export const formatOptions = (lists) => {
+  return lists?.flatMap((item) => {
+      const children =
+          item?.node?.children?.edges?.map((child) => ({
+              value: child?.node?.id,
+              label: `-- ${child?.node?.name}`,
+          })) || [];
+      return [{ value: item?.node?.id, label: item?.node?.name }, ...children];
   });
 };

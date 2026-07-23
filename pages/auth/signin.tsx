@@ -30,6 +30,7 @@ const LoginBoxed = () => {
   const router = useRouter();
 
   const [loginCaptchaToken, setLoginCaptchaToken] = useState("");
+  const [showApplicantModal, setShowApplicantModal] = useState(false);
   const captchaRef = useRef<any>(null);
   const captchaVerifiedRef = useRef(false);
   const captchaPopupOpenRef = useRef(false);
@@ -137,30 +138,20 @@ const LoginBoxed = () => {
       }
 
       const res: any = await Models.auth.login(body);
-       if (res?.user?.role === "applicant") {
-        setLoginCaptchaToken("");
-        captchaRef.current?.reset();
-        setState({
-          btnLoading: false,
-          email: "",
-          password: "",
-          errors: {},
-          userRestrictModal: true,
-        });
-        console.log("user");
-        
+
+      if (res?.user?.role === "applicant") {
+        setState({ btnLoading: false, email: "", password: "" });
+        resetCaptcha();
+        setShowApplicantModal(true);
         return;
       }
+
       Success("Login Successfully");
       localStorage.setItem("token", res.access);
       localStorage.setItem("refresh", res.refresh);
       localStorage.setItem("userId", res.user?.id);
       localStorage.setItem("role", res.user?.role);
-      if (res.user?.role == ROLES.HOD) {
-        router.replace("/faculty/my_job");
-      } else {
-        router.replace("/");
-      }
+      router.replace("/");
       setState({ btnLoading: false });
     } catch (error) {
       setLoginCaptchaToken("")
@@ -366,45 +357,31 @@ const LoginBoxed = () => {
           </div>
         </div>
       </div>
-
-
-      <Modal
-        open={state.userRestrictModal}
-        close={() => setState({ userRestrictModal: false })}
-        subTitle="Applicant Login Restricted"
-        closeIcon
-        renderComponent={() => (
-          <div className="relative h-fit bg-[#f3f4f6] flex flex-col items-center justify-center text-center p-8 overflow-hidden">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
-              <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-              </svg>
-            </div>
-            <h2 className="text-xl font-bold text-gray-900 mb-3">
-              Applicant Login Not Allowed Here
-            </h2>
-            <p className="text-gray-600 text-sm max-w-sm leading-relaxed mb-6">
-              This portal is for HR members only. As an faculty user, please login through the dedicated website.
+      {showApplicantModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-sm rounded-lg bg-white p-6 text-center shadow-xl">
+            <h2 className="mb-3 text-lg font-bold text-dblue">Access Restricted</h2>
+            <p className="mb-5 text-sm text-gray-600">
+              This portal is only for HR login. If you are a Faculty, please login below portal:
             </p>
-            <div className="flex flex-col gap-3 w-full max-w-xs">
-              <a
-                href={process.env.NEXT_PUBLIC_USER_PORTAL_URL || "https://www.facultypro.in/"}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-2.5 bg-[#1E3786] hover:bg-[#1E3786]/90 text-white font-semibold rounded-full text-sm text-center transition-colors"
-              >
-                Go to Applicant Website
-              </a>
-              <button
-                onClick={() => setState({ userRestrictModal: false })}
-                className="w-full rounded-full text-sm"
-              >
-                Cancel
-              </button>
-            </div>
+            <a
+              href="https://facultypro.in/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mb-4 inline-block rounded bg-dblue px-5 py-2 text-sm font-semibold text-white hover:opacity-90"
+            >
+              Go to Faculty Login
+            </a>
+            <br />
+            <button
+              onClick={() => setShowApplicantModal(false)}
+              className="mt-3 text-sm text-gray-400 underline"
+            >
+              Close
+            </button>
           </div>
-        )}
-      />
+        </div>
+      )}
     </div>
   );
 };
