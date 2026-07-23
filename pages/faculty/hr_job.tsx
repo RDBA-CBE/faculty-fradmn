@@ -216,6 +216,8 @@ const Job = () => {
       null,
       p?.college?.map((c: any) => c.college_id),
     );
+    jobCount(p?.college?.map((c: any) => c.college_id));
+
   };
 
   const jobList = async (page, insId = null, colId = null) => {
@@ -618,7 +620,7 @@ const Job = () => {
       const formData = buildFormData({ job_status_id: newStatus });
       await Models.job.update(formData, row?.id);
       Success(`Job ${newStatus} successfully!`);
-      jobList(state.page);
+      callJobListByRole(state.page);
     } catch (error) {
       Failure("Failed to update status");
     }
@@ -636,7 +638,7 @@ const Job = () => {
     try {
       await Models.job.delete(id);
       Success("Job deleted successfully!");
-      jobList(state.page);
+      callJobListByRole(state.page);
     } catch (error) {
       Failure("Failed to delete job");
     }
@@ -657,7 +659,7 @@ const Job = () => {
       }
       Success(`${state.selectedRecords.length} jobs deleted successfully!`);
       setState({ selectedRecords: [] });
-      jobList(state.page);
+      callJobListByRole(state.page);
     } catch (error) {
       Failure("Failed to delete jobs. Please try again.");
     }
@@ -1361,7 +1363,7 @@ const Job = () => {
                 sortOrder: direction,
                 page: 1,
               });
-              jobList(1);
+              callJobListByRole(1);
             }}
             minHeight={200}
           />
