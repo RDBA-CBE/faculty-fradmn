@@ -115,6 +115,8 @@ export default function UpdateJob() {
     editItem: null,
     catTitle: "",
     canonical_url: "",
+    meta_title: "",
+    meta_description: "",
   });
 
   useEffect(() => {
@@ -343,6 +345,8 @@ export default function UpdateJob() {
         setState({
           seoCategorySelected: allSelected,
           seoCategory: seoPreFill,
+          meta_title: res?.meta_title || "",
+          meta_description: res?.meta_description || "",
         });
         setState({ loading: false });
       }
@@ -812,6 +816,8 @@ export default function UpdateJob() {
         applyLink: state.applyLink,
         jobRole: state.jobRole?.value,
         job_title: state.jobRole?.label,
+        meta_title: state.meta_title,
+        meta_description: state.meta_description,
       };
       console.log("✌️validation --->", validation);
 
@@ -915,6 +921,8 @@ export default function UpdateJob() {
       body.master_category_ids = seoCategory.parent_ids || [];
       body.subcategory_ids = seoCategory.child_ids || [];
       body.subcategory_child_ids = seoCategory.sub_child_ids || [];
+      body.meta_title = state.meta_title;
+      body.meta_description = state.meta_description;
 
       if (state.jobRole?.value) {
         body.role_ids = [state.jobRole?.value];
@@ -2041,7 +2049,7 @@ export default function UpdateJob() {
               ref={section5Ref}
               className="scroll-mt-32 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
             >
-              <div className="border-b px-6 py-4 gap-5 flex items-center">
+              <div className="border-b px-6 py-4 gap-5 flex items-center justify-between">
                 <h2 className="flex items-center gap-2 text-lg font-semibold text-black">
                   <svg
                     className="h-5 w-5"
@@ -2085,6 +2093,22 @@ export default function UpdateJob() {
                       {state.error.seoCategory}
                     </p>
                   )}
+                  <TextInput
+                    title="Meta Title"
+                    placeholder="Enter meta title"
+                    value={state.meta_title}
+                    onChange={(e) => setState({ meta_title: e.target.value, error: { ...state.error, meta_title: undefined } })}
+                    error={state.error?.meta_title}
+                    required
+                  />
+                  <TextArea
+                    title="Meta Description"
+                    placeholder="Enter meta description"
+                    value={state.meta_description}
+                    onChange={(e) => setState({ meta_description: e.target.value, error: { ...state.error, meta_description: undefined } })}
+                    error={state.error?.meta_description}
+                    required
+                  />
                 </div>
               </div>
             </div>

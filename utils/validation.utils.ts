@@ -266,6 +266,9 @@ export const CreateNewJob = Yup.object().shape({
         .email("Enter a valid email"),
     otherwise: (schema) => schema.notRequired(),
   }),
+
+  meta_title: Yup.string().required("Meta title is required"),
+  meta_description: Yup.string().required("Meta description is required"),
 });
 
 export const panel = Yup.object().shape({

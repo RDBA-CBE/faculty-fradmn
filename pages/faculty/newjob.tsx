@@ -166,6 +166,8 @@ export default function Newjob() {
     rawSeoCategoryList: [],
     seoCategorySelected: [],
     seoCategory: null,
+    meta_title: "",
+    meta_description: "",
     aiAssistantOpen: false,
     aiPrompt: "",
     aiSuggestions: [],
@@ -694,6 +696,8 @@ export default function Newjob() {
         alternativeEmail: state.alternativeEmail,
         applyLink: state.applyLink,
         jobRole: state.jobRole?.value,
+        meta_title: state.meta_title,
+        meta_description: state.meta_description,
       };
 
       await CreateNewJob.validate(validation, { abortEarly: false });
@@ -804,6 +808,8 @@ export default function Newjob() {
       body.master_category_ids = seoCategory.parent_ids || [];
       body.subcategory_ids = seoCategory.child_ids || [];
       body.subcategory_child_ids = seoCategory.sub_child_ids || [];
+      body.meta_title = state.meta_title;
+      body.meta_description = state.meta_description;
 
       if (state.jobRole) {
         body.role_ids = [state.jobRole?.value];
@@ -1056,6 +1062,7 @@ export default function Newjob() {
       let res: any;
       if (state.parent_category?.id) {
         const body: any = { name: state?.name, slug: state.slug, description: state.catDescription, title: state.catTitle, canonical_url: state.canonical_url };
+
         const selected = state.parent_category;
         if (selected.depth === 0) {
           body.category_id = selected.id;
@@ -2069,7 +2076,7 @@ export default function Newjob() {
                 ref={section5Ref}
                 className="scroll-mt-32 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
               >
-                <div className="border-b px-6 py-4 gap-5 flex items-center">
+                <div className="border-b px-6 py-4 gap-5 flex items-center justify-between">
                   <h2 className="flex items-center gap-2 text-lg font-semibold text-black">
                     <svg
                       className="h-5 w-5"
@@ -2108,6 +2115,22 @@ export default function Newjob() {
                     {state.error?.seoCategory && (
                       <p className="mt-2 text-sm text-red-600">{state.error.seoCategory}</p>
                     )}
+                    <TextInput
+                      title="Meta Title"
+                      placeholder="Enter meta title"
+                      value={state.meta_title}
+                      onChange={(e) => setState({ meta_title: e.target.value, error: { ...state.error, meta_title: undefined } })}
+                      error={state.error?.meta_title}
+                      required
+                    />
+                    <TextArea
+                      title="Meta Description"
+                      placeholder="Enter meta description"
+                      value={state.meta_description}
+                      onChange={(e) => setState({ meta_description: e.target.value, error: { ...state.error, meta_description: undefined } })}
+                      error={state.error?.meta_description}
+                      required
+                    />
                   </div>
                 </div>
               </div>

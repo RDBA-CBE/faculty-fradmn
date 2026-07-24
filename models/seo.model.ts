@@ -3,7 +3,7 @@ import instance from "@/utils/axios.utils";
 const seo = {
   list: (page, body) => {
     let promise = new Promise((resolve, reject) => {
-      let url = `categories/?page=${page}`;
+      let url = `categories/?pagination=false`;
       if (body?.search) {
         url += `&search=${encodeURIComponent(body.search)}`;
       }
