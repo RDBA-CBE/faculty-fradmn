@@ -218,7 +218,7 @@ const Users = () => {
         1,
         "",
         false,
-        res?.college?.map((item) => item?.college_id),
+        res?.college?.map((item) => item?.college_id)
       );
     } catch (error) {
       console.error("Error fetching institutions:", error);
@@ -262,7 +262,6 @@ const Users = () => {
     }
   };
 
-
   const searchInputRef = useRef<HTMLDivElement>(null);
   const searchTextRef = useRef<HTMLInputElement>(null);
   const searchValueRef = useRef<string>("");
@@ -295,7 +294,9 @@ const Users = () => {
       const suggestions: { label: string; data: any }[] = [];
       res?.data?.forEach((user: any) => {
         user?.display_name?.forEach((item: any) => {
-          const lineKey = Object.keys(item).find((k) => k.startsWith("line") && k !== "data");
+          const lineKey = Object.keys(item).find(
+            (k) => k.startsWith("line") && k !== "data"
+          );
           const val = lineKey ? item[lineKey] : null;
           if (val && !suggestions.find((s) => s.label === val)) {
             suggestions.push({ label: val, data: item.data || {} });
@@ -303,7 +304,10 @@ const Users = () => {
         });
       });
       if (!justSelectedRef.current) {
-        setState({ searchSuggestions: suggestions, showSuggestions: suggestions.length > 0 });
+        setState({
+          searchSuggestions: suggestions,
+          showSuggestions: suggestions.length > 0,
+        });
       }
     } catch (error) {
       setState({ searchSuggestions: [], showSuggestions: false });
@@ -316,7 +320,7 @@ const Users = () => {
       const res: any =
         await Models.master.additional_academic_responsibilities_list(
           { pagination: "No" },
-          1,
+          1
         );
       const dropdown = res?.map((item: any) => ({
         value: item.id,
@@ -515,7 +519,7 @@ const Users = () => {
     showDeleteAlert(
       () => deleteRecord(row.id),
       () => Swal.fire("Cancelled", "Record is safe", "info"),
-      "Are you sure you want to delete this record?",
+      "Are you sure you want to delete this record?"
     );
   };
 
@@ -533,7 +537,7 @@ const Users = () => {
     showDeleteAlert(
       () => bulkDeleteRecords(),
       () => Swal.fire("Cancelled", "Your Records are safe :)", "info"),
-      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`,
+      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`
     );
   };
 
@@ -569,8 +573,10 @@ const Users = () => {
   const getColumns = (): any[] => {
     const isAnonymous = (row: any) => {
       if (!row?.reveal_name) {
-        const is_responses = row?.interesteds?.some((item: any) => item?.is_status == "Accepted");
-        return is_responses? false : true;
+        const is_responses = row?.interesteds?.some(
+          (item: any) => item?.is_status == "Accepted"
+        );
+        return is_responses ? false : true;
       }
       return false;
     };
@@ -594,7 +600,9 @@ const Users = () => {
         render: (row: any) => {
           const user = safeUser(row);
           const showFullActions = row?.reveal_name;
-          const is_responses = row?.interesteds?.some((item: any) => item?.is_status == "Accepted");
+          const is_responses = row?.interesteds?.some(
+            (item: any) => item?.is_status == "Accepted"
+          );
           return showFullActions || is_responses ? (
             <div
               onClick={() => getUser(row)}
@@ -605,12 +613,11 @@ const Users = () => {
                   : "text-gray-900 dark:text-white"
               }`}
             >
-              {user.username}
+              {capitalizeFLetter(user.username)}
             </div>
           ) : (
             <span
-            onClick={() => getUser(row)}
-
+              onClick={() => getUser(row)}
               title={user.username}
               className={`cursor-pointer font-medium ${
                 isAnonymous(row)
@@ -618,7 +625,8 @@ const Users = () => {
                   : "text-gray-900 dark:text-white"
               }`}
             >
-              {user.username}
+                            {capitalizeFLetter(user.username)}
+
             </span>
           );
         },
@@ -685,14 +693,14 @@ const Users = () => {
       {
         accessor: "actions",
         title: "Actions",
-         textAlignment: "center",
+        textAlignment: "center",
         render: (row) => {
           const showFullActions = row?.reveal_name;
 
           let is_responses = false;
           if (row?.interesteds?.length > 0) {
             const is_response = row?.interesteds?.some(
-              (item: any) => item?.is_status === "Accepted",
+              (item: any) => item?.is_status === "Accepted"
             );
             if (is_response) {
               is_responses = true;
@@ -701,69 +709,59 @@ const Users = () => {
           console.log("is_responses --->", is_responses);
 
           return (
-            <div className="tour-seekers-actions flex items-center justify-center gap-3">
-              <div
+            <div className="tour-seekers-actions flex items-center justify-center">
+              <ActionButton
                 onClick={() => getUser(row)}
-                className="flex cursor-pointer items-center justify-center rounded-lg text-green-600 transition-all duration-200"
-                title="View Profile"
-              >
-                <IconEye className="h-4 w-4" />
-              </div>
-              {/* {(showFullActions || is_responses) && ( */}
-                <button
+                tooltip="View Profile"
+                className="text-green-600"
+                icon={<IconEye className="h-4 w-4" />}
+              />
+
+              <ActionButton
+                onClick={() =>
+                  setState({
+                    isOpenInterest: true,
+                    message: "",
+                    applicantName: row?.username,
+                    applicantId: row?.id,
+                  })
+                }
+                tooltip="Send Interest"
+                className="text-blue-600"
+                icon={<Send className="h-4 w-4" />}
+              />
+
+              {row?.interesteds?.length > 0 && (
+                <ActionButton
                   onClick={() =>
                     setState({
-                      isOpenInterest: true,
-                      message: "",
-                      applicantName: row?.username,
-                      applicantId: row?.id,
+                      isOpenInteresteds: true,
+                      interestedsRow: row,
                     })
                   }
-                  className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200"
-                  title="Send Interest"
-                >
-                  <Send className="h-4 w-4" />
-                </button>
-              {/* )} */}
-              {row?.interesteds?.length > 0 && (
-                <button
-                  onClick={() =>
-                    setState({ isOpenInteresteds: true, interestedsRow: row })
-                  }
-                  className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200"
-                  title="Interested status"
-                >
-                  <Mail className="h-4 w-4" />
-                </button>
+                  tooltip="Interested Status"
+                  className="text-blue-600"
+                  icon={<Mail className="h-4 w-4" />}
+                />
               )}
 
-              {(showFullActions ||
-                is_responses) && (
-                  <>
-                    <button
-                      onClick={() => handleSheduleInterview(row)}
-                      className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200"
-                      title="Interview Schedule"
-                    >
-                      <CalendarCheck className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => handleRound(row)}
-                      className="flex items-center justify-center rounded-lg text-pink-600 transition-all duration-200"
-                      title="Interview Round"
-                    >
-                      <BriefcaseBusiness className="h-4 w-4" />
-                    </button>
-                  </>
-                )}
+              {(showFullActions || is_responses) && (
+                <>
+                  <ActionButton
+                    onClick={() => handleSheduleInterview(row)}
+                    tooltip="Interview Schedule"
+                    className="text-blue-600"
+                    icon={<CalendarCheck className="h-4 w-4" />}
+                  />
 
-              {/* <button
-                onClick={() => handleDelete(row)}
-                className="flex items-center justify-center rounded-lg text-red-600 transition-all duration-200"
-                title="Delete"
-              >
-                <IconTrash className="h-4 w-4" />
-              </button> */}
+                  <ActionButton
+                    onClick={() => handleRound(row)}
+                    tooltip="Interview Round"
+                    className="text-pink-600"
+                    icon={<BriefcaseBusiness className="h-4 w-4" />}
+                  />
+                </>
+              )}
             </div>
           );
         },
@@ -812,7 +810,9 @@ const Users = () => {
         hr_interview_status: "Sent Interest",
       };
       await Models.application.send_interest(body);
-      Success(`Interest sent to ${state.selectedRecords.length} talent(s) successfully!`);
+      Success(
+        `Interest sent to ${state.selectedRecords.length} talent(s) successfully!`
+      );
       setState({
         showBulkInterestModal: false,
         bulkMessage: "",
@@ -866,7 +866,9 @@ const Users = () => {
 
       await Models.interview.create_user_interview(body);
 
-      Success(`Interview scheduled for ${state.selectedRecords.length} talent(s) successfully!`);
+      Success(
+        `Interview scheduled for ${state.selectedRecords.length} talent(s) successfully!`
+      );
       setState({
         showBulkInterviewModal: false,
         errors: {},
@@ -1016,7 +1018,7 @@ const Users = () => {
                   openSuggestions(state.search);
                 }}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
+                  if (e.key === "Enter") {
                     justSelectedRef.current = false;
                     openSuggestions(state.search);
                   }
@@ -1040,18 +1042,26 @@ const Users = () => {
                       experience: null,
                       department: null,
                     });
-                    userList(1, { search: "", current_position: "", current_location: "", experience_id: "", department_id: "" });
+                    userList(1, {
+                      search: "",
+                      current_position: "",
+                      current_location: "",
+                      experience_id: "",
+                      department_id: "",
+                    });
                   }}
                 >
                   ✕
                 </button>
               )}
             </div>
-            {state.showSuggestions && state.searchSuggestions.length > 0 && dropdownRect &&
+            {state.showSuggestions &&
+              state.searchSuggestions.length > 0 &&
+              dropdownRect &&
               typeof document !== "undefined" &&
               ReactDOM.createPortal(
                 <div
-                className="overflow-y-auto overscroll-contain scroll-smooth"
+                  className="overflow-y-auto overscroll-contain scroll-smooth"
                   ref={suggestionPortalRef}
                   style={{
                     position: "fixed",
@@ -1067,41 +1077,57 @@ const Users = () => {
                     // overflowY: "auto",
                   }}
                 >
-                  {state.searchSuggestions.map((suggestion: { label: string; data: any }, idx: number) => (
-                    <div
-                      key={idx}
-                      className="cursor-pointer px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
-                      onMouseDown={(e) => e.preventDefault()}
-                      onClick={() => {
-                        const d = suggestion.data;
-                        justSelectedRef.current = true;
-                        searchTextRef.current?.blur();
-                        searchValueRef.current = suggestion.label;
-                        setState({
-                          search: suggestion.label,
-                          showSuggestions: false,
-                          search_current_position: d?.current_position || "",
-                          search_current_location: d?.current_location || "",
-                          experience: d?.experience ? { value: d.experience, label: d.experience } : state.experience,
-                          department: d?.department_master_id ? { value: d.department_master_id, label: d.department || "" } : state.department,
-                        });
-                        userList(1, {
-                          // search: suggestion.label,
-                          // reveal_name: "Yes",
-                          ...(d?.current_position ? { current_position: d.current_position } : {}),
-                          ...(d?.current_location ? { current_location: d.current_location } : {}),
-                          ...(d?.experience ? { experience_id: d.experience } : {}),
-                          ...(d?.department_master_id ? { department_master_id: d.department_master_id } : {}),
-                        });
-                      }}
-                    >
-                      {suggestion.label}
-                    </div>
-                  ))}
+                  {state.searchSuggestions.map(
+                    (suggestion: { label: string; data: any }, idx: number) => (
+                      <div
+                        key={idx}
+                        className="cursor-pointer px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => {
+                          const d = suggestion.data;
+                          justSelectedRef.current = true;
+                          searchTextRef.current?.blur();
+                          searchValueRef.current = suggestion.label;
+                          setState({
+                            search: suggestion.label,
+                            showSuggestions: false,
+                            search_current_position: d?.current_position || "",
+                            search_current_location: d?.current_location || "",
+                            experience: d?.experience
+                              ? { value: d.experience, label: d.experience }
+                              : state.experience,
+                            department: d?.department_master_id
+                              ? {
+                                  value: d.department_master_id,
+                                  label: d.department || "",
+                                }
+                              : state.department,
+                          });
+                          userList(1, {
+                            // search: suggestion.label,
+                            // reveal_name: "Yes",
+                            ...(d?.current_position
+                              ? { current_position: d.current_position }
+                              : {}),
+                            ...(d?.current_location
+                              ? { current_location: d.current_location }
+                              : {}),
+                            ...(d?.experience
+                              ? { experience_id: d.experience }
+                              : {}),
+                            ...(d?.department_master_id
+                              ? { department_master_id: d.department_master_id }
+                              : {}),
+                          });
+                        }}
+                      >
+                        {capitalizeFLetter(suggestion.label)}
+                      </div>
+                    )
+                  )}
                 </div>,
                 document.getElementById("popper-portal") || document.body
-              )
-            }
+              )}
           </div>
 
           <div className="group relative">
@@ -1157,7 +1183,13 @@ const Users = () => {
               {state.selectedRecords.length > 0 && (
                 <>
                   <button
-                    onClick={() => setState({ showBulkInterestModal: true, bulkMessage: "", bulkInterestJob: null })}
+                    onClick={() =>
+                      setState({
+                        showBulkInterestModal: true,
+                        bulkMessage: "",
+                        bulkInterestJob: null,
+                      })
+                    }
                     className="flex items-center gap-2 rounded-lg border border-blue-500 px-3 py-1.5 text-sm text-blue-600 transition hover:bg-blue-50"
                   >
                     <Send className="h-4 w-4" />
@@ -1168,7 +1200,7 @@ const Users = () => {
                     className="flex items-center gap-2 rounded-lg border border-green-500 px-3 py-1.5 text-sm text-green-600 transition hover:bg-green-50"
                   >
                     <CalendarCheck className="h-4 w-4" />
-                    Schedule Interview ({state.selectedRecords.length})
+                    Quick Schedule ({state.selectedRecords.length})
                   </button>
                 </>
               )}
@@ -1179,7 +1211,7 @@ const Users = () => {
           </div>
         </div>
 
-        <div className="overflow-x-aut border border-gray-200 bg-white tour-seekers-table">
+        <div className="overflow-x-aut tour-seekers-table border border-gray-200 bg-white">
           <DataTable
             noRecordsText={`No job seeker found`}
             highlightOnHover
@@ -1250,7 +1282,13 @@ const Users = () => {
         subTitle={`Send Interest to ${state.selectedRecords.length} Talent(s)`}
         closeIcon
         open={state.showBulkInterestModal}
-        close={() => setState({ showBulkInterestModal: false, bulkMessage: "", bulkInterestJob: null })}
+        close={() =>
+          setState({
+            showBulkInterestModal: false,
+            bulkMessage: "",
+            bulkInterestJob: null,
+          })
+        }
         isFullWidth={false}
         maxWidth="max-w-2xl"
         renderComponent={() => (
@@ -1269,18 +1307,34 @@ const Users = () => {
               placeholder="Select job"
               isClearable={true}
               onSearch={(searchTerm) =>
-                jobList(1, searchTerm, false, state.profile?.college?.map((item) => item?.college_id))
+                jobList(
+                  1,
+                  searchTerm,
+                  false,
+                  state.profile?.college?.map((item) => item?.college_id)
+                )
               }
               loadMore={() =>
                 state.jobNext &&
-                jobList(state.jobPage + 1, "", true, state.profile?.college?.map((item) => item?.college_id))
+                jobList(
+                  state.jobPage + 1,
+                  "",
+                  true,
+                  state.profile?.college?.map((item) => item?.college_id)
+                )
               }
               loading={state.jobLoading}
             />
             <div className="mt-8 flex flex-col-reverse gap-3 border-t border-gray-200 pt-6 sm:flex-row sm:justify-end">
               <button
                 type="button"
-                onClick={() => setState({ showBulkInterestModal: false, bulkMessage: "", bulkInterestJob: null })}
+                onClick={() =>
+                  setState({
+                    showBulkInterestModal: false,
+                    bulkMessage: "",
+                    bulkInterestJob: null,
+                  })
+                }
                 className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
                 Cancel
@@ -1329,7 +1383,7 @@ const Users = () => {
                   1,
                   searchTerm,
                   false,
-                  state.profile?.college?.map((item) => item?.college_id),
+                  state.profile?.college?.map((item) => item?.college_id)
                 );
               }}
               loadMore={() => {
@@ -1338,7 +1392,7 @@ const Users = () => {
                     state.jobPage + 1,
                     "",
                     true,
-                    state.profile?.college?.map((item) => item?.college_id),
+                    state.profile?.college?.map((item) => item?.college_id)
                   );
               }}
               loading={state.jobLoading}
@@ -1373,17 +1427,31 @@ const Users = () => {
       />
 
       <Modal
-        subTitle={`Schedule Interview for ${state.selectedRecords.length} Talent(s)`}
+        subTitle={`Quick Schedule for ${state.selectedRecords.length} Talent(s)`}
         closeIcon
         open={state.showBulkInterviewModal}
-        close={() => setState({ showBulkInterviewModal: false, errors: {}, interviewSlot: "", roundName: "", requestForChange: false, interview_link: "" })}
+        close={() =>
+          setState({
+            showBulkInterviewModal: false,
+            errors: {},
+            interviewSlot: "",
+            roundName: "",
+            requestForChange: false,
+            interview_link: "",
+          })
+        }
         renderComponent={() => (
           <div className="space-y-5">
             <TextInput
               title="Round Name"
               placeholder="Enter round name (e.g., Technical Round 1)"
               value={state.roundName}
-              onChange={(e) => setState({ roundName: e.target.value, errors: { ...state.errors, roundName: "" } })}
+              onChange={(e) =>
+                setState({
+                  roundName: e.target.value,
+                  errors: { ...state.errors, roundName: "" },
+                })
+              }
               error={state.errors?.roundName}
               required
             />
@@ -1391,7 +1459,12 @@ const Users = () => {
               title="Interview Slot"
               value={state.interviewSlot}
               placeholder="Choose Date & Time"
-              onChange={(e) => setState({ interviewSlot: e, errors: { ...state.errors, interviewSlot: "" } })}
+              onChange={(e) =>
+                setState({
+                  interviewSlot: e,
+                  errors: { ...state.errors, interviewSlot: "" },
+                })
+              }
               showTimeSelect={true}
               usePortal
               required
@@ -1402,7 +1475,12 @@ const Users = () => {
               title="Interview Link"
               placeholder="Enter interview link"
               value={state.interview_link}
-              onChange={(e) => setState({ interview_link: e.target.value, errors: { ...state.errors, interview_link: "" } })}
+              onChange={(e) =>
+                setState({
+                  interview_link: e.target.value,
+                  errors: { ...state.errors, interview_link: "" },
+                })
+              }
               error={state.errors?.interview_link}
             />
             <div className="flex items-center gap-2">
@@ -1410,16 +1488,30 @@ const Users = () => {
                 type="checkbox"
                 id="bulkRequestForChange"
                 checked={state.requestForChange}
-                onChange={(e) => setState({ requestForChange: e.target.checked })}
+                onChange={(e) =>
+                  setState({ requestForChange: e.target.checked })
+                }
                 className="h-4 w-4 rounded border-gray-300 text-blue-600"
               />
-              <label htmlFor="bulkRequestForChange" className="text-sm font-medium text-gray-700">
-                Request for Change
+              <label
+                htmlFor="bulkRequestForChange"
+                className="text-sm font-medium text-gray-700 pt-2"
+              >
+                Request the candidate to change the interview slot
               </label>
             </div>
             <div className="mt-6 flex gap-3">
               <button
-                onClick={() => setState({ showBulkInterviewModal: false, errors: {}, interviewSlot: "", roundName: "", requestForChange: false, interview_link: "" })}
+                onClick={() =>
+                  setState({
+                    showBulkInterviewModal: false,
+                    errors: {},
+                    interviewSlot: "",
+                    roundName: "",
+                    requestForChange: false,
+                    interview_link: "",
+                  })
+                }
                 className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50"
               >
                 Cancel
@@ -1429,7 +1521,9 @@ const Users = () => {
                 disabled={state.submitting}
                 className="bg-dblue flex-1 rounded-lg px-4 py-2 text-white hover:shadow-lg disabled:opacity-50"
               >
-                {state.submitting ? "Scheduling..." : `Schedule for ${state.selectedRecords.length} Talent(s)`}
+                {state.submitting
+                  ? "Scheduling..."
+                  : `Schedule for ${state.selectedRecords.length} Talent(s)`}
               </button>
             </div>
           </div>
@@ -1437,7 +1531,7 @@ const Users = () => {
       />
 
       <Modal
-        subTitle={`Create Interview Schedule (${state.applicant?.label})`}
+        subTitle={`Quick Schedule (${state.applicant?.label})`}
         closeIcon
         open={state.showInterviewModal}
         close={() =>
@@ -1474,13 +1568,13 @@ const Users = () => {
                 title="Interview Slot"
                 value={state.interviewSlot}
                 placeholder="Choose From"
-                onChange={(e) =>{
+                onChange={(e) => {
                   console.log("hello");
-                  
+
                   setState({
                     interviewSlot: e,
                     errors: { ...state.errors, interviewSlot: "" },
-                  })
+                  });
                 }}
                 disabled={false}
                 showTimeSelect={true}
@@ -1514,9 +1608,9 @@ const Users = () => {
                 />
                 <label
                   htmlFor="requestForChange"
-                  className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                  className="text-sm font-medium text-gray-700 dark:text-gray-300 mt-2"
                 >
-                  Request for Change
+                 Request the candidate to change the interview slot
                 </label>
               </div>
             </div>
@@ -1605,7 +1699,7 @@ const Users = () => {
                           <p className="text-xs text-gray-500">
                             {formatScheduleDateTime(
                               round.scheduled_date,
-                              round.scheduled_time,
+                              round.scheduled_time
                             )}
                           </p>
                         </div>
@@ -1704,7 +1798,7 @@ const Users = () => {
                         <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                           {item?.created_at
                             ? moment(item.created_at).format(
-                                "DD MMM YYYY, hh:mm A",
+                                "DD MMM YYYY, hh:mm A"
                               )
                             : "—"}
                         </p>
@@ -1758,7 +1852,7 @@ const Users = () => {
             u?.interesteds?.some(
               (i: any) =>
                 String(i?.sender?.id) === String(user_id) &&
-                i?.is_status === "Accepted",
+                i?.is_status === "Accepted"
             );
 
           const sideMenuItems = [
@@ -1896,7 +1990,7 @@ const Users = () => {
                               </p>
                             </div>
                           </div>
-                        ) : null,
+                        ) : null
                       )}
                     </div>
                   </div>
@@ -1918,7 +2012,7 @@ const Users = () => {
                             >
                               {resp.responsibility_title}
                             </span>
-                          ),
+                          )
                         )}
                       </div>
                     ) : (
@@ -2066,7 +2160,7 @@ const Users = () => {
                                   >
                                     {tech}
                                   </span>
-                                ),
+                                )
                               )}
                             </div>
                           )}
@@ -2222,14 +2316,14 @@ const Users = () => {
                         />
                       ) : (
                         <span className="text-sm font-medium text-white">
-                          {u?.first_name?.[0]}
+                          {capitalizeFLetter(u?.first_name?.[0])}
                           {u?.last_name?.[0]}
                         </span>
                       )}
                     </div>
                     <div>
                       <p className="text-lg font-bold text-gray-900 dark:text-white">
-                        {u?.username || `${u?.first_name} ${u?.last_name}`}
+                        {capitalizeFLetter(u?.username) || `${capitalizeFLetter(u?.first_name)} ${u?.last_name}`}
                       </p>
                       {u?.email && (
                         <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -2368,5 +2462,30 @@ const Users = () => {
     </div>
   );
 };
+
+const ActionButton = ({
+  onClick,
+  icon,
+  tooltip,
+  className,
+}: {
+  onClick: () => void;
+  icon: React.ReactNode;
+  tooltip: string;
+  className: string;
+}) => (
+  <div className="group relative flex items-center justify-center">
+    <button
+      onClick={onClick}
+      className={`flex h-6 w-6 cursor-pointer items-center justify-center rounded-lg transition-all duration-200 ${className}`}
+    >
+      {icon}
+    </button>
+
+    <div className="pointer-events-none absolute -top-5 left-1/2 z-50 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+      {tooltip}
+    </div>
+  </div>
+);
 
 export default Users;

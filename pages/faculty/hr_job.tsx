@@ -214,10 +214,9 @@ const Job = () => {
     jobList(
       page,
       null,
-      p?.college?.map((c: any) => c.college_id),
+      p?.college?.map((c: any) => c.college_id)
     );
     jobCount(p?.college?.map((c: any) => c.college_id));
-
   };
 
   const jobList = async (page, insId = null, colId = null) => {
@@ -233,7 +232,8 @@ const Job = () => {
       const tableData = res?.results?.map((item) => ({
         id: item.id,
         job_title: item.roles?.length > 0 ? item?.roles?.[0]?.role_name : "",
-        job_short_title: item.roles?.length > 0 ? item?.roles?.[0]?.short_name : "",
+        job_short_title:
+          item.roles?.length > 0 ? item?.roles?.[0]?.short_name : "",
         job_description: item.job_description,
 
         college_name: item?.college?.name,
@@ -379,7 +379,7 @@ const Job = () => {
   const institutionDropdownList = async (
     page,
     search = "",
-    loadMore = false,
+    loadMore = false
   ) => {
     try {
       setState({ institutionLoading: true });
@@ -406,7 +406,7 @@ const Job = () => {
     loadMore = false,
     institutionId = null,
     createdBy = null,
-    collegeIds = null,
+    collegeIds = null
   ) => {
     try {
       console.log("✌️collegeIds --->", collegeIds);
@@ -436,11 +436,11 @@ const Job = () => {
     page,
     search = "",
     loadMore = false,
-    collegeIds = null,
+    collegeIds = null
   ) => {
     try {
       setState({ departmentLoading: true });
-      const body: any = { search,pagination:"No" };
+      const body: any = { search, pagination: "No" };
       if (collegeIds) {
         body.college = collegeIds;
       }
@@ -462,9 +462,7 @@ const Job = () => {
     const body: any = {};
     const userId = localStorage.getItem("userId");
 
-   
-    body.ordering = "-updated_at" ;
-   
+    body.ordering = "-updated_at";
 
     if (state.search) {
       body.search = state.search;
@@ -602,13 +600,13 @@ const Job = () => {
         Success(
           row.is_approved
             ? "Job unapproved successfully!"
-            : "Job approved successfully!",
+            : "Job approved successfully!"
         );
         callJobListByRole(state.page);
-        jobCount(state.profile?.college?.map((item) => item?.college_id))
+        jobCount(state.profile?.college?.map((item) => item?.college_id));
       } catch (error) {
         Failure(
-          row.is_approved ? "Failed to unapprove job" : "Failed to approve job",
+          row.is_approved ? "Failed to unapprove job" : "Failed to approve job"
         );
       }
     }
@@ -630,7 +628,7 @@ const Job = () => {
     showDeleteAlert(
       () => deleteRecord(row?.id),
       () => Swal.fire("Cancelled", "Record is safe", "info"),
-      "Are you sure you want to delete this job?",
+      "Are you sure you want to delete this job?"
     );
   };
 
@@ -648,7 +646,7 @@ const Job = () => {
     showDeleteAlert(
       () => bulkDeleteRecords(),
       () => Swal.fire("Cancelled", "Your Records are safe :)", "info"),
-      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`,
+      `Are you sure want to delete ${state.selectedRecords.length} record(s)?`
     );
   };
 
@@ -695,7 +693,9 @@ const Job = () => {
         last_date: res?.last_date
           ? moment(res?.last_date).format("YYYY-MM-DD")
           : "",
-        deadline: res?.deadline ? moment(res?.deadline).format("YYYY-MM-DD") : "",
+        deadline: res?.deadline
+          ? moment(res?.deadline).format("YYYY-MM-DD")
+          : "",
         start_date: res?.start_date
           ? moment(res?.start_date).format("YYYY-MM-DD")
           : "",
@@ -714,10 +714,14 @@ const Job = () => {
             ? res?.categories?.map((cat: any) => cat?.id)
             : [],
         role_ids:
-          res?.roles?.length > 0 ? res?.roles?.map((role: any) => role?.id) : [],
+          res?.roles?.length > 0
+            ? res?.roles?.map((role: any) => role?.id)
+            : [],
         additional_academic_responsibility_ids:
           res?.additional_academic_responsibilities?.length > 0
-            ? res?.additional_academic_responsibilities?.map((item: any) => item?.id)
+            ? res?.additional_academic_responsibilities?.map(
+                (item: any) => item?.id
+              )
             : [],
       };
 
@@ -776,7 +780,7 @@ const Job = () => {
           className="flex-1 cursor-pointer rounded-lg  border-gray-200 bg-blue-100 px-4 py-4  transition hover:shadow-md dark:border-gray-700"
         >
           <div className="flex  items-center gap-5">
-            <div className="flex  items-center justify-center bg-white/70 rounded-full p-2 dark:border-gray-700">
+            <div className="flex  items-center justify-center rounded-full bg-white/70 p-2 dark:border-gray-700">
               <Briefcase className="text-dblue h-7 w-7" />
             </div>
 
@@ -797,7 +801,7 @@ const Job = () => {
           className="flex-1 cursor-pointer rounded-lg  border-gray-200 bg-green-100 px-4 py-4  transition hover:shadow-md dark:border-gray-700"
         >
           <div className="flex items-center gap-5 ">
-            <div className="flex  items-center justify-center  bg-white/70 rounded-full p-2 dark:border-gray-700">
+            <div className="flex  items-center justify-center  rounded-full bg-white/70 p-2 dark:border-gray-700">
               <CheckCircle className="h-7 w-7 text-green-600" />
             </div>
 
@@ -818,7 +822,7 @@ const Job = () => {
           className="flex-1 cursor-pointer  rounded-lg  border-gray-200 bg-yellow-100 px-4 py-4  transition hover:shadow-md dark:border-gray-700"
         >
           <div className="flex items-center gap-5">
-            <div className="flex  items-center justify-center  bg-white/70 rounded-full p-2 dark:border-gray-700">
+            <div className="flex  items-center justify-center  rounded-full bg-white/70 p-2 dark:border-gray-700">
               <Hourglass className="h-7 w-7 text-yellow-600" />
             </div>
 
@@ -878,7 +882,7 @@ const Job = () => {
                   false,
                   institutionId,
                   null,
-                  collegeIds,
+                  collegeIds
                 );
               }}
               loadMore={() => {
@@ -891,7 +895,7 @@ const Job = () => {
                     true,
                     institutionId,
                     null,
-                    collegeIds,
+                    collegeIds
                   );
                 }
               }}
@@ -975,7 +979,9 @@ const Job = () => {
             if (state.academicResponsibilityFilter?.length > 0) {
               activeFilters.push({
                 key: "academicResponsibilityFilter",
-                label: `Academic Responsibility: ${state.academicResponsibilityFilter.map((item: any) => item.label).join(", ")}`,
+                label: `Academic Responsibility: ${state.academicResponsibilityFilter
+                  .map((item: any) => item.label)
+                  .join(", ")}`,
               });
             }
             if (state.filterCollege)
@@ -1084,16 +1090,15 @@ const Job = () => {
           </div>
         </div>
 
-        <div className=" overflow-x-auto border border-gray-200 bg-white tour-job-table">
+        <div className=" tour-job-table overflow-x-auto border border-gray-200 bg-white">
           <DataTable
-            
             noRecordsText="No jobs found"
             highlightOnHover
             className="table-hover whitespace-nowrap"
             records={state.jobList}
             fetching={state.loading}
             selectedRecords={state.jobList?.filter((record) =>
-              state.selectedRecords.includes(record.id),
+              state.selectedRecords.includes(record.id)
             )}
             onSelectedRecordsChange={(records) =>
               setState({ selectedRecords: records.map((r: any) => r.id) })
@@ -1114,7 +1119,7 @@ const Job = () => {
                 title: "Title",
                 sortable: true,
                 render: (row: any) => (
-                  <div className="flex flex-col min-w-[130px]">
+                  <div className="flex min-w-[130px] flex-col">
                     <Link
                       href={`/faculty/job_details?id=${row?.id}`}
                       title={row?.job_short_title}
@@ -1230,7 +1235,7 @@ const Job = () => {
                       <Clock className="h-3 w-3" />
                     )}
                     {capitalizeFLetter(
-                      (row as any).is_approved ? "Approved" : "Pending",
+                      (row as any).is_approved ? "Approved" : "Pending"
                     ) || "-"}
                   </span>
                 ),
@@ -1287,68 +1292,52 @@ const Job = () => {
                 title: "Actions",
                 textAlignment: "center",
                 render: (row: any) => (
-                  <div className="tour-job-actions flex items-center justify-center gap-3">
-                    <button
-                      onClick={() =>
-                        router.push(`/faculty/job_details?id=${row.id}`)
-                      }
-                      className="flex  items-center justify-center rounded-lg  text-indigo-600 "
-                      title="View"
-                    >
-                      <IconEye className="h-4 w-4" />
-                    </button>
-                    {/* {state.profile?.role == ROLES.HR && ( */}
-                    {state?.profile?.job_approval_permission && <button
+                  <div className="tour-job-actions flex items-center justify-center ">
+                    <ActionButton
                       onClick={(e) => {
                         e.stopPropagation();
-
-                        // if (state.profile?.role == ROLES.HR) {
-                        handleApprove(row);
-                        // }
+                        router.push(`/faculty/job_details?id=${row.id}`);
                       }}
-                      // onClick={() => handleToggleStatus(row)}
-                      className={`flex items-center justify-center rounded-lg ${
-                        row?.job_status === "published"
-                          ? "text-red-600 "
-                          : " text-green-600 "
-                      }`}
-                      title={"Job Status"}
-                    >
-                      <CheckCircle className="h-4 w-4" />
-                    </button>}
-                    {/* )} */}
-                    {/* <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleLog(row);
-                      }}
-                      className="flex items-center justify-center rounded-lg  text-purple-600 "
-                      title="Logs"
-                    >
-                      <IconHistory className="h-4 w-4" />
-                    </button> */}
+                      tooltip="View"
+                      className="text-indigo-600"
+                      icon={<IconEye className="h-4 w-4" />}
+                    />
 
-                    <button
+                    {state?.profile?.job_approval_permission && (
+                      <ActionButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleApprove(row);
+                        }}
+                        tooltip="Job Status"
+                        className={
+                          row?.job_status === "published"
+                            ? "text-red-600"
+                            : "text-green-600"
+                        }
+                        icon={<CheckCircle className="h-4 w-4" />}
+                      />
+                    )}
+
+                    <ActionButton
                       onClick={(e) => {
                         e.stopPropagation();
                         handleEdit(row);
                       }}
-                      className="flex  items-center justify-center rounded-lg text-blue-600 "
-                      title="Edit"
-                    >
-                      <IconEdit className="h-4 w-4" />
-                    </button>
+                      tooltip="Edit"
+                      className="text-blue-600"
+                      icon={<IconEdit className="h-4 w-4" />}
+                    />
 
-                    <button
+                    <ActionButton
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDelete(row);
                       }}
-                      className="flex  items-center justify-center rounded-lg  text-red-600 "
-                      title="Delete"
-                    >
-                      <IconTrash className="h-4 w-4" />
-                    </button>
+                      tooltip="Delete"
+                      className="text-red-600"
+                      icon={<IconTrash className="h-4 w-4" />}
+                    />
                   </div>
                 ),
               },
@@ -1579,9 +1568,7 @@ const Job = () => {
               <CustomSelect
                 options={state.academicResponsibilityList}
                 value={state.academicResponsibilityFilter}
-                onChange={(e) =>
-                  setState({ academicResponsibilityFilter: e })
-                }
+                onChange={(e) => setState({ academicResponsibilityFilter: e })}
                 placeholder="Academic responsibility"
                 isClearable={true}
                 loading={state.academicResponsibilityLoading}
@@ -1623,5 +1610,30 @@ const Job = () => {
     </div>
   );
 };
+
+const ActionButton = ({
+  onClick,
+  icon,
+  tooltip,
+  className,
+}: {
+  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  icon: React.ReactNode;
+  tooltip: string;
+  className: string;
+}) => (
+  <div className="group relative flex items-center justify-center">
+    <button
+      onClick={onClick}
+      className={`flex h-6 w-6 cursor-pointer items-center justify-center rounded-lg transition-all duration-200 ${className}`}
+    >
+      {icon}
+    </button>
+
+    <div className="pointer-events-none absolute -top-5 left-1/2 z-50 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+      {tooltip}
+    </div>
+  </div>
+);
 
 export default PrivateRouter(Job);

@@ -48,7 +48,11 @@ import {
   ClipboardList,
   ArrowLeft,
 } from "lucide-react";
-import { CALENDAR_CLIENT_ID, FRONTEND_URL, ROLES } from "@/utils/constant.utils";
+import {
+  CALENDAR_CLIENT_ID,
+  FRONTEND_URL,
+  ROLES,
+} from "@/utils/constant.utils";
 import Link from "next/link";
 import CustomSelect from "@/components/FormFields/CustomSelect.component";
 import CustomeDatePicker from "@/components/datePicker";
@@ -116,14 +120,13 @@ const ApplicationDetail = () => {
     }
   }, [id]);
 
-   useEffect(() => {
+  useEffect(() => {
+    const role = localStorage.getItem("role");
 
-      const role = localStorage.getItem("role")
-      
-        if(fetchApplicationDetail && id && role == "hr"){
-        readApplicationNotification()
-        }
-      }, [])
+    if (fetchApplicationDetail && id && role == "hr") {
+      readApplicationNotification();
+    }
+  }, []);
 
   const profile = async () => {
     try {
@@ -150,22 +153,19 @@ const ApplicationDetail = () => {
     }
   };
 
-
   const readApplicationNotification = async () => {
-        try {
-          
-          const body ={
-            user_id: id,
-            notification_type: "application"
-          }
-    
-          const res = await Models.notification.mark_view(body)
-          console.log("notification res", res);
-          
-        } catch (error) {
-          console.log("error", error);
-        }
-      }
+    try {
+      const body = {
+        user_id: id,
+        notification_type: "application",
+      };
+
+      const res = await Models.notification.mark_view(body);
+      console.log("notification res", res);
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
 
   const fetchApplicationDetail = async () => {
     try {
@@ -417,7 +417,7 @@ const ApplicationDetail = () => {
         submitting: false,
         interview_link: "",
         rescheduleId: null,
-        googleAuthCode:false
+        googleAuthCode: false,
       });
 
       fetchApplicationDetail();
@@ -672,18 +672,19 @@ const ApplicationDetail = () => {
                   </div>
                 )}
               </div>
-              {state.profile?.role == ROLES.HR && app?.status_display !== "Rejected" && (
-                <div className=" flex items-center justify-end">
-                  <button
-                    onClick={() => setState({ showInterviewModal: true })}
-                    className="tour-detail-schedule bg-dblue group relative inline-flex transform items-center gap-2 overflow-hidden rounded-lg px-4 py-2 text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
-                  >
-                    <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
-                    <UserCheck className="relative z-10 h-5 w-5" />
-                    <span className="relative z-10"> Interview Schedule</span>
-                  </button>
-                </div>
-              )}
+              {state.profile?.role == ROLES.HR &&
+                app?.status_display !== "Rejected" && (
+                  <div className=" flex items-center justify-end">
+                    <button
+                      onClick={() => setState({ showInterviewModal: true })}
+                      className="tour-detail-schedule bg-dblue group relative inline-flex transform items-center gap-2 overflow-hidden rounded-lg px-4 py-2 text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+                    >
+                      <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+                      <UserCheck className="relative z-10 h-5 w-5" />
+                      <span className="relative z-10"> Interview Schedule</span>
+                    </button>
+                  </div>
+                )}
             </div>
 
             {/* Job Information */}
@@ -891,7 +892,13 @@ const ApplicationDetail = () => {
                                         {panel.department?.department_name}
                                       </div>
                                     </div>
-
+                                    {panel?.decision_maker && (
+                                      <div
+                                        className={`cursor-pointer rounded-full bg-green-100 px-3 py-1 text-xs text-green-700 shadow-sm outline-none `}
+                                      >
+                                        Descision Maker
+                                      </div>
+                                    )}
                                     {panel.score && (
                                       <div className="flex items-center gap-1 rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
                                         <Star className="h-3 w-3" />
@@ -1393,10 +1400,11 @@ const ApplicationDetail = () => {
                     htmlFor="requestForChange"
                     className="pt-2 text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
-                    Request for Change
+                    {/* Request for Change */}
+                    Request the candidate to change the interview slot
                   </label>
                 </div>
-                {!state.profile?.google_calendar_connected_at && (
+                {/* {!state.profile?.google_calendar_connected_at && (
                   <div className="flex items-center gap-2">
                     <input
                       type="checkbox"
@@ -1447,7 +1455,7 @@ const ApplicationDetail = () => {
                       )}
                     </label>
                   </div>
-                )}
+                )} */}
               </div>
             </div>
 
