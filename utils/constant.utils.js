@@ -636,6 +636,10 @@ export const OwnmenuConfig = {
           label: "Panel Members",
           href: "/faculty/master/hr_panel",
         },
+        {
+          label: "Additional Acedemic Responsibilities",
+          href: "/faculty/master/additional_academic_responsibilities",
+        },
       ],
     },
   ],
