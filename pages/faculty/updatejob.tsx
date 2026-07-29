@@ -115,8 +115,8 @@ export default function UpdateJob() {
     editItem: null,
     catTitle: "",
     canonical_url: "",
-    meta_title: "",
-    meta_description: "",
+    // meta_title: "",
+    // meta_description: "",
   });
 
   useEffect(() => {
@@ -345,8 +345,8 @@ export default function UpdateJob() {
         setState({
           seoCategorySelected: allSelected,
           seoCategory: seoPreFill,
-          meta_title: res?.meta_title || "",
-          meta_description: res?.meta_description || "",
+          // meta_title: res?.meta_title || "",
+          // meta_description: res?.meta_description || "",
         });
         setState({ loading: false });
       }
@@ -816,24 +816,24 @@ export default function UpdateJob() {
         applyLink: state.applyLink,
         jobRole: state.jobRole?.value,
         job_title: state.jobRole?.label,
-        meta_title: state.meta_title,
-        meta_description: state.meta_description,
+        // meta_title: state.meta_title,
+        // meta_description: state.meta_description,
       };
       console.log("✌️validation --->", validation);
 
       await CreateNewJob.validate(validation, { abortEarly: false });
 
       // SEO category is required — at least one must be selected
-      const seoCategory = state.seoCategory || {};
-      const hasSeoSelection =
-        (seoCategory.parent_ids?.length > 0) ||
-        (seoCategory.child_ids?.length > 0) ||
-        (seoCategory.sub_child_ids?.length > 0);
-      if (!hasSeoSelection) {
-        Failure("Please select at least one SEO category.");
-        setState({ btnLoading: false, error: { ...state.error, seoCategory: "Please select at least one SEO category." } });
-        return;
-      }
+      // const seoCategory = state.seoCategory || {};
+      // const hasSeoSelection =
+      //   (seoCategory.parent_ids?.length > 0) ||
+      //   (seoCategory.child_ids?.length > 0) ||
+      //   (seoCategory.sub_child_ids?.length > 0);
+      // if (!hasSeoSelection) {
+      //   Failure("Please select at least one SEO category.");
+      //   setState({ btnLoading: false, error: { ...state.error, seoCategory: "Please select at least one SEO category." } });
+      //   return;
+      // }
 
       const body: any = {
         // job_title: capitalizeFLetter(state.title),
@@ -918,11 +918,11 @@ export default function UpdateJob() {
       }
 
       // const seoCategory = state.seoCategory || {};
-      body.master_category_ids = seoCategory.parent_ids || [];
-      body.subcategory_ids = seoCategory.child_ids || [];
-      body.subcategory_child_ids = seoCategory.sub_child_ids || [];
-      body.meta_title = state.meta_title;
-      body.meta_description = state.meta_description;
+      // body.master_category_ids = seoCategory.parent_ids || [];
+      // body.subcategory_ids = seoCategory.child_ids || [];
+      // body.subcategory_child_ids = seoCategory.sub_child_ids || [];
+      // body.meta_title = state.meta_title;
+      // body.meta_description = state.meta_description;
 
       if (state.jobRole?.value) {
         body.role_ids = [state.jobRole?.value];
@@ -2044,7 +2044,7 @@ export default function UpdateJob() {
             </div>
           </div>
 
-          <div className="py-4">
+          {/* <div className="py-4">
             <div
               ref={section5Ref}
               className="scroll-mt-32 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
@@ -2112,7 +2112,7 @@ export default function UpdateJob() {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Card 4: Professional Skills
           <div

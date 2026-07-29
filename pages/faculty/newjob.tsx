@@ -166,8 +166,8 @@ export default function Newjob() {
     rawSeoCategoryList: [],
     seoCategorySelected: [],
     seoCategory: null,
-    meta_title: "",
-    meta_description: "",
+    // meta_title: "",
+    // meta_description: "",
     aiAssistantOpen: false,
     aiPrompt: "",
     aiSuggestions: [],
@@ -696,8 +696,8 @@ export default function Newjob() {
         alternativeEmail: state.alternativeEmail,
         applyLink: state.applyLink,
         jobRole: state.jobRole?.value,
-        meta_title: state.meta_title,
-        meta_description: state.meta_description,
+        // meta_title: state.meta_title,
+        // meta_description: state.meta_description,
       };
 
       await CreateNewJob.validate(validation, { abortEarly: false });
@@ -705,15 +705,15 @@ export default function Newjob() {
       // SEO category is required — at least one must be selected
       const seoCategory = state.seoCategory || {};
 
-      const hasSeoSelection =
-        (seoCategory.parent_ids?.length > 0) ||
-        (seoCategory.child_ids?.length > 0) ||
-        (seoCategory.sub_child_ids?.length > 0);
-      if (!hasSeoSelection) {
-        Failure("Please select at least one SEO category.");
-        setState({ btnLoading: false, error: { ...state.error, seoCategory: "Please select at least one SEO category." } });
-        return;
-      }
+      // const hasSeoSelection =
+      //   (seoCategory.parent_ids?.length > 0) ||
+      //   (seoCategory.child_ids?.length > 0) ||
+      //   (seoCategory.sub_child_ids?.length > 0);
+      // if (!hasSeoSelection) {
+      //   Failure("Please select at least one SEO category.");
+      //   setState({ btnLoading: false, error: { ...state.error, seoCategory: "Please select at least one SEO category." } });
+      //   return;
+      // }
 
       const body: any = {
         // job_title: capitalizeFLetter(state.title),
@@ -805,11 +805,11 @@ export default function Newjob() {
       }
 
       // const seoCategory = state.seoCategory || {};
-      body.master_category_ids = seoCategory.parent_ids || [];
-      body.subcategory_ids = seoCategory.child_ids || [];
-      body.subcategory_child_ids = seoCategory.sub_child_ids || [];
-      body.meta_title = state.meta_title;
-      body.meta_description = state.meta_description;
+      // body.master_category_ids = seoCategory.parent_ids || [];
+      // body.subcategory_ids = seoCategory.child_ids || [];
+      // body.subcategory_child_ids = seoCategory.sub_child_ids || [];
+      // body.meta_title = state.meta_title;
+      // body.meta_description = state.meta_description;
 
       if (state.jobRole) {
         body.role_ids = [state.jobRole?.value];
@@ -2072,7 +2072,7 @@ export default function Newjob() {
                 </div>
               </div>
 
-              <div
+              {/* <div
                 ref={section5Ref}
                 className="scroll-mt-32 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
               >
@@ -2133,7 +2133,7 @@ export default function Newjob() {
                     />
                   </div>
                 </div>
-              </div>
+              </div> */}
 
               {/* Action Buttons */}
               <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">

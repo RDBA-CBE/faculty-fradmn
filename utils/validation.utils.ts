@@ -267,8 +267,8 @@ export const CreateNewJob = Yup.object().shape({
     otherwise: (schema) => schema.notRequired(),
   }),
 
-  meta_title: Yup.string().required("Meta title is required"),
-  meta_description: Yup.string().required("Meta description is required"),
+  // meta_title: Yup.string().required("Meta title is required"),
+  // meta_description: Yup.string().required("Meta description is required"),
 });
 
 export const panel = Yup.object().shape({
