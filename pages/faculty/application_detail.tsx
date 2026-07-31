@@ -1404,7 +1404,7 @@ const ApplicationDetail = () => {
                     Request the candidate to change the interview slot
                   </label>
                 </div>
-                {/* {!state.profile?.google_calendar_connected_at && (
+                {!state.profile?.google_calendar_connected_at && (
                   <div className="flex items-center gap-2">
                     <input
                       type="checkbox"
@@ -1455,7 +1455,7 @@ const ApplicationDetail = () => {
                       )}
                     </label>
                   </div>
-                )} */}
+                )}
               </div>
             </div>
 

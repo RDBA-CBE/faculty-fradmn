@@ -472,6 +472,8 @@ const Users = () => {
       body.institution = state.profile?.institution?.id;
       if (state.dropCollege?.length > 0) {
         body.college = state.dropCollege?.map((item) => Number(item.value));
+      }else{
+        body.college = null
       }
 
       const formData = buildFormData(body);
