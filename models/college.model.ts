@@ -66,7 +66,7 @@ const college_dept = {
         .catch((error) => {
 console.log('✌️error --->', error);
           if (error.response) {
-            reject(error.response);
+            reject(error.response.data);
           } else {
             reject(error);
           }
