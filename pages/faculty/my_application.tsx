@@ -60,7 +60,7 @@ import {
 import CustomeDatePicker from "@/components/datePicker";
 import PrivateRouter from "@/hook/privateRouter";
 import moment from "moment";
-import { CALENDAR_CLIENT_ID,  RECORDS, ROLES, STATUS_COLOR } from "@/utils/constant.utils";
+import { CALENDAR_CLIENT_ID,   RECORDS, ROLES, STATUS_COLOR } from "@/utils/constant.utils";
 import Utils from "@/imports/utils.import";
 import * as Yup from "yup";
 import Link from "next/link";
@@ -2199,7 +2199,7 @@ const Application = () => {
                   htmlFor="requestForChange"
                   className="text-sm pt-2 font-medium text-gray-700 dark:text-gray-300"
                 >
-                  Request for Change
+                  Request the candidate to change the interview slot
                 </label>
               </div>
              {!state.profile?.google_calendar_connected_at && (
@@ -2236,6 +2236,7 @@ const Application = () => {
                             `access_type=offline&` +
                             `prompt=consent&` +
                             `state=${encodeURIComponent(redirectUri)}`;
+
                           window.location.href = googleAuthUrl;
                         } else {
                           setState({ googleAuthCode: "" });
