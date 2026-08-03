@@ -1429,10 +1429,12 @@ const ApplicationDetail = () => {
                           const redirectUri = url.toString();
                           const googleAuthUrl =
                             `https://accounts.google.com/o/oauth2/v2/auth?` +
-                             `client_id=${CALENDAR_CLIENT_ID}&` +
+                            `client_id=${CALENDAR_CLIENT_ID}&` +
                             `redirect_uri=https://user-service.88.222.213.249.nip.io/auth/google/callback&` +
                             `response_type=code&` +
-                            `scope=https://www.googleapis.com/auth/calendar&` +
+                            `scope=${encodeURIComponent(
+                              "https://www.googleapis.com/auth/calendar.events"
+                            )}&` +
                             `access_type=offline&` +
                             `prompt=consent&` +
                             `state=${encodeURIComponent(redirectUri)}`;
@@ -1447,7 +1449,8 @@ const ApplicationDetail = () => {
                       htmlFor="connectGoogleCalendar"
                       className="pt-2  text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
-                      Connect Google Calendar
+                      {`Connect Google Calendar (Optional)`}
+
                       {state.googleAuthCode && (
                         <span className="ml-2 text-xs text-green-600">
                           ✓ Connected
@@ -1673,7 +1676,7 @@ const ApplicationDetail = () => {
                     htmlFor="requestForChange"
                     className="pt-2 text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
-                    Request for Change
+                    Request the candidate to change the interview slot
                   </label>
                 </div>
                 {!state.profile?.google_calendar_connected_at && (
@@ -1704,7 +1707,9 @@ const ApplicationDetail = () => {
                             `client_id=${CALENDAR_CLIENT_ID}&` +
                             `redirect_uri=https://user-service.88.222.213.249.nip.io/auth/google/callback&` +
                             `response_type=code&` +
-                            `scope=https://www.googleapis.com/auth/calendar&` +
+                            `scope=${encodeURIComponent(
+                              "https://www.googleapis.com/auth/calendar.events"
+                            )}&` +
                             `access_type=offline&` +
                             `prompt=consent&` +
                             `state=${encodeURIComponent(redirectUri)}`;
@@ -1719,7 +1724,8 @@ const ApplicationDetail = () => {
                       htmlFor="connectGoogleCalendar"
                       className="pt-2  text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
-                      Connect Google Calendar
+                      {`Connect Google Calendar (Optional)`}
+
                       {state.googleAuthCode && (
                         <span className="ml-2 text-xs text-green-600">
                           ✓ Connected
@@ -1727,7 +1733,7 @@ const ApplicationDetail = () => {
                       )}
                     </label>
                   </div>
-                )}
+             )} 
               </div>
             </div>
 

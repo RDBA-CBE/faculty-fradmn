@@ -2232,7 +2232,7 @@ const Application = () => {
                             `client_id=${CALENDAR_CLIENT_ID}&` +
                             `redirect_uri=https://user-service.88.222.213.249.nip.io/auth/google/callback&` +
                             `response_type=code&` +
-                            `scope=https://www.googleapis.com/auth/calendar&` +
+                            `scope=${encodeURIComponent("https://www.googleapis.com/auth/calendar.events")}&` +
                             `access_type=offline&` +
                             `prompt=consent&` +
                             `state=${encodeURIComponent(redirectUri)}`;
@@ -2248,7 +2248,7 @@ const Application = () => {
                       htmlFor="connectGoogleCalendar"
                       className="pt-2  text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
-                      Connect Google Calendar
+                      {`Connect Google Calendar (Optional)`}
                       {state.googleAuthCode && (
                         <span className="ml-2 text-xs text-green-600">
                           ✓ Connected
@@ -2256,7 +2256,7 @@ const Application = () => {
                       )}
                     </label>
                   </div>
-                )} 
+             )}  
             </div>
             </div>
             <div className="mt-6 flex gap-3">
