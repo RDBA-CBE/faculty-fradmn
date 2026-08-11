@@ -747,16 +747,18 @@ const ApplicationDetail = () => {
   }
 
   .section-title {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
 
     color: #172554;
 
-    padding-bottom: 7px;
+    background-color: #1e3786;
 
-    margin-bottom: 10px;
+    padding: 7px 12px;
 
-    border-bottom: 1px solid #cbd5e1;
+    margin-bottom: 12px;
+
+    border-radius: 4px;
 
     break-after: avoid;
   }
@@ -821,8 +823,8 @@ const ApplicationDetail = () => {
   }
 
   .profile-avatar {
-    width: 65px;
-    height: 65px;
+    width: 45px;
+    height: 45px;
 
     border-radius: 50%;
 
@@ -959,6 +961,10 @@ const ApplicationDetail = () => {
       repeat(2, minmax(0, 1fr));
 
     gap: 10px;
+  }
+
+  .card-grid.single-item {
+    grid-template-columns: 1fr;
   }
 
   .card {
@@ -1409,8 +1415,8 @@ const ApplicationDetail = () => {
           <div class="profile-email">${safe(applicant.email)}</div>
 
           <div class="profile-meta">
-            ${metaPill(applicant.experience)}
-            ${metaPill(applicant.location)}
+            ${metaPill(applicant.current_position)}
+         
             
           </div>
         </div>
@@ -1557,7 +1563,7 @@ const ApplicationDetail = () => {
       ${
         experiences.length
           ? `
-            <div class="card-grid">
+            <div class="card-grid${experiences.length === 1 ? " single-item" : ""}">
 
               ${experiences
                 .map(
@@ -1629,7 +1635,7 @@ const ApplicationDetail = () => {
 
       ${sectionTitle("8. Projects")}
 
-            <div class="card-grid">
+            <div class="card-grid${projects.length === 1 ? " single-item" : ""}">
 
               ${projects
                 .map(
