@@ -47,6 +47,7 @@ import {
   ExternalLink,
   ClipboardList,
   ArrowLeft,
+  Printer,
 } from "lucide-react";
 import {
   CALENDAR_CLIENT_ID,
@@ -467,6 +468,1701 @@ const ApplicationDetail = () => {
     }
   };
 
+  const generateApplicationPrintHTML = (data: any) => {
+    const {
+      applicant = {},
+      application = {},
+      job = {},
+      qualifications = [],
+      experiences = [],
+      projects = [],
+      publications = [],
+      skills = [],
+      achievements = [],
+      academicResponsibilities = [],
+      panelMembers = [],
+    } = data;
+    console.log("✌️data --->", data);
+
+    const escapeHtml = (value: any) =>
+      String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+    const safe = (value: any) => {
+      if (value === null || value === undefined || value === "") {
+        return "-";
+      }
+
+      return escapeHtml(value);
+    };
+
+    const hasValue = (value: any) =>
+      value !== null &&
+      value !== undefined &&
+      String(value).trim() !== "" &&
+      String(value).trim() !== "-";
+
+    const arrayValue = (value: any[]) => {
+      if (!value || value.length === 0) {
+        return "-";
+      }
+
+      return value
+        .map((item: any) => safe(item?.name || item?.city || item))
+        .join(", ");
+    };
+
+    const statusClass = (status: any) => {
+      const normalized = String(status || "").toLowerCase();
+
+      if (
+        ["approved", "selected", "completed", "joined", "offer released"].some(
+          (item) => normalized.includes(item)
+        )
+      ) {
+        return "status-positive";
+      }
+
+      if (
+        ["rejected", "withdrawn", "declined"].some((item) =>
+          normalized.includes(item)
+        )
+      ) {
+        return "status-negative";
+      }
+
+      if (
+        ["interview", "scheduled", "shortlisted"].some((item) =>
+          normalized.includes(item)
+        )
+      ) {
+        return "status-info";
+      }
+
+      if (
+        ["pending", "review", "hold"].some((item) => normalized.includes(item))
+      ) {
+        return "status-warning";
+      }
+
+      return "status-neutral";
+    };
+
+    const sectionTitle = (title: string) => `
+      <div class="section-title">
+        ${title}
+      </div>
+    `;
+
+    const infoItem = (label: string, value: any) => `
+      <div class="info-item">
+        <div class="label">${label}</div>
+        <div class="value">${safe(value)}</div>
+      </div>
+    `;
+
+    const eligibilityItem = (label: string, value: any) => `
+      <div class="eligibility-item">
+        <div class="label">${label}</div>
+        <div class="eligibility-value">${safe(value)}</div>
+      </div>
+    `;
+
+    const metaPill = (value: any) =>
+      hasValue(value) ? `<span class="meta-pill">${safe(value)}</span>` : "";
+
+// Body/content: 10.5px
+// Labels: 9px
+// Section heading: 14px
+// Report title: 20px
+// Profile name: 18px
+// Card heading: 12px
+// Decision: 15px
+// Table content: 10px
+// Feedback: 10.5px
+// Footer: 8.5px
+
+    const feedbackItem = (label: string, value: any, isWide = false) => `
+      ${
+        hasValue(value)
+          ? `
+            <div class="feedback-item ${isWide ? "feedback-item-wide" : ""}">
+              <div class="feedback-label">${label}</div>
+              <div class="feedback-value">${safe(value)}</div>
+            </div>
+          `
+          : ""
+      }
+    `;
+
+    return `
+  <!DOCTYPE html>
+
+  <html>
+  <head>
+
+  <meta charset="UTF-8" />
+
+  <title>
+    Job Application - ${safe(applicant.name)}
+  </title>
+
+  <style>
+
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #1e293b;
+    background: #ffffff;
+    font-size: 10.5px;
+    line-height: 1.5;
+  }
+
+  .print-container {
+    width: 100%;
+    max-width: 210mm;
+    margin: auto;
+  }
+
+  /* ================= HEADER ================= */
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding-bottom: 15px;
+    margin-bottom: 18px;
+
+    border-bottom: 2px solid #1e3a8a;
+  }
+
+  .logo {
+    font-size: 25px;
+    font-weight: 800;
+    color: #111827;
+  }
+
+  .logo span {
+    color: #1e3a8a;
+  }
+
+  .header-right {
+    text-align: right;
+    font-size: 11px;
+    color: #64748b;
+  }
+
+  /* ================= TITLE ================= */
+
+  .report-title {
+    margin-bottom: 18px;
+  }
+
+  .report-title h1 {
+    margin: 0;
+    font-size: 20px;
+    color: #172554;
+  }
+
+  .report-title p {
+    margin: 3px 0 0;
+    color: #64748b;
+  }
+
+  /* ================= STATUS ================= */
+
+  .status-box {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    padding: 12px 15px;
+    border: 1px solid #dbeafe;
+    background: #f8fafc;
+    border-radius: 6px;
+    margin-bottom: 20px;
+  }
+
+  .status-label {
+    color: #64748b;
+  }
+
+  .status-value {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 9px;
+    border: 1px solid transparent;
+  }
+
+  .status-positive {
+    background: #dcfce7;
+    color: #166534;
+    border-color: #bbf7d0;
+  }
+
+  .status-warning {
+    background: #fef3c7;
+    color: #92400e;
+    border-color: #fde68a;
+  }
+
+  .status-negative {
+    background: #fee2e2;
+    color: #991b1b;
+    border-color: #fecaca;
+  }
+
+  .status-info {
+    background: #dbeafe;
+    color: #1e40af;
+    border-color: #bfdbfe;
+  }
+
+  .status-neutral {
+    background: #f1f5f9;
+    color: #334155;
+    border-color: #e2e8f0;
+  }
+
+  /* ================= SECTIONS ================= */
+
+  .section {
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-size: 14px;
+    font-weight: 700;
+
+    color: #172554;
+
+    padding-bottom: 7px;
+
+    margin-bottom: 10px;
+
+    border-bottom: 1px solid #cbd5e1;
+
+    break-after: avoid;
+  }
+
+  /* ================= INFO GRID ================= */
+
+  .info-grid {
+    display: grid;
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 6px 18px;
+  }
+
+  .info-item {
+    padding: 5px 0;
+
+    border-bottom: 1px solid #f1f5f9;
+
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .label {
+    font-size: 9px;
+
+    color: #64748b;
+
+    margin-bottom: 2px;
+
+    text-transform: uppercase;
+  }
+
+  .value {
+    font-size: 10.5px;
+    font-weight: 500;
+    color: #1e293b;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  /* ================= PROFILE ================= */
+
+  .profile-header {
+    display: flex;
+
+    gap: 12px;
+
+    padding: 11px;
+
+    background: #f8fafc;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 7px;
+
+    margin-bottom: 10px;
+
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .profile-avatar {
+    width: 65px;
+    height: 65px;
+
+    border-radius: 50%;
+
+    object-fit: cover;
+
+    border: 1px solid #cbd5e1;
+  }
+
+  .profile-name {
+    font-size: 18px;
+
+    font-weight: 700;
+
+    color: #172554;
+  }
+
+  .profile-email {
+    color: #64748b;
+
+    margin-top: 2px;
+  }
+
+  .profile-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .meta-pill {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: #e0f2fe;
+    color: #075985;
+    font-size: 9px;
+    font-weight: 600;
+  }
+
+  .eligibility-grid {
+    display: grid;
+
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    gap: 8px;
+
+    margin-top: 8px;
+
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .eligibility-item {
+    padding: 7px 9px;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 5px;
+
+    background: #f8fafc;
+
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .eligibility-value {
+    color: #172554;
+
+    font-size: 10.5px;
+
+    font-weight: 700;
+  }
+
+  /* ================= ABOUT ================= */
+
+  .about-box {
+    padding: 12px 14px;
+
+    background: #f8fafc;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 6px;
+
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  /* ================= TABLE ================= */
+
+  .data-table {
+    width: 100%;
+
+    border-collapse: collapse;
+
+    margin-top: 8px;
+  }
+
+  .data-table th {
+    background: #1e3a8a;
+
+    color: white;
+
+    font-weight: 600;
+
+    text-align: left;
+
+    padding: 8px;
+
+    font-size: 9px;
+  }
+
+  .data-table td {
+    padding: 8px;
+
+    border: 1px solid #e2e8f0;
+
+    vertical-align: top;
+
+    font-size: 10px;
+  }
+
+  .data-table tr:nth-child(even) td {
+    background: #f8fafc;
+  }
+
+  /* ================= CARDS ================= */
+
+  .card-grid {
+    display: grid;
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 10px;
+  }
+
+  .card {
+    border: 1px solid #e2e8f0;
+
+    border-radius: 6px;
+
+    padding: 11px;
+
+    page-break-inside: avoid;
+  }
+
+  .card-title {
+    font-size: 12px;
+
+    font-weight: 700;
+
+    color: #172554;
+
+    margin-bottom: 5px;
+  }
+
+  .card-subtitle {
+    color: #64748b;
+
+    font-size: 9px;
+
+    margin-bottom: 6px;
+  }
+
+  .card-description {
+    font-size: 10.5px;
+
+    color: #334155;
+
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  /* ================= TAGS ================= */
+
+  .tags {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 5px;
+  }
+
+  .tag {
+    padding: 4px 8px;
+
+    border-radius: 4px;
+
+    background: #eff6ff;
+
+    color: #1e40af;
+
+    font-size: 9px;
+
+    border: 1px solid #dbeafe;
+  }
+
+  /* ================= PANEL ================= */
+
+  .panel-card {
+    border: 1px solid #e2e8f0;
+
+    border-radius: 7px;
+
+    padding: 14px;
+
+    margin-bottom: 12px;
+
+    background: #ffffff;
+
+    page-break-inside: avoid;
+  }
+
+  .panel-card-decision-maker {
+    border-color: #86efac;
+
+    background: #f0fdf4;
+  }
+
+  .panel-header {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-start;
+
+    gap: 12px;
+
+    padding-bottom: 10px;
+
+    margin-bottom: 12px;
+
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .panel-name {
+    font-size: 12px;
+
+    font-weight: 700;
+
+    color: #172554;
+  }
+
+  .panel-member {
+    min-width: 0;
+  }
+
+  .panel-role {
+    color: #64748b;
+
+    font-size: 9px;
+
+    margin-top: 2px;
+
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .rating {
+    display: inline-block;
+
+    padding: 3px 8px;
+
+    border-radius: 999px;
+
+    background: #eff6ff;
+
+    border: 1px solid #dbeafe;
+
+    font-weight: 700;
+
+    color: #1e3a8a;
+
+    font-size: 9px;
+  }
+
+  .panel-badges {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    justify-content: flex-end;
+
+    gap: 6px;
+  }
+
+  .decision-maker-badge {
+    display: inline-block;
+
+    padding: 3px 8px;
+
+    border-radius: 999px;
+
+    background: #dcfce7;
+
+    border: 1px solid #86efac;
+
+    color: #166534;
+
+    font-size: 9px;
+
+    font-weight: 700;
+  }
+
+  .panel-feedback-grid {
+    display: grid;
+
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 8px;
+  }
+
+  .feedback-item {
+    min-width: 0;
+
+    padding: 8px 10px;
+
+    background: #f8fafc;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 5px;
+  }
+
+  .feedback-item-wide {
+    grid-column: 1 / -1;
+  }
+
+  .feedback-label {
+    margin-bottom: 3px;
+
+    color: #64748b;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+  }
+
+  .feedback-value {
+    color: #1e293b;
+
+    font-size: 10.5px;
+
+    font-weight: 600;
+
+    overflow-wrap: anywhere;
+
+    word-break: break-word;
+  }
+
+  .feedback {
+    padding: 9px;
+
+    background: #f8fafc;
+
+    border-radius: 5px;
+
+    color: #334155;
+
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  /* ================= DECISION ================= */
+
+  .decision-box {
+    padding: 15px;
+
+    border: 2px solid #cbd5e1;
+
+    border-radius: 7px;
+
+    background: #f8fafc;
+  }
+
+  .decision {
+    font-size: 15px;
+
+    font-weight: 700;
+
+    color: #172554;
+
+    margin-bottom: 6px;
+  }
+
+  .remarks {
+    color: #475569;
+
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .link-text {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  /* ================= FOOTER ================= */
+
+  .footer {
+    margin-top: 14px;
+
+    padding-top: 8px;
+
+    border-top: 1px solid #cbd5e1;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    color: #64748b;
+
+    font-size: 8.5px;
+
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* ================= PRINT ================= */
+
+  @media print {
+
+    body {
+      background: white;
+    }
+
+    .no-print {
+      display: none !important;
+    }
+
+    table {
+      page-break-inside: auto;
+    }
+
+    tr {
+      page-break-inside: avoid;
+    }
+
+    thead {
+      display: table-header-group;
+    }
+
+    .status-box,
+    .info-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .eligibility-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .panel-feedback-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+  }
+
+  </style>
+
+  </head>
+
+  <body>
+
+  <div class="print-container">
+
+    <!-- HEADER -->
+
+    <div class="header">
+
+      <div class="logo">
+        Faculty<span>Pro</span>
+      </div>
+
+      <div class="header-right">
+        Job Application Report<br />
+        Generated on ${new Date().toLocaleDateString("en-IN")}
+      </div>
+
+    </div>
+
+
+    <!-- TITLE -->
+
+    <div class="report-title">
+
+      <h1>
+        Job Application Details
+      </h1>
+
+      <p>
+        Complete Applicant & Recruitment Report
+      </p>
+
+    </div>
+
+     <!-- 3. JOB DETAILS -->
+
+    <div class="section">
+
+      ${sectionTitle("1. Job Details")}
+
+      <div class="info-grid">
+
+        ${infoItem("Job Title", job.title)}
+        ${infoItem("Institution", job.institution)}
+        ${infoItem("College", job.college)}
+        ${infoItem("Department", job.department)}
+        ${infoItem("Category", arrayValue(job.categories))}
+        ${infoItem("Location", arrayValue(job.locations))}
+        ${infoItem("Experience", job.experience)}
+        ${infoItem("Qualification", job.qualification)}
+        ${infoItem("Salary Range", job.salary_range)}
+      
+       
+        ${infoItem("Immediate Hiring", job.immediate_join ? "Yes" : "No")}
+
+      </div>
+
+    </div>
+
+
+    <!-- 1. APPLICATION SUMMARY -->
+
+    <div class="section">
+
+      ${sectionTitle("2. Application Summary")}
+
+      <div class="status-box">
+
+        <div>
+          <div class="status-label">Application ID</div>
+          <strong>${safe(application.id)}</strong>
+        </div>
+
+        <div>
+          <div class="status-label">Applied Date</div>
+          <strong>${safe(application.applied_date)}</strong>
+        </div>
+
+        <div>
+          <div class="status-label">Status</div>
+          <span class="status-value ${statusClass(application.status)}">
+            ${safe(application.status)}
+          </span>
+        </div>
+
+        <div>
+          <div class="status-label">Current Stage</div>
+          <strong>${safe(application.current_stage)}</strong>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- 2. APPLICANT SNAPSHOT -->
+
+    <div class="section">
+
+      ${sectionTitle("3. Applicant Snapshot")}
+
+      <div class="profile-header">
+
+        ${
+          applicant.profile_image
+            ? `
+              <img
+                src="${safe(applicant.profile_image)}"
+                class="profile-avatar"
+              />
+            `
+            : ""
+        }
+
+        <div>
+          <div class="profile-name">${safe(applicant.name)}</div>
+          <div class="profile-email">${safe(applicant.email)}</div>
+
+          <div class="profile-meta">
+            ${metaPill(applicant.experience)}
+            ${metaPill(applicant.location)}
+            
+          </div>
+        </div>
+
+      </div>
+
+      <div class="info-grid">
+
+        ${infoItem("Email", applicant.email)}
+        ${infoItem("Phone", applicant.phone)}
+        ${infoItem("Location", applicant.location)}
+        ${infoItem("Gender", applicant.gender)}
+        ${infoItem("Experience", applicant.experience)}
+        ${infoItem("Company", applicant.company)}
+
+      </div>
+
+      <div class="eligibility-grid">
+        ${eligibilityItem("PhD Completed", applicant.phd_completed)}
+        ${eligibilityItem("NET Cleared", applicant.net_cleared)}
+        ${eligibilityItem("SET / SLET Cleared", applicant.set_slet_cleared)}
+      </div>
+
+    </div>
+
+
+   
+
+
+    <!-- 4. Applicant About -->
+
+    
+
+
+    <!-- 5. PROFESSIONAL SUMMARY -->
+
+    <div class="section">
+
+      ${sectionTitle("4. Professional Summary")}
+
+      <div class="card">
+        <div class="card-title">About Applicant</div>
+        <div class="card-description">${safe(applicant.about)}</div>
+      </div>
+
+      ${
+        academicResponsibilities?.length
+          ? `
+            <div class="card" style="margin-top: 10px;">
+              <div class="card-title">Academic Responsibilities</div>
+              <div class="tags">
+                ${academicResponsibilities
+                  .map(
+                    (item: any) => `
+                      <span class="tag">
+                        ${safe(
+                          item?.responsibility_title || item?.title || item
+                        )}
+                      </span>
+                    `
+                  )
+                  .join("")}
+              </div>
+            </div>
+          `
+          : ""
+      }
+
+      <div class="card" style="margin-top: 10px;">
+        <div class="card-title">Resume</div>
+        <div class="info-grid">
+          ${infoItem("Resume File Name", applicant.resume_name)}
+          <div class="info-item">
+            <div class="label">Resume URL</div>
+            <div class="value link-text">${safe(applicant.resume_url)}</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- 6. ACADEMIC QUALIFICATIONS -->
+
+    <div class="section">
+
+      ${sectionTitle("5. Academic Qualifications")}
+
+      ${
+        qualifications.length
+          ? `
+            <table class="data-table">
+
+              <thead>
+
+                <tr>
+                  <th>Degree</th>
+                  <th>Institution</th>
+                  <th>Specialization</th>
+                  <th>Year</th>
+                  <th>Percentage / CGPA</th>
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                ${qualifications
+                  .map(
+                    (item: any) => `
+                      <tr>
+
+                        <td>${safe(item.degree)}</td>
+
+                        <td>${safe(item.institution)}</td>
+
+                        <td>${safe(item.specialization)}</td>
+
+                        <td>${safe(item.year)}</td>
+
+                        <td>${safe(item.score)}</td>
+
+                      </tr>
+                    `
+                  )
+                  .join("")}
+
+              </tbody>
+
+            </table>
+          `
+          : `<div class="about-box">No qualification details available.</div>`
+      }
+
+    </div>
+
+
+    <!-- 7. EXPERIENCE -->
+
+    <div class="section">
+
+      ${sectionTitle("6. Experience")}
+
+      ${
+        experiences.length
+          ? `
+            <div class="card-grid">
+
+              ${experiences
+                .map(
+                  (item: any) => `
+                    <div class="card">
+
+                      <div class="card-title">
+                        ${safe(item.designation)}
+                      </div>
+
+                      <div class="card-subtitle">
+                        ${safe(item.company)}
+                        |
+                        ${safe(item.duration)}
+                      </div>
+
+                      <div class="card-description">
+                        ${safe(item.description)}
+                      </div>
+
+                    </div>
+                  `
+                )
+                .join("")}
+
+            </div>
+          `
+          : `<div class="about-box">No experience details available.</div>`
+      }
+
+    </div>
+
+
+    ${
+      skills?.length
+        ? `
+    <!-- 8. SKILLS -->
+
+    <div class="section">
+
+      ${sectionTitle("7. Skills")}
+
+      <div class="tags">
+
+        ${skills
+          .map(
+            (skill: any) => `
+                    <span class="tag">
+                      ${safe(skill?.name || skill)}
+                    </span>
+                  `
+          )
+          .join("")}
+
+      </div>
+
+    </div>
+        `
+        : ""
+    }
+
+
+    ${
+      projects.length
+        ? `
+    <!-- 9. PROJECTS -->
+
+    <div class="section">
+
+      ${sectionTitle("8. Projects")}
+
+            <div class="card-grid">
+
+              ${projects
+                .map(
+                  (item: any) => `
+                    <div class="card">
+
+                      <div class="card-title">
+                        ${safe(item.title)}
+                      </div>
+
+                      <div class="card-description">
+                        ${safe(item.description)}
+                      </div>
+
+                    </div>
+                  `
+                )
+                .join("")}
+
+            </div>
+
+    </div>
+        `
+        : ""
+    }
+
+
+    ${
+      publications.length
+        ? `
+    <!-- 10. PUBLICATIONS -->
+
+    <div class="section">
+
+      ${sectionTitle("9. Publications")}
+
+            <table class="data-table">
+
+              <thead>
+
+                <tr>
+                  <th>Title</th>
+                  <th>Journal / Conference</th>
+                  <th>Year</th>
+                  <th>Link</th>
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                ${publications
+                  .map(
+                    (item: any) => `
+                      <tr>
+
+                        <td>${safe(item.title)}</td>
+
+                        <td>${safe(item.publisher)}</td>
+
+                        <td>${safe(item.year)}</td>
+
+                        <td>${safe(item.url)}</td>
+
+                      </tr>
+                    `
+                  )
+                  .join("")}
+
+              </tbody>
+
+            </table>
+
+    </div>
+        `
+        : ""
+    }
+
+
+    ${
+      achievements.length
+        ? `
+    <!-- 11. ACHIEVEMENTS -->
+
+    <div class="section">
+
+      ${sectionTitle("10. Achievements")}
+
+            <div class="card-grid">
+
+              ${achievements
+                .map(
+                  (item: any) => `
+                    <div class="card">
+
+                      <div class="card-title">
+                        ${safe(item.title)}
+                      </div>
+
+                      <div class="card-description">
+                        ${safe(item.description)}
+                      </div>
+
+                    </div>
+                  `
+                )
+                .join("")}
+
+            </div>
+
+    </div>
+        `
+        : ""
+    }
+
+
+    
+
+
+    <!-- 13. PANEL FEEDBACK -->
+
+    <div class="section">
+
+      ${sectionTitle("11. Panel Member Feedback")}
+
+      ${
+        panelMembers.length
+          ? panelMembers
+              .map(
+                (panel: any) => `
+                  <div class="panel-card ${
+                    panel.decision_maker ? "panel-card-decision-maker" : ""
+                  }">
+
+                    <div class="panel-header">
+
+                      <div class="panel-member">
+
+                        <div class="panel-name">
+                          ${safe(panel.name)}
+                        </div>
+
+                        <div class="panel-role">
+                          ${safe(panel.role)}
+                        </div>
+
+                      </div>
+
+                      <div class="panel-badges">
+                        ${
+                          panel.decision_maker
+                            ? `<div class="decision-maker-badge">Decision Maker</div>`
+                            : ""
+                        }
+                        ${
+                          panel.rating
+                            ? `<div class="rating">${safe(panel.rating)}</div>`
+                            : ""
+                        }
+                      </div>
+                    </div>
+
+                    <div class="panel-feedback-grid">
+                      ${feedbackItem(
+                        "Knowledge Rating",
+                        panel.knowledge_rating
+                      )}
+                      ${feedbackItem(
+                        "Knowledge Detail",
+                        panel.knowledge_detail
+                      )}
+                      ${feedbackItem(
+                        "Communication Rating",
+                        panel.communication_skills_rating
+                      )}
+                      ${feedbackItem(
+                        "Communication Comment",
+                        panel.communication_skills_comment
+                      )}
+                      ${feedbackItem("Attitude Rating", panel.attitude_rating)}
+                      ${feedbackItem(
+                        "Attitude Comment",
+                        panel.attitude_comment
+                      )}
+                      ${feedbackItem(
+                        "Overall Assessment",
+                        panel.overall_assessment_rating
+                      )}
+                      ${feedbackItem(
+                        "Overall Remark",
+                        panel.overall_assessment_remark
+                      )}
+                      ${feedbackItem(
+                        "Position Recommendation",
+                        panel.position_recommendation
+                      )}
+                      ${feedbackItem(
+                        "Recommendation Comment",
+                        panel.recommendation_comments,
+                        true
+                      )}
+                    </div>
+
+                  </div>
+                `
+              )
+              .join("")
+          : `<div class="about-box">No panel feedback available.</div>`
+      }
+
+    </div>
+
+
+   
+
+
+    <!-- FOOTER -->
+
+    <div class="footer">
+
+      <div>
+        FacultyPro
+      </div>
+
+      <div>
+        Confidential - Job Application Report
+      </div>
+
+      <div>
+        Printed on ${new Date().toLocaleDateString("en-IN")}
+      </div>
+
+    </div>
+
+  </div>
+
+  </body>
+
+  </html>
+  `;
+  };
+
+  const buildApplicationPrintData = (
+    applicationDetail: any,
+    applicantProfile?: any
+  ) => {
+    const jobDetail = applicationDetail?.job_detail || {};
+    const profileData = applicantProfile || {};
+    const fullName =
+      profileData?.username ||
+      [profileData?.first_name, profileData?.last_name]
+        .filter(Boolean)
+        .join(" ") ||
+      applicationDetail?.applicant_name ||
+      [applicationDetail?.first_name, applicationDetail?.last_name]
+        .filter(Boolean)
+        .join(" ");
+    const formatDate = (value: any, format = "DD/MM/YYYY") =>
+      value && moment(value).isValid() ? moment(value).format(format) : value;
+    const getName = (item: any) =>
+      item?.name ||
+      item?.title ||
+      item?.label ||
+      item?.category_name ||
+      item?.location_name ||
+      item?.department_name ||
+      item?.short_name ||
+      item?.city ||
+      item;
+    const mapNames = (value: any) =>
+      Array.isArray(value) ? value.map(getName).filter(Boolean) : [];
+    const fileNameFromUrl = (url: string) => {
+      if (!url) return "";
+      const cleanUrl = url.split("?")[0];
+      return decodeURIComponent(cleanUrl.split("/").pop() || "Resume");
+    };
+    const yesNo = (value: any) => (value ? "Yes" : "No");
+    const departments = applicationDetail?.department_details?.length
+      ? applicationDetail.department_details
+      : applicationDetail?.department
+      ? [applicationDetail.department]
+      : [];
+    const educationList =
+      profileData?.educations || applicationDetail?.educations || [];
+    const experienceList =
+      profileData?.experiences || applicationDetail?.experiences || [];
+    const projectList =
+      profileData?.projects || applicationDetail?.projects || [];
+    const publicationList =
+      profileData?.publications || applicationDetail?.publications || [];
+    const achievementList =
+      profileData?.achievements || applicationDetail?.achievements || [];
+    const skillList = profileData?.skills || applicationDetail?.skills || [];
+    const responsibilityList =
+      profileData?.additional_academic_responsibilities ||
+      applicationDetail?.additional_academic_responsibilities ||
+      [];
+    const interviewSlots = applicationDetail?.interview_slots || [];
+    const latestInterviewRound = interviewSlots.length
+      ? interviewSlots[interviewSlots.length - 1]
+      : null;
+    const panelFeedback = interviewSlots.flatMap((round: any) =>
+      (round?.panels || []).map((panel: any) => {
+        const feedback = panel?.feedbacks?.[0] || {};
+        return {
+          name: panel?.name,
+          decision_maker: panel?.decision_maker,
+          role: [
+            round?.round_name,
+            panel?.designation,
+            panel?.department?.department_name,
+          ]
+            .filter(Boolean)
+            .join(" | "),
+          rating:
+            feedback?.overall_assessment_rating ||
+            panel?.score ||
+            feedback?.knowledge_rating,
+          knowledge_rating: feedback?.knowledge_rating,
+          knowledge_detail: feedback?.knowledge_detail,
+          communication_skills_rating: feedback?.communication_skills_rating,
+          communication_skills_comment:
+            feedback?.communication_skills_comment,
+          attitude_rating: feedback?.attitude_rating,
+          attitude_comment: feedback?.attitude_comment,
+          overall_assessment_rating: feedback?.overall_assessment_rating,
+          overall_assessment_remark: feedback?.overall_assessment_remark,
+          position_recommendation: feedback?.position_recommendation,
+          recommendation_comments: feedback?.recommendation_comments,
+          feedback:
+            feedback?.overall_assessment_remark ||
+            feedback?.recommendation_comments ||
+            feedback?.knowledge_detail ||
+            feedback?.academic_record_remark ||
+            "No feedback submitted.",
+        };
+      })
+    );
+
+    return {
+      applicant: {
+        name: fullName,
+        email: profileData?.email || applicationDetail?.email,
+        phone: profileData?.phone || applicationDetail?.phone,
+        location:
+          profileData?.current_location ||
+          profileData?.location ||
+          applicationDetail?.current_location,
+        gender: profileData?.gender || applicationDetail?.gender,
+        experience: profileData?.experience || applicationDetail?.experience,
+        company:
+          profileData?.current_company || applicationDetail?.current_company,
+        about:
+          profileData?.about ||
+          profileData?.profile_summary ||
+          applicationDetail?.message,
+        profile_image:
+          profileData?.profile_logo_url ||
+          profileData?.profile_image ||
+          applicationDetail?.profile_logo_url,
+        resume_name: fileNameFromUrl(
+          profileData?.resume_url || applicationDetail?.resume
+        ),
+        resume_url: profileData?.resume_url || applicationDetail?.resume,
+        qualification:
+          profileData?.highest_qualification ||
+          applicationDetail?.qualification ||
+          jobDetail?.qualification,
+        phd_completed: yesNo(profileData?.phd_completed),
+        net_cleared: yesNo(profileData?.net_cleared),
+        set_slet_cleared:
+          profileData?.set_cleared || profileData?.slet_cleared ? "Yes" : "No",
+      },
+      application: {
+        id: applicationDetail?.id,
+        applied_date: formatDate(applicationDetail?.applied_date),
+        status:
+          applicationDetail?.application_status?.name ||
+          applicationDetail?.status_display ||
+          applicationDetail?.status,
+        current_stage:
+          applicationDetail?.current_stage || latestInterviewRound?.round_name,
+        source: applicationDetail?.source || "FacultyPro",
+        expected_salary: applicationDetail?.expected_salary,
+        notice_period: applicationDetail?.notice_period,
+        final_decision:
+          applicationDetail?.final_decision ||
+          applicationDetail?.status_display ||
+          applicationDetail?.status,
+        final_remarks: applicationDetail?.final_remarks,
+        decision_date:
+          formatDate(applicationDetail?.decision_date) ||
+          formatDate(applicationDetail?.final_decision_date),
+        decision_by:
+          applicationDetail?.decision_by?.name ||
+          applicationDetail?.decision_by?.username ||
+          applicationDetail?.decision_by ||
+          applicationDetail?.final_decision_by?.name ||
+          applicationDetail?.final_decision_by?.username ||
+          applicationDetail?.final_decision_by,
+        cover_letter: applicationDetail?.message,
+        interview_rounds: interviewSlots.length,
+      },
+      job: {
+        title: jobDetail?.job_title,
+        role: jobDetail?.short_title || jobDetail?.job_short_title,
+        institution:
+          jobDetail?.institution?.name ||
+          jobDetail?.institution_name ||
+          applicationDetail?.institution_name,
+        college:
+          jobDetail?.college?.name ||
+          jobDetail?.college_name ||
+          applicationDetail?.college_name,
+        department: mapNames(departments).join(", "),
+        job_type: jobDetail?.job_type,
+        categories: mapNames(jobDetail?.categories),
+        locations: mapNames(jobDetail?.locations),
+        experience: jobDetail?.experiences?.name,
+        qualification: jobDetail?.qualification,
+        salary_range: jobDetail?.salary_range,
+        last_date: formatDate(jobDetail?.last_date),
+        urgency: jobDetail?.priority,
+        immediate_join:
+          jobDetail?.immediate_joining || jobDetail?.immediate_join,
+        description: jobDetail?.job_description || jobDetail?.description,
+      },
+      qualifications: educationList.map((edu: any) => ({
+        degree: edu?.degree,
+        institution: edu?.institution,
+        specialization: edu?.field || edu?.specialization,
+        year: [edu?.start_year, edu?.end_year].filter(Boolean).join(" - "),
+        score: edu?.cgpa || edu?.percentage || edu?.score,
+      })),
+      experiences: experienceList.map((exp: any) => ({
+        designation: exp?.designation,
+        company: exp?.company,
+        duration:
+          exp?.duration ||
+          [
+            formatDate(exp?.start_date, "MMM YYYY"),
+            exp?.currently_working
+              ? "Present"
+              : formatDate(exp?.end_date, "MMM YYYY"),
+          ]
+            .filter(Boolean)
+            .join(" - "),
+        description: exp?.job_description || exp?.description,
+      })),
+      skills: skillList,
+      academicResponsibilities: responsibilityList,
+      projects: projectList.map((project: any) => ({
+        title: project?.project_title || project?.title,
+        description: [
+          project?.project_description || project?.description,
+          project?.technologies?.length
+            ? `Technologies: ${project.technologies.join(", ")}`
+            : "",
+          project?.link ? `Link: ${project.link}` : "",
+        ]
+          .filter(Boolean)
+          .join("\n"),
+      })),
+      publications: publicationList.map((publication: any) => ({
+        title: publication?.publication_title || publication?.title,
+        publisher:
+          publication?.publication_journal ||
+          publication?.publisher ||
+          publication?.journal,
+        year: publication?.publication_year || publication?.year,
+        url: publication?.publication_url || publication?.url,
+      })),
+      achievements: achievementList.map((achievement: any) => ({
+        title: achievement?.achievement_title || achievement?.title,
+        description:
+          achievement?.achievement_description ||
+          achievement?.description ||
+          achievement?.organization,
+      })),
+      panelMembers: panelFeedback,
+    };
+  };
+
+  const handlePrintApplication = async () => {
+    let applicantProfile = state.userProfile;
+
+    // if (!applicantProfile && state.application?.applicant) {
+    try {
+      applicantProfile = await Models.auth.getUser(state.application.applicant);
+      setState({ userProfile: applicantProfile });
+    } catch (error) {
+      console.error("Error fetching applicant profile for print:", error);
+    }
+    // }
+
+    const html = generateApplicationPrintHTML(
+      buildApplicationPrintData(state.application, applicantProfile)
+    );
+
+    const printFrame = document.createElement("iframe");
+    printFrame.style.position = "fixed";
+    printFrame.style.right = "0";
+    printFrame.style.bottom = "0";
+    printFrame.style.width = "0";
+    printFrame.style.height = "0";
+    printFrame.style.border = "0";
+    printFrame.style.visibility = "hidden";
+
+    document.body.appendChild(printFrame);
+
+    const frameWindow = printFrame.contentWindow;
+    const frameDocument =
+      printFrame.contentDocument || frameWindow?.document || null;
+
+    if (!frameWindow || !frameDocument) {
+      document.body.removeChild(printFrame);
+      return;
+    }
+
+    frameDocument.open();
+    frameDocument.write(html);
+    frameDocument.close();
+
+    printFrame.onload = () => {
+      frameWindow.focus();
+      frameWindow.print();
+
+      setTimeout(() => {
+        document.body.removeChild(printFrame);
+      }, 1000);
+    };
+  };
+
   if (state.loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -495,6 +2191,19 @@ const ApplicationDetail = () => {
             <ArrowLeft className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
             <span>Back</span>
           </button>
+
+        
+
+          <button
+                                onClick={handlePrintApplication}
+
+                      className="tour-detail-view-profile"
+                    >
+                      <div className="bg-dblue group flex cursor-pointer items-center gap-3 rounded-lg px-6 py-2 shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl">
+                        <Printer className="h-4 w-4 text-white" />
+                        <p className=" text-white">Print Application</p>
+                      </div>
+                    </button>
 
           {/* <div className="flex items-start gap-3">
  <UserCog className="mt-1 h-5 w-5 text-purple-600" />
@@ -1096,7 +2805,7 @@ const ApplicationDetail = () => {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
+                {/* <div className="flex items-start gap-3">
                   <Users className="text-dyellow mt-1 h-5 w-5" />
                   <div>
                     <p className="text-xs text-gray-500">Openings</p>
@@ -1104,7 +2813,7 @@ const ApplicationDetail = () => {
                       {job?.number_of_openings || "N/A"}
                     </p>
                   </div>
-                </div>
+                </div> */}
               </div>
 
               {/* Job Description */}
@@ -1733,7 +3442,7 @@ const ApplicationDetail = () => {
                       )}
                     </label>
                   </div>
-             )} 
+                )}
               </div>
             </div>
 

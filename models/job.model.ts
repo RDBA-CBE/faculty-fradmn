@@ -10,6 +10,9 @@ const job = {
       if (body?.ordering) {
         url += `&ordering=${encodeURIComponent(body.ordering)}`;
       }
+      if (body?.pagination == "No") {
+        url += `&pagination=${encodeURIComponent(false)}`;
+      }
 
       if (body?.additional_academic_responsibility_ids) {
         url += `&additional_academic_responsibility_ids=${encodeURIComponent(body.additional_academic_responsibility_ids)}`;

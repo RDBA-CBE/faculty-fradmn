@@ -55,6 +55,8 @@ import LogCard from "@/components/logCard";
 import { MdApproval } from "react-icons/md";
 import PrivateRouter from "@/hook/privateRouter";
 import Link from "next/link";
+import IconDownload from "@/components/Icon/IconDownload";
+import * as XLSX from "xlsx";
 
 const SESSION_KEY = "hr_job_page";
 
@@ -70,6 +72,7 @@ const Job = () => {
     showFilterModal: false,
     loading: false,
     submitting: false,
+    exporting: false,
     duplicatingJobId: null,
     sortBy: "",
     sortOrder: "asc",
@@ -219,6 +222,50 @@ const Job = () => {
     jobCount(p?.college?.map((c: any) => c.college_id));
   };
 
+  const formatJobRow = (item: any) => ({
+    id: item.id,
+    job_title: item.roles?.length > 0 ? item?.roles?.[0]?.role_name : "",
+    job_short_title: item.roles?.length > 0 ? item?.roles?.[0]?.short_name : "",
+    job_description: item.job_description,
+    institution_name:
+      item?.institution?.name || item?.institution?.institution_name || "-",
+    college_name: item?.college?.name,
+    department:
+      item?.department?.length > 0
+        ? item?.department?.map((d: any) => d?.short_name)
+        : [],
+    department_names:
+      item?.department?.length > 0
+        ? item?.department?.map((d: any) => d?.name || d?.short_name)
+        : [],
+    created_by_username: item?.created_by?.username || "-",
+    categories:
+      item?.categories?.length > 0
+        ? item?.categories?.map((category: any) => category?.name)
+        : [],
+    locations:
+      item?.locations?.length > 0
+        ? item?.locations?.map((location: any) => location?.city)
+        : [],
+    job_type: item?.job_type,
+    experiences: {
+      value: item?.experiences?.id,
+      label: item?.experiences?.name,
+    },
+    qualification: item?.qualification,
+    salary_range: item?.salary_range,
+    number_of_openings: item?.number_of_openings,
+    last_date: item?.last_date,
+    priority: item?.priority,
+    job_status: item?.job_status,
+    is_approved: item?.is_approved,
+    total_applications: item?.total_applications,
+    created_at: item?.created_at,
+    short_name: item?.college?.short_name || "-",
+    college_id: item?.college?.id,
+    department_id: item?.department?.id,
+  });
+
   const jobList = async (page, insId = null, colId = null) => {
     try {
       setState({ loading: true });
@@ -229,39 +276,7 @@ const Job = () => {
       } else if (colId) body.college_id = colId;
       const res: any = await Models.job.list(page, body);
 
-      const tableData = res?.results?.map((item) => ({
-        id: item.id,
-        job_title: item.roles?.length > 0 ? item?.roles?.[0]?.role_name : "",
-        job_short_title:
-          item.roles?.length > 0 ? item?.roles?.[0]?.short_name : "",
-        job_description: item.job_description,
-
-        college_name: item?.college?.name,
-        department:
-          item?.department?.length > 0
-            ? item?.department?.map((d) => d?.short_name)
-            : [],
-        // department_name:)  item?.department?.name || "-",
-
-        job_type: item?.job_type,
-        experiences: {
-          value: item?.experiences?.id,
-          label: item?.experiences?.name,
-        },
-        qualification: item?.qualification,
-        salary_range: item?.salary_range,
-        number_of_openings: item?.number_of_openings,
-
-        last_date: item?.last_date,
-        priority: item?.priority,
-        job_status: item?.job_status,
-        is_approved: item?.is_approved,
-
-        total_applications: item?.total_applications,
-        short_name: item?.college?.short_name || "-",
-        college_id: item?.college?.id,
-        department_id: item?.department?.id,
-      }));
+      const tableData = res?.results?.map(formatJobRow);
 
       setState({
         loading: false,
@@ -274,6 +289,116 @@ const Job = () => {
       });
     } catch (error) {
       setState({ loading: false });
+    }
+  };
+
+  const handleExportJobs = async () => {
+    try {
+      setState({ exporting: true });
+      const body = bodyData();
+
+      if (state.filterCollege?.value) {
+        body.college_id = state.filterCollege?.value;
+      } else {
+        const collegeIds = state.profile?.college?.map((item: any) => item?.college_id);
+        if (collegeIds?.length > 0) body.college_id = collegeIds;
+      }
+
+      let page = 1;
+      let hasNextPage = true;
+      const results: any[] = [];
+
+      while (hasNextPage) {
+        const res: any = await Models.job.list(page, body);
+        const pageResults = Array.isArray(res) ? res : res?.results || [];
+        results.push(...pageResults);
+        hasNextPage = !!res?.next;
+        page += 1;
+      }
+
+      const jobs = results.map(formatJobRow);
+
+      if (jobs.length === 0) {
+        Failure("No jobs available to export");
+        return;
+      }
+
+      const headers = [
+        "S.No", "Title", "Role", "Institution", "College", "Department",
+        "Categories", "Locations", "Experience", "Qualification",
+        "Salary Range", "Openings", "Urgency", "Immediate Hiring",
+        "Last Date", "Applications", "Status", "Job Description",
+        "Created By", "Created At",
+      ];
+
+      // Header style: dark blue bg (#1E3786), white bold text
+      const HEADER_BG = "FF1E3786";
+      const HEADER_FG = "FFFFFFFF";
+
+      const makeCell = (value: any, forceString = false): XLSX.CellObject => {
+        if (value === null || value === undefined || value === "") return { v: "-", t: "s" };
+        if (forceString) return { v: String(value), t: "s" };
+        if (typeof value === "number") return { v: value, t: "n" };
+        return { v: String(value), t: "s" };
+      };
+
+      const makeHeaderCell = (value: string): XLSX.CellObject => ({
+        v: value, t: "s",
+        s: {
+          fill: { fgColor: { rgb: HEADER_BG } },
+          font: { bold: true, color: { rgb: HEADER_FG }, sz: 11 },
+          alignment: { horizontal: "center", vertical: "center", wrapText: true },
+          border: {
+            bottom: { style: "thin", color: { rgb: "FFCCCCCC" } },
+            right: { style: "thin", color: { rgb: "FFCCCCCC" } },
+          },
+        },
+      });
+
+      const wsData: XLSX.CellObject[][] = [headers.map(makeHeaderCell)];
+
+      jobs.forEach((job: any, index: number) => {
+        wsData.push([
+          makeCell(index + 1),
+          makeCell(job.job_short_title || "-"),
+          makeCell(job.job_title || "-"),
+          makeCell(job.institution_name || "-"),
+          makeCell(job.short_name || job.college_name || "-"),
+          makeCell(job.department_names?.length > 0 ? job.department_names.join(", ") : "-"),
+          makeCell(job.categories?.length > 0 ? job.categories.join(", ") : "-"),
+          makeCell(job.locations?.length > 0 ? job.locations.join(", ") : "-"),
+          makeCell(job.experiences?.label || "-"),
+          makeCell(job.qualification || "-"),
+          makeCell(job.salary_range || "-"),
+          makeCell(job.number_of_openings ?? "-"),
+          makeCell(job.priority || "-"),
+          makeCell(job.immediate_join ? "Yes" : "No"),
+          makeCell(job.last_date ? moment(job.last_date).format("DD/MM/YYYY") : "-"),
+          makeCell(job.total_applications ?? 0),
+          makeCell(job.is_approved ? "Approved" : "Pending"),
+          makeCell(job.job_description || "-"),
+          makeCell(job.created_by_username || "-"),
+          makeCell(job.created_at ? moment(job.created_at).format("DD/MM/YYYY") : "-"),
+        ]);
+      });
+
+      const ws: XLSX.WorkSheet = {};
+      wsData.forEach((row, R) => {
+        row.forEach((cell, C) => {
+          ws[XLSX.utils.encode_cell({ r: R, c: C })] = cell;
+        });
+      });
+      ws["!ref"] = XLSX.utils.encode_range({ r: 0, c: 0 }, { r: wsData.length - 1, c: headers.length - 1 });
+      ws["!cols"] = headers.map(() => ({ wch: 20 }));
+      ws["!rows"] = [{ hpt: 30 }];
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Jobs");
+      XLSX.writeFile(wb, `job-list-${moment().format("YYYY-MM-DD")}.xlsx`);
+    } catch (error) {
+      Failure("Failed to export jobs");
+    } finally {
+      setState({ exporting: false });
     }
   };
 
@@ -760,14 +885,30 @@ const Job = () => {
               Manage job postings and opportunities
             </p>
           </div>
+          <div className="flex gap-4">
+
           <button
             onClick={() => router.push("newjob")}
             className="tour-add-job bg-dblue group relative inline-flex transform items-center gap-2 overflow-hidden rounded-lg px-4 py-2  text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
           >
             <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
             <IconPlus className="relative z-10 h-5 w-5" />
+           
             <span className="relative z-10">Add Job</span>
           </button>
+          <button
+            onClick={handleExportJobs}
+            disabled={state.exporting}
+            className="tour-add-job group relative inline-flex transform items-center gap-2 overflow-hidden rounded-lg bg-emerald-600 px-4 py-2  text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:bg-emerald-700 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            <div className="absolute inset-0 bg-emerald-700 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+            <IconDownload className="relative z-10 h-5 w-5" />
+            <span className="relative z-10">
+              {state.exporting ? "Exporting..." : "Export"}
+            </span>
+          </button>
+          </div>
+
         </div>
       </div>
 

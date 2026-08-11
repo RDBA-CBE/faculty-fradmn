@@ -30,6 +30,8 @@ import CheckboxInput from "@/components/FormFields/CheckBoxInput.component";
 import NumberInput from "@/components/FormFields/NumberInputs.component";
 import TextArea from "@/components/FormFields/TextArea.component";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import IconDownload from "@/components/Icon/IconDownload";
+import * as XLSX from "xlsx";
 
 const CollegeAndDepartment = () => {
   const dispatch = useDispatch();
@@ -43,6 +45,7 @@ const CollegeAndDepartment = () => {
     showModal: false,
     loading: false,
     submitting: false,
+    exporting: false,
     sortBy: "",
     sortOrder: "asc",
     departmentCount: 0,
@@ -179,7 +182,6 @@ const CollegeAndDepartment = () => {
       Failure("Failed to fetch departments");
     }
   };
-  console.log("✌️deptList --->", state.deptList);
 
   const collegeDropdownList = async (
     page,
@@ -279,6 +281,160 @@ const CollegeAndDepartment = () => {
         state.sortOrder === "desc" ? `-${state.sortBy}` : state.sortBy;
     }
     return body;
+  };
+
+  const buildDepartmentListBody = (collegeId = null) => {
+    const body = collegeBodyData();
+
+    if (state.filterCollege) {
+      body.college = state.filterCollege?.value;
+    } else {
+      const colleges =
+        collegeId ?? state.profile?.college?.map((c: any) => c.college_id);
+      if (colleges) body.college = colleges;
+    }
+
+    return body;
+  };
+
+  const formatExportDate = (value: any) => {
+    if (!value) return "-";
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+
+    return date.toLocaleDateString("en-IN");
+  };
+
+  const joinValues = (value: any) => {
+    if (!Array.isArray(value) || value.length === 0) return "-";
+    return value
+      .map((item: any) => item?.name || item?.short_name || item)
+      .filter(Boolean)
+      .join(", ");
+  };
+
+  const handleExportDepartments = async () => {
+    try {
+      setState({ exporting: true });
+
+      const body = buildDepartmentListBody();
+      let page = 1;
+      let hasNextPage = true;
+      const results: any[] = [];
+
+      while (hasNextPage) {
+        const res: any = await Models.department.list(page, body);
+        const pageResults = Array.isArray(res) ? res : res?.results || [];
+        results.push(...pageResults);
+        hasNextPage = !!res?.next;
+        page += 1;
+      }
+
+      if (results.length === 0) {
+        Failure("No departments available to export");
+        return;
+      }
+
+      const headers = [
+        "S.No",
+        "Department Name",
+        "Short Name",
+        "Status",
+        "Approved",
+        "NBA Accreditation",
+        "Intake Per Year",
+        "Total Jobs",
+        "College Name",
+        "College Short Name",
+        "College Code",
+        "College Email",
+        "College Phone",
+        "College Address",
+        "Institution Name",
+        "Institution Code",
+        "Institution Email",
+        "Institution Phone",
+        "Institution Address",
+        "Created At",
+        "Updated At",
+      ];
+
+      // Build worksheet data as array-of-arrays of XLSX cell objects
+      // Using type "s" (string) for phone numbers ensures no scientific notation
+      const makeCell = (value: any, forceString = false): XLSX.CellObject => {
+        if (value === null || value === undefined || value === "") {
+          return { v: "-", t: "s" };
+        }
+        if (forceString) {
+          return { v: String(value), t: "s" };
+        }
+        if (typeof value === "number") {
+          return { v: value, t: "n" };
+        }
+        return { v: String(value), t: "s" };
+      };
+
+      // Header row
+      const wsData: XLSX.CellObject[][] = [
+        headers.map((h) => makeCell(h)),
+      ];
+
+      // Data rows
+      results.forEach((item: any, index: number) => {
+        const departmentExtras = item?.department_extras || [];
+        const intakePerYear = departmentExtras?.length
+          ? departmentExtras.map((extra: any) => extra?.intake_per_year ?? 0).join(", ")
+          : item?.intake_per_year ?? "-";
+
+        wsData.push([
+          makeCell(index + 1),
+          makeCell(item?.department_name || "-"),
+          makeCell(item?.short_name || "-"),
+          makeCell(item?.status || "-"),
+          makeCell(item?.is_approved ? "Yes" : "No"),
+          makeCell(item?.nba_accreditation ? "Yes" : "No"),
+          makeCell(intakePerYear),
+          makeCell(item?.total_jobs ?? 0),
+          makeCell(item?.college_name || "-"),
+          makeCell(item?.college_short_name || "-"),
+          makeCell(item?.college_code_enriched || "-"),
+          makeCell(item?.college_email || "-"),
+          makeCell(item?.college_phone, true),   // force string — no scientific notation
+          makeCell(item?.college_address || "-"),
+          makeCell(item?.institution_name || "-"),
+          makeCell(item?.institution_code || "-"),
+          makeCell(item?.institution_email || "-"),
+          makeCell(item?.institution_phone, true), // force string — no scientific notation
+          makeCell(item?.institution_address || "-"),
+          makeCell(formatExportDate(item?.created_at)),
+          makeCell(formatExportDate(item?.updated_at)),
+        ]);
+      });
+
+      // Convert cell objects to worksheet
+      const ws: XLSX.WorkSheet = {};
+      wsData.forEach((row, R) => {
+        row.forEach((cell, C) => {
+          const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
+          ws[cellRef] = cell;
+        });
+      });
+      ws["!ref"] = XLSX.utils.encode_range(
+        { r: 0, c: 0 },
+        { r: wsData.length - 1, c: headers.length - 1 }
+      );
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Departments");
+
+      const today = new Date().toISOString().slice(0, 10);
+      XLSX.writeFile(wb, `department-list-${today}.xlsx`);
+    } catch (error) {
+      Failure("Failed to export departments");
+    } finally {
+      setState({ exporting: false });
+    }
   };
 
   const handleEdit = (row) => {
@@ -893,14 +1049,17 @@ const CollegeAndDepartment = () => {
               Manage departments
             </p>
           </div>
-          {/* <button
-            onClick={() => setState({ showModal: true })}
-            className="bg-dblue group relative inline-flex transform items-center gap-2 overflow-hidden rounded-lg px-4 py-2  text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+          <button
+            onClick={handleExportDepartments}
+            disabled={state.exporting}
+            className="tour-add-job group relative inline-flex transform items-center gap-2 overflow-hidden rounded-lg bg-emerald-600 px-4 py-2  text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:bg-emerald-700 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70"
           >
-            <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
-            <IconPlus className="relative z-10 h-5 w-5" />
-            <span className="relative z-10">Add Department</span>
-          </button> */}
+            <div className="absolute inset-0 bg-emerald-700 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+            <IconDownload className="relative z-10 h-5 w-5" />
+            <span className="relative z-10">
+              {state.exporting ? "Exporting..." : "Export"}
+            </span>
+          </button>
         </div>
       </div>
 
