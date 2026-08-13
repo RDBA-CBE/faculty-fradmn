@@ -2335,11 +2335,11 @@ const ApplicationDetail = () => {
                       Applied Date
                     </p>
                     <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      {new Date(app?.applied_date).toLocaleDateString("en-US", {
+                      {app?.applied_date ? new Date(app.applied_date).toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "long",
                         day: "numeric",
-                      })}
+                      }) : "-"}
                     </p>
                   </div>
                 </div>
@@ -2576,7 +2576,7 @@ const ApplicationDetail = () => {
                             Pannel Members With Feedbacks :
                           </div>
                           <div className="grid gap-4 ">
-                            {round.panels.map((panel, i) => {
+                            {round?.panels?.map((panel, i) => {
                               const feedback = panel?.feedbacks?.[0];
                               return (
                                 <div
@@ -2858,7 +2858,7 @@ const ApplicationDetail = () => {
                           Last Date to Apply :
                         </span>
                         <span className=" text-gray-900 dark:text-white">
-                          {new Date(job?.last_date).toLocaleDateString()}
+                          {job?.last_date ? new Date(job.last_date).toLocaleDateString() : "-"}
                         </span>
                       </div>
                     )}
@@ -2874,7 +2874,7 @@ const ApplicationDetail = () => {
                               : "text-green-600"
                           }`}
                         >
-                          {new Date(job?.deadline).toLocaleDateString()}
+                          {job?.deadline ? new Date(job.deadline).toLocaleDateString() : "-"}
                         </span>
                       </div>
                     )}
