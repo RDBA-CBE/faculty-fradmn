@@ -28,6 +28,9 @@ const job = {
       if (body?.is_approved == "Yes") {
         url = url + `&is_approved=${true}`;
       }
+      if (body?.is_approved == "No") {
+        url = url + `&is_approved=${false}`;
+      }
 
       if (body?.department_id) {
         url = url + `&department=${body.department_id}`;

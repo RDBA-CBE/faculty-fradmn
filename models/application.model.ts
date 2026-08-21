@@ -15,6 +15,13 @@ const application = {
         url += `&ordering=${encodeURIComponent(body.ordering)}`;
       }
 
+      if (body?.is_viewed) {
+        url += `&is_viewed=${encodeURIComponent(body.is_viewed)}`;
+      }
+      if (body?.is_viewed == false) {
+        url += `&is_viewed=${encodeURIComponent(body.is_viewed)}`;
+      }
+
       if (body?.exclude_applied_interview == "Yes") {
         url += `&exclude_applied_interview=${encodeURIComponent(true)}`;
       }
@@ -59,6 +66,18 @@ const application = {
       }
       if (body?.end_date) {
         url = url + `&date_posted_before=${body.end_date}`;
+      }
+      if (body?.schedule_date_from) {
+        url = url + `&schedule_date_from=${body.schedule_date_from}`;
+      }
+      if (body?.scheduled_date_to) {
+        url = url + `&scheduled_date_to=${body.scheduled_date_to}`;
+      }
+      if (body?.status_changed_at_from) {
+        url = url + `&status_changed_at_from=${body.status_changed_at_from}`;
+      }
+      if (body?.status_changed_at_to) {
+        url = url + `&status_changed_at_to=${body.status_changed_at_to}`;
       }
       if (body?.status) {
         url = url + `&application_status_id=${body.status}`;
