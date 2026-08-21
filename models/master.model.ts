@@ -637,6 +637,8 @@ const master = {
       if (body?.department_id) url += `&department_id=${body.department_id}`;
       if (body?.college_id) url += `&college_id=${body.college_id}`;
       if (body?.institution_id) url += `&institution_id=${body.institution_id}`;
+      if (body?.start_date) url += `&created_date_from=${body.start_date}`;
+      if (body?.end_date) url += `&created_date_to=${body.end_date}`;
 
 
       

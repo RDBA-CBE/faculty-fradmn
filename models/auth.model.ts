@@ -166,6 +166,14 @@ const auth = {
         url += `&ordering=${encodeURIComponent(body.ordering)}`;
       }
 
+       if (body?.start_date) {
+        url += `&created_from=${encodeURIComponent(body.start_date)}`;
+      }
+
+       if (body?.end_date) {
+        url += `&created_to=${encodeURIComponent(body.end_date)}`;
+      }
+
       if (body?.active_job_seeker == "Yes") {
         url += `&active_job_seeker=${encodeURIComponent(true)}`;
       }

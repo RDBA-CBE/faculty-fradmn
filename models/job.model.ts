@@ -76,6 +76,9 @@ const job = {
       if (body?.salary_range) {
         url = url + `&salary_range_id=${body.salary_range}`;
       }
+      if (body?.variance_less_than != null) {
+        url = url + `&variance_less_than=${body.variance_less_than}`;
+      }
 
       instance()
         .get(url)

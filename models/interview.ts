@@ -33,6 +33,13 @@ const interview = {
         url += `&Is_publish=${encodeURIComponent(false)}`;
       }
 
+      if (body?.schedule_date_from) {
+        url += `&schedule_date_from=${encodeURIComponent(body.schedule_date_from)}`;
+      }
+       if (body?.scheduled_date_to) {
+        url += `&scheduled_date_to=${encodeURIComponent(body.scheduled_date_to)}`;
+      }
+
       
 
       instance()

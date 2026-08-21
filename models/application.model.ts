@@ -91,6 +91,16 @@ const application = {
       if (body?.salary_range) {
         url = url + `&salary_range_id=${body.salary_range}`;
       }
+      if (body?.status_new) {
+        url = url + `&status_new=${body.status_new}`;
+      }
+      if (body?.interview_status) {
+        url = url + `&interview_status=${body.interview_status}`;
+      }
+
+      if (body?.reschedule) {
+        url = url + `&reschedule=${body.reschedule}`;
+      }
 
       instance()
         .get(url)

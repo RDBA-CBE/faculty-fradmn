@@ -119,7 +119,7 @@ const Dashboard = () => {
 
   const [state, setState] = useSetState({
     selectedRecords: [],
-    activeCard: 1,
+    activeCard: null,
     isOpenRound: false,
     showStatusModal: false,
     isOpenInterest: false,
@@ -151,6 +151,23 @@ const Dashboard = () => {
     profileActiveTab: "profile",
     profileActiveSection: "summary",
     isOpenInteresteds: false,
+
+    // Overdue Follow-ups table
+    overdueFollowups: [],
+    overdueFollowupsLoading: false,
+    overdueFollowupsTotal: 0,
+    overdueFollowupsCount: 0,
+    overdueFollowupsPage: 1,
+
+    // Days to Fill Variance table
+    daysToFillVariance: [],
+    daysToFillVarianceLoading: false,
+    daysToFillVarianceTotal: 0,
+    daysToFillVarianceCount: 0,
+    daysToFillVariancePage: 1,
+
+    // Dashboard college filter
+    dashboardCollegeFilter: null,
   });
 
   const debounceSearch = useDebounce(state.search, 500);
@@ -171,12 +188,6 @@ const Dashboard = () => {
     if (state.activeCard == 2) {
       applicationStatusList();
     }
-    // else if (state.activeCard == 3) {
-    //   ExceptInterviewAndAppliedList();
-    // }
-    else {
-      profiles();
-    }
     setState({
       search: "",
       sortBy: "",
@@ -196,6 +207,7 @@ const Dashboard = () => {
     if (activePeriod !== "custom") {
       setFromDate(null);
       setToDate(null);
+      setState({ activeCard: null });
       fetchDashboard({ period: activePeriod }, state.profile);
     }
   }, [activePeriod]);
@@ -203,6 +215,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (fromDate && toDate) {
       setActivePeriod("custom");
+      setState({ activeCard: null });
       fetchDashboard(
         {
           from: moment(fromDate).format("YYYY-MM-DD"),
@@ -246,6 +259,7 @@ const Dashboard = () => {
   ]);
 
   useEffect(() => {
+    if (state.activeCard === null) return;
     if (CARD_FETCH_MAP[state.activeCard]) {
       setState({ cardTableData: [], cardTablePage: 1, cardSearch: "" });
       CARD_FETCH_MAP[state.activeCard](1);
@@ -255,6 +269,7 @@ const Dashboard = () => {
   const debounceCardSearch = useDebounce(state.cardSearch, 500);
 
   useEffect(() => {
+    if (state.activeCard === null) return;
     if (CARD_FETCH_MAP[state.activeCard]) {
       CARD_FETCH_MAP[state.activeCard](state.cardTablePage);
     }
@@ -302,7 +317,7 @@ const Dashboard = () => {
       },
       {
         id: 7,
-        label: "Awaiting Review",
+        label: "Applications Awaiting Review",
         value: tc?.awaiting_review?.value ?? 0,
         color: "text-purple-600",
         bg: "bg-white/70",
@@ -342,7 +357,7 @@ const Dashboard = () => {
       },
       {
         id: 13,
-        label: "Rescheduled",
+        label: "Reschedule Request",
         value: tc?.interview_rescheduled?.value ?? 0,
         color: "text-amber-600",
         bg: "bg-white/70",
@@ -352,7 +367,7 @@ const Dashboard = () => {
       },
       {
         id: 6,
-        label: "Selected",
+        label: "Selected Applications",
         value: tc?.decisions?.selected ?? 0,
         color: "text-green-600",
         bg: "bg-white/70",
@@ -381,28 +396,8 @@ const Dashboard = () => {
         clickable: tc?.active_panel_members?.clickable,
       },
       {
-        id: 11,
-        label: "Outreached",
-        value: tc?.outreached?.value ?? 0,
-        color: "text-pink-600",
-        bg: "bg-white/70",
-        mainbg: "bg-pink-100",
-        icon: <IconUser className="h-7 w-7" />,
-        clickable: tc?.outreached?.clickable,
-      },
-      {
-        id: 9,
-        label: "Talents Identified",
-        value: tc?.talents_identified?.value ?? 0,
-        color: "text-teal-600",
-        bg: "bg-white/70",
-        mainbg: "bg-teal-100",
-        icon: <IconUser className="h-7 w-7" />,
-        clickable: tc?.talents_identified?.clickable,
-      },
-      {
         id: 14,
-        label: "Find Right Talents",
+        label: "Talents Identified",
         value: tc?.find_right_talents?.value ?? 0,
         color: "text-cyan-600",
         bg: "bg-white/70",
@@ -410,16 +405,37 @@ const Dashboard = () => {
         icon: <IconUser className="h-7 w-7" />,
         clickable: tc?.find_right_talents?.clickable,
       },
-      {
-        id: 15,
-        label: "Interest Sent",
-        value: tc?.total_interest_sent?.value ?? 0,
-        color: "text-blue-500",
-        bg: "bg-white/70",
-        mainbg: "bg-blue-50",
-        icon: <IconUsers className="h-7 w-7" />,
-        clickable: tc?.total_interest_sent?.clickable,
-      },
+      // {
+      //   id: 11,
+      //   label: "Outreached",
+      //   value: tc?.outreached?.value ?? 0,
+      //   color: "text-pink-600",
+      //   bg: "bg-white/70",
+      //   mainbg: "bg-pink-100",
+      //   icon: <IconUser className="h-7 w-7" />,
+      //   clickable: tc?.outreached?.clickable,
+      // },
+      // {
+      //   id: 9,
+      //   label: "Talents Identified",
+      //   value: tc?.talents_identified?.value ?? 0,
+      //   color: "text-teal-600",
+      //   bg: "bg-white/70",
+      //   mainbg: "bg-teal-100",
+      //   icon: <IconUser className="h-7 w-7" />,
+      //   clickable: tc?.talents_identified?.clickable,
+      // },
+     
+      // {
+      //   id: 15,
+      //   label: "Interest Sent",
+      //   value: tc?.total_interest_sent?.value ?? 0,
+      //   color: "text-blue-500",
+      //   bg: "bg-white/70",
+      //   mainbg: "bg-blue-50",
+      //   icon: <IconUsers className="h-7 w-7" />,
+      //   clickable: tc?.total_interest_sent?.clickable,
+      // },
       {
         id: 16,
         label: "Avg Days to Schedule",
@@ -779,7 +795,11 @@ const Dashboard = () => {
   const fetchDashboard = async (params?: any, profile?: any) => {
     try {
       const profileRes = await Models.auth.profile();
-      const dashRes: any = await Models.dashboard.dashboard(params ?? {});
+      const collegeId = state.dashboardCollegeFilter?.value;
+      const dashRes: any = await Models.dashboard.dashboard({
+        ...(params ?? {}),
+        ...(collegeId ? { college_id: collegeId } : {}),
+      });
 
       const data = dashRes?.data;
 
@@ -787,8 +807,191 @@ const Dashboard = () => {
       setDashboard(data);
       setStats(data?.top_cards ?? {});
       cards(profile?.role, data?.top_cards);
+      fetchOverdueFollowups(1, profileRes);
+      fetchDaysToFillVariance(1, profileRes);
+      upCommingInterviews(1, profileRes)
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const fetchOverdueFollowups = async (page = 1, profileData?: any) => {
+    try {
+      setState({ overdueFollowupsLoading: true });
+
+      const p = profileData ?? state.profile;
+      const role = p?.role;
+      const colleges = p?.college?.map((c: any) => c.college_id);
+      const instId = p?.institution?.id;
+      const deptId = p?.department?.department_id;
+
+      const body: any = { status_new: "followup" };
+      const df = dashboardDateFilter();
+      if (df.start_date) body.start_date = df.start_date;
+      if (df.end_date) body.end_date = df.end_date;
+
+      if (role === ROLES.INSTITUTION_ADMIN && instId) body.institution = instId;
+      if (role === ROLES.HR && colleges?.length) body.college = colleges;
+      if (role === ROLES.HOD && deptId) body.department = deptId;
+      const res: any = await Models.application.list(page, body);
+      const results = res?.results ?? [];
+      const rows = results.map((item: any) => {
+        const appliedDate = item?.created_at ? new Date(item.created_at) : null;
+
+        return {
+          id: item?.id,
+          candidate: item?.first_name
+            ? `${item.first_name} ${item.last_name}`
+            : item?.username ?? "—",
+          job: item?.job_detail?.short_name,
+
+          college: item?.job_detail?.college?.short_name,
+          status: item?.application_status?.name ?? item?.status,
+          applied_date: moment(appliedDate).format("DD MMM YYYY, hh:mm A"),
+          status_date: moment(item.status_changed_at).format(
+            "DD MMM YYYY, hh:mm A",
+          ),
+          department_name:
+            item?.department_details?.length > 0 &&
+            item?.department_details?.map((item) => item?.short_name),
+          resume: item?.resume,
+        };
+      });
+      const total = rows.reduce(
+        (sum: number, r: any) => sum + r.days_overdue,
+        0,
+      );
+      setState({
+        overdueFollowups: rows,
+        overdueFollowupsTotal: total,
+        overdueFollowupsCount: res?.count ?? 0,
+        overdueFollowupsPage: page,
+        overdueFollowupsLoading: false,
+      });
+    } catch {
+      setState({ overdueFollowupsLoading: false });
+    }
+  };
+
+  const fetchDaysToFillVariance = async (page = 1, profileData?: any) => {
+    try {
+      setState({ daysToFillVarianceLoading: true });
+
+      const p = profileData ?? state.profile;
+      const role = p?.role;
+      const colleges = p?.college?.map((c: any) => c.college_id);
+      const instId = p?.institution?.id;
+      const deptId = p?.department?.department_id;
+
+      const body: any = { variance_less_than: 10, is_approved: "Yes" };
+      const df = dashboardDateFilter();
+      if (df.start_date) body.start_date = df.start_date;
+      if (df.end_date) body.end_date = df.end_date;
+      if (role === ROLES.INSTITUTION_ADMIN && instId)
+        body.institution_id = instId;
+      if (role === ROLES.HR && colleges?.length) body.college_id = colleges;
+      if (role === ROLES.HOD && deptId) body.department_id = deptId;
+
+      const res: any = await Models.job.list(page, body);
+      const results = res?.results ?? [];
+      const rows = results.map((item: any) => {
+        return {
+          id: item?.id,
+          job_title: item?.roles?.[0]?.role_name,
+          job_role: item.roles?.length > 0 ? item?.roles?.[0]?.short_name : "",
+
+          college: item?.college?.short_name ?? "—",
+          department:
+            item?.department?.length > 0
+              ? item?.department?.map((d) => d?.short_name)
+              : [],
+          total_applications: item?.total_applications,
+          priority: item?.priority,
+          days_to_fill: item.days_to_fill,
+          variance: item.variance,
+        };
+      });
+      const totalTarget = rows.reduce(
+        (sum: number, r: any) => sum + r.target_days,
+        0,
+      );
+      const totalVariance = rows.reduce(
+        (sum: number, r: any) => sum + r.variance,
+        0,
+      );
+      setState({
+        daysToFillVariance: rows,
+        daysToFillVarianceTotal: {
+          target: totalTarget,
+          variance: totalVariance,
+        },
+        daysToFillVarianceCount: res?.count ?? 0,
+        daysToFillVariancePage: page,
+        daysToFillVarianceLoading: false,
+      });
+    } catch {
+      setState({ daysToFillVarianceLoading: false });
+    }
+  };
+
+  
+
+   const upCommingInterviews = async (page = 1, profileData?: any) => {
+    try {
+      setState({ upCommingInterviewsLoading: true });
+
+      const p = profileData ?? state.profile;
+      const userId = p.id;
+
+      // Always filter: today → today + 5 days
+      const today = moment().format("YYYY-MM-DD");
+      const fiveDaysLater = moment().add(5, "days").format("YYYY-MM-DD");
+
+      const body: any = {
+        status_new: "followup",
+        created_by: userId,
+        schedule_date_from: today,
+        schedule_date_to: fiveDaysLater,
+      };
+
+
+      const res: any = await Models.interview.list(page, body);
+      const results = res?.results ?? [];
+      const rows = results.map((item: any) => {
+        const appliedDate = item?.created_at ? new Date(item.created_at) : null;
+
+        return {
+          id: item?.id,
+          candidate: item?.first_name
+            ? `${item.first_name} ${item.last_name}`
+            : item?.username ?? "—",
+          job: item?.job_detail?.short_name,
+
+          college: item?.job_detail?.college?.short_name,
+          status: item?.application_status?.name ?? item?.status,
+          applied_date: moment(appliedDate).format("DD MMM YYYY, hh:mm A"),
+          status_date: moment(item.status_changed_at).format(
+            "DD MMM YYYY, hh:mm A",
+          ),
+          department_name:
+            item?.department_details?.length > 0 &&
+            item?.department_details?.map((item) => item?.short_name),
+          resume: item?.resume,
+        };
+      });
+      const total = rows.reduce(
+        (sum: number, r: any) => sum + r.days_overdue,
+        0,
+      );
+      setState({
+        upCommingInterviewsList: rows,
+        upCommingInterviewsTotal: total,
+        upCommingInterviewsCount: res?.count ?? 0,
+        upCommingInterviewsPage: page,
+        upCommingInterviewsLoading: false,
+      });
+    } catch {
+      setState({ overdueFollowupsLoading: false });
     }
   };
 
@@ -978,91 +1181,6 @@ const Dashboard = () => {
   const pieSeries = dashboard?.pie_chart?.map((p: any) => p.value) ?? [];
   const hasPieChartData = pieSeries?.some((value: number) => Number(value) > 0);
 
-  const collegesPieChart: any = {
-    series: hasPieChartData ? pieSeries : [1],
-    options: {
-      chart: { type: "donut", height: 260 },
-      labels: hasPieChartData ? pieLabels : ["No response found"],
-      colors: hasPieChartData
-        ? ["#1B55E2", "#e2a03f", "#e7515a", "#11380c", "#d143ee", "#43eebb"]
-        : ["#D1D5DB"],
-      dataLabels: { enabled: false },
-      tooltip: { enabled: hasPieChartData },
-      states: {
-        hover: { filter: { type: "none" } },
-        active: { filter: { type: "none" } },
-      },
-      plotOptions: {
-        pie: {
-          donut: {
-            labels: {
-              show: !hasPieChartData,
-              name: { show: false },
-              value: { show: false },
-              total: {
-                show: !hasPieChartData,
-                showAlways: !hasPieChartData,
-                label: "",
-                formatter: () => "No application found",
-              },
-            },
-          },
-        },
-      },
-      legend: hasPieChartData
-        ? {
-            show: true,
-            position: "bottom",
-            labels: {
-              colors: isDark ? "#E5E7EB" : "#374151",
-            },
-          }
-        : { show: false },
-      noData: {
-        text: "No application found",
-        align: "center",
-        verticalAlign: "middle",
-      },
-    },
-  };
-
-  /* ---------------- INTERVIEW CHART ---------------- */
-
-  const interviewChart: any = {
-    series: [{ name: "Interviews", data: interviewTrend }],
-    options: {
-      chart: { height: 160, type: "bar", toolbar: { show: false } },
-      colors: ["#00ab55"],
-      plotOptions: { bar: { borderRadius: 4, columnWidth: "50%" } },
-      labels: trendLabels,
-      grid: { borderColor: isDark ? "#191E3A" : "#E0E6ED" },
-    },
-  };
-
-  /* ---------------- DECISION CHART ---------------- */
-
-  const decisionChart: any = {
-    series: [
-      { name: "Selected", data: decisionSelectedTrend },
-      { name: "Rejected", data: decisionRejectedTrend },
-    ],
-    options: {
-      chart: {
-        height: 160,
-        type: "bar",
-        toolbar: { show: false },
-        stacked: true,
-      },
-      colors: ["#00ab55", "#e7515a"],
-      plotOptions: { bar: { borderRadius: 4, columnWidth: "50%" } },
-      labels: trendLabels,
-      grid: { borderColor: isDark ? "#191E3A" : "#E0E6ED" },
-      legend: { position: "top" },
-    },
-  };
-
-  /* ---------------- FUNNEL ---------------- */
-
   const funnelData =
     dashboard?.application_funnel?.map((f: any) => ({
       x: f.stage,
@@ -1114,7 +1232,10 @@ const Dashboard = () => {
       const periodMap: Record<string, string> = {
         "7d": moment().subtract(7, "days").format("YYYY-MM-DD"),
         "1m": moment().subtract(1, "months").format("YYYY-MM-DD"),
-        "Lm": moment().subtract(1, "months").startOf("month").format("YYYY-MM-DD"),
+        Lm: moment()
+          .subtract(1, "months")
+          .startOf("month")
+          .format("YYYY-MM-DD"),
         "3m": moment().subtract(3, "months").format("YYYY-MM-DD"),
         "6m": moment().subtract(6, "months").format("YYYY-MM-DD"),
         "1y": moment().subtract(1, "year").format("YYYY-MM-DD"),
@@ -1131,7 +1252,7 @@ const Dashboard = () => {
     // override search with card-specific search
     if (state.cardSearch) body.search = state.cardSearch;
     else delete body.search;
-        const role = state.profile?.role;
+    const role = state.profile?.role;
     const colleges = state.profile?.college?.map((c: any) => c.college_id);
     const instId = state.profile?.institution?.id;
     const deptId = state.profile?.department?.department_id;
@@ -1263,7 +1384,7 @@ const Dashboard = () => {
         page,
         is_approved: "Yes",
       };
-       const df = dashboardDateFilter();
+      const df = dashboardDateFilter();
       if (df.start_date) body.start_date = df.start_date;
       if (df.end_date) body.end_date = df.end_date;
       const res: any = await Models.job.list(page, body);
@@ -1396,7 +1517,7 @@ const Dashboard = () => {
           job: item?.job_detail?.short_name,
           college: item?.job_detail?.college?.short_name,
           status: item?.application_status?.name,
-          date: item?.status_date,
+          date: item?.status_changed_at,
           department_name:
             item?.department_details?.length > 0 &&
             item?.department_details?.map((item) => item?.short_name),
@@ -1508,6 +1629,10 @@ const Dashboard = () => {
       if (state.cardSearch) body.search = state.cardSearch;
       const colleges = state.profile?.college?.map((c: any) => c.college_id);
       if (colleges?.length) body.college_id = colleges;
+      const df = dashboardDateFilter();
+      if (df.start_date) body.start_date = df.start_date;
+      if (df.end_date) body.end_date = df.end_date;
+
       const res: any = await Models.master.panel_list(body, page);
       setState({
         cardTableData: res?.results?.map((item: any) => ({
@@ -1553,6 +1678,10 @@ const Dashboard = () => {
       const body: any = { active_job_seeker: "Yes", role: ROLES.APPLICANT };
       if (userId) body.user_id = userId;
       if (state.cardSearch) body.search = state.cardSearch;
+      const df = dashboardDateFilter();
+      if (df.start_date) body.start_date = df.start_date;
+      if (df.end_date) body.end_date = df.end_date;
+
       const res: any = await Models.auth.userList(page, body);
       setState({
         cardTableData: (res?.results ?? []).map(mapJobSeekerRow),
@@ -1634,15 +1763,18 @@ const Dashboard = () => {
     }
   };
 
-  // card id=13 — Interview Rescheduled
+  // card id=13 — Interview Rescheduled Request
   const fetchCardRescheduled = async (page = 1) => {
     try {
       setState({ cardTableLoading: true });
       const body: any = {
         ...cardBodyData(),
         page,
-        interview_status: "Rescheduled",
+        reschedule : true
       };
+      const df = dashboardDateFilter();
+      if (df.start_date) body.schedule_date_from = df.start_date;
+      if (df.end_date) body.scheduled_date_to = df.end_date;
       const res: any = await Models.application.list(page, body);
       setState({
         cardTableData: res?.results?.map((item: any) => ({
@@ -1651,6 +1783,7 @@ const Dashboard = () => {
           job: item?.job_detail?.short_name,
           college: item?.job_detail?.college?.short_name,
           scheduled_date: item?.interview_slots?.slice(-1)?.[0]?.scheduled_date,
+          rescheduled_date: item?.interview_slots?.slice(-1)?.[0]?.rescheduled_date,
           status: item?.interview_slots?.slice(-1)?.[0]?.status ?? "-",
         })),
         cardTableCount: res?.count,
@@ -3006,6 +3139,17 @@ const Dashboard = () => {
         ),
       },
       {
+        accessor: "rescheduled_date",
+        title: "Re-scheduled Req Date",
+        render: (r: any) => (
+          <span className="text-xs">
+            {r.rescheduled_date
+              ? moment(r.rescheduled_date).format("DD MMM YYYY, hh:mm A")
+              : "-"}
+          </span>
+        ),
+      },
+      {
         accessor: "status",
         title: "Status",
         render: (r: any) => (
@@ -3280,7 +3424,12 @@ const Dashboard = () => {
         { name: "Selected", data: src.map((d: any) => d.selected) },
       ],
       options: {
-        chart: { type: "line", height: 360, toolbar: { show: false }, zoom: { enabled: false } },
+        chart: {
+          type: "line",
+          height: 360,
+          toolbar: { show: false },
+          zoom: { enabled: false },
+        },
         colors: isDark ? ["#818cf8", "#34d399"] : ["#4f46e5", "#059669"],
         stroke: { curve: "smooth", width: 3 },
         markers: { size: 4, hover: { size: 6 } },
@@ -3295,11 +3444,18 @@ const Dashboard = () => {
         },
         yaxis: {
           title: { text: "Count", style: { fontSize: "11px" } },
-          labels: { style: { fontSize: "11px", colors: isDark ? "#94a3b8" : "#374151" } },
+          labels: {
+            style: { fontSize: "11px", colors: isDark ? "#94a3b8" : "#374151" },
+          },
         },
-        grid: { borderColor: isDark ? "#1e293b" : "#E0E6ED", strokeDashArray: 4 },
+        grid: {
+          borderColor: isDark ? "#1e293b" : "#E0E6ED",
+          strokeDashArray: 4,
+        },
         legend: {
-          position: "top", horizontalAlign: "right", fontSize: "12px",
+          position: "top",
+          horizontalAlign: "right",
+          fontSize: "12px",
           labels: { colors: isDark ? "#cbd5e1" : "#374151" },
         },
         dataLabels: { enabled: false },
@@ -3357,51 +3513,148 @@ const Dashboard = () => {
   };
 
   // Positions Filled vs Openings — by department (not month)
-  const getFilledVsOpeningsChart = () => {
-    const src = dashboard?.position_fill_trend ?? [];
-    return {
-      series: [
-        { name: "Job Postings", data: src.map((d: any) => d.job_postings) },
-        { name: "Openings", data: src.map((d: any) => d.openings) },
-        {
-          name: "Positions Filled",
-          data: src.map((d: any) => d.positions_filled),
+const getFilledVsOpeningsChart = () => {
+  const src = dashboard?.position_fill_trend ?? [];
+
+  return {
+    series: [
+      {
+        name: "Job Postings",
+        data: src.map((d: any) => d.job_postings),
+      },
+      {
+        name: "Openings",
+        data: src.map((d: any) => d.openings),
+      },
+      {
+        name: "Positions Filled",
+        data: src.map((d: any) => d.positions_filled),
+      },
+    ],
+
+    options: {
+      chart: {
+        type: "bar",
+        height: 320,
+        toolbar: {
+          show: false,
         },
-      ],
-      options: {
-        chart: { type: "area", height: 320, toolbar: { show: false }, zoom: { enabled: false } },
-        colors: isDark
-          ? ["#818cf8", "#fbbf24", "#34d399"]
-          : ["#4f46e5", "#d97706", "#059669"],
-        stroke: { curve: "smooth", width: 3 },
-        fill: { type: "gradient", gradient: { shadeIntensity: 1, opacityFrom: 0.28, opacityTo: 0.03, stops: [0, 100] } },
-        markers: { size: 3, hover: { size: 5 } },
-        xaxis: {
-          categories: src.map((d: any) => d.department_name?.trim()),
-          labels: {
-            style: { fontSize: "10px", colors: isDark ? "#94a3b8" : "#374151" },
-            rotate: -20,
+        zoom: {
+          enabled: false,
+        },
+      },
+
+      plotOptions: {
+        bar: {
+          horizontal: true,
+          barHeight: "55%",
+          borderRadius: 4,
+        },
+      },
+
+      // Hide values displayed on the bars
+      dataLabels: {
+        enabled: false,
+      },
+
+      colors: isDark
+        ? ["#818cf8", "#fbbf24", "#34d399"]
+        : ["#4f46e5", "#d97706", "#059669"],
+
+      xaxis: {
+        categories: src.map(
+          (d: any) => d.department_name?.trim()
+        ),
+
+        // Count only on X-axis
+        title: {
+          text: "Count",
+          style: {
+            fontSize: "11px",
+            color: isDark ? "#94a3b8" : "#374151",
           },
         },
-        yaxis: {
-          title: { text: "Count", style: { fontSize: "11px" } },
-          labels: { style: { fontSize: "11px" } },
+
+        labels: {
+          show: true,
+          style: {
+            fontSize: "11px",
+            colors: isDark ? "#94a3b8" : "#374151",
+          },
         },
-        grid: {
-          borderColor: isDark ? "#1e293b" : "#E0E6ED",
-          strokeDashArray: 4,
+
+        axisBorder: {
+          show: true,
         },
-        legend: {
-          position: "top",
-          horizontalAlign: "right",
-          fontSize: "12px",
-          labels: { colors: isDark ? "#cbd5e1" : "#374151" },
+
+        axisTicks: {
+          show: true,
         },
-        tooltip: { shared: true, intersect: false },
-        noData: { text: "No data available" },
+
+        position: "bottom",
       },
-    };
+
+      yaxis: {
+        // Department names only
+        labels: {
+          show: true,
+          style: {
+            fontSize: "10px",
+            colors: isDark ? "#94a3b8" : "#374151",
+          },
+        },
+
+        title: {
+          text: undefined,
+        },
+
+        axisBorder: {
+          show: false,
+        },
+
+        axisTicks: {
+          show: false,
+        },
+      },
+
+      grid: {
+        borderColor: isDark ? "#1e293b" : "#E0E6ED",
+        strokeDashArray: 4,
+
+        // Prevent grid/labels from appearing on opposite side
+        xaxis: {
+          lines: {
+            show: true,
+          },
+        },
+
+        yaxis: {
+          lines: {
+            show: false,
+          },
+        },
+      },
+
+      legend: {
+        position: "top",
+        horizontalAlign: "right",
+        fontSize: "12px",
+        labels: {
+          colors: isDark ? "#cbd5e1" : "#374151",
+        },
+      },
+
+      tooltip: {
+        shared: true,
+        intersect: false,
+      },
+
+      noData: {
+        text: "No data available",
+      },
+    },
   };
+};
 
   // Selection Rate Trend — line chart with markers + reference line at avg
   const getSelectionRateChart = () => {
@@ -4111,7 +4364,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen dark:from-gray-900 dark:to-gray-800">
+    <div className="dark:from-gray-900 dark:to-gray-800">
       <div className=" flex justify-between">
         {/* Filters */}
         <div className="mb-2 flex flex-wrap items-center gap-2">
@@ -4220,11 +4473,31 @@ const Dashboard = () => {
         </div>
       )}
 
+       {/* College filter above stat cards — only for roles with college list */}
+      {state.collegeList?.length > 0 && (
+        <div className="mb-3 w-56">
+          <CustomSelect
+            options={state.collegeList}
+            value={state.dashboardCollegeFilter}
+            onChange={(e) => {
+              setState({ dashboardCollegeFilter: e });
+              const params = activePeriod !== "custom"
+                ? { period: activePeriod }
+                : fromDate && toDate
+                ? { from: moment(fromDate).format("YYYY-MM-DD"), to: moment(toDate).format("YYYY-MM-DD") }
+                : { period: activePeriod };
+              fetchDashboard(params, state.profile);
+            }}
+            placeholder="Filter by College"
+            isClearable
+          />
+        </div>
+      )}
+
       {/* Stat Cards */}
       <div className="tour-stat-cards mb-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7">
         {state.cards?.map((card) => {
-          const isActive =
-            state.activeCard === card.id && CARD_FETCH_MAP[card.id];
+          const isActive = state.activeCard === card.id && CARD_FETCH_MAP[card.id] && state.activeCard !== null;
           return (
             <div
               key={card.label}
@@ -4233,7 +4506,7 @@ const Dashboard = () => {
                   ? `scale-[1.02] shadow-lg ring-2 ring-offset-1 ${card.mainbg} ring-current`
                   : `${card.mainbg} hover:scale-[1.01] hover:shadow-md`
               }`}
-              onClick={() => setState({ activeCard: card.id })}
+              onClick={() => setState({ activeCard: state.activeCard === card.id ? null : card.id })}
             >
               <div className="flex items-start gap-2">
                 <div
@@ -4264,7 +4537,7 @@ const Dashboard = () => {
       {CARD_FETCH_MAP[state.activeCard] && (
         <div className="mb-6">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-base font-semibold text-gray-800 dark:text-white">
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
               {CARD_TITLES[state.activeCard]}
             </h2>
             {/* <TextInput
@@ -4308,12 +4581,12 @@ const Dashboard = () => {
       {/* Row 1: Application Volume Trend (area) 2/3 + Experience Level Donut 1/3 */}
       <div className="mb-5 grid grid-cols-1 gap-4 xl:grid-cols-3">
         <div className="panel xl:col-span-2">
-          <h5 className="mb-0.5 text-sm font-semibold text-gray-800 dark:text-white">
+          <h5 className="mb-0.5 !text-lg font-semibold text-gray-800 dark:text-white">
             Application Volume Trend
           </h5>
-          <p className="mb-3 text-xs text-gray-400">
+          {/* <p className="mb-3 text-xs text-gray-400">
             Monthly applicants vs selected — x: month/year · y: count
-          </p>
+          </p> */}
           {isMounted &&
             (() => {
               const c = getVolumeTrendChart();
@@ -4328,12 +4601,12 @@ const Dashboard = () => {
             })()}
         </div>
         <div className="panel xl:col-span-1">
-          <h5 className="mb-0.5 text-sm font-semibold text-gray-800 dark:text-white">
+          <h5 className="mb-0.5 !text-lg font-semibold text-gray-800 dark:text-white">
             Applications by Experience Level
           </h5>
-          <p className="mb-3 text-xs text-gray-400">
+          {/* <p className="mb-3 text-xs text-gray-400">
             Donut — share per experience band
-          </p>
+          </p> */}
           {isMounted &&
             (() => {
               const c = getExperienceDonutChart();
@@ -4342,7 +4615,7 @@ const Dashboard = () => {
                   series={c.series}
                   options={c.options as any}
                   type="donut"
-                  height={220}
+                  height={250}
                 />
               );
             })()}
@@ -4352,12 +4625,12 @@ const Dashboard = () => {
       {/* Row 2: Urgency (1/4) + Source Pie (1/4) + Funnel (2/4) */}
       <div className="mb-5 grid grid-cols-1 gap-3 xl:grid-cols-3">
         <div className="panel xl:col-span-1">
-          <h5 className="mb-0.5 text-sm font-semibold text-gray-800 dark:text-white">
+          <h5 className="mb-5 !text-lg font-semibold text-gray-800 dark:text-white">
             Job Postings by Urgency
           </h5>
-          <p className="mb-3 text-xs text-gray-400">
+          {/* <p className="mb-3 text-xs text-gray-400">
             x: deadline range · y: job count
-          </p>
+          </p> */}
           {isMounted &&
             (() => {
               const c = getUrgencyBarChart();
@@ -4366,18 +4639,18 @@ const Dashboard = () => {
                   series={c.series}
                   options={c.options as any}
                   type="bar"
-                  height={240}
+                  height={300}
                 />
               );
             })()}
         </div>
         <div className="panel xl:col-span-1">
-          <h5 className="mb-0.5 text-sm font-semibold text-gray-800 dark:text-white">
+          <h5 className="mb-5 !text-lg font-semibold text-gray-800 dark:text-white">
             Applications by Source
           </h5>
-          <p className="mb-3 text-xs text-gray-400">
+          {/* <p className="mb-3 text-xs text-gray-400">
             Internal vs External applicants
-          </p>
+          </p> */}
           {isMounted &&
             (() => {
               const c = getApplyTypePieChart();
@@ -4386,18 +4659,18 @@ const Dashboard = () => {
                   series={c.series}
                   options={c.options as any}
                   type="pie"
-                  height={240}
+                  height={300}
                 />
               );
             })()}
         </div>
         <div className="panel xl:col-span-1">
-          <h5 className="mb-0.5 text-sm font-semibold text-gray-800 dark:text-white">
+          <h5 className="mb-3 !text-lg font-semibold text-gray-800 dark:text-white">
             Application Funnel
           </h5>
-          <p className="mb-3 text-xs text-gray-400">
+          {/* <p className="mb-3 text-xs text-gray-400">
             Stage-wise conversion pipeline
-          </p>
+          </p> */}
           {isMounted &&
             (() => {
               if (dashboard?.application_funnel?.length > 0) {
@@ -4445,12 +4718,12 @@ const Dashboard = () => {
       {/* Row 3: Applications by Department (horizontal bar, 3/5) + Applications by College (line, 2/5) */}
       <div className="mb-5 grid grid-cols-1 gap-4 xl:grid-cols-5">
         <div className="panel xl:col-span-3">
-          <h5 className="mb-0.5 text-sm font-semibold text-gray-800 dark:text-white">
+          <h5 className="mb-0.5 !text-lg font-semibold text-gray-800 dark:text-white">
             Applications by Department
           </h5>
-          <p className="mb-3 text-xs text-gray-400">
+          {/* <p className="mb-3 text-xs text-gray-400">
             Horizontal bar — department · applicants vs selected
-          </p>
+          </p> */}
           {isMounted &&
             (() => {
               const c = getDepartmentBarChart();
@@ -4465,12 +4738,12 @@ const Dashboard = () => {
             })()}
         </div>
         <div className="panel xl:col-span-2">
-          <h5 className="mb-0.5 text-sm font-semibold text-gray-800 dark:text-white">
+          <h5 className="mb-0.5 !text-lg font-semibold text-gray-800 dark:text-white">
             Applications by College
           </h5>
-          <p className="mb-3 text-xs text-gray-400">
+          {/* <p className="mb-3 text-xs text-gray-400">
             Line — college · applicants vs selected trend
-          </p>
+          </p> */}
           {isMounted &&
             (() => {
               const c = getCollegeBarChart();
@@ -4489,18 +4762,18 @@ const Dashboard = () => {
       {/* Row 4: Full Overview Trend + Interviews & Decisions stacked */}
       {/* <div className="mb-5 grid grid-cols-1 gap-4 xl:grid-cols-3">
         <div className="panel xl:col-span-2">
-          <h5 className="mb-0.5 text-sm font-semibold text-gray-800 dark:text-white">Jobs, Applications & Registrations Overview</h5>
+          <h5 className="mb-0.5 !text-lg font-semibold text-gray-800 dark:text-white">Jobs, Applications & Registrations Overview</h5>
           <p className="mb-3 text-xs text-gray-400">Full trend across all key metrics</p>
           {isMounted && <ReactApexChart series={trendChart.series} options={trendChart.options} type="area" height={270} />}
         </div>
         <div className="panel xl:col-span-1 flex flex-col gap-3">
           <div>
-            <h5 className="mb-0.5 text-sm font-semibold text-gray-800 dark:text-white">Interviews Scheduled</h5>
+            <h5 className="mb-0.5 !text-lg font-semibold text-gray-800 dark:text-white">Interviews Scheduled</h5>
             <p className="mb-1 text-xs text-gray-400">Monthly interview volume</p>
             {isMounted && <ReactApexChart series={interviewChart.series} options={{ ...interviewChart.options, chart: { ...interviewChart.options.chart, height: 120 }, xaxis: { labels: { style: { fontSize: "10px" } } } }} type="bar" height={120} />}
           </div>
           <div className="border-t border-gray-100 pt-2 dark:border-gray-700">
-            <h5 className="mb-0.5 text-sm font-semibold text-gray-800 dark:text-white">Decisions</h5>
+            <h5 className="mb-0.5 !text-lg font-semibold text-gray-800 dark:text-white">Decisions</h5>
             <p className="mb-1 text-xs text-gray-400">Selected vs Rejected over time</p>
             {isMounted && <ReactApexChart series={decisionChart.series} options={{ ...decisionChart.options, chart: { ...decisionChart.options.chart, height: 120 }, xaxis: { labels: { style: { fontSize: "10px" } } } }} type="bar" height={120} />}
           </div>
@@ -4510,12 +4783,12 @@ const Dashboard = () => {
       {/* Row 5: Positions Filled (3/5) + Selection Rate (2/5) */}
       <div className="mb-5 grid grid-cols-1 gap-5 xl:grid-cols-5">
         <div className="panel xl:col-span-3">
-          <h5 className="mb-0.5 text-base font-semibold text-gray-800 dark:text-white">
+          <h5 className="mb-0.5 !text-lg font-semibold text-gray-800 dark:text-white">
             Positions Filled vs Openings
           </h5>
-          <p className="mb-4 text-xs text-gray-400">
+          {/* <p className="mb-4 text-xs text-gray-400">
             Job postings, openings and positions filled per department
-          </p>
+          </p> */}
           {isMounted &&
             (() => {
               const c = getFilledVsOpeningsChart();
@@ -4525,7 +4798,7 @@ const Dashboard = () => {
                     series={c.series}
                     options={c.options as any}
                     type="area"
-                    height={320}
+                    height={400}
                   />
                 </>
               );
@@ -4533,12 +4806,12 @@ const Dashboard = () => {
         </div>
 
         <div className="panel xl:col-span-2">
-          <h5 className="mb-0.5 text-base font-semibold text-gray-800 dark:text-white">
+          <h5 className="mb-0.5 !text-lg font-semibold text-gray-800 dark:text-white">
             Selection Rate Trend
           </h5>
-          <p className="mb-4 text-xs text-gray-400">
+          {/* <p className="mb-4 text-xs text-gray-400">
             Line chart — x: month · y: % selected · dashed line = average
-          </p>
+          </p> */}
           {isMounted &&
             (() => {
               const c = getSelectionRateChart();
@@ -4555,15 +4828,15 @@ const Dashboard = () => {
       </div>
 
       {/* Row 6: Immediate vs Regular (2/5) + Stage Drop-off (3/5) */}
-      <div className="mb-5 grid grid-cols-1 gap-5 xl:grid-cols-5">
-        <div className="panel xl:col-span-2">
-          <h5 className="mb-0.5 text-base font-semibold text-gray-800 dark:text-white">
+      <div className="mb-5 grid grid-cols-1 gap-5 xl:grid-cols-6">
+        <div className="panel xl:col-span-3">
+          <h5 className="mb-0.5 !text-lg font-semibold text-gray-800 dark:text-white">
             Immediate vs Regular Hiring
           </h5>
-          <p className="mb-4 text-xs text-gray-400">
+          {/* <p className="mb-4 text-xs text-gray-400">
             Mixed chart — line (immediate) + area (regular) · x: month · y: job
             count
-          </p>
+          </p> */}
           {isMounted &&
             (() => {
               const c = getHiringTypeChart();
@@ -4579,121 +4852,694 @@ const Dashboard = () => {
         </div>
 
         <div className="panel xl:col-span-3">
-          <h5 className="mb-0.5 text-base font-semibold text-gray-800 dark:text-white">
+          <h5 className="mb-0.5 !text-lg font-semibold text-gray-800 dark:text-white">
             Stage Drop-off Analysis
           </h5>
-          <p className="mb-4 text-xs text-gray-400">
+          {/* <p className="mb-4 text-xs text-gray-400">
             Applied → Interview → Selected / Waitlisted → Joined
-          </p>
+          </p> */}
           {(() => {
             const d = dashboard?.stage_dropoff_analysis;
-            const applied = d?.applied ?? dummyDropoff.applied.total;
-            const interview = d?.interview ?? dummyDropoff.interview.total;
-            const selected = d?.selected ?? dummyDropoff.selected.total;
-            const waitlisted = d?.waitlisted ?? dummyDropoff.waitlist.total;
-            const joined = d?.joined ?? dummyDropoff.joined.total;
-            const movedToInterview = d?.applied_to_interview?.moved ?? 120;
-            const notMovedToInterview =
-              d?.applied_to_interview?.not_moved ?? 80;
-            const movedToSelected = d?.interview_to_selected?.moved ?? 1;
-            const notMovedToSelected = d?.interview_to_selected?.not_moved ?? 5;
-            const movedToJoined = d?.selected_to_joined?.moved ?? 0;
-            const notMovedToJoined = d?.selected_to_joined?.not_moved ?? 1;
+            const applied = d?.applied ?? 0;
+            const interview = d?.interview ?? 0;
+            const selected = d?.selected ?? 0;
+            const waitlisted = d?.waitlisted ?? 0;
+            const joined = d?.joined ?? 0;
+            const a2i = d?.applied_to_interview ?? { moved: 0, not_moved: 0 };
+            const i2s = d?.interview_to_selected ?? { moved: 0, not_moved: 0 };
+            const i2w = d?.interview_to_waitlisted ?? { moved: 0, not_moved: 0 };
+            const s2j = d?.selected_to_joined ?? { moved: 0, not_moved: 0 };
+
+            const StageBox = ({ label, value, bg, text }: any) => (
+              <div className={`flex flex-col items-center justify-center rounded-2xl border px-5 py-4 shadow-sm ${bg}`}>
+                <span className={`text-2xl font-bold ${text}`}>{value}</span>
+                <span className="mt-1 text-xs font-medium text-gray-500 dark:text-gray-400">{label}</span>
+              </div>
+            );
+
+            const Connector = ({ moved, dropped }: any) => (
+              <div className="flex flex-col items-center justify-center gap-1 px-1">
+                <div className="flex items-center gap-1">
+                  <span className="h-px w-6 bg-gray-300 dark:bg-gray-600" />
+                  <span className="rounded-full bg-green-100 px-1.5 py-0.5 text-[10px] font-semibold text-green-700">↑{moved}</span>
+                  <span className="h-px w-6 bg-gray-300 dark:bg-gray-600" />
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="h-px w-6 bg-gray-200 dark:bg-gray-700" />
+                  <span className="rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-semibold text-red-600">↓{dropped}</span>
+                  <span className="h-px w-6 bg-gray-200 dark:bg-gray-700" />
+                </div>
+              </div>
+            );
+
             return (
-              <div className="overflow-x-auto pb-1">
-                <div className="min-w-[560px] px-1 py-2">
+              <div className="w-full">
+                <div className="flex flex-wrap gap-y-3">
+                  {/* Main pipeline row */}
                   <div className="flex items-center">
-                    {[
-                      { label: "Applied", value: applied, tone: "blue" },
-                      { label: "Interview", value: interview, tone: "amber" },
-                    ].map((stage, idx) => (
-                      <div
-                        key={stage.label}
-                        className="flex flex-1 items-center"
-                      >
-                        <div
-                          className={`w-full rounded-xl border px-3 py-3 text-center ${
-                            stage.tone === "blue"
-                              ? "border-blue-200 bg-blue-50 dark:border-blue-900/40 dark:bg-blue-900/10"
-                              : "border-amber-200 bg-amber-50 dark:border-amber-900/40 dark:bg-amber-900/10"
-                          }`}
-                        >
-                          <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                            {stage.label}
-                          </p>
-                          <p className="mt-1 text-xl font-bold text-gray-900 dark:text-white">
-                            {stage.value}
-                          </p>
-                        </div>
-                        <div className="mx-2 flex w-24 shrink-0 flex-col items-center gap-0.5 text-[10px] leading-tight">
-                          <span className="whitespace-nowrap font-semibold text-green-600 dark:text-green-400">
-                            Moved:{" "}
-                            {idx === 0 ? movedToInterview : movedToSelected}
-                          </span>
-                          <span className="h-px w-full bg-gray-300 dark:bg-gray-600" />
-                          <span className="whitespace-nowrap text-red-500 dark:text-red-400">
-                            Dropped:{" "}
-                            {idx === 0
-                              ? notMovedToInterview
-                              : notMovedToSelected}
-                          </span>
-                        </div>
+                    {/* Applied */}
+                    <StageBox label="Applied" value={applied} bg="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20" text="text-blue-600" />
+                    <Connector moved={a2i.moved} dropped={a2i.not_moved} />
+                    {/* Interview */}
+                    <StageBox label="Interview" value={interview} bg="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20" text="text-amber-600" />
+
+                    {/* Fork: two branches stacked */}
+                    <div className="relative mx-3 flex flex-col gap-3">
+                      {/* top fork line */}
+                      <div className="absolute left-0 top-[calc(25%-1px)] h-px w-3 bg-gray-300 dark:bg-gray-600" />
+                      <div className="absolute left-0 bottom-[calc(25%-1px)] h-px w-3 bg-gray-300 dark:bg-gray-600" />
+                      <div className="absolute left-0 top-[25%] h-[50%] w-px bg-gray-300 dark:bg-gray-600" />
+
+                      {/* Selected branch */}
+                      <div className="ml-3 flex items-center">
+                        <Connector moved={i2s.moved} dropped={i2s.not_moved} />
+                        <StageBox label="Selected" value={selected} bg="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20" text="text-green-600" />
+                        <Connector moved={s2j.moved} dropped={s2j.not_moved} />
+                        <StageBox label="Joined" value={joined} bg="border-teal-200 bg-teal-50 dark:border-teal-800 dark:bg-teal-900/20" text="text-teal-600" />
                       </div>
-                    ))}
-                    <div className="flex flex-1 flex-col gap-3">
-                      {[
-                        { label: "Selected", value: selected, tone: "green" },
-                        {
-                          label: "Waitlisted",
-                          value: waitlisted,
-                          tone: "purple",
-                        },
-                      ].map((stage) => (
-                        <div
-                          key={stage.label}
-                          className={`relative rounded-xl border px-3 py-2 text-center ${
-                            stage.tone === "green"
-                              ? "border-green-200 bg-green-50 dark:border-green-900/40 dark:bg-green-900/10"
-                              : "border-purple-200 bg-purple-50 dark:border-purple-900/40 dark:bg-purple-900/10"
-                          }`}
-                        >
-                          <span className="absolute -left-2 top-1/2 h-px w-2 bg-gray-300 dark:bg-gray-600" />
-                          <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                            {stage.label}
-                          </p>
-                          <p className="mt-0.5 text-lg font-bold text-gray-900 dark:text-white">
-                            {stage.value}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="mx-2 flex w-24 shrink-0 flex-col items-center gap-0.5 text-[10px] leading-tight">
-                      <span className="whitespace-nowrap font-semibold text-green-600 dark:text-green-400">
-                        Moved: {movedToJoined}
-                      </span>
-                      <span className="h-px w-full bg-gray-300 dark:bg-gray-600" />
-                      <span className="whitespace-nowrap text-red-500 dark:text-red-400">
-                        Dropped: {notMovedToJoined}
-                      </span>
-                    </div>
-                    <div className="flex-1 rounded-xl border border-teal-200 bg-teal-50 px-3 py-3 text-center dark:border-teal-900/40 dark:bg-teal-900/10">
-                      <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                        Joined
-                      </p>
-                      <p className="mt-1 text-xl font-bold text-gray-900 dark:text-white">
-                        {joined}
-                      </p>
+
+                      {/* Waitlisted branch */}
+                      <div className="ml-3 flex items-center">
+                        <Connector moved={i2w.moved} dropped={i2w.not_moved} />
+                        <StageBox label="Waitlisted" value={waitlisted} bg="border-purple-200 bg-purple-50 dark:border-purple-800 dark:bg-purple-900/20" text="text-purple-600" />
+                      </div>
                     </div>
                   </div>
-                  <div className="mt-3 flex justify-between text-[11px] text-gray-400">
-                    <span>All applicants</span>
-                    <span>Stage conversion</span>
-                    <span>Final conversion</span>
+
+                  {/* Legend */}
+                  <div className="mt-4 flex items-center gap-4 text-[11px] text-gray-400">
+                    <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full bg-green-400" /> Moved to next stage</span>
+                    <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full bg-red-400" /> Dropped off</span>
                   </div>
                 </div>
               </div>
             );
           })()}
+        </div>
+      </div>
+
+      {/* ── Bottom Tables Row ── */}
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-1 pb-6">
+        {/* Days to Fill Variance */}
+        <div className="mb-6">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
+                Days to Fill Variance
+              </h2>
+              <p className="text-xs text-gray-400">
+                Jobs where actual days to fill is within 10 days of target
+              </p>
+            </div>
+          </div>
+          <DataTable
+            noRecordsText="No data found"
+            highlightOnHover
+            className="table-hover whitespace-nowrap"
+            records={state.daysToFillVariance}
+            fetching={state.daysToFillVarianceLoading}
+            minHeight={160}
+            columns={[
+              { accessor: "job_role", title: "Job Role" },
+              {
+                accessor: "department_name",
+                title: "Dept",
+                sortable: true,
+                cellsStyle: {
+                  whiteSpace: "normal",
+                  wordBreak: "break-word",
+                },
+                render: ({ department }) => {
+                  if (!department || department?.length === 0) {
+                    return <span className="text-gray-400">-</span>;
+                  }
+
+                  const firstDept = department?.[0];
+                  const otherDept = department?.slice(1);
+                  const maxShow = 3;
+                  const remaining = otherDept?.length - maxShow;
+                  const visibleDept = otherDept?.slice(0, maxShow);
+                  const hiddenDept = otherDept?.slice(maxShow);
+
+                  return (
+                    <div className="flex flex-wrap items-center gap-2">
+                      {/* First department text */}
+                      <span
+                        className="text-sm  text-gray-700 dark:text-gray-300"
+                        title={firstDept}
+                      >
+                        {firstDept}
+                      </span>
+
+                      {/* Avatars */}
+                      <div className="flex items-center -space-x-2">
+                        {visibleDept?.map((dept: string, index: number) => (
+                          <div key={index} className="group relative">
+                            <div className="bg-dblue flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white text-xs  text-white dark:border-gray-900">
+                              {dept?.slice(0, 2)?.toUpperCase()}
+                            </div>
+
+                            {/* Tooltip */}
+                            <div
+                              className="absolute bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100"
+                              title={dept}
+                            >
+                              {dept}
+                            </div>
+                          </div>
+                        ))}
+                        {remaining > 0 && (
+                          <div className="group relative">
+                            <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-gray-400 text-xs  text-white dark:border-gray-900">
+                              +{remaining}
+                            </div>
+
+                            {/* Remaining tooltip */}
+                            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
+                              {hiddenDept
+                                ?.map((d: string) => capitalizeFLetter(d))
+                                .join(", ")}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                },
+              },
+              { accessor: "college", title: "College" },
+              {
+                accessor: "days_to_fill",
+                title: "Days to fill",
+                textAlignment: "right",
+              },
+              {
+                accessor: "priority",
+                title: "Expiration period",
+                textAlignment: "right",
+              },
+              {
+                accessor: "variance",
+                title: "Variance",
+                textAlignment: "right",
+                render: (r: any) => (
+                  <span
+                    className={`font-medium ${
+                      r.variance < 0
+                        ? "text-green-600"
+                        : r.variance <= 7
+                        ? "text-amber-600"
+                        : "text-red-600"
+                    }`}
+                  >
+                    {r.variance > 0 ? `+${r.variance}` : r.variance}
+                  </span>
+                ),
+              },
+
+              {
+                accessor: "total_applications",
+                title: "Applications",
+                sortable: true,
+                cellsStyle: {
+                  whiteSpace: "normal",
+                  wordBreak: "break-word",
+                },
+                render: ({ total_applications }) => (
+                  <span className="text-gray-600 dark:text-gray-400">
+                    {total_applications}
+                  </span>
+                ),
+              },
+
+              {
+                accessor: "actions",
+                title: "Actions",
+                render: (row: any) => (
+                  <div className="flex items-center justify-center gap-3">
+                    <button
+                      onClick={() =>
+                        router.push(`/faculty/job_details?id=${row.id}`)
+                      }
+                      className="flex  items-center justify-center rounded-lg  text-indigo-600 "
+                      title="View"
+                    >
+                      <IconEye className="h-4 w-4" />
+                    </button>
+                    {/* {state.profile?.role == ROLES.HR && ( */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+
+                        // if (state.profile?.role == ROLES.HR) {
+                        handleApprove(row);
+                        // }
+                      }}
+                      // onClick={() => handleToggleStatus(row)}
+                      className={`flex items-center justify-center rounded-lg ${
+                        row?.job_status === "published"
+                          ? "text-red-600 "
+                          : " text-green-600 "
+                      }`}
+                      title={"Job Status"}
+                    >
+                      <CheckCircle className="h-4 w-4" />
+                    </button>
+                    {/* )} */}
+                    {/* <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleLog(row);
+                          }}
+                          className="flex items-center justify-center rounded-lg  text-purple-600 "
+                          title="Logs"
+                        >
+                          <IconHistory className="h-4 w-4" />
+                        </button> */}
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/faculty/updatejob?id=${row.id}`);
+                      }}
+                      className="flex  items-center justify-center rounded-lg text-blue-600 "
+                      title="Edit"
+                    >
+                      <IconEdit className="h-4 w-4" />
+                    </button>
+
+                    {/* <button
+              // onClickCapture={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete(row);
+              }}
+              className="flex  items-center justify-center rounded-lg  text-red-600 "
+              title="Delete"
+            >
+              <IconTrash className="h-4 w-4" />
+            </button> */}
+                  </div>
+                ),
+              },
+            ]}
+            customLoader={
+              <div className="flex items-center justify-center py-10">
+                <IconLoader className="h-6 w-6 animate-spin text-blue-600" />
+              </div>
+            }
+          />
+          {state.daysToFillVarianceCount > 10 && (
+            <div className="mt-3">
+              <Pagination
+                activeNumber={(p) => {
+                  setState({ daysToFillVariancePage: p });
+                  fetchDaysToFillVariance(p);
+                }}
+                totalPage={state.daysToFillVarianceCount}
+                currentPages={state.daysToFillVariancePage}
+                pageSize={10}
+              />
+            </div>
+          )}
+        </div>
+        
+        {/* <div className="mb-6">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
+                Upcomming interviews
+              </h2>
+             
+            </div>
+          </div>
+          <DataTable
+            noRecordsText="No data found"
+            highlightOnHover
+            className="table-hover whitespace-nowrap"
+            records={state.upCommingInterviewsList}
+            fetching={state.upCommingInterviewsLoading}
+            minHeight={160}
+            columns={[
+              { accessor: "job_role", title: "Job Role" },
+              {
+                accessor: "department_name",
+                title: "Dept",
+                sortable: true,
+                cellsStyle: {
+                  whiteSpace: "normal",
+                  wordBreak: "break-word",
+                },
+                render: ({ department }) => {
+                  if (!department || department?.length === 0) {
+                    return <span className="text-gray-400">-</span>;
+                  }
+
+                  const firstDept = department?.[0];
+                  const otherDept = department?.slice(1);
+                  const maxShow = 3;
+                  const remaining = otherDept?.length - maxShow;
+                  const visibleDept = otherDept?.slice(0, maxShow);
+                  const hiddenDept = otherDept?.slice(maxShow);
+
+                  return (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span
+                        className="text-sm  text-gray-700 dark:text-gray-300"
+                        title={firstDept}
+                      >
+                        {firstDept}
+                      </span>
+
+                      <div className="flex items-center -space-x-2">
+                        {visibleDept?.map((dept: string, index: number) => (
+                          <div key={index} className="group relative">
+                            <div className="bg-dblue flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white text-xs  text-white dark:border-gray-900">
+                              {dept?.slice(0, 2)?.toUpperCase()}
+                            </div>
+
+                            <div
+                              className="absolute bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100"
+                              title={dept}
+                            >
+                              {dept}
+                            </div>
+                          </div>
+                        ))}
+                        {remaining > 0 && (
+                          <div className="group relative">
+                            <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-gray-400 text-xs  text-white dark:border-gray-900">
+                              +{remaining}
+                            </div>
+
+                            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
+                              {hiddenDept
+                                ?.map((d: string) => capitalizeFLetter(d))
+                                .join(", ")}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                },
+              },
+              { accessor: "college", title: "College" },
+              {
+                accessor: "days_to_fill",
+                title: "Days to fill",
+                textAlignment: "right",
+              },
+              {
+                accessor: "priority",
+                title: "Expiration period",
+                textAlignment: "right",
+              },
+              {
+                accessor: "variance",
+                title: "Variance",
+                textAlignment: "right",
+                render: (r: any) => (
+                  <span
+                    className={`font-medium ${
+                      r.variance < 0
+                        ? "text-green-600"
+                        : r.variance <= 7
+                        ? "text-amber-600"
+                        : "text-red-600"
+                    }`}
+                  >
+                    {r.variance > 0 ? `+${r.variance}` : r.variance}
+                  </span>
+                ),
+              },
+
+              {
+                accessor: "total_applications",
+                title: "Applications",
+                sortable: true,
+                cellsStyle: {
+                  whiteSpace: "normal",
+                  wordBreak: "break-word",
+                },
+                render: ({ total_applications }) => (
+                  <span className="text-gray-600 dark:text-gray-400">
+                    {total_applications}
+                  </span>
+                ),
+              },
+
+              {
+                accessor: "actions",
+                title: "Actions",
+                render: (row: any) => (
+                  <div className="flex items-center justify-center gap-3">
+                    <button
+                      onClick={() =>
+                        router.push(`/faculty/job_details?id=${row.id}`)
+                      }
+                      className="flex  items-center justify-center rounded-lg  text-indigo-600 "
+                      title="View"
+                    >
+                      <IconEye className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+
+                        handleApprove(row);
+                        // }
+                      }}
+                      className={`flex items-center justify-center rounded-lg ${
+                        row?.job_status === "published"
+                          ? "text-red-600 "
+                          : " text-green-600 "
+                      }`}
+                      title={"Job Status"}
+                    >
+                      <CheckCircle className="h-4 w-4" />
+                    </button>
+                    
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/faculty/updatejob?id=${row.id}`);
+                      }}
+                      className="flex  items-center justify-center rounded-lg text-blue-600 "
+                      title="Edit"
+                    >
+                      <IconEdit className="h-4 w-4" />
+                    </button>
+
+                   
+                  </div>
+                ),
+              },
+            ]}
+            customLoader={
+              <div className="flex items-center justify-center py-10">
+                <IconLoader className="h-6 w-6 animate-spin text-blue-600" />
+              </div>
+            }
+          />
+          {state.upCommingInterviewsCount > 10 && (
+            <div className="mt-3">
+              <Pagination
+                activeNumber={(p) => {
+                  setState({ upCommingInterviewsPage: p });
+                  upCommingInterviews(p);
+                }}
+                totalPage={state.upCommingInterviewsCount}
+                currentPages={state.upCommingInterviewsPage}
+                pageSize={10}
+              />
+            </div>
+          )}
+        </div> */}
+     
+
+        {/* Overdue Follow-ups */}
+        <div className="mb-6">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
+                Overdue Follow-ups
+              </h2>
+              <p className="text-xs text-gray-400">
+                Applications who need HR follow-up
+              </p>
+            </div>
+          </div>
+          <DataTable
+            noRecordsText="No data found"
+            highlightOnHover
+            className="table-hover whitespace-nowrap"
+            records={state.overdueFollowups}
+            fetching={state.overdueFollowupsLoading}
+            minHeight={160}
+            columns={[
+              {
+                accessor: "candidate",
+                title: "Candidate",
+                render: (r: any) => (
+                  <Link
+                    href={`/faculty/application_detail?id=${r.id}`}
+                    className="text-dblue hover:underline"
+                  >
+                    {r.candidate}
+                  </Link>
+                ),
+              },
+              { accessor: "job", title: "Job Role" },
+              { accessor: "college", title: "College" },
+              {
+                accessor: "department_name",
+                title: "Department",
+                render: ({ department_name }) => {
+                  if (!department_name || department_name?.length === 0) {
+                    return <span className="text-gray-400">-</span>;
+                  }
+
+                  const firstDept = department_name?.[0];
+                  const otherDept = department_name?.slice(1);
+                  const maxShow = 3;
+                  const remaining = otherDept?.length - maxShow;
+                  const visibleDept = otherDept?.slice(0, maxShow);
+                  const hiddenDept = otherDept?.slice(maxShow);
+
+                  return (
+                    <div className="flex flex-wrap items-center gap-2">
+                      {/* First department text */}
+                      <span
+                        title={firstDept}
+                        className="text-sm  text-gray-700 dark:text-gray-300"
+                      >
+                        {firstDept}
+                      </span>
+
+                      {/* Avatars */}
+                      <div className="flex items-center -space-x-2">
+                        {visibleDept?.map((dept: string, index: number) => (
+                          <div key={index} className="group relative z-10">
+                            <div className="bg-dblue flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white text-xs  text-white dark:border-gray-900">
+                              {dept?.slice(0, 2)?.toUpperCase()}
+                            </div>
+
+                            {/* Tooltip */}
+                            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
+                              {capitalizeFLetter(dept)}
+                            </div>
+                          </div>
+                        ))}
+                        {remaining > 0 && (
+                          <div className="group relative">
+                            <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-gray-400 text-xs  text-white dark:border-gray-900">
+                              +{remaining}
+                            </div>
+
+                            {/* Remaining tooltip */}
+                            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
+                              {hiddenDept
+                                ?.map((d: string) => capitalizeFLetter(d))
+                                .join(", ")}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                },
+                sortable: true,
+              },
+              {
+                accessor: "status",
+                title: "Status",
+                render: (r: any) => (
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                      STATUS_COLOR[r.status] ?? "bg-gray-100 text-gray-700"
+                    }`}
+                  >
+                    {r.status}
+                  </span>
+                ),
+              },
+              { accessor: "applied_date", title: "Applied Date" },
+              { accessor: "status_date", title: "Last Status Date" },
+              {
+                accessor: "actions",
+                title: "Actions",
+                textAlignment: "center",
+                render: (row: any) => (
+                  <div className="flex items-center justify-center gap-3">
+                    <button
+                      onClick={() => handleEdit(row)}
+                      className="flex  items-center justify-center rounded-lg  text-green-900 transition-all duration-200 "
+                      title="View"
+                    >
+                      <IconEye className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDownloadResume(row)}
+                      className="flex  items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
+                      title="Resume"
+                    >
+                      <FileText className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => handleRound(row)}
+                      className="flex  items-center justify-center rounded-lg  text-pink-600 transition-all duration-200 "
+                      title="Interview Round"
+                    >
+                      <BriefcaseBusiness className="h-4 w-4" />
+                    </button>
+
+                    {state.profile?.role == ROLES.HR && (
+                      <button
+                        onClick={() => {
+                          setState({
+                            showStatusModal: true,
+                            selectedApplication: row,
+                            selectedStatus: row.application_status,
+                          });
+                        }}
+                        className="flex items-center justify-center rounded-lg text-purple-600 transition-all duration-200 "
+                        title="Update Status"
+                      >
+                        <UserCheck className="h-4 w-4" />
+                      </button>
+                    )}
+                    {/* <button
+                            onClick={() => handleDelete(row)}
+                            className="flex items-center justify-center rounded-lg  text-red-600 transition-all duration-200 "
+                            title="Delete"
+                          >
+                            <IconTrash className="h-4 w-4" />
+                          </button> */}
+                  </div>
+                ),
+              },
+            ]}
+            customLoader={
+              <div className="flex items-center justify-center py-10">
+                <IconLoader className="h-6 w-6 animate-spin text-blue-600" />
+              </div>
+            }
+          />
+          {state.overdueFollowupsCount > 10 && (
+            <div className="mt-3">
+              <Pagination
+                activeNumber={(p) => {
+                  setState({ overdueFollowupsPage: p });
+                  fetchOverdueFollowups(p);
+                }}
+                totalPage={state.overdueFollowupsCount}
+                currentPages={state.overdueFollowupsPage}
+                pageSize={10}
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -5092,7 +5938,7 @@ const Dashboard = () => {
               case "summary":
                 return (
                   <div className="space-y-2">
-                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
                       Profile Summary
                     </h3>
                     <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
@@ -5220,7 +6066,7 @@ const Dashboard = () => {
               case "responsibility":
                 return (
                   <div className="space-y-4">
-                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
                       Academic Responsibilities
                     </h3>
                     {u?.additional_academic_responsibilities?.length ? (
@@ -5247,7 +6093,7 @@ const Dashboard = () => {
               case "experience":
                 return (
                   <div className="space-y-4">
-                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
                       Experience
                     </h3>
                     {u?.experiences?.length ? (
@@ -5299,7 +6145,7 @@ const Dashboard = () => {
               case "education":
                 return (
                   <div className="space-y-4">
-                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
                       Education
                     </h3>
                     {u?.educations?.length ? (
@@ -5340,7 +6186,7 @@ const Dashboard = () => {
               case "projects":
                 return (
                   <div className="space-y-4">
-                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
                       Projects
                     </h3>
                     {u?.projects?.length ? (
@@ -5411,7 +6257,7 @@ const Dashboard = () => {
               case "publications":
                 return (
                   <div className="space-y-4">
-                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
                       Publications
                     </h3>
                     {u?.publications?.length ? (
@@ -5453,7 +6299,7 @@ const Dashboard = () => {
               case "skills":
                 return (
                   <div className="space-y-4">
-                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
                       Skills
                     </h3>
                     {u?.skills?.length ? (
@@ -5476,7 +6322,7 @@ const Dashboard = () => {
               case "achievements":
                 return (
                   <div className="space-y-4">
-                    <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
                       Achievements
                     </h3>
                     {u?.achievements?.length ? (
@@ -5610,7 +6456,7 @@ const Dashboard = () => {
                 </div>
               ) : (
                 <div className="p-6">
-                  <h3 className="mb-4 text-base font-semibold text-gray-800 dark:text-white">
+                  <h3 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white">
                     Academic Qualifications
                   </h3>
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
