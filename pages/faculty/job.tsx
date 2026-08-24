@@ -51,6 +51,9 @@ import {
 import IconHistory from "@/components/Icon/IconHistory";
 import Modal from "@/components/modal/modal.component";
 import LogCard from "@/components/logCard";
+import JoyrideTour, { TourStep } from "@/components/JoyrideTour";
+import { useTour } from "@/hook/useTour";
+import { HelpCircle } from "lucide-react";
 
 const Job = () => {
   const dispatch = useDispatch();
@@ -125,6 +128,46 @@ const Job = () => {
   });
 
   const debounceSearch = useDebounce(state.search, 500);
+
+  // Tour configuration
+  const { run, startTour, stopTour } = useTour({ autoStart: false });
+
+  const tourSteps: TourStep[] = [
+    {
+      target: "body",
+      content: "Welcome to the Job Management page! Here you can view and manage all job postings.",
+      placement: "center",
+      disableBeacon: true,
+      title: "Welcome to Jobs",
+    },
+    {
+      target: "#add-job-button",
+      content: "Click here to create a new job posting. You can add job details, requirements, and more.",
+      placement: "left",
+      title: "Add New Job",
+    },
+    {
+      target: ".mantine-datatable",
+      content: "View all your job postings here. You can search, filter, and take actions on each job.",
+      placement: "top",
+      title: "Job Listings",
+    },
+    {
+      target: "body",
+      content: "That's it! You're ready to manage your job postings. Click the help icon anytime to restart this tour.",
+      placement: "center",
+      title: "You're All Set!",
+    },
+  ];
+
+  // Check if user came from dashboard tour
+  useEffect(() => {
+    const fromTour = localStorage.getItem("fromDashboardTour");
+    if (fromTour === "true") {
+      localStorage.removeItem("fromDashboardTour");
+      setTimeout(() => startTour(), 500);
+    }
+  }, []);
 
   useEffect(() => {
     dispatch(setPageTitle("Job Management"));

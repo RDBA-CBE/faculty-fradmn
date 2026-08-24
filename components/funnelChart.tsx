@@ -5,15 +5,6 @@ import "react-funnel-pipeline/dist/index.css";
 export default function Funnel(props: any) {
   const { data, height, width } = props;
 
-  const colors = [
-    "#a3ddff",
-    "#edfaa2",
-    "#2ee6477e",
-    "#f76c62",
-    
-    "#e5e7eb", // empty row color
-  ];
-
   const wrapText = (text: string) => text.replace(/ /g, "\n");
 
   const formattedData = data.map((item: any) => ({
@@ -38,27 +29,57 @@ export default function Funnel(props: any) {
         chartWidth={width || "auto"}
         chartHeight={height || "auto"}
         data={finalData}
-        pallette={colors}
         showNames
         showValues
 
-        getRowStyle={() => ({
-          height: 70,
-        })}
+        getRowStyle={(row: any) => {
+          const index = finalData.indexOf(row);
+          switch (index) {
+            case 0:
+              return {
+                backgroundColor: "#dfe9ff",
+                border: "1px solid #537bd7",
+                height: 70,
+              };
+            case 1:
+              return {
+                backgroundColor: "#ffe2c0",
+                border: "3px solid #ffa339",
+                height: 70,
+              };
+            case 2:
+              return {
+                backgroundColor: "#d0ffe0",
+                border: "3px solid #128639",
+                height: 70,
+              };
+            case 3:
+              return {
+                backgroundColor: "#ffc9c9",
+                border: "3px solid #dc2626",
+                height: 70,
+              };
+            default:
+              return {
+                backgroundColor: "#e5e7eb",
+                border: "none",
+                height: 70,
+              };
+          }
+        }}
 
         getRowNameStyle={(row: any) => ({
           fontSize: "15px",
-          
-        //   whiteSpace: "pre-line",
           textAlign: "center",
-          color: row.name ? "#000" : "transparent",
-          wordWrap:"break-word"
+          color: row.name ? "#000000" : "transparent",
+          wordWrap: "break-word",
         })}
 
         getRowValueStyle={(row: any) => ({
           fontSize: "16px",
           fontWeight: 600,
-          color: row.name ? "#000" : "transparent",
+          textAlign: "center",
+          color: row.name ? "#000000" : "transparent",
         })}
       />
     </div>

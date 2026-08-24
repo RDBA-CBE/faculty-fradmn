@@ -264,7 +264,7 @@ const Dashboard = () => {
       setState({ cardTableData: [], cardTablePage: 1, cardSearch: "" });
       CARD_FETCH_MAP[state.activeCard](1);
     }
-  }, [state.activeCard]);
+  }, [state.activeCard, state.dashboardCollegeFilter]);
 
   const debounceCardSearch = useDebounce(state.cardSearch, 500);
 
@@ -292,6 +292,12 @@ const Dashboard = () => {
         institutionDropdownList(1, "", false);
       } else if (res?.role == ROLES.INSTITUTION_ADMIN) {
         collegeDropdownList(1, "", false, res?.institution?.id, res.id);
+      } else if (res?.role == ROLES.HR || res?.role == ROLES.HOD) {
+        const dropdown = (res?.college ?? []).map((c: any) => ({
+          value: c.college_id,
+          label: c.short_name,
+        }));
+        setState({ collegeList: dropdown });
       }
 
       // List based on activeCard
@@ -310,99 +316,109 @@ const Dashboard = () => {
         label: "Total Applications",
         value: tc?.applications?.value ?? 0,
         color: "text-dblue",
-        bg: "bg-white/70",
-        mainbg: "bg-blue-100",
-        icon: <IconUsers className="h-7 w-7" />,
+        bg: "bg-[#f4f9ff]",
+        mainbg: "bg-[#f4f9ff]",
+        accentColor: "#324ca5",
+        icon: <IconUsers className="h-7 w-7 text-[#324ca5]" />,
         clickable: tc?.applications?.clickable,
       },
       {
         id: 7,
         label: "Applications Awaiting Review",
         value: tc?.awaiting_review?.value ?? 0,
-        color: "text-purple-600",
-        bg: "bg-white/70",
-        mainbg: "bg-purple-100",
-        icon: <IconUsers className="h-7 w-7" />,
+        color: "text-dblue",
+        bg: "bg-[#f4f9ff]",
+        mainbg: "bg-[#f4f9ff]",
+        accentColor: "#324ca5",
+        icon: <IconUsers className="h-7 w-7 text-purple-600" />,
         clickable: tc?.awaiting_review?.clickable,
       },
       {
         id: 4,
         label: "Active Jobs",
         value: tc?.approved_jobs?.value ?? 0,
-        color: "text-green-700",
-        bg: "bg-white/70",
-        mainbg: "bg-green-100",
-        icon: <IconChecks className="h-7 w-7" />,
+        color: "text-dblue",
+        bg: "bg-[#f4f9ff]",
+        mainbg: "bg-[#f4f9ff]",
+        accentColor: "#324ca5",
+        icon: <IconChecks className="h-7 w-7 text-green-700" />,
         clickable: tc?.approved_jobs?.clickable,
       },
       {
         id: 5,
         label: "Pending Jobs",
         value: tc?.pending_approvals?.value ?? 0,
-        color: "text-yellow-600",
-        bg: "bg-white/70",
-        mainbg: "bg-yellow-100",
-        icon: <IconCalendar className="h-7 w-7" />,
+        color: "text-dblue",
+        bg: "bg-[#f4f9ff]",
+        mainbg: "bg-[#f4f9ff]",
+        accentColor: "#324ca5",
+        icon: <IconCalendar className="h-7 w-7 text-yellow-600" />,
         clickable: tc?.pending_approvals?.clickable,
       },
       {
         id: 2,
         label: "Interview Scheduled",
         value: tc?.interview_scheduled?.value ?? 0,
-        color: "text-[#5f16ff]",
-        bg: "bg-white/70",
-        mainbg: "bg-[#d2c1f7f2]",
-        icon: <IconUsers className="h-7 w-7" />,
+        color: "text-dblue",
+        bg: "bg-[#f4f9ff]",
+        mainbg: "bg-[#f4f9ff]",
+        accentColor: "#324ca5",
+        icon: <IconUsers className="h-7 w-7 text-[#5f16ff]" />,
         clickable: tc?.interview_scheduled?.clickable,
       },
       {
         id: 13,
         label: "Reschedule Request",
         value: tc?.interview_rescheduled?.value ?? 0,
-        color: "text-amber-600",
-        bg: "bg-white/70",
-        mainbg: "bg-amber-100",
-        icon: <IconCalendar className="h-7 w-7" />,
+        color: "text-dblue",
+        bg: "bg-[#f4f9ff]",
+        mainbg: "bg-[#f4f9ff]",
+        accentColor: "#324ca5",
+        icon: <IconCalendar className="h-7 w-7 text-amber-600" />,
         clickable: tc?.interview_rescheduled?.clickable,
       },
       {
         id: 6,
         label: "Selected Applications",
         value: tc?.decisions?.selected ?? 0,
-        color: "text-green-600",
-        bg: "bg-white/70",
-        mainbg: "bg-green-50",
-        icon: <IconChecks className="h-7 w-7" />,
+        color: "text-dblue",
+        bg: "bg-[#f4f9ff]",
+        mainbg: "bg-[#f4f9ff]",
+        accentColor: "#324ca5",
+        icon: <IconChecks className="h-7 w-7 text-green-600" />,
         clickable: tc?.decisions?.clickable,
       },
       {
         id: 10,
         label: "Rejected Applications",
         value: tc?.rejected_applications?.value ?? 0,
-        color: "text-red-600",
-        bg: "bg-white/70",
-        mainbg: "bg-red-100",
-        icon: <IconUser className="h-7 w-7" />,
+        color: "text-dblue",
+        bg: "bg-[#f4f9ff]",
+        mainbg: "bg-[#f4f9ff]",
+        accentColor: "#324ca5",
+        icon: <IconUser className="h-7 w-7 text-red-600" />,
         clickable: tc?.rejected_applications?.clickable,
       },
       {
         id: 8,
         label: "Active Panel Members",
         value: tc?.active_panel_members?.value ?? 0,
-        color: "text-indigo-600",
-        bg: "bg-white/70",
-        mainbg: "bg-indigo-100",
-        icon: <IconUsers className="h-7 w-7" />,
+       color: "text-dblue",
+        bg: "bg-[#f4f9ff]",
+        mainbg: "bg-[#f4f9ff]",
+        accentColor: "#324ca5",
+        icon: <IconUsers className="h-7 w-7 text-indigo-600" />,
         clickable: tc?.active_panel_members?.clickable,
       },
       {
         id: 14,
         label: "Talents Identified",
         value: tc?.find_right_talents?.value ?? 0,
-        color: "text-cyan-600",
-        bg: "bg-white/70",
-        mainbg: "bg-cyan-100",
-        icon: <IconUser className="h-7 w-7" />,
+       color: "text-dblue",
+        bg: "bg-[#f4f9ff]",
+        mainbg: "bg-[#f4f9ff]",
+        accentColor: "#324ca5",
+        icon: <IconUser className="h-7 w-7 text-cyan-600" />,
         clickable: tc?.find_right_talents?.clickable,
       },
       // {
@@ -412,7 +428,9 @@ const Dashboard = () => {
       //   color: "text-pink-600",
       //   bg: "bg-white/70",
       //   mainbg: "bg-pink-100",
-      //   icon: <IconUser className="h-7 w-7" />,
+      //   borderColor: "border-pink-400",
+      //   ringColor: "ring-pink-400",
+      //   icon: <IconUser className="h-7 w-7 text-pink-600" />,
       //   clickable: tc?.outreached?.clickable,
       // },
       // {
@@ -422,7 +440,9 @@ const Dashboard = () => {
       //   color: "text-teal-600",
       //   bg: "bg-white/70",
       //   mainbg: "bg-teal-100",
-      //   icon: <IconUser className="h-7 w-7" />,
+      //   borderColor: "border-teal-400",
+      //   ringColor: "ring-teal-400",
+      //   icon: <IconUser className="h-7 w-7 text-teal-600" />,
       //   clickable: tc?.talents_identified?.clickable,
       // },
      
@@ -433,7 +453,9 @@ const Dashboard = () => {
       //   color: "text-blue-500",
       //   bg: "bg-white/70",
       //   mainbg: "bg-blue-50",
-      //   icon: <IconUsers className="h-7 w-7" />,
+      //   borderColor: "border-blue-300",
+      //   ringColor: "ring-blue-300",
+      //   icon: <IconUsers className="h-7 w-7 text-blue-500" />,
       //   clickable: tc?.total_interest_sent?.clickable,
       // },
       {
@@ -443,10 +465,11 @@ const Dashboard = () => {
           tc?.avg_days_to_schedule_interview?.value != null
             ? Number(tc.avg_days_to_schedule_interview.value).toFixed(1)
             : "—",
-        color: "text-orange-600",
-        bg: "bg-white/70",
-        mainbg: "bg-orange-100",
-        icon: <IconCalendar className="h-7 w-7" />,
+       color: "text-dblue",
+        bg: "bg-[#f4f9ff]",
+        mainbg: "bg-[#f4f9ff]",
+        accentColor: "#324ca5",
+        icon: <IconCalendar className="h-7 w-7 text-orange-600" />,
         clickable: false,
       },
     ];
@@ -792,13 +815,13 @@ const Dashboard = () => {
     return body;
   };
 
-  const fetchDashboard = async (params?: any, profile?: any) => {
+  const fetchDashboard = async (params?: any, profile?: any, collegeId?: any) => {
     try {
       const profileRes = await Models.auth.profile();
-      const collegeId = state.dashboardCollegeFilter?.value;
+      const resolvedCollegeId = collegeId ?? state.dashboardCollegeFilter?.value;
       const dashRes: any = await Models.dashboard.dashboard({
         ...(params ?? {}),
-        ...(collegeId ? { college_id: collegeId } : {}),
+        ...(resolvedCollegeId ? { college_id: resolvedCollegeId } : {}),
       });
 
       const data = dashRes?.data;
@@ -960,23 +983,25 @@ const Dashboard = () => {
       const rows = results.map((item: any) => {
         const appliedDate = item?.created_at ? new Date(item.created_at) : null;
 
+        console.log("item", item);
+        
+
         return {
           id: item?.id,
-          candidate: item?.first_name
-            ? `${item.first_name} ${item.last_name}`
-            : item?.username ?? "—",
-          job: item?.job_detail?.short_name,
-
-          college: item?.job_detail?.college?.short_name,
-          status: item?.application_status?.name ?? item?.status,
+          candidate: item?.applications[0]?.applicant_name,
+          job_role: item?.applications[0]?.short_name || item?.applications[0]?.job_title,
+        
+          college: item?.applications[0]?.job_detail?.college?.name,
           applied_date: moment(appliedDate).format("DD MMM YYYY, hh:mm A"),
-          status_date: moment(item.status_changed_at).format(
+          status_date: moment(item.applications[0]?.status_changed_at).format(
             "DD MMM YYYY, hh:mm A",
           ),
-          department_name:
-            item?.department_details?.length > 0 &&
-            item?.department_details?.map((item) => item?.short_name),
+          department_name: item?.applications[0]?.department_detail?.department_name,
           resume: item?.resume,
+          status: item?.applications[0]?.application_status?.name ?? item?.status,
+          scheduled_date: item?.scheduled_date,
+          applications_id:item?.applications[0]?.id
+
         };
       });
       const total = rows.reduce(
@@ -1100,6 +1125,28 @@ const Dashboard = () => {
     return bucket;
   };
 
+  const wrapChartLabel = (value: unknown, maxCharacters = 18) => {
+    const label = String(value ?? "");
+    if (label.length <= maxCharacters) return label;
+
+    const words = label.split(/\s+/);
+    const lines: string[] = [];
+    let line = "";
+
+    words.forEach((word) => {
+      const nextLine = line ? `${line} ${word}` : word;
+      if (line && nextLine.length > maxCharacters) {
+        lines.push(line);
+        line = word;
+      } else {
+        line = nextLine;
+      }
+    });
+
+    if (line) lines.push(line);
+    return lines;
+  };
+
   const trendLabels =
     dashboard?.trend?.map((t: any) => formatBucketLabel(t.bucket)) ?? [];
 
@@ -1165,8 +1212,15 @@ const Dashboard = () => {
         ? ["#2196F3", "#E7515A", "#00ab55", "#e2a03f", "#d143ee", "#43eebb"]
         : ["#1B55E2", "#E7515A", "#00ab55", "#e2a03f", "#d143ee", "#43eebb"],
       labels: trendLabels,
-      xaxis: { labels: { style: { fontSize: "11px" } } },
+      xaxis: {
+        title: { text: "Period", style: { fontSize: "11px" } },
+        labels: {
+          formatter: (value: string) => wrapChartLabel(value),
+          style: { fontSize: "11px" },
+        },
+      },
       yaxis: {
+        title: { text: "Count", style: { fontSize: "11px" } },
         labels: { offsetX: isRtl ? -30 : -10, style: { fontSize: "11px" } },
         opposite: isRtl,
       },
@@ -1210,8 +1264,8 @@ const Dashboard = () => {
           }: ${val} (${pct}%)`;
         },
       },
-      xaxis: { labels: { show: false } },
-      yaxis: { show: false },
+      xaxis: { labels: { show: false }, title: { text: "Stage" } },
+      yaxis: { show: false, title: { text: "Count" } },
       legend: { show: false },
       grid: { show: false },
     },
@@ -1252,6 +1306,9 @@ const Dashboard = () => {
     // override search with card-specific search
     if (state.cardSearch) body.search = state.cardSearch;
     else delete body.search;
+    // apply dashboard college filter
+    if (state.dashboardCollegeFilter?.value)
+      body.college = state.dashboardCollegeFilter.value;
     const role = state.profile?.role;
     const colleges = state.profile?.college?.map((c: any) => c.college_id);
     const instId = state.profile?.institution?.id;
@@ -1270,6 +1327,9 @@ const Dashboard = () => {
     const body: any = { ...bodyData() };
     if (state.cardSearch) body.search = state.cardSearch;
     else delete body.search;
+    // apply dashboard college filter
+    if (state.dashboardCollegeFilter?.value)
+      body.college_id = state.dashboardCollegeFilter.value;
     const role = state.profile?.role;
     const colleges = state.profile?.college?.map((c: any) => c.college_id);
     const instId = state.profile?.institution?.id;
@@ -1831,7 +1891,7 @@ const Dashboard = () => {
         title: "Department",
         render: ({ department_name }) => {
           if (!department_name || department_name?.length === 0) {
-            return <span className="text-gray-400">-</span>;
+            return <span className="text-black">-</span>;
           }
 
           const firstDept = department_name?.[0];
@@ -1903,7 +1963,7 @@ const Dashboard = () => {
         accessor: "date",
         title: "Applied",
         render: (r: any) => (
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-black">
             {r.date ? moment(r.date).format("DD MMM YYYY") : "-"}
           </span>
         ),
@@ -1982,7 +2042,7 @@ const Dashboard = () => {
         title: "Department",
         render: ({ department_name }) => {
           if (!department_name || department_name?.length === 0) {
-            return <span className="text-gray-400">-</span>;
+            return <span className="text-black">-</span>;
           }
 
           const firstDept = department_name?.[0];
@@ -2140,7 +2200,7 @@ const Dashboard = () => {
         },
         render: ({ department }) => {
           if (!department || department?.length === 0) {
-            return <span className="text-gray-400">-</span>;
+            return <span className="text-black">-</span>;
           }
 
           const firstDept = department?.[0];
@@ -2206,7 +2266,7 @@ const Dashboard = () => {
         },
         render: ({ college_name }) => (
           <span
-            className="text-gray-600 dark:text-gray-400"
+            className="text-gray-600 dark:text-black"
             title={college_name}
           >
             {college_name || "-"}
@@ -2267,7 +2327,7 @@ const Dashboard = () => {
           wordBreak: "break-word",
         },
         render: ({ total_applications }) => (
-          <span className="text-gray-600 dark:text-gray-400">
+          <span className="text-gray-600 dark:text-black">
             {total_applications}
           </span>
         ),
@@ -2277,7 +2337,7 @@ const Dashboard = () => {
       //   accessor: "last_date",
       //   title: "Last Date",
       //   render: ({ last_date }) => (
-      //     <span className="text-gray-600 dark:text-gray-400">
+      //     <span className="text-gray-600 dark:text-black">
       //       {last_date
       //         ? new Date(last_date).toLocaleDateString()
       //         : "-"}
@@ -2380,7 +2440,7 @@ const Dashboard = () => {
         },
         render: ({ department }) => {
           if (!department || department?.length === 0) {
-            return <span className="text-gray-400">-</span>;
+            return <span className="text-black">-</span>;
           }
 
           const firstDept = department?.[0];
@@ -2446,7 +2506,7 @@ const Dashboard = () => {
         },
         render: ({ college_name }) => (
           <span
-            className="text-gray-600 dark:text-gray-400"
+            className="text-gray-600 dark:text-black"
             title={college_name}
           >
             {college_name || "-"}
@@ -2507,7 +2567,7 @@ const Dashboard = () => {
           wordBreak: "break-word",
         },
         render: ({ total_applications }) => (
-          <span className="text-gray-600 dark:text-gray-400">
+          <span className="text-gray-600 dark:text-black">
             {total_applications}
           </span>
         ),
@@ -2517,7 +2577,7 @@ const Dashboard = () => {
       //   accessor: "last_date",
       //   title: "Last Date",
       //   render: ({ last_date }) => (
-      //     <span className="text-gray-600 dark:text-gray-400">
+      //     <span className="text-gray-600 dark:text-black">
       //       {last_date
       //         ? new Date(last_date).toLocaleDateString()
       //         : "-"}
@@ -2613,7 +2673,7 @@ const Dashboard = () => {
         title: "Department",
         render: ({ department_name }) => {
           if (!department_name || department_name?.length === 0) {
-            return <span className="text-gray-400">-</span>;
+            return <span className="text-black">-</span>;
           }
 
           const firstDept = department_name?.[0];
@@ -2760,7 +2820,7 @@ const Dashboard = () => {
         title: "Department",
         render: ({ department_name }) => {
           if (!department_name || department_name?.length === 0) {
-            return <span className="text-gray-400">-</span>;
+            return <span className="text-black">-</span>;
           }
 
           const firstDept = department_name?.[0];
@@ -2908,7 +2968,7 @@ const Dashboard = () => {
         title: "Department",
         render: ({ department_name }) => {
           if (!department_name || department_name?.length === 0) {
-            return <span className="text-gray-400">-</span>;
+            return <span className="text-black">-</span>;
           }
 
           const firstDept = department_name?.[0];
@@ -2980,7 +3040,7 @@ const Dashboard = () => {
         accessor: "date",
         title: "Applied",
         render: (r: any) => (
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-black">
             {r.date ? moment(r.date).format("DD MMM YYYY") : "-"}
           </span>
         ),
@@ -3054,7 +3114,7 @@ const Dashboard = () => {
             className={`rounded-full px-2 py-0.5 text-xs font-medium ${
               r.decision_maker
                 ? "bg-green-100 text-green-700"
-                : "bg-gray-100 text-gray-500"
+                : "bg-gray-100 text-black"
             }`}
           >
             {r.decision_maker ? "Yes" : "No"}
@@ -3084,7 +3144,7 @@ const Dashboard = () => {
       //   title: "Interest Status",
       //   render: (r: any) => r.hr_interview_status ? (
       //     <span className="rounded-full bg-pink-100 px-2 py-0.5 text-xs text-pink-700">{r.hr_interview_status}</span>
-      //   ) : <span className="text-gray-400">-</span>,
+      //   ) : <span className="text-black">-</span>,
       // },
     ],
     14: [
@@ -3109,7 +3169,7 @@ const Dashboard = () => {
       //   title: "Interest Status",
       //   render: (r: any) => r.hr_interview_status ? (
       //     <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-700">{r.hr_interview_status}</span>
-      //   ) : <span className="text-gray-400">-</span>,
+      //   ) : <span className="text-black">-</span>,
       // },
     ],
     13: [
@@ -3196,17 +3256,24 @@ const Dashboard = () => {
           zoom: { enabled: false },
         },
         stroke: { curve: "smooth", width: 2.5 },
-        colors: ["#1B55E2", "#00ab55", "#e2a03f"],
+        colors: ["#1f46b3", "#007550", "#d97706"],
         fill: {
           type: "gradient",
           gradient: {
-            shadeIntensity: 1,
-            opacityFrom: 0.3,
-            opacityTo: 0.03,
-            stops: [0, 100],
+  shadeIntensity: 0.1,
+  opacityFrom: 0.15,
+  opacityTo: 0.35,
+  stops: [0, 100],
+},
+        },
+        xaxis: {
+          categories: labels,
+          title: { text: "Month", style: { fontSize: "11px" } },
+          labels: {
+            formatter: (value: string) => wrapChartLabel(value),
+            style: { fontSize: "11px" },
           },
         },
-        xaxis: { categories: labels, labels: { style: { fontSize: "11px" } } },
         yaxis: {
           title: { text: "Count", style: { fontSize: "11px" } },
           labels: { style: { fontSize: "11px" } },
@@ -3280,13 +3347,17 @@ const Dashboard = () => {
       series: [{ name: "Jobs", data: src.map((d: any) => d.job_postings) }],
       options: {
         chart: { type: "bar", height: 240, toolbar: { show: false } },
-        colors: ["#e2a03f", "#e7515a", "#1B55E2", "#00ab55"],
+        colors: ["#1f46b3"],
         plotOptions: {
-          bar: { borderRadius: 6, columnWidth: "48%", distributed: true },
+          bar: { borderRadius: 12, columnWidth: "48%", distributed: true },
         },
         xaxis: {
           categories: src.map((d: any) => d.urgency),
-          labels: { style: { fontSize: "11px" } },
+          title: { text: "Urgency", style: { fontSize: "11px" } },
+          labels: {
+            formatter: (value: string) => wrapChartLabel(value),
+            style: { fontSize: "11px" },
+          },
         },
         yaxis: {
           title: { text: "Jobs", style: { fontSize: "11px" } },
@@ -3324,9 +3395,16 @@ const Dashboard = () => {
         },
         xaxis: {
           categories: src.map((d: any) => `#${d.job_id} ${d.job_role}`),
-          labels: { style: { fontSize: "11px" } },
+          title: { text: "Days Remaining", style: { fontSize: "11px" } },
+          labels: {
+            formatter: (value: string) => wrapChartLabel(value),
+            style: { fontSize: "11px" },
+          },
         },
-        yaxis: { labels: { style: { fontSize: "10px" }, maxWidth: 150 } },
+        yaxis: {
+          title: { text: "Job Role", style: { fontSize: "11px" } },
+          labels: { style: { fontSize: "10px" }, maxWidth: 150 },
+        },
         grid: {
           borderColor: isDark ? "#191E3A" : "#E0E6ED",
           strokeDashArray: 4,
@@ -3362,7 +3440,7 @@ const Dashboard = () => {
           `Internal (${Math.round((internal / total) * 100)}%)`,
           `External (${Math.round((external / total) * 100)}%)`,
         ],
-        colors: isDark ? ["#818cf8", "#fbbf24"] : ["#4f46e5", "#d97706"],
+        colors: isDark ? ["#2d68b4", "#d97706"] : ["#3067ff", "#d97706"],
         dataLabels: {
           enabled: true,
           formatter: (_v: number, opts: any) =>
@@ -3402,7 +3480,7 @@ const Dashboard = () => {
           borderRadius: 4,
         },
       },
-      colors: ["#4361ee", "#2196f3", "#e2a03f", "#00ab55"],
+      colors: chartColors,
       dataLabels: {
         enabled: true,
         formatter: (v: number, opt: any) =>
@@ -3420,8 +3498,8 @@ const Dashboard = () => {
     const src = dashboard?.applications_by_department ?? [];
     return {
       series: [
-        { name: "Applicants", data: src.map((d: any) => d.applications) },
-        { name: "Selected", data: src.map((d: any) => d.selected) },
+        { name: "Applicants", type: "bar", data: src.map((d: any) => d.applications) },
+        { name: "Selected", type: "line", data: src.map((d: any) => d.selected) },
       ],
       options: {
         chart: {
@@ -3430,28 +3508,27 @@ const Dashboard = () => {
           toolbar: { show: false },
           zoom: { enabled: false },
         },
-        colors: isDark ? ["#818cf8", "#34d399"] : ["#4f46e5", "#059669"],
-        stroke: { curve: "smooth", width: 3 },
-        markers: { size: 4, hover: { size: 6 } },
+        colors: [isDark ? "#818cf8" : "#c7d7fa", isDark ? "#34d399" : "#007550"],
+        stroke: { width: [0, 3], curve: "smooth" },
+        plotOptions: { bar: { columnWidth: "55%", borderRadius: 12 } },
+        markers: { size: [0, 5], hover: { size: 7 } },
         xaxis: {
-          categories: src.map((d: any) => d.department_name?.trim()),
+          categories: src.map((d: any) => d.department_name),
+          title: { text: "Department", style: { fontSize: "11px" } },
           labels: {
+            formatter: (value: string) => wrapChartLabel(value),
             style: { fontSize: "10px", colors: isDark ? "#94a3b8" : "#374151" },
-            rotate: -30,
-            trim: true,
-            maxHeight: 80,
+            rotate: 0,
+            trim: false,
+            hideOverlappingLabels: false,
+            maxHeight: 120,
           },
         },
         yaxis: {
           title: { text: "Count", style: { fontSize: "11px" } },
-          labels: {
-            style: { fontSize: "11px", colors: isDark ? "#94a3b8" : "#374151" },
-          },
+          labels: { style: { fontSize: "11px", colors: isDark ? "#94a3b8" : "#374151" } },
         },
-        grid: {
-          borderColor: isDark ? "#1e293b" : "#E0E6ED",
-          strokeDashArray: 4,
-        },
+        grid: { borderColor: isDark ? "#1e293b" : "#E0E6ED", strokeDashArray: 4 },
         legend: {
           position: "top",
           horizontalAlign: "right",
@@ -3479,14 +3556,19 @@ const Dashboard = () => {
           toolbar: { show: false },
           zoom: { enabled: false },
         },
-        colors: isDark ? ["#fbbf24", "#f87171"] : ["#d97706", "#dc2626"],
+        colors: chartColors,
         stroke: { curve: "smooth", width: 2.5 },
         markers: { size: 4, hover: { size: 6 } },
         xaxis: {
           categories: src.map((d: any) => d.college_name?.trim()),
+          title: { text: "College", style: { fontSize: "11px" } },
           labels: {
+            formatter: (value: string) => wrapChartLabel(value),
             style: { fontSize: "11px", colors: isDark ? "#94a3b8" : "#374151" },
-            rotate: -20,
+            rotate: 0,
+            trim: false,
+            hideOverlappingLabels: false,
+            maxHeight: 120,
           },
         },
         yaxis: {
@@ -3535,13 +3617,24 @@ const getFilledVsOpeningsChart = () => {
     options: {
       chart: {
         type: "bar",
-        height: 320,
+        height: 350,
         toolbar: {
           show: false,
         },
         zoom: {
           enabled: false,
         },
+      },
+
+      // Very light gradient
+      fill: {
+          type: "gradient",
+          gradient: {
+  shadeIntensity: 0.1,
+  opacityFrom: 0.15,
+  opacityTo: 0.35,
+  stops: [0, 100],
+},
       },
 
       plotOptions: {
@@ -3552,21 +3645,19 @@ const getFilledVsOpeningsChart = () => {
         },
       },
 
-      // Hide values displayed on the bars
       dataLabels: {
         enabled: false,
       },
 
       colors: isDark
         ? ["#818cf8", "#fbbf24", "#34d399"]
-        : ["#4f46e5", "#d97706", "#059669"],
+        : ["#1f46b3", "#d97706", "#007550"],
 
       xaxis: {
         categories: src.map(
-          (d: any) => d.department_name?.trim()
+          (d: any) => d.department_name
         ),
 
-        // Count only on X-axis
         title: {
           text: "Count",
           style: {
@@ -3576,7 +3667,7 @@ const getFilledVsOpeningsChart = () => {
         },
 
         labels: {
-          show: true,
+          formatter: (value: string) => wrapChartLabel(value),
           style: {
             fontSize: "11px",
             colors: isDark ? "#94a3b8" : "#374151",
@@ -3595,7 +3686,6 @@ const getFilledVsOpeningsChart = () => {
       },
 
       yaxis: {
-        // Department names only
         labels: {
           show: true,
           style: {
@@ -3605,7 +3695,11 @@ const getFilledVsOpeningsChart = () => {
         },
 
         title: {
-          text: undefined,
+          text: "Department",
+          style: {
+            fontSize: "11px",
+            color: isDark ? "#94a3b8" : "#374151",
+          },
         },
 
         axisBorder: {
@@ -3619,9 +3713,9 @@ const getFilledVsOpeningsChart = () => {
 
       grid: {
         borderColor: isDark ? "#1e293b" : "#E0E6ED",
-        strokeDashArray: 4,
+        strokeDashArray: 0.2,
+        strokeWidth: 0.5,
 
-        // Prevent grid/labels from appearing on opposite side
         xaxis: {
           lines: {
             show: true,
@@ -3656,78 +3750,31 @@ const getFilledVsOpeningsChart = () => {
   };
 };
 
-  // Selection Rate Trend — line chart with markers + reference line at avg
+  // Selection Rate Trend — bars for applications/selected + line for rate on secondary axis
   const getSelectionRateChart = () => {
     const src = dashboard?.selection_rate_trend ?? [];
-    const rates = src.map((d: any) => d.selection_rate ?? 0);
-    const avg = rates.length
-      ? Math.round(
-          rates.reduce((a: number, b: number) => a + b, 0) / rates.length,
-        )
-      : 0;
     return {
-      series: [{ name: "Selection Rate", data: rates }],
+      series: [{ name: 'Selection Rate (%)', data: src.map((d) => d.selection_rate ?? 0) }],
       options: {
-        chart: {
-          type: "line",
-          height: 320,
-          toolbar: { show: false },
-          zoom: { enabled: false },
-        },
-        stroke: { curve: "smooth", width: 3 },
-        colors: ["#d143ee"],
+        chart: { type: 'area', height: 320, toolbar: { show: false }, zoom: { enabled: false } },
+        stroke: { curve: 'smooth', width: 3 },
+        colors: ['#1f46b3'],
+        fill: { type: 'gradient', gradient: { shadeIntensity: 1,  stops: [0, 100] } },
         xaxis: {
-          categories: src.map((d: any) => d.month),
-          labels: { style: { fontSize: "12px" } },
-          title: {
-            text: "Month",
-            style: { fontSize: "12px", fontWeight: 500 },
-          },
-        },
-        yaxis: {
-          title: {
-            text: "Selection Rate (%)",
-            style: { fontSize: "12px", fontWeight: 500 },
-          },
+          categories: src.map((d) => d.month),
           labels: {
-            style: { fontSize: "12px" },
-            formatter: (v: number) => `${v}%`,
+            formatter: (value: string) => wrapChartLabel(value),
+            style: { fontSize: '11px' },
           },
-          min: 0,
-          max: Math.max(50, Math.ceil(Math.max(...rates, 0) / 10) * 10),
+          title: { text: 'Month', style: { fontSize: '11px' } },
         },
-        grid: {
-          borderColor: isDark ? "#191E3A" : "#E0E6ED",
-          strokeDashArray: 5,
-        },
-        markers: {
-          size: 6,
-          colors: ["#d143ee"],
-          strokeColors: "#fff",
-          strokeWidth: 2,
-          hover: { size: 8 },
-        },
-        annotations: {
-          yaxis: [
-            {
-              y: avg,
-              borderColor: "#e2a03f",
-              borderWidth: 2,
-              strokeDashArray: 6,
-              label: {
-                text: `Avg ${avg}%`,
-                style: {
-                  color: "#fff",
-                  background: "#e2a03f",
-                  fontSize: "11px",
-                },
-                position: "right",
-              },
-            },
-          ],
-        },
-        tooltip: { y: { formatter: (v: number) => `${v}%` } },
+        yaxis: { title: { text: 'Selection Rate (%)', style: { fontSize: '11px' } }, labels: { style: { fontSize: '11px' }, formatter: (v) => v + '%' }, min: 0 },
+        grid: { borderColor: isDark ? '#191E3A' : '#E0E6ED', strokeDashArray: 5 },
+        markers: { size: 5, colors: ['#007550'], strokeColors: '#fff', strokeWidth: 2, hover: { size: 7 } },
+        tooltip: { y: { formatter: (v) => v + '%' } },
         legend: { show: false },
+        dataLabels: { enabled: false },
+        noData: { text: 'No data available' },
       },
     };
   };
@@ -3751,7 +3798,7 @@ const getFilledVsOpeningsChart = () => {
       options: {
         chart: { type: "line", height: 320, toolbar: { show: false } },
         stroke: { curve: "smooth", width: [3, 2] },
-        colors: ["#e7515a", "#1B55E2"],
+        colors: ["#007550", "#1f46b3"],
         fill: {
           type: ["solid", "gradient"],
           gradient: {
@@ -3763,7 +3810,10 @@ const getFilledVsOpeningsChart = () => {
         },
         xaxis: {
           categories: src.map((d: any) => d.month),
-          labels: { style: { fontSize: "12px" } },
+          labels: {
+            formatter: (value: string) => wrapChartLabel(value),
+            style: { fontSize: "12px" },
+          },
           title: {
             text: "Month",
             style: { fontSize: "12px", fontWeight: 500 },
@@ -3898,7 +3948,7 @@ const getFilledVsOpeningsChart = () => {
 
   const chartColors = isDark
     ? ["#818cf8", "#34d399", "#fbbf24", "#f87171", "#c084fc", "#22d3ee"]
-    : ["#4f46e5", "#059669", "#d97706", "#dc2626", "#9333ea", "#0891b2"];
+    : ["#1f46b3",  "#007550", "#d97706", "#dc2626", "#9333ea", "#0891b2", "#4f46e5", "#b20865", "#b20808"];
 
   const darkChartTheme = isDark
     ? {
@@ -3910,12 +3960,12 @@ const getFilledVsOpeningsChart = () => {
   /* ---------------- STAT CARDS ---------------- */
 
   const filterLables = [
-    { label: "Last 1 Year", value: "1y" },
-    { label: "6 Months", value: "6m" },
-    { label: "Last 3 Months", value: "3m" },
-    { label: "Last Month", value: "Lm" },
-    { label: "1 Month", value: "1m" },
     { label: "Last 7 Days", value: "7d" },
+    { label: "1 Month", value: "1m" },
+    { label: "Last Month", value: "last_month" },
+    { label: "Last 3 Months", value: "3m" },
+    { label: "6 Months", value: "6m" },
+    { label: "1 Year", value: "1y" },
   ];
 
   const callListByRole = (
@@ -4458,7 +4508,7 @@ const getFilledVsOpeningsChart = () => {
             </span>
           )}
 
-          {(activePeriod || fromDate || toDate) && (
+          {(activePeriod !== "6m" || fromDate || toDate) && (
             <button
               onClick={() => {
                 setFromDate(null);
@@ -4475,7 +4525,7 @@ const getFilledVsOpeningsChart = () => {
 
        {/* College filter above stat cards — only for roles with college list */}
       {state.collegeList?.length > 0 && (
-        <div className="mb-3 w-56">
+        <div className="mb-5 w-56">
           <CustomSelect
             options={state.collegeList}
             value={state.dashboardCollegeFilter}
@@ -4486,7 +4536,7 @@ const getFilledVsOpeningsChart = () => {
                 : fromDate && toDate
                 ? { from: moment(fromDate).format("YYYY-MM-DD"), to: moment(toDate).format("YYYY-MM-DD") }
                 : { period: activePeriod };
-              fetchDashboard(params, state.profile);
+              fetchDashboard(params, state.profile, e?.value ?? null);
             }}
             placeholder="Filter by College"
             isClearable
@@ -4495,17 +4545,30 @@ const getFilledVsOpeningsChart = () => {
       )}
 
       {/* Stat Cards */}
-      <div className="tour-stat-cards mb-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7">
+      <div className="tour-stat-cards mb-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7">
         {state.cards?.map((card) => {
           const isActive = state.activeCard === card.id && CARD_FETCH_MAP[card.id] && state.activeCard !== null;
           return (
             <div
               key={card.label}
-              className={`cursor-pointer rounded-xl p-3 transition-all duration-200 ${
-                isActive
-                  ? `scale-[1.02] shadow-lg ring-2 ring-offset-1 ${card.mainbg} ring-current`
-                  : `${card.mainbg} hover:scale-[1.01] hover:shadow-md`
+              className={`cursor-pointer rounded-xl p-3 transition-all duration-200 ${card.mainbg} ${
+                isActive ? "ring-2 ring-offset-1 scale-[1] shadow-lg" : "shadow-md hover:shadow-md"
               }`}
+              style={
+                isActive
+                  ? { "--tw-ring-color": card.accentColor } as React.CSSProperties
+                  : { border: "1px solid #aebdf1" }
+              }
+              onMouseEnter={(e) => {
+                if (!isActive) {
+                  (e.currentTarget as HTMLDivElement).style.border = `1px solid ${card.accentColor}`;
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) {
+                  (e.currentTarget as HTMLDivElement).style.border = "1px solid #aebdf1";
+                }
+              }}
               onClick={() => setState({ activeCard: state.activeCard === card.id ? null : card.id })}
             >
               <div className="flex items-start gap-2">
@@ -4516,11 +4579,11 @@ const getFilledVsOpeningsChart = () => {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div
-                    className={`text-xl font-bold leading-tight ${card.color}`}
+                    className={`text-xl font-bold leading-tight text-black`}
                   >
                     {card.value}
                   </div>
-                  <div className="truncate text-xs text-gray-500 dark:text-gray-400">
+                  <div className="truncate text-xs text-black" title={card.label}>
                     {card.label}
                   </div>
                   {/* {isActive && (
@@ -4535,9 +4598,9 @@ const getFilledVsOpeningsChart = () => {
 
       {/* Card-driven table */}
       {CARD_FETCH_MAP[state.activeCard] && (
-        <div className="mb-6">
+        <div className="panel shadow-md border-gray rounded-xl shadow-md border-gray rounded-xl mb-6 mt-5">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
+            <h2 className="text-lg font-semibold text-black dark:text-white">
               {CARD_TITLES[state.activeCard]}
             </h2>
             {/* <TextInput
@@ -4580,11 +4643,11 @@ const getFilledVsOpeningsChart = () => {
 
       {/* Row 1: Application Volume Trend (area) 2/3 + Experience Level Donut 1/3 */}
       <div className="mb-5 grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <div className="panel xl:col-span-2">
-          <h5 className="mb-0.5 !text-lg font-semibold text-gray-800 dark:text-white">
+        <div className="panel shadow-md border-gray rounded-xl xl:col-span-2">
+          <h5 className="mb-0.5 !text-lg font-semibold text-black dark:text-white">
             Application Volume Trend
           </h5>
-          {/* <p className="mb-3 text-xs text-gray-400">
+          {/* <p className="mb-3 text-xs text-black">
             Monthly applicants vs selected — x: month/year · y: count
           </p> */}
           {isMounted &&
@@ -4600,11 +4663,11 @@ const getFilledVsOpeningsChart = () => {
               );
             })()}
         </div>
-        <div className="panel xl:col-span-1">
-          <h5 className="mb-0.5 !text-lg font-semibold text-gray-800 dark:text-white">
+        <div className="panel shadow-md border-gray rounded-xl xl:col-span-1">
+          <h5 className="mb-0.5 !text-lg font-semibold text-black dark:text-white">
             Applications by Experience Level
           </h5>
-          {/* <p className="mb-3 text-xs text-gray-400">
+          {/* <p className="mb-3 text-xs text-black">
             Donut — share per experience band
           </p> */}
           {isMounted &&
@@ -4622,53 +4685,318 @@ const getFilledVsOpeningsChart = () => {
         </div>
       </div>
 
-      {/* Row 2: Urgency (1/4) + Source Pie (1/4) + Funnel (2/4) */}
-      <div className="mb-5 grid grid-cols-1 gap-3 xl:grid-cols-3">
-        <div className="panel xl:col-span-1">
-          <h5 className="mb-5 !text-lg font-semibold text-gray-800 dark:text-white">
-            Job Postings by Urgency
+       <div className="mb-5 grid grid-cols-1">
+        <div className="panel shadow-md border-gray rounded-xl col-span-1">
+          <h5 className="mb-0.5 !text-lg font-semibold text-black dark:text-white">
+            Applications by Department
           </h5>
-          {/* <p className="mb-3 text-xs text-gray-400">
-            x: deadline range · y: job count
+          {/* <p className="mb-3 text-xs text-black">
+            Horizontal bar — department · applicants vs selected
           </p> */}
           {isMounted &&
             (() => {
-              const c = getUrgencyBarChart();
+              const c = getDepartmentBarChart();
               return (
                 <ReactApexChart
                   series={c.series}
                   options={c.options as any}
                   type="bar"
-                  height={300}
+                  height={360}
                 />
               );
             })()}
         </div>
-        <div className="panel xl:col-span-1">
-          <h5 className="mb-5 !text-lg font-semibold text-gray-800 dark:text-white">
+      </div>
+   
+
+
+
+      
+
+      {/* Row 4: Full Overview Trend + Interviews & Decisions stacked */}
+      {/* <div className="mb-5 grid grid-cols-1 gap-4 xl:grid-cols-3">
+        <div className="panel shadow-md border-gray rounded-xl xl:col-span-2">
+          <h5 className="mb-0.5 !text-lg font-semibold text-black dark:text-white">Jobs, Applications & Registrations Overview</h5>
+          <p className="mb-3 text-xs text-black">Full trend across all key metrics</p>
+          {isMounted && <ReactApexChart series={trendChart.series} options={trendChart.options} type="area" height={270} />}
+        </div>
+        <div className="panel shadow-md border-gray rounded-xl xl:col-span-1 flex flex-col gap-3">
+          <div>
+            <h5 className="mb-0.5 !text-lg font-semibold text-black dark:text-white">Interviews Scheduled</h5>
+            <p className="mb-1 text-xs text-black">Monthly interview volume</p>
+            {isMounted && <ReactApexChart series={interviewChart.series} options={{ ...interviewChart.options, chart: { ...interviewChart.options.chart, height: 120 }, xaxis: { labels: { style: { fontSize: "10px" } } } }} type="bar" height={120} />}
+          </div>
+          <div className="border-t border-gray-100 pt-2 dark:border-gray-700">
+            <h5 className="mb-0.5 !text-lg font-semibold text-black dark:text-white">Decisions</h5>
+            <p className="mb-1 text-xs text-black">Selected vs Rejected over time</p>
+            {isMounted && <ReactApexChart series={decisionChart.series} options={{ ...decisionChart.options, chart: { ...decisionChart.options.chart, height: 120 }, xaxis: { labels: { style: { fontSize: "10px" } } } }} type="bar" height={120} />}
+          </div>
+        </div>
+      </div> */}
+
+      {/* Row 5: + Selection Rate (2/5) */}
+      <div className="mb-5 grid grid-cols-1 gap-5 xl:grid-cols-5">
+        
+        
+        <div className="panel shadow-md border-gray rounded-xl xl:col-span-3">
+          <h5 className="mb-4 !text-lg font-semibold text-black dark:text-white">
+            Stage Drop-off Analysis
+          </h5>
+          {(() => {
+            const d = dashboard?.stage_dropoff_analysis;
+            const applied = d?.applied ?? 0;
+            const interview = d?.interview ?? 0;
+            const selected = d?.selected ?? 0;
+            const waitlisted = d?.waitlisted ?? 0;
+            const joined = d?.joined ?? 0;
+            const a2i = d?.applied_to_interview ?? { moved: 0, not_moved: 0 };
+            const i2s = d?.interview_to_selected ?? { moved: 0, not_moved: 0 };
+            const i2w = d?.interview_to_waitlisted ?? { moved: 0, not_moved: 0 };
+            const s2j = d?.selected_to_joined ?? { moved: 0, not_moved: 0 };
+
+            const StageCard = ({ label, value, icon, borderColor, bgColor, iconBg, valueColor, moved, dropped }: {
+              label: string; value: number; icon: React.ReactNode;
+              borderColor: string; bgColor: string; iconBg: string; valueColor: string;
+              moved?: number; dropped?: number;
+            }) => (
+              <div className="overflow-hidden rounded-2xl shadow-sm" style={{ border: `1.5px solid ${borderColor}`, minWidth: 180 }}>
+                <div className="flex items-center gap-3 px-4 py-3" style={{ backgroundColor: bgColor }}>
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: iconBg }}>
+                    {icon}
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold" style={{ color: valueColor }}>{value}</div>
+                    <div className="text-xs font-semibold text-gray-600 dark:text-gray-300">{label}</div>
+                  </div>
+                </div>
+                {(moved !== undefined || dropped !== undefined) && (
+                  <div className="grid grid-cols-2 divide-x border-t" style={{ borderColor, borderTopColor: borderColor }}>
+                    <div className="flex flex-col items-center py-2">
+                      <span className="text-lg font-bold text-[#128639]">{moved ?? 0}</span>
+                      <span className="text-[14px] text-black">Moved</span>
+                    </div>
+                    <div className="flex flex-col items-center py-2">
+                      <span className="text-lg font-bold text-[#dc2626]">{dropped ?? 0}</span>
+                      <span className="text-[14px] text-black">Dropped</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+
+            const DropCard = ({ count }: { count: number }) => (
+              <div className="flex flex-col items-center gap-1 rounded-2xl border-2 border-dashed border-[#dc2626] bg-red-50 px-4 py-3 dark:border-red-700 dark:bg-red-900/20" style={{ minWidth: 120 }}>
+                <div className="flex items-center gap-1.5">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#dc2626] text-white text-[8px] font-bold">✕</span>
+                  <span className="text-xl font-bold text-black">{count}</span>
+                </div>
+                <span className="text-xs text-black">Dropped off</span>
+              </div>
+            );
+
+            const MovedCard = () => (
+              <div className="flex flex-col items-center gap-1 rounded-2xl border-2 border-dashed border-green-300 bg-green-50 px-4 py-3 dark:border-green-700 dark:bg-green-900/20" style={{ minWidth: 120 }}>
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-green-500 text-white text-xs">✓</span>
+                <span className="text-[11px] text-black">Moved to next stage</span>
+              </div>
+            );
+
+            // Vertical connector with dot at bottom
+            const VConn = ({ color = "#a5b4fc" }: { color?: string }) => (
+              <div className="flex flex-col items-center" style={{ height: 32 }}>
+                <div className="flex-1 w-px" style={{ backgroundColor: color }} />
+                <div className="h-2.5 w-2.5 rounded-full border-2 bg-white dark:bg-gray-900" style={{ borderColor: color }} />
+              </div>
+            );
+
+            // Horizontal fork: draws a T-shape connecting two children
+            const HFork = ({ color = "#a5b4fc", leftPct = "25%", rightPct = "75%" }: { color?: string; leftPct?: string; rightPct?: string }) => (
+              <div className="relative w-full" style={{ height: 32 }}>
+                {/* vertical stem from top center */}
+                <div className="absolute top-0 left-1/2 w-px" style={{ height: "50%", backgroundColor: color, transform: "translateX(-50%)" }} />
+                {/* horizontal bar */}
+                <div className="absolute" style={{ top: "50%", left: leftPct, right: `calc(100% - ${rightPct})`, height: 1, backgroundColor: color }} />
+                {/* left drop */}
+                <div className="absolute" style={{ top: "50%", left: leftPct, width: 1, height: "50%", backgroundColor: color }} />
+                {/* right drop */}
+                <div className="absolute" style={{ top: "50%", left: rightPct, width: 1, height: "50%", backgroundColor: color, transform: "translateX(-1px)" }} />
+                {/* left dot */}
+                <div className="absolute" style={{ bottom: 0, left: leftPct, transform: "translate(-50%, 50%)", width: 10, height: 10, borderRadius: "50%", border: `2px solid ${color}`, backgroundColor: "white" }} />
+                {/* right dot */}
+                <div className="absolute" style={{ bottom: 0, left: rightPct, transform: "translate(-50%, 50%)", width: 10, height: 10, borderRadius: "50%", border: `2px solid ${color}`, backgroundColor: "white" }} />
+              </div>
+            );
+
+            // Small fork for leaf level (two children from one parent)
+            const LeafFork = ({ color = "#a5b4fc" }: { color?: string }) => (
+              <div className="relative w-full" style={{ height: 32 }}>
+                <div className="absolute top-0 left-1/2 w-px" style={{ height: "50%", backgroundColor: color, transform: "translateX(-50%)" }} />
+                <div className="absolute" style={{ top: "50%", left: "20%", right: "20%", height: 1, backgroundColor: color }} />
+                <div className="absolute" style={{ top: "50%", left: "20%", width: 1, height: "50%", backgroundColor: color }} />
+                <div className="absolute" style={{ top: "50%", right: "20%", width: 1, height: "50%", backgroundColor: color }} />
+                <div className="absolute" style={{ bottom: 0, left: "20%", transform: "translate(-50%, 50%)", width: 10, height: 10, borderRadius: "50%", border: `2px solid ${color}`, backgroundColor: "white" }} />
+                <div className="absolute" style={{ bottom: 0, right: "20%", transform: "translate(50%, 50%)", width: 10, height: 10, borderRadius: "50%", border: `2px solid ${color}`, backgroundColor: "white" }} />
+              </div>
+            );
+
+            return (
+              <div className="w-full overflow-x-auto">
+                <div className="flex min-w-[520px] flex-col items-center pb-6">
+
+                  {/* ── Applied ── */}
+                  <StageCard label="Applied" value={applied}
+                    borderColor="#537bd7" bgColor={isDark ? "#1e3a5f22" : "#dfe9ff"} iconBg="#fff" valueColor="#000"
+                    icon={<IconUsers className="h-5 w-5 text-black" />}
+                    moved={a2i.moved} dropped={a2i.not_moved}
+                  />
+                  <VConn color="#acabab" />
+
+                  {/* ── Interview ── */}
+                  <StageCard label="Interview" value={interview}
+                    borderColor="#ffa339" bgColor={isDark ? "#3d2e0022" : "#ffe2c0"} iconBg="#fff" valueColor="#000"
+                    icon={<IconUsers className="h-5 w-5 text-black" />}
+                    moved={i2s.moved + i2w.moved} dropped={i2s.not_moved + i2w.not_moved}
+                  />
+
+                  {/* ── Fork: Interview → Selected + Waitlisted ── */}
+                  <HFork color="#acabab" leftPct="25%" rightPct="75%" />
+
+                  {/* ── Selected + Waitlisted row ── */}
+                  <div className="flex w-full items-start justify-around gap-4 px-2">
+
+                    {/* LEFT: Selected branch */}
+                    <div className="flex flex-1 flex-col items-center">
+                      <StageCard label="Selected" value={selected}
+                        borderColor="#128639" bgColor={isDark ? "#06402022" : "#f0fdf4"} iconBg="#fff" valueColor="#000"
+                        icon={<IconUsers className="h-5 w-5 text-black" />}
+                        moved={s2j.moved} dropped={s2j.not_moved}
+                      />
+                      {/* Only show children if selected > 0 */}
+                      {selected > 0 && (
+                        <>
+                          <LeafFork color="#acabab" />
+                          <div className="flex w-full justify-around gap-2 px-2">
+                            <StageCard label="Joined" value={joined}
+                              borderColor="#128639" bgColor={isDark ? "#06402022" : "#f0fdf4"} iconBg="#fff" valueColor="#000"
+                              icon={<IconUsers className="h-5 w-5 text-black" />}
+                              moved={s2j.moved}
+                            />
+                            <DropCard count={s2j.not_moved} />
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    {/* RIGHT: Waitlisted branch */}
+                    <div className="flex flex-1 flex-col items-center">
+                      <StageCard label="Waitlisted" value={waitlisted}
+                        borderColor="#537bd7" bgColor={isDark ? "#2e1a5522" : "#dfe9ff"} iconBg="#fff" valueColor="#000"
+                        icon={<IconUsers className="h-5 w-5 text-black" />}
+                        moved={i2w.moved} dropped={i2w.not_moved}
+                      />
+                      {/* Only show children if waitlisted > 0 */}
+                      {waitlisted > 0 && (
+                        <>
+                          <LeafFork color="#acabab" />
+                          <div className="flex w-full justify-around gap-2 px-2">
+                            <MovedCard />
+                            <DropCard count={i2w.not_moved} />
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Legend */}
+                  <div className="mt-10 flex items-center gap-6 text-[12px] text-black">
+                    <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-[#128639]" /> Moved to next stage</span>
+                    <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-[#dc2626]" /> Dropped off</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+
+
+        <div className=" xl:col-span-2 flex flex-col space-y-5">
+          <div className="panel shadow-md border-gray rounded-xl">
+          <h5 className="mb-5 !text-lg font-semibold text-black dark:text-white">
             Applications by Source
           </h5>
-          {/* <p className="mb-3 text-xs text-gray-400">
+          {/* <p className="mb-3 text-xs text-black">
             Internal vs External applicants
           </p> */}
-          {isMounted &&
-            (() => {
-              const c = getApplyTypePieChart();
-              return (
-                <ReactApexChart
-                  series={c.series}
-                  options={c.options as any}
-                  type="pie"
-                  height={300}
-                />
-              );
-            })()}
+          {(() => {
+            const src = dashboard?.applications_by_source ?? [];
+            const internal = src.find((d: any) => d.source === "internal")?.applications ?? 0;
+            const external = src.find((d: any) => d.source === "external")?.applications ?? 0;
+            const total = internal + external || 1;
+            const internalPct = Math.round((internal / total) * 100);
+            const externalPct = 100 - internalPct;
+            const r = 54;
+            const circ = 2 * Math.PI * r;
+            const internalDash = (internalPct / 100) * circ;
+            const externalDash = (externalPct / 100) * circ;
+            return (
+              <div className="flex flex-col items-center gap-6 py-2">
+                {/* Donut */}
+                <div className="relative flex items-center justify-center">
+                  <svg width="200" height="150" viewBox="0 0 140 140">
+                    {/* bg track */}
+                    <circle cx="70" cy="70" r={r} fill="none" stroke={isDark ? "#1e293b" : "#f1f5f9"} strokeWidth="18" />
+                    {/* external arc (amber) — drawn first, full circle offset */}
+                    <circle cx="70" cy="70" r={r} fill="none" stroke="#ffa339" strokeWidth="18"
+                      strokeDasharray={`${externalDash} ${circ - externalDash}`}
+                      strokeDashoffset={-(internalDash)}
+                      strokeLinecap="round"
+                      style={{ transform: "rotate(-90deg)", transformOrigin: "70px 70px" }}
+                    />
+                    {/* internal arc (blue) */}
+                    <circle cx="70" cy="70" r={r} fill="none" stroke="#1f46b3" strokeWidth="18"
+                      strokeDasharray={`${internalDash} ${circ - internalDash}`}
+                      strokeDashoffset={0}
+                      strokeLinecap="round"
+                      style={{ transform: "rotate(-90deg)", transformOrigin: "70px 70px" }}
+                    />
+                  </svg>
+                  <div className="absolute flex flex-col items-center">
+                    <span className="text-2xl font-bold text-gray-800 dark:text-white">{total}</span>
+                    <span className="text-[10px] text-black">Total</span>
+                  </div>
+                </div>
+                {/* Stat rows */}
+                <div className="w-full space-y-3">
+                  <div className="flex items-center justify-between rounded-xl bg-[#dfe9ff] px-4 py-3 dark:bg-blue-900/20">
+                    <div className="flex items-center gap-2">
+                      <span className="h-3 w-3 rounded-full bg-[#1f46b3]" />
+                      <span className="text-md font-medium text-black dark:text-gray-300">Internal</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl font-bold text-black">{internal}</span>
+                      {/* <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-semibold text-blue-700 dark:bg-blue-800 dark:text-blue-200">{internalPct}%</span> */}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between rounded-xl bg-[#ffe2c0] px-4 py-3 dark:bg-amber-900/20">
+                    <div className="flex items-center gap-2">
+                      <span className="h-3 w-3 rounded-full bg-[#ffa339]" />
+                      <span className="text-md font-medium text-black dark:text-gray-300">External</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl font-bold text-black">{external}</span>
+                      {/* <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700 dark:bg-amber-800 dark:text-amber-200">{externalPct}%</span> */}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </div>
-        <div className="panel xl:col-span-1">
-          <h5 className="mb-3 !text-lg font-semibold text-gray-800 dark:text-white">
+        <div className="panel shadow-md border-gray rounded-xl">
+          <h5 className="mb-3 !text-lg font-semibold text-black dark:text-white">
             Application Funnel
           </h5>
-          {/* <p className="mb-3 text-xs text-gray-400">
+          {/* <p className="mb-3 text-xs text-black">
             Stage-wise conversion pipeline
           </p> */}
           {isMounted &&
@@ -4681,13 +5009,13 @@ const getFilledVsOpeningsChart = () => {
                         acc.push({
                           name: "Selected",
                           value: f.selected,
-                          fill: "#00ab55",
+                          fill: "#007550",
                         });
                       if (f.rejected !== undefined)
                         acc.push({
                           name: "Rejected",
                           value: f.rejected,
-                          fill: "#e7515a",
+                          fill: "#dc2626",
                         });
                     } else {
                       acc.push({
@@ -4713,80 +5041,16 @@ const getFilledVsOpeningsChart = () => {
               );
             })()}
         </div>
-      </div>
-
-      {/* Row 3: Applications by Department (horizontal bar, 3/5) + Applications by College (line, 2/5) */}
-      <div className="mb-5 grid grid-cols-1 gap-4 xl:grid-cols-5">
-        <div className="panel xl:col-span-3">
-          <h5 className="mb-0.5 !text-lg font-semibold text-gray-800 dark:text-white">
-            Applications by Department
-          </h5>
-          {/* <p className="mb-3 text-xs text-gray-400">
-            Horizontal bar — department · applicants vs selected
-          </p> */}
-          {isMounted &&
-            (() => {
-              const c = getDepartmentBarChart();
-              return (
-                <ReactApexChart
-                  series={c.series}
-                  options={c.options as any}
-                  type="line"
-                  height={360}
-                />
-              );
-            })()}
-        </div>
-        <div className="panel xl:col-span-2">
-          <h5 className="mb-0.5 !text-lg font-semibold text-gray-800 dark:text-white">
-            Applications by College
-          </h5>
-          {/* <p className="mb-3 text-xs text-gray-400">
-            Line — college · applicants vs selected trend
-          </p> */}
-          {isMounted &&
-            (() => {
-              const c = getCollegeBarChart();
-              return (
-                <ReactApexChart
-                  series={c.series}
-                  options={c.options as any}
-                  type="line"
-                  height={360}
-                />
-              );
-            })()}
         </div>
       </div>
 
-      {/* Row 4: Full Overview Trend + Interviews & Decisions stacked */}
-      {/* <div className="mb-5 grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <div className="panel xl:col-span-2">
-          <h5 className="mb-0.5 !text-lg font-semibold text-gray-800 dark:text-white">Jobs, Applications & Registrations Overview</h5>
-          <p className="mb-3 text-xs text-gray-400">Full trend across all key metrics</p>
-          {isMounted && <ReactApexChart series={trendChart.series} options={trendChart.options} type="area" height={270} />}
-        </div>
-        <div className="panel xl:col-span-1 flex flex-col gap-3">
-          <div>
-            <h5 className="mb-0.5 !text-lg font-semibold text-gray-800 dark:text-white">Interviews Scheduled</h5>
-            <p className="mb-1 text-xs text-gray-400">Monthly interview volume</p>
-            {isMounted && <ReactApexChart series={interviewChart.series} options={{ ...interviewChart.options, chart: { ...interviewChart.options.chart, height: 120 }, xaxis: { labels: { style: { fontSize: "10px" } } } }} type="bar" height={120} />}
-          </div>
-          <div className="border-t border-gray-100 pt-2 dark:border-gray-700">
-            <h5 className="mb-0.5 !text-lg font-semibold text-gray-800 dark:text-white">Decisions</h5>
-            <p className="mb-1 text-xs text-gray-400">Selected vs Rejected over time</p>
-            {isMounted && <ReactApexChart series={decisionChart.series} options={{ ...decisionChart.options, chart: { ...decisionChart.options.chart, height: 120 }, xaxis: { labels: { style: { fontSize: "10px" } } } }} type="bar" height={120} />}
-          </div>
-        </div>
-      </div> */}
-
-      {/* Row 5: Positions Filled (3/5) + Selection Rate (2/5) */}
-      <div className="mb-5 grid grid-cols-1 gap-5 xl:grid-cols-5">
-        <div className="panel xl:col-span-3">
-          <h5 className="mb-0.5 !text-lg font-semibold text-gray-800 dark:text-white">
+              {/* Positions Filled (3/5) */}
+      <div className="mb-5 grid grid-cols-1">
+        <div className="panel shadow-md border-gray rounded-xl xl:col-span-3">
+          <h5 className="mb-0.5 !text-lg font-semibold text-black dark:text-white">
             Positions Filled vs Openings
           </h5>
-          {/* <p className="mb-4 text-xs text-gray-400">
+          {/* <p className="mb-4 text-xs text-black">
             Job postings, openings and positions filled per department
           </p> */}
           {isMounted &&
@@ -4804,36 +5068,59 @@ const getFilledVsOpeningsChart = () => {
               );
             })()}
         </div>
+      </div>
 
-        <div className="panel xl:col-span-2">
-          <h5 className="mb-0.5 !text-lg font-semibold text-gray-800 dark:text-white">
-            Selection Rate Trend
+      <div className="mb-5 grid grid-cols-1 gap-5 xl:grid-cols-6">
+        <div className="panel shadow-md border-gray rounded-xl xl:col-span-3">
+            <h5 className="mb-0.5 !text-lg font-semibold text-black dark:text-white">
+              Selection Rate Trend
+            </h5>
+            {/* <p className="mb-4 text-xs text-black">
+              Line chart — x: month · y: % selected · dashed line = average
+            </p> */}
+            {isMounted &&
+              (() => {
+                const c = getSelectionRateChart();
+                return (
+                  <ReactApexChart
+                    series={c.series}
+                    options={c.options as any}
+                    type="line"
+                    height={360}
+                  />
+                );
+              })()}
+        </div>
+        <div className="panel shadow-md border-gray rounded-xl xl:col-span-3">
+          <h5 className="mb-5 !text-lg font-semibold text-black dark:text-white">
+            Job Postings by Urgency
           </h5>
-          {/* <p className="mb-4 text-xs text-gray-400">
-            Line chart — x: month · y: % selected · dashed line = average
+          {/* <p className="mb-3 text-xs text-black">
+            x: deadline range · y: job count
           </p> */}
           {isMounted &&
             (() => {
-              const c = getSelectionRateChart();
+              const c = getUrgencyBarChart();
               return (
                 <ReactApexChart
                   series={c.series}
                   options={c.options as any}
-                  type="line"
-                  height={360}
+                  type="bar"
+                  height={300}
                 />
               );
             })()}
         </div>
       </div>
 
-      {/* Row 6: Immediate vs Regular (2/5) + Stage Drop-off (3/5) */}
-      <div className="mb-5 grid grid-cols-1 gap-5 xl:grid-cols-6">
-        <div className="panel xl:col-span-3">
-          <h5 className="mb-0.5 !text-lg font-semibold text-gray-800 dark:text-white">
+
+      {/* Row 3: Applications by Department (horizontal bar, 3/5) + Applications by College (line, 2/5) */}
+      <div className="mb-5 grid grid-cols-1 gap-4 xl:grid-cols-5">
+        <div className="panel shadow-md border-gray rounded-xl xl:col-span-3">
+          <h5 className="mb-0.5 !text-lg font-semibold text-black dark:text-white">
             Immediate vs Regular Hiring
           </h5>
-          {/* <p className="mb-4 text-xs text-gray-400">
+          {/* <p className="mb-4 text-xs text-black">
             Mixed chart — line (immediate) + area (regular) · x: month · y: job
             count
           </p> */}
@@ -4850,104 +5137,41 @@ const getFilledVsOpeningsChart = () => {
               );
             })()}
         </div>
-
-        <div className="panel xl:col-span-3">
-          <h5 className="mb-0.5 !text-lg font-semibold text-gray-800 dark:text-white">
-            Stage Drop-off Analysis
+        <div className="panel shadow-md border-gray rounded-xl xl:col-span-2">
+          <h5 className="mb-0.5 !text-lg font-semibold text-black dark:text-white">
+            Applications by College
           </h5>
-          {/* <p className="mb-4 text-xs text-gray-400">
-            Applied → Interview → Selected / Waitlisted → Joined
+          {/* <p className="mb-3 text-xs text-black">
+            Line — college · applicants vs selected trend
           </p> */}
-          {(() => {
-            const d = dashboard?.stage_dropoff_analysis;
-            const applied = d?.applied ?? 0;
-            const interview = d?.interview ?? 0;
-            const selected = d?.selected ?? 0;
-            const waitlisted = d?.waitlisted ?? 0;
-            const joined = d?.joined ?? 0;
-            const a2i = d?.applied_to_interview ?? { moved: 0, not_moved: 0 };
-            const i2s = d?.interview_to_selected ?? { moved: 0, not_moved: 0 };
-            const i2w = d?.interview_to_waitlisted ?? { moved: 0, not_moved: 0 };
-            const s2j = d?.selected_to_joined ?? { moved: 0, not_moved: 0 };
-
-            const StageBox = ({ label, value, bg, text }: any) => (
-              <div className={`flex flex-col items-center justify-center rounded-2xl border px-5 py-4 shadow-sm ${bg}`}>
-                <span className={`text-2xl font-bold ${text}`}>{value}</span>
-                <span className="mt-1 text-xs font-medium text-gray-500 dark:text-gray-400">{label}</span>
-              </div>
-            );
-
-            const Connector = ({ moved, dropped }: any) => (
-              <div className="flex flex-col items-center justify-center gap-1 px-1">
-                <div className="flex items-center gap-1">
-                  <span className="h-px w-6 bg-gray-300 dark:bg-gray-600" />
-                  <span className="rounded-full bg-green-100 px-1.5 py-0.5 text-[10px] font-semibold text-green-700">↑{moved}</span>
-                  <span className="h-px w-6 bg-gray-300 dark:bg-gray-600" />
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="h-px w-6 bg-gray-200 dark:bg-gray-700" />
-                  <span className="rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-semibold text-red-600">↓{dropped}</span>
-                  <span className="h-px w-6 bg-gray-200 dark:bg-gray-700" />
-                </div>
-              </div>
-            );
-
-            return (
-              <div className="w-full">
-                <div className="flex flex-wrap gap-y-3">
-                  {/* Main pipeline row */}
-                  <div className="flex items-center">
-                    {/* Applied */}
-                    <StageBox label="Applied" value={applied} bg="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20" text="text-blue-600" />
-                    <Connector moved={a2i.moved} dropped={a2i.not_moved} />
-                    {/* Interview */}
-                    <StageBox label="Interview" value={interview} bg="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20" text="text-amber-600" />
-
-                    {/* Fork: two branches stacked */}
-                    <div className="relative mx-3 flex flex-col gap-3">
-                      {/* top fork line */}
-                      <div className="absolute left-0 top-[calc(25%-1px)] h-px w-3 bg-gray-300 dark:bg-gray-600" />
-                      <div className="absolute left-0 bottom-[calc(25%-1px)] h-px w-3 bg-gray-300 dark:bg-gray-600" />
-                      <div className="absolute left-0 top-[25%] h-[50%] w-px bg-gray-300 dark:bg-gray-600" />
-
-                      {/* Selected branch */}
-                      <div className="ml-3 flex items-center">
-                        <Connector moved={i2s.moved} dropped={i2s.not_moved} />
-                        <StageBox label="Selected" value={selected} bg="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20" text="text-green-600" />
-                        <Connector moved={s2j.moved} dropped={s2j.not_moved} />
-                        <StageBox label="Joined" value={joined} bg="border-teal-200 bg-teal-50 dark:border-teal-800 dark:bg-teal-900/20" text="text-teal-600" />
-                      </div>
-
-                      {/* Waitlisted branch */}
-                      <div className="ml-3 flex items-center">
-                        <Connector moved={i2w.moved} dropped={i2w.not_moved} />
-                        <StageBox label="Waitlisted" value={waitlisted} bg="border-purple-200 bg-purple-50 dark:border-purple-800 dark:bg-purple-900/20" text="text-purple-600" />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Legend */}
-                  <div className="mt-4 flex items-center gap-4 text-[11px] text-gray-400">
-                    <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full bg-green-400" /> Moved to next stage</span>
-                    <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full bg-red-400" /> Dropped off</span>
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
+          {isMounted &&
+            (() => {
+              const c = getCollegeBarChart();
+              return (
+                <ReactApexChart
+                  series={c.series}
+                  options={c.options as any}
+                  type="line"
+                  height={360}
+                />
+              );
+            })()}
         </div>
       </div>
 
+      
+
       {/* ── Bottom Tables Row ── */}
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-1 pb-6">
+     
         {/* Days to Fill Variance */}
-        <div className="mb-6">
+         {state.daysToFillVariance.length > 0 &&
+         <div className="panel shadow-md border-gray rounded-xl mb-5">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
+              <h2 className="text-lg font-semibold text-black dark:text-white">
                 Days to Fill Variance
               </h2>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-black">
                 Jobs where actual days to fill is within 10 days of target
               </p>
             </div>
@@ -4971,7 +5195,7 @@ const getFilledVsOpeningsChart = () => {
                 },
                 render: ({ department }) => {
                   if (!department || department?.length === 0) {
-                    return <span className="text-gray-400">-</span>;
+                    return <span className="text-black">-</span>;
                   }
 
                   const firstDept = department?.[0];
@@ -5066,7 +5290,7 @@ const getFilledVsOpeningsChart = () => {
                   wordBreak: "break-word",
                 },
                 render: ({ total_applications }) => (
-                  <span className="text-gray-600 dark:text-gray-400">
+                  <span className="text-gray-600 dark:text-black">
                     {total_applications}
                   </span>
                 ),
@@ -5162,12 +5386,12 @@ const getFilledVsOpeningsChart = () => {
               />
             </div>
           )}
-        </div>
+        </div> }
         
-        {/* <div className="mb-6">
+        <div className="panel shadow-md border-gray rounded-xl mb-5">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
+              <h2 className="text-lg font-semibold text-black dark:text-white">
                 Upcomming interviews
               </h2>
              
@@ -5182,112 +5406,41 @@ const getFilledVsOpeningsChart = () => {
             minHeight={160}
             columns={[
               { accessor: "job_role", title: "Job Role" },
-              {
-                accessor: "department_name",
-                title: "Dept",
-                sortable: true,
-                cellsStyle: {
-                  whiteSpace: "normal",
-                  wordBreak: "break-word",
-                },
-                render: ({ department }) => {
-                  if (!department || department?.length === 0) {
-                    return <span className="text-gray-400">-</span>;
-                  }
-
-                  const firstDept = department?.[0];
-                  const otherDept = department?.slice(1);
-                  const maxShow = 3;
-                  const remaining = otherDept?.length - maxShow;
-                  const visibleDept = otherDept?.slice(0, maxShow);
-                  const hiddenDept = otherDept?.slice(maxShow);
-
-                  return (
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span
-                        className="text-sm  text-gray-700 dark:text-gray-300"
-                        title={firstDept}
-                      >
-                        {firstDept}
-                      </span>
-
-                      <div className="flex items-center -space-x-2">
-                        {visibleDept?.map((dept: string, index: number) => (
-                          <div key={index} className="group relative">
-                            <div className="bg-dblue flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white text-xs  text-white dark:border-gray-900">
-                              {dept?.slice(0, 2)?.toUpperCase()}
-                            </div>
-
-                            <div
-                              className="absolute bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100"
-                              title={dept}
-                            >
-                              {dept}
-                            </div>
-                          </div>
-                        ))}
-                        {remaining > 0 && (
-                          <div className="group relative">
-                            <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-gray-400 text-xs  text-white dark:border-gray-900">
-                              +{remaining}
-                            </div>
-
-                            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
-                              {hiddenDept
-                                ?.map((d: string) => capitalizeFLetter(d))
-                                .join(", ")}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                },
-              },
+              { accessor: "candidate", title: "Candidate" },
+              { accessor: "department_name", title: "Department" },
+              
               { accessor: "college", title: "College" },
+              // {
+              //   accessor: "applied_date",
+              //   title: "Applied date",
+              //   // textAlignment: "right",
+              // },
               {
-                accessor: "days_to_fill",
-                title: "Days to fill",
-                textAlignment: "right",
-              },
+        accessor: "status",
+        title: "Status",
+        render: (r: any) => (
+          <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs text-purple-700">
+            {r.status}
+          </span>
+        ),
+      },
               {
-                accessor: "priority",
-                title: "Expiration period",
-                textAlignment: "right",
-              },
-              {
-                accessor: "variance",
-                title: "Variance",
-                textAlignment: "right",
+                accessor: "scheduled_date",
+                title: "Scheduled date",
                 render: (r: any) => (
-                  <span
-                    className={`font-medium ${
-                      r.variance < 0
-                        ? "text-green-600"
-                        : r.variance <= 7
-                        ? "text-amber-600"
-                        : "text-red-600"
-                    }`}
-                  >
-                    {r.variance > 0 ? `+${r.variance}` : r.variance}
-                  </span>
-                ),
+          <span className="text-xs">
+            {r.scheduled_date
+              ? moment(r.scheduled_date).format("DD MMM YYYY, hh:mm A")
+              : "-"}
+          </span>
+        ),
+                // textAlignment: "right",
               },
 
-              {
-                accessor: "total_applications",
-                title: "Applications",
-                sortable: true,
-                cellsStyle: {
-                  whiteSpace: "normal",
-                  wordBreak: "break-word",
-                },
-                render: ({ total_applications }) => (
-                  <span className="text-gray-600 dark:text-gray-400">
-                    {total_applications}
-                  </span>
-                ),
-              },
+
+           
+
+           
 
               {
                 accessor: "actions",
@@ -5295,42 +5448,13 @@ const getFilledVsOpeningsChart = () => {
                 render: (row: any) => (
                   <div className="flex items-center justify-center gap-3">
                     <button
-                      onClick={() =>
-                        router.push(`/faculty/job_details?id=${row.id}`)
-                      }
+                       onClick={() => router.push(`/faculty/application_detail?id=${row.applications_id}`)}
                       className="flex  items-center justify-center rounded-lg  text-indigo-600 "
                       title="View"
                     >
                       <IconEye className="h-4 w-4" />
                     </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-
-                        handleApprove(row);
-                        // }
-                      }}
-                      className={`flex items-center justify-center rounded-lg ${
-                        row?.job_status === "published"
-                          ? "text-red-600 "
-                          : " text-green-600 "
-                      }`}
-                      title={"Job Status"}
-                    >
-                      <CheckCircle className="h-4 w-4" />
-                    </button>
-                    
-
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        router.push(`/faculty/updatejob?id=${row.id}`);
-                      }}
-                      className="flex  items-center justify-center rounded-lg text-blue-600 "
-                      title="Edit"
-                    >
-                      <IconEdit className="h-4 w-4" />
-                    </button>
+                  
 
                    
                   </div>
@@ -5356,17 +5480,17 @@ const getFilledVsOpeningsChart = () => {
               />
             </div>
           )}
-        </div> */}
+        </div> 
      
 
         {/* Overdue Follow-ups */}
-        <div className="mb-6">
+        <div className="panel shadow-md border-gray rounded-xl mb-5">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
+              <h2 className="text-lg font-semibold text-black dark:text-white">
                 Overdue Follow-ups
               </h2>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-black">
                 Applications who need HR follow-up
               </p>
             </div>
@@ -5398,7 +5522,7 @@ const getFilledVsOpeningsChart = () => {
                 title: "Department",
                 render: ({ department_name }) => {
                   if (!department_name || department_name?.length === 0) {
-                    return <span className="text-gray-400">-</span>;
+                    return <span className="text-black">-</span>;
                   }
 
                   const firstDept = department_name?.[0];
@@ -5541,7 +5665,7 @@ const getFilledVsOpeningsChart = () => {
             </div>
           )}
         </div>
-      </div>
+     
 
       <Modal
         subTitle="Interview Rounds"
@@ -5558,7 +5682,7 @@ const getFilledVsOpeningsChart = () => {
                 <h3 className="text-lg font-semibold">
                   {state.application?.first_name} {state.application?.last_name}
                 </h3>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-black">
                   {state.application?.email} • {state.application?.phone}
                 </p>
               </div> */}
@@ -5577,7 +5701,7 @@ const getFilledVsOpeningsChart = () => {
                           <p className="font-semibold">
                             {capitalizeFLetter(round.round_name)}
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-black">
                             {formatScheduleDateTime(
                               round.scheduled_date,
                               round.scheduled_time,
@@ -5938,7 +6062,7 @@ const getFilledVsOpeningsChart = () => {
               case "summary":
                 return (
                   <div className="space-y-2">
-                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+                    <h3 className="text-lg font-semibold text-black dark:text-white">
                       Profile Summary
                     </h3>
                     <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
@@ -5965,8 +6089,8 @@ const getFilledVsOpeningsChart = () => {
                         </div>
                       ) : (
                         <div className="flex items-center gap-2 rounded-lg border border-gray-200 p-3 dark:border-gray-700">
-                          <FileText className="h-4 w-4 shrink-0 text-gray-400" />
-                          <span className="text-sm text-gray-400 dark:text-gray-500">
+                          <FileText className="h-4 w-4 shrink-0 text-black" />
+                          <span className="text-sm text-black dark:text-black">
                             No resume provided
                           </span>
                         </div>
@@ -5979,7 +6103,7 @@ const getFilledVsOpeningsChart = () => {
                       </div>
                     )}
                     <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
-                      <p className="mb-2 text-sm font-semibold   tracking-wide text-gray-500 dark:text-gray-400">
+                      <p className="mb-2 text-sm font-semibold   tracking-wide text-black dark:text-black">
                         Profile Summary
                       </p>
                       <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
@@ -6036,7 +6160,7 @@ const getFilledVsOpeningsChart = () => {
                           >
                             {item.icon}
                             <div className="space-y-1">
-                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                              <p className="text-xs text-black dark:text-black">
                                 {item.label}
                               </p>
                               <div className="h-3 w-28 animate-pulse rounded bg-gray-200 dark:bg-gray-600" />
@@ -6049,7 +6173,7 @@ const getFilledVsOpeningsChart = () => {
                           >
                             {item.icon}
                             <div>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                              <p className="text-xs text-black dark:text-black">
                                 {item.label}
                               </p>
                               <p className="text-sm font-medium text-gray-800 dark:text-white">
@@ -6066,7 +6190,7 @@ const getFilledVsOpeningsChart = () => {
               case "responsibility":
                 return (
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+                    <h3 className="text-lg font-semibold text-black dark:text-white">
                       Academic Responsibilities
                     </h3>
                     {u?.additional_academic_responsibilities?.length ? (
@@ -6083,7 +6207,7 @@ const getFilledVsOpeningsChart = () => {
                         )}
                       </div>
                     ) : (
-                      <p className="text-sm text-gray-400">
+                      <p className="text-sm text-black">
                         No academic responsibilities listed.
                       </p>
                     )}
@@ -6093,7 +6217,7 @@ const getFilledVsOpeningsChart = () => {
               case "experience":
                 return (
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+                    <h3 className="text-lg font-semibold text-black dark:text-white">
                       Experience
                     </h3>
                     {u?.experiences?.length ? (
@@ -6107,7 +6231,7 @@ const getFilledVsOpeningsChart = () => {
                               <p className="font-semibold text-gray-800 dark:text-white">
                                 {exp.designation}
                               </p>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                              <p className="text-sm text-gray-600 dark:text-black">
                                 {exp.company}
                               </p>
                             </div>
@@ -6117,7 +6241,7 @@ const getFilledVsOpeningsChart = () => {
                             </span>
                           )} */}
                           </div>
-                          <p className="mt-1 text-xs text-gray-500">
+                          <p className="mt-1 text-xs text-black">
                             {exp.start_date
                               ? moment(exp.start_date).format("MMM YYYY")
                               : ""}{" "}
@@ -6135,7 +6259,7 @@ const getFilledVsOpeningsChart = () => {
                         </div>
                       ))
                     ) : (
-                      <p className="text-sm text-gray-400">
+                      <p className="text-sm text-black">
                         No experience records.
                       </p>
                     )}
@@ -6145,7 +6269,7 @@ const getFilledVsOpeningsChart = () => {
               case "education":
                 return (
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+                    <h3 className="text-lg font-semibold text-black dark:text-white">
                       Education
                     </h3>
                     {u?.educations?.length ? (
@@ -6157,13 +6281,13 @@ const getFilledVsOpeningsChart = () => {
                           <p className="font-semibold text-gray-800 dark:text-white">
                             {edu.degree}
                           </p>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                          <p className="text-sm text-gray-600 dark:text-black">
                             {edu.field}
                           </p>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                          <p className="text-sm text-gray-600 dark:text-black">
                             {edu.institution}
                           </p>
-                          <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
+                          <div className="mt-1 flex items-center gap-3 text-xs text-black">
                             <span>
                               {edu.start_year} – {edu.end_year}
                             </span>
@@ -6176,7 +6300,7 @@ const getFilledVsOpeningsChart = () => {
                         </div>
                       ))
                     ) : (
-                      <p className="text-sm text-gray-400">
+                      <p className="text-sm text-black">
                         No education records.
                       </p>
                     )}
@@ -6186,7 +6310,7 @@ const getFilledVsOpeningsChart = () => {
               case "projects":
                 return (
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+                    <h3 className="text-lg font-semibold text-black dark:text-white">
                       Projects
                     </h3>
                     {u?.projects?.length ? (
@@ -6210,7 +6334,7 @@ const getFilledVsOpeningsChart = () => {
                             </span>
                           </div>
                           {proj.duration && (
-                            <p className="mt-0.5 text-xs text-gray-500">
+                            <p className="mt-0.5 text-xs text-black">
                               {proj.duration}
                             </p>
                           )}
@@ -6242,14 +6366,14 @@ const getFilledVsOpeningsChart = () => {
                             </a>
                           )}
                           {proj.funded && proj.funding_details && (
-                            <p className="mt-1 text-xs text-gray-500">
+                            <p className="mt-1 text-xs text-black">
                               Funded: {proj.funding_details}
                             </p>
                           )}
                         </div>
                       ))
                     ) : (
-                      <p className="text-sm text-gray-400">No projects.</p>
+                      <p className="text-sm text-black">No projects.</p>
                     )}
                   </div>
                 );
@@ -6257,7 +6381,7 @@ const getFilledVsOpeningsChart = () => {
               case "publications":
                 return (
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+                    <h3 className="text-lg font-semibold text-black dark:text-white">
                       Publications
                     </h3>
                     {u?.publications?.length ? (
@@ -6269,10 +6393,10 @@ const getFilledVsOpeningsChart = () => {
                           <p className="font-semibold text-gray-800 dark:text-white">
                             {pub.publication_title}
                           </p>
-                          <p className="mt-0.5 text-sm text-gray-600 dark:text-gray-400">
+                          <p className="mt-0.5 text-sm text-gray-600 dark:text-black">
                             {pub.publication_journal}
                           </p>
-                          <div className="mt-1 flex flex-wrap gap-2 text-xs text-gray-500">
+                          <div className="mt-1 flex flex-wrap gap-2 text-xs text-black">
                             {pub.publication_year && (
                               <span>Year: {pub.publication_year}</span>
                             )}
@@ -6291,7 +6415,7 @@ const getFilledVsOpeningsChart = () => {
                         </div>
                       ))
                     ) : (
-                      <p className="text-sm text-gray-400">No publications.</p>
+                      <p className="text-sm text-black">No publications.</p>
                     )}
                   </div>
                 );
@@ -6299,7 +6423,7 @@ const getFilledVsOpeningsChart = () => {
               case "skills":
                 return (
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+                    <h3 className="text-lg font-semibold text-black dark:text-white">
                       Skills
                     </h3>
                     {u?.skills?.length ? (
@@ -6314,7 +6438,7 @@ const getFilledVsOpeningsChart = () => {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-sm text-gray-400">No skills listed.</p>
+                      <p className="text-sm text-black">No skills listed.</p>
                     )}
                   </div>
                 );
@@ -6322,7 +6446,7 @@ const getFilledVsOpeningsChart = () => {
               case "achievements":
                 return (
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+                    <h3 className="text-lg font-semibold text-black dark:text-white">
                       Achievements
                     </h3>
                     {u?.achievements?.length ? (
@@ -6347,7 +6471,7 @@ const getFilledVsOpeningsChart = () => {
                               </a>
                             )}
                           </div>
-                          <p className="mt-0.5 text-sm text-gray-600 dark:text-gray-400">
+                          <p className="mt-0.5 text-sm text-gray-600 dark:text-black">
                             {ach.organization}
                           </p>
                           {ach.achievement_description && (
@@ -6358,7 +6482,7 @@ const getFilledVsOpeningsChart = () => {
                         </div>
                       ))
                     ) : (
-                      <p className="text-sm text-gray-400">No achievements.</p>
+                      <p className="text-sm text-black">No achievements.</p>
                     )}
                   </div>
                 );
@@ -6393,7 +6517,7 @@ const getFilledVsOpeningsChart = () => {
                         {u?.username || `${u?.first_name} ${u?.last_name}`}
                       </p>
                       {u?.email && (
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <p className="text-sm text-black dark:text-black">
                           {u.email}
                         </p>
                       )}
@@ -6419,7 +6543,7 @@ const getFilledVsOpeningsChart = () => {
                     className={`px-6 py-3 text-sm font-medium capitalize transition-colors ${
                       state.profileActiveTab === tab
                         ? "text-dblue border-b-2 border-blue-600"
-                        : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                        : "text-black hover:text-gray-700 dark:text-black dark:hover:text-gray-200"
                     }`}
                   >
                     {tab}
@@ -6441,7 +6565,7 @@ const getFilledVsOpeningsChart = () => {
                         className={`w-full px-4 py-2.5 text-left text-sm transition-colors ${
                           state.profileActiveSection === item.key
                             ? "bg-dblue font-semibold text-white"
-                            : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+                            : "text-gray-600 hover:bg-gray-100 dark:text-black dark:hover:bg-gray-700"
                         }`}
                       >
                         {item.label}
@@ -6456,7 +6580,7 @@ const getFilledVsOpeningsChart = () => {
                 </div>
               ) : (
                 <div className="p-6">
-                  <h3 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white">
+                  <h3 className="mb-4 text-lg font-semibold text-black dark:text-white">
                     Academic Qualifications
                   </h3>
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -6494,7 +6618,7 @@ const getFilledVsOpeningsChart = () => {
                           className={
                             u?.[q.key]
                               ? "text-green-600 dark:text-green-400"
-                              : "text-gray-400"
+                              : "text-black"
                           }
                         >
                           {q.icon}
@@ -6503,7 +6627,7 @@ const getFilledVsOpeningsChart = () => {
                           className={`text-center text-sm font-medium ${
                             u?.[q.key]
                               ? "text-green-700 dark:text-green-400"
-                              : "text-gray-500 dark:text-gray-400"
+                              : "text-black dark:text-black"
                           }`}
                         >
                           {q.label}
@@ -6512,7 +6636,7 @@ const getFilledVsOpeningsChart = () => {
                           className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
                             u?.[q.key]
                               ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-                              : "bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
+                              : "bg-gray-200 text-black dark:bg-gray-700 dark:text-black"
                           }`}
                         >
                           {u?.[q.key] ? "Yes" : "No"}
@@ -6540,7 +6664,7 @@ const getFilledVsOpeningsChart = () => {
           return (
             <div>
               {interesteds.length === 0 ? (
-                <p className="py-2 text-center text-sm text-gray-400">
+                <p className="py-2 text-center text-sm text-black">
                   No interest records found.
                 </p>
               ) : (
@@ -6554,7 +6678,7 @@ const getFilledVsOpeningsChart = () => {
                         <p className="font-medium text-gray-900 dark:text-white">
                           {item?.job?.job_title || "—"}
                         </p>
-                        <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                        <p className="mt-0.5 text-xs text-black dark:text-black">
                           {item?.created_at
                             ? moment(item.created_at).format(
                                 "DD MMM YYYY, hh:mm A",
