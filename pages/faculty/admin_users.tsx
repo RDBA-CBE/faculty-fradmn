@@ -155,6 +155,8 @@ const Users = () => {
     profileActiveSection: "summary",
     isOpenDeleteRequest: false,
     selectedDeleteRequest: null,
+    showHRRequestDetail: false,
+    selectedHRRequest: null,
   });
 
   const debounceSearch = useDebounce(state.search, 500);
@@ -330,6 +332,7 @@ const Users = () => {
               ? item?.institution
               : item?.institution?.name
             : item?.institution?.name,
+        created_at: item?.created_at,
 
         institutionData: state.hr_request
           ? item?.institution
@@ -1670,10 +1673,18 @@ const Users = () => {
         {
           accessor: "actions",
           title: "Actions",
+          textAlignment: "center",
           render: (row) => (
             <div className="flex items-center justify-center gap-3">
               {state.activeTab == ROLES.HR && state.hr_request ? (
                 <>
+                  <button
+                    onClick={() => setState({ showHRRequestDetail: true, selectedHRRequest: row })}
+                    className="flex items-center justify-center rounded-lg text-indigo-600 transition-all duration-200"
+                    title="View Details"
+                  >
+                    <IconEye className="h-4 w-4" />
+                  </button>
                   <button
                     onClick={() => handleEdit(row)}
                     className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200 "
@@ -3198,6 +3209,47 @@ const Users = () => {
                   </div>
                 </div>
               )}
+            </div>
+          );
+        }}
+      />
+
+      <Modal
+        subTitle="HR Request Details"
+        closeIcon
+        open={state.showHRRequestDetail}
+        close={() => setState({ showHRRequestDetail: false, selectedHRRequest: null })}
+        maxWidth="max-w-md"
+        renderComponent={() => {
+          const r = state.selectedHRRequest;
+          if (!r) return null;
+          const fields = [
+            { icon: <User className="h-4 w-4 text-indigo-500" />,   label: "Name",        val: r.username },
+            { icon: <Mail className="h-4 w-4 text-blue-500" />,     label: "Email",       val: r.email },
+            { icon: <Phone className="h-4 w-4 text-green-500" />,   label: "Phone",       val: r.phone },
+            { icon: <Building className="h-4 w-4 text-orange-500" />,label: "Institution", val: capitalizeFLetter(r.institution) },
+            { icon: <Building className="h-4 w-4 text-purple-500" />,label: "College",    val: Array.isArray(r.college) ? capitalizeFLetter(r.college.filter(Boolean).join(", ")) : capitalizeFLetter(r.college) },
+            { icon: <Clock className="h-4 w-4 text-gray-400" />,    label: "Requested On",val: r.created_at ? moment(r.created_at).format("DD MMM YYYY, hh:mm A") : "—" },
+          ];
+          return (
+            <div className="space-y-3 py-1">
+              {fields.map((f, i) => (
+                <div key={i} className="flex items-start gap-3 rounded-lg border border-gray-100 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-800/50">
+                  <div className="mt-0.5 shrink-0">{f.icon}</div>
+                  <div>
+                    <p className="text-xs text-gray-400">{f.label}</p>
+                    <p className="text-sm font-medium text-gray-800 dark:text-white">{f.val || "—"}</p>
+                  </div>
+                </div>
+              ))}
+              <div className="flex justify-end border-t border-gray-200 pt-4 dark:border-gray-700">
+                <button
+                  onClick={() => setState({ showHRRequestDetail: false, selectedHRRequest: null })}
+                  className="rounded-lg border border-gray-300 bg-white px-5 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           );
         }}

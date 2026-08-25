@@ -141,6 +141,27 @@ const Dashboard = () => {
     cardTableLoading: false,
     cardTablePage: 1,
     cardSearch: "",
+    showCardFilterModal: false,
+    cardApplicationStatus: null,
+    cardApplicationInstitution: null,
+    cardApplicationCollege: null,
+    cardApplicationDepartment: null,
+    cardJobStartDate: null,
+    cardJobEndDate: null,
+    cardJobLocation: null,
+    cardJobSalary: null,
+    cardJobStatus: null,
+    cardJobAcademicResponsibilities: [],
+    cardTalentPreferences: [],
+    cardTalentDepartment: null,
+    cardTalentExperience: null,
+    cardTalentAcademicResponsibilities: [],
+    cardPanelCollege: null,
+    cardPanelDepartment: null,
+    cardLocationList: [],
+    cardSalaryRangeList: [],
+    cardAcademicResponsibilityList: [],
+    cardExperienceList: [],
 
     academicResponsibilityFilter: null,
     academicResponsibilityList: [],
@@ -182,12 +203,14 @@ const Dashboard = () => {
     profiles();
     applicationStatus();
     master_department();
+    loadCardFilterOptions();
   }, []);
 
   useEffect(() => {
     if (state.activeCard == 2) {
       applicationStatusList();
     }
+    // Issue 3 — clear all card-level filters when active card changes
     setState({
       search: "",
       sortBy: "",
@@ -195,6 +218,22 @@ const Dashboard = () => {
       start_date: "",
       departmentFilter: "",
       collegeFilter: "",
+      // card filters
+      cardApplicationStatus: null,
+      cardApplicationCollege: null,
+      cardApplicationDepartment: null,
+      cardJobStartDate: null,
+      cardJobEndDate: null,
+      cardJobLocation: null,
+      cardJobSalary: null,
+      cardJobStatus: null,
+      cardJobAcademicResponsibilities: [],
+      cardPanelCollege: null,
+      cardPanelDepartment: null,
+      cardTalentPreferences: [],
+      cardTalentDepartment: null,
+      cardTalentExperience: null,
+      cardTalentAcademicResponsibilities: [],
     });
   }, [state.activeCard]);
 
@@ -471,6 +510,39 @@ const Dashboard = () => {
         accentColor: "#324ca5",
         icon: <IconCalendar className="h-7 w-7 text-orange-600" />,
         clickable: false,
+      },
+      {
+        id: 17,
+        label: "Upcoming Interviews",
+        value: tc?.upcoming_interview_slots?.value ?? tc?.upcoming_interview_slots?.value ?? 0,
+        color: "text-dblue",
+        bg: "bg-[#f4f9ff]",
+        mainbg: "bg-[#f4f9ff]",
+        accentColor: "#324ca5",
+        icon: <IconCalendar className="h-7 w-7 text-violet-600" />,
+        clickable: true,
+      },
+      {
+        id: 18,
+        label: "Overdue Follow-ups",
+        value: tc?.followup_applications?.value ?? tc?.followup_applications.value ?? 0,
+        color: "text-dblue",
+        bg: "bg-[#f4f9ff]",
+        mainbg: "bg-[#f4f9ff]",
+        accentColor: "#324ca5",
+        icon: <IconUsers className="h-7 w-7 text-red-600" />,
+        clickable: true,
+      },
+      {
+        id: 19,
+        label: "Job Variance",
+        value: tc?.critical_variance_jobs?.value ?? tc?.critical_variance_jobs?.value ?? 0,
+        color: "text-dblue",
+        bg: "bg-[#f4f9ff]",
+        mainbg: "bg-[#f4f9ff]",
+        accentColor: "#324ca5",
+        icon: <IconCalendar className="h-7 w-7 text-amber-600" />,
+        clickable: true,
       },
     ];
     setState({ cards: CARDS });
@@ -1358,11 +1430,85 @@ const Dashboard = () => {
   };
 
   // card id=1 — Total Applications (filter: none extra)
-  const fetchCardApplications = async (page = 1) => {
+  const loadCardFilterOptions = async () => {
+    try {
+      const [locations, salaries, responsibilities, experiences] : any = await Promise.all([
+        Models.job.job_locations(),
+        Models.job.job_salary_ranges(),
+        Models.master.additional_academic_responsibilities_list({ pagination: "No" }, 1),
+        Models.master.experience_list({ pagination: "No" }, 1),
+      ]);
+      setState({
+        cardLocationList: Dropdown(locations?.results, "city"),
+        cardSalaryRangeList: Dropdown(salaries?.results, "name"),
+        cardAcademicResponsibilityList: (responsibilities ?? []).map((item: any) => ({ value: item.id, label: item.responsibility_title })),
+        cardExperienceList: Dropdown(experiences?.results, "name"),
+      });
+    } catch (error) {
+      console.error("Unable to load dashboard card filters:", error);
+    }
+  };
+
+  const getFilterValue = (filters: any, key: string, currentValue: any) =>
+    Object.prototype.hasOwnProperty.call(filters, key) ? filters[key] : currentValue;
+
+  // Build application-card filter body from explicit values (no state reads — avoids stale closure)
+  const cardApplicationFilterBody = (filters: any = {}) => {
+    const body: any = {};
+    const dept   = getFilterValue(filters, "cardApplicationDepartment", state.cardApplicationDepartment);
+    const status = getFilterValue(filters, "cardApplicationStatus", state.cardApplicationStatus);
+    const college= getFilterValue(filters, "cardApplicationCollege", state.cardApplicationCollege);
+    if (college?.value)  body.college    = college.value;
+    if (dept?.value)     body.department = dept.value;
+    if (status?.value)   body.status     = status.value;
+    return body;
+  };
+
+  // Build job-card filter body from explicit values
+  const cardJobFilterBody = (filters: any = {}) => {
+    const body: any = {};
+    const loc    = getFilterValue(filters, "cardJobLocation", state.cardJobLocation);
+    const salary = getFilterValue(filters, "cardJobSalary", state.cardJobSalary);
+    const status = getFilterValue(filters, "cardJobStatus", state.cardJobStatus);
+    const start  = getFilterValue(filters, "cardJobStartDate", state.cardJobStartDate);
+    const end    = getFilterValue(filters, "cardJobEndDate", state.cardJobEndDate);
+    const resp   = getFilterValue(filters, "cardJobAcademicResponsibilities", state.cardJobAcademicResponsibilities);
+    const dept   = getFilterValue(filters, "cardApplicationDepartment", state.cardApplicationDepartment);
+    if (start)        body.start_date  = moment(start).format("YYYY-MM-DD");
+    if (end)          body.end_date    = moment(end).format("YYYY-MM-DD");
+    if (loc?.value)   body.location    = loc.value;
+    if (salary?.value)body.salary_range= salary.value;
+    if (status?.value)body.status      = status.value;
+    if (dept?.value)  body.department_id = dept.value;
+    if (resp?.length) body.additional_academic_responsibility_ids = resp.map((i: any) => i.value);
+    return body;
+  };
+
+  // Build talent-card filter body from explicit values
+  const cardTalentFilterBody = (filters: any = {}) => {
+    const body: any = {};
+    const prefs = getFilterValue(filters, "cardTalentPreferences", state.cardTalentPreferences);
+    const dept  = getFilterValue(filters, "cardTalentDepartment", state.cardTalentDepartment);
+    const exp   = getFilterValue(filters, "cardTalentExperience", state.cardTalentExperience);
+    const resp  = getFilterValue(filters, "cardTalentAcademicResponsibilities", state.cardTalentAcademicResponsibilities);
+    const values = prefs?.map((i: any) => i.value) ?? [];
+    if (values.length) {
+      body.phd_completed = values.includes(1);
+      body.net_cleared   = values.includes(2);
+      body.set_cleared   = values.includes(3);
+      body.slet_cleared  = values.includes(4);
+    }
+    if (dept?.value)  body.department_id = dept.value;
+    if (exp?.value)   body.experience_id = exp.label;
+    if (resp?.length) body.additional_academic_responsibility_ids = resp.map((i: any) => i.value);
+    return body;
+  };
+  const fetchCardApplications = async (page = 1, filters: any = {}) => {
     try {
       setState({ cardTableLoading: true });
       const body: any = {
         ...cardBodyData(),
+        ...cardApplicationFilterBody(filters),
         page,
       };
       const df = dashboardDateFilter();
@@ -1393,7 +1539,7 @@ const Dashboard = () => {
   };
 
   // card id=2 — Interview Scheduled
-  const fetchCardInterviewScheduled = async (page = 1) => {
+  const fetchCardInterviewScheduled = async (page = 1, filters: any = {}) => {
     try {
       setState({ cardTableLoading: true });
       const statusId = await getApplicationStatusId("Interview Scheduled");
@@ -1407,6 +1553,7 @@ const Dashboard = () => {
       }
       const body: any = {
         ...cardBodyData(),
+        ...cardApplicationFilterBody(filters),
         page,
         status: statusId,
       };
@@ -1436,11 +1583,12 @@ const Dashboard = () => {
   };
 
   // card id=4 — Active Jobs
-  const fetchCardActiveJobs = async (page = 1) => {
+  const fetchCardActiveJobs = async (page = 1, filters: any = {}) => {
     try {
       setState({ cardTableLoading: true });
       const body: any = {
         ...cardJobBodyData(),
+        ...cardJobFilterBody(filters),
         page,
         is_approved: "Yes",
       };
@@ -1548,7 +1696,7 @@ const Dashboard = () => {
   };
 
   // card id=6 — Selected Applications
-  const fetchCardSelected = async (page = 1) => {
+  const fetchCardSelected = async (page = 1, filters: any = {}) => {
     try {
       setState({ cardTableLoading: true });
       const statusId = await getApplicationStatusId("Selected");
@@ -1562,6 +1710,7 @@ const Dashboard = () => {
       }
       const body: any = {
         ...cardBodyData(),
+        ...cardApplicationFilterBody(filters),
         page,
         status: statusId,
       };
@@ -1609,7 +1758,7 @@ const Dashboard = () => {
   };
 
   // card id=10 — Rejected Applications
-  const fetchCardRejected = async (page = 1) => {
+  const fetchCardRejected = async (page = 1, filters: any = {}) => {
     try {
       setState({ cardTableLoading: true });
       const statusId = await getApplicationStatusId("Rejected");
@@ -1623,6 +1772,7 @@ const Dashboard = () => {
       }
       const body: any = {
         ...cardBodyData(),
+        ...cardApplicationFilterBody(filters),
         page,
         status: statusId,
       };
@@ -1648,11 +1798,12 @@ const Dashboard = () => {
   };
 
   // card id=7 — Awaiting Review
-  const fetchCardAwaitingReview = async (page = 1) => {
+  const fetchCardAwaitingReview = async (page = 1, filters: any = {}) => {
     try {
       setState({ cardTableLoading: true });
       const body: any = {
         ...cardBodyData(),
+        ...cardApplicationFilterBody(filters),
         page,
         is_viewed: false,
       };
@@ -1682,13 +1833,16 @@ const Dashboard = () => {
   };
 
   // card id=8 — Active Panel Members (uses Models.master.panel_list, same as hr_panel page)
-  const fetchCardPanelMembers = async (page = 1) => {
+  const fetchCardPanelMembers = async (page = 1, filters: any = {}) => {
     try {
       setState({ cardTableLoading: true });
       const body: any = {};
       if (state.cardSearch) body.search = state.cardSearch;
       const colleges = state.profile?.college?.map((c: any) => c.college_id);
       if (colleges?.length) body.college_id = colleges;
+      if (state.cardPanelCollege?.value) body.college_id = state.cardPanelCollege.value;
+      const dept = filters.cardPanelDepartment ?? state.cardPanelDepartment;
+      if (dept?.value) body.department_id = dept.value;
       const df = dashboardDateFilter();
       if (df.start_date) body.start_date = df.start_date;
       if (df.end_date) body.end_date = df.end_date;
@@ -1730,12 +1884,16 @@ const Dashboard = () => {
   });
 
   // card id=14 — Find Right Talents (same as job_seekers page base list)
-  const fetchCardFindRightTalents = async (page = 1) => {
+  const fetchCardFindRightTalents = async (page = 1, filters: any = {}) => {
     try {
       setState({ cardTableLoading: true });
       const userId =
         typeof window !== "undefined" ? localStorage.getItem("userId") : null;
-      const body: any = { active_job_seeker: "Yes", role: ROLES.APPLICANT };
+      const body: any = {
+        active_job_seeker: "Yes",
+        role: ROLES.APPLICANT,
+        ...cardTalentFilterBody(filters),
+      };
       if (userId) body.user_id = userId;
       if (state.cardSearch) body.search = state.cardSearch;
       const df = dashboardDateFilter();
@@ -1824,11 +1982,12 @@ const Dashboard = () => {
   };
 
   // card id=13 — Interview Rescheduled Request
-  const fetchCardRescheduled = async (page = 1) => {
+  const fetchCardRescheduled = async (page = 1, filters: any = {}) => {
     try {
       setState({ cardTableLoading: true });
       const body: any = {
         ...cardBodyData(),
+        ...cardApplicationFilterBody(filters),
         page,
         reschedule : true
       };
@@ -1854,7 +2013,112 @@ const Dashboard = () => {
     }
   };
 
-  const CARD_FETCH_MAP: Record<number, (page?: number) => void> = {
+  // card id=17 — Upcoming Interviews
+  const fetchCardUpcomingInterviews = async (page = 1) => {
+    try {
+      setState({ cardTableLoading: true });
+      const p = state.profile;
+      const userId = p?.id;
+      const today = moment().format("YYYY-MM-DD");
+      const fiveDaysLater = moment().add(5, "days").format("YYYY-MM-DD");
+      const body: any = {
+        created_by: userId,
+        schedule_date_from: today,
+        schedule_date_to: fiveDaysLater,
+      };
+      if (state.cardSearch) body.search = state.cardSearch;
+      const res: any = await Models.interview.list(page, body);
+      const rows = (res?.results ?? []).map((item: any) => ({
+        id: item?.id,
+        applications_id: item?.applications?.[0]?.id,
+        candidate: item?.applications?.[0]?.applicant_name,
+        job_role: item?.applications?.[0]?.short_name || item?.applications?.[0]?.job_title,
+        college: item?.applications?.[0]?.job_detail?.college?.name,
+        department_name: item?.applications?.[0]?.department_detail?.department_name,
+        status: item?.applications?.[0]?.application_status?.name ?? item?.status,
+        scheduled_date: item?.scheduled_date,
+      }));
+      setState({ cardTableData: rows, cardTableCount: res?.count ?? 0, cardTableLoading: false });
+    } catch {
+      setState({ cardTableLoading: false });
+    }
+  };
+
+  // card id=18 — Overdue Follow-ups
+  const fetchCardOverdueFollowups = async (page = 1) => {
+    try {
+      setState({ cardTableLoading: true });
+      const p = state.profile;
+      const role = p?.role;
+      const colleges = p?.college?.map((c: any) => c.college_id);
+      const instId = p?.institution?.id;
+      const deptId = p?.department?.department_id;
+      const body: any = { status_new: "followup" };
+      if (state.cardSearch) body.search = state.cardSearch;
+      const df = dashboardDateFilter();
+      if (df.start_date) body.start_date = df.start_date;
+      if (df.end_date) body.end_date = df.end_date;
+      if (role === ROLES.INSTITUTION_ADMIN && instId) body.institution = instId;
+      if (role === ROLES.HR && colleges?.length) body.college = colleges;
+      if (role === ROLES.HOD && deptId) body.department = deptId;
+      const res: any = await Models.application.list(page, body);
+      const rows = (res?.results ?? []).map((item: any) => ({
+        id: item?.id,
+        candidate: item?.first_name ? `${item.first_name} ${item.last_name}` : item?.username ?? "—",
+        job: item?.job_detail?.short_name,
+        college: item?.job_detail?.college?.short_name,
+        status: item?.application_status?.name ?? item?.status,
+        applied_date: item?.created_at ? moment(item.created_at).format("DD MMM YYYY, hh:mm A") : "—",
+        status_date: item?.status_changed_at ? moment(item.status_changed_at).format("DD MMM YYYY, hh:mm A") : "—",
+        department_name: item?.department_details?.length > 0
+          ? item.department_details?.map((d: any) => d?.short_name)
+          : null,
+        resume: item?.resume,
+      }));
+      setState({ cardTableData: rows, cardTableCount: res?.count ?? 0, cardTableLoading: false });
+    } catch {
+      setState({ cardTableLoading: false });
+    }
+  };
+
+  // card id=19 — Days to Fill Variance
+  const fetchCardDaysToFillVariance = async (page = 1) => {
+    try {
+      setState({ cardTableLoading: true });
+      const p = state.profile;
+      const role = p?.role;
+      const colleges = p?.college?.map((c: any) => c.college_id);
+      const instId = p?.institution?.id;
+      const deptId = p?.department?.department_id;
+      const body: any = { variance_less_than: 10, is_approved: "Yes" };
+      if (state.cardSearch) body.search = state.cardSearch;
+      const df = dashboardDateFilter();
+      if (df.start_date) body.start_date = df.start_date;
+      if (df.end_date) body.end_date = df.end_date;
+      if (role === ROLES.INSTITUTION_ADMIN && instId) body.institution_id = instId;
+      if (role === ROLES.HR && colleges?.length) body.college_id = colleges;
+      if (role === ROLES.HOD && deptId) body.department_id = deptId;
+      const res: any = await Models.job.list(page, body);
+      const rows = (res?.results ?? []).map((item: any) => ({
+        id: item?.id,
+        job_role: item.roles?.length > 0 ? item?.roles?.[0]?.short_name : "",
+        job_title: item?.roles?.[0]?.role_name,
+        college: item?.college?.short_name ?? "—",
+        department: item?.department?.length > 0 ? item?.department?.map((d: any) => d?.short_name) : [],
+        total_applications: item?.total_applications,
+        priority: item?.priority,
+        days_to_fill: item.days_to_fill,
+        variance: item.variance,
+        is_approved: item?.is_approved,
+        job_status: item?.job_status,
+      }));
+      setState({ cardTableData: rows, cardTableCount: res?.count ?? 0, cardTableLoading: false });
+    } catch {
+      setState({ cardTableLoading: false });
+    }
+  };
+
+  const CARD_FETCH_MAP: Record<number, (page?: number, filters?: any) => void> = {
     1: fetchCardApplications,
     2: fetchCardInterviewScheduled,
     4: fetchCardActiveJobs,
@@ -1868,6 +2132,9 @@ const Dashboard = () => {
     13: fetchCardRescheduled,
     14: fetchCardFindRightTalents,
     15: fetchCardInterestSent,
+    17: fetchCardUpcomingInterviews,
+    18: fetchCardOverdueFollowups,
+    19: fetchCardDaysToFillVariance,
   };
 
   const CARD_COLUMNS: Record<number, any[]> = {
@@ -1996,7 +2263,7 @@ const Dashboard = () => {
               <BriefcaseBusiness className="h-4 w-4" />
             </button>
 
-            {state.profile?.role == ROLES.HR && (
+            {/* {state.profile?.role == ROLES.HR && (
               <button
                 onClick={() => {
                   setState({
@@ -2010,7 +2277,7 @@ const Dashboard = () => {
               >
                 <UserCheck className="h-4 w-4" />
               </button>
-            )}
+            )} */}
             {/* <button
                             onClick={() => handleDelete(row)}
                             className="flex items-center justify-center rounded-lg  text-red-600 transition-all duration-200 "
@@ -2147,7 +2414,7 @@ const Dashboard = () => {
               <BriefcaseBusiness className="h-4 w-4" />
             </button>
 
-            {state.profile?.role == ROLES.HR && (
+            {/* {state.profile?.role == ROLES.HR && (
               <button
                 onClick={() => {
                   setState({
@@ -2161,7 +2428,7 @@ const Dashboard = () => {
               >
                 <UserCheck className="h-4 w-4" />
               </button>
-            )}
+            )} */}
             {/* <button
                             onClick={() => handleDelete(row)}
                             className="flex items-center justify-center rounded-lg  text-red-600 transition-all duration-200 "
@@ -2774,7 +3041,7 @@ const Dashboard = () => {
               <BriefcaseBusiness className="h-4 w-4" />
             </button>
 
-            {state.profile?.role == ROLES.HR && (
+            {/* {state.profile?.role == ROLES.HR && (
               <button
                 onClick={() => {
                   setState({
@@ -2788,7 +3055,7 @@ const Dashboard = () => {
               >
                 <UserCheck className="h-4 w-4" />
               </button>
-            )}
+            )} */}
             {/* <button
                             onClick={() => handleDelete(row)}
                             className="flex items-center justify-center rounded-lg  text-red-600 transition-all duration-200 "
@@ -2922,7 +3189,7 @@ const Dashboard = () => {
               <BriefcaseBusiness className="h-4 w-4" />
             </button>
 
-            {state.profile?.role == ROLES.HR && (
+            {/* {state.profile?.role == ROLES.HR && (
               <button
                 onClick={() => {
                   setState({
@@ -2936,7 +3203,7 @@ const Dashboard = () => {
               >
                 <UserCheck className="h-4 w-4" />
               </button>
-            )}
+            )} */}
             {/* <button
                             onClick={() => handleDelete(row)}
                             className="flex items-center justify-center rounded-lg  text-red-600 transition-all duration-200 "
@@ -3073,7 +3340,7 @@ const Dashboard = () => {
               <BriefcaseBusiness className="h-4 w-4" />
             </button>
 
-            {state.profile?.role == ROLES.HR && (
+            {/* {state.profile?.role == ROLES.HR && (
               <button
                 onClick={() => {
                   setState({
@@ -3087,7 +3354,7 @@ const Dashboard = () => {
               >
                 <UserCheck className="h-4 w-4" />
               </button>
-            )}
+            )} */}
             {/* <button
                             onClick={() => handleDelete(row)}
                             className="flex items-center justify-center rounded-lg  text-red-600 transition-all duration-200 "
@@ -3219,6 +3486,201 @@ const Dashboard = () => {
         ),
       },
     ],
+    17: [
+      {
+        accessor: "candidate",
+        title: "Candidate",
+        render: (r: any) => (
+          <Link href={`/faculty/application_detail?id=${r.applications_id}`} className="text-dblue hover:underline">
+            {r.candidate}
+          </Link>
+        ),
+      },
+      { accessor: "job_role", title: "Job Role" },
+      { accessor: "college", title: "College" },
+      { accessor: "department_name", title: "Department" },
+      {
+        accessor: "status",
+        title: "Status",
+        render: (r: any) => (
+          <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs text-purple-700">{r.status}</span>
+        ),
+      },
+      {
+        accessor: "scheduled_date",
+        title: "Scheduled Date",
+        render: (r: any) => (
+          <span className="text-xs">{r.scheduled_date ? moment(r.scheduled_date).format("DD MMM YYYY, hh:mm A") : "-"}</span>
+        ),
+      },
+      {
+        accessor: "actions",
+        title: "Actions",
+        textAlignment: "center",
+        render: (row: any) => (
+          <div className="flex items-center justify-center gap-3">
+            <button onClick={() => router.push(`/faculty/application_detail?id=${row.applications_id}`)} className="flex items-center justify-center rounded-lg text-indigo-600" title="View">
+              <IconEye className="h-4 w-4" />
+            </button>
+          </div>
+        ),
+      },
+    ],
+    18: [
+      {
+        accessor: "candidate",
+        title: "Candidate",
+        render: (r: any) => (
+          <Link href={`/faculty/application_detail?id=${r.id}`} className="text-dblue hover:underline">
+            {r.candidate}
+          </Link>
+        ),
+      },
+      { accessor: "job", title: "Job Role" },
+      { accessor: "college", title: "College" },
+      {
+        accessor: "department_name",
+        title: "Department",
+        render: ({ department_name }) => {
+          if (!department_name || !Array.isArray(department_name) || department_name.length === 0) return <span className="text-gray-400">-</span>;
+          return <span className="text-sm text-gray-700 dark:text-gray-300">{department_name.join(", ")}</span>;
+        },
+      },
+      {
+        accessor: "status",
+        title: "Status",
+        render: (r: any) => (
+          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLOR[r.status] ?? "bg-gray-100 text-gray-700"}`}>
+            {r.status}
+          </span>
+        ),
+      },
+      { accessor: "applied_date", title: "Applied Date" },
+      { accessor: "status_date", title: "Last Status Date" },
+      {
+        accessor: "actions",
+        title: "Actions",
+        textAlignment: "center",
+        render: (row: any) => (
+          <div className="flex items-center justify-center gap-3">
+            <button onClick={() => handleEdit(row)} className="flex items-center justify-center rounded-lg text-green-900 transition-all duration-200" title="View">
+              <IconEye className="h-4 w-4" />
+            </button>
+            <button onClick={() => handleDownloadResume(row)} className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200" title="Resume">
+              <FileText className="h-4 w-4" />
+            </button>
+            <button onClick={() => handleRound(row)} className="flex items-center justify-center rounded-lg text-pink-600 transition-all duration-200" title="Interview Round">
+              <BriefcaseBusiness className="h-4 w-4" />
+            </button>
+          </div>
+        ),
+      },
+    ],
+    19: [
+      {
+        accessor: "job_role",
+        title: "Job Role",
+        render: (row: any) => (
+          <div
+            className="cursor-pointer text-dblue hover:underline"
+            onClick={() => router.push(`/faculty/job_details?id=${row.id}`)}
+          >
+            {row.job_role || row.job_title || "—"}
+          </div>
+        ),
+      },
+      {
+        accessor: "department",
+        title: "Department",
+        render: ({ department }) => {
+          if (!department || !Array.isArray(department) || department.length === 0)
+            return <span className="text-gray-400">-</span>;
+          const first = department[0];
+          const rest = department.slice(1);
+          const maxShow = 3;
+          const visible = rest.slice(0, maxShow);
+          const hidden = rest.slice(maxShow);
+          const remaining = rest.length - maxShow;
+          return (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-sm text-gray-700 dark:text-gray-300" title={first}>{first}</span>
+              <div className="flex items-center -space-x-2">
+                {visible.map((dept: string, i: number) => (
+                  <div key={i} className="group relative">
+                    <div className="bg-dblue flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white text-xs text-white dark:border-gray-900">
+                      {dept.slice(0, 2).toUpperCase()}
+                    </div>
+                    <div className="absolute bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
+                      {capitalizeFLetter(dept)}
+                    </div>
+                  </div>
+                ))}
+                {remaining > 0 && (
+                  <div className="group relative">
+                    <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-gray-400 text-xs text-white dark:border-gray-900">
+                      +{remaining}
+                    </div>
+                    <div className="absolute bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
+                      {hidden.map((d: string) => capitalizeFLetter(d)).join(", ")}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        },
+      },
+      { accessor: "college", title: "College" },
+      {
+        accessor: "days_to_fill",
+        title: "Days to Fill",
+        textAlignment: "right",
+        render: (r: any) => <span className="text-gray-700 dark:text-gray-300">{r.days_to_fill ?? "—"}</span>,
+      },
+      {
+        accessor: "priority",
+        title: "Expiration Period",
+        textAlignment: "right",
+        render: (r: any) => <span className="text-gray-700 dark:text-gray-300">{r.priority ?? "—"}</span>,
+      },
+      {
+        accessor: "variance",
+        title: "Variance",
+        textAlignment: "right",
+        render: (r: any) => (
+          <span className={`font-medium ${r.variance < 0 ? "text-green-600" : r.variance <= 7 ? "text-amber-600" : "text-red-600"}`}>
+            {r.variance > 0 ? `+${r.variance}` : r.variance ?? "—"}
+          </span>
+        ),
+      },
+      {
+        accessor: "total_applications",
+        title: "Applications",
+        render: (r: any) => <span className="text-gray-600 dark:text-gray-400">{r.total_applications}</span>,
+      },
+      {
+        accessor: "actions",
+        title: "Actions",
+        render: (row: any) => (
+          <div className="flex items-center justify-center gap-3">
+            <button
+              onClick={() => router.push(`/faculty/job_details?id=${row.id}`)}
+              className="flex items-center justify-center rounded-lg text-indigo-600"
+              title="View"
+            >
+              <IconEye className="h-4 w-4" />
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); router.push(`/faculty/updatejob?id=${row.id}`); }}
+              className="flex items-center justify-center rounded-lg text-blue-600"
+              title="Edit"
+            >
+              <IconEdit className="h-4 w-4" />
+            </button>
+          </div>
+        ),
+      },
+    ],
   };
 
   const CARD_TITLES: Record<number, string> = {
@@ -3227,14 +3689,17 @@ const Dashboard = () => {
     4: "Active Jobs",
     5: "Pending Jobs",
     6: "Selected Applications",
-    7: "Awaiting Review",
+    7: "Applications Awaiting Review",
     8: "Active Panel Members",
     9: "Talents Identified (Interest Accepted)",
     10: "Rejected Applications",
     11: "Outreached",
-    13: "Interview Rescheduled",
-    14: "Find Right Talents",
+    13: "Interview Rescheduled Request",
+    14: "Talents Identified",
     15: "Interest Sent",
+    17: "Upcoming Interviews ( Scheduled for Next 5 days )",
+    18: "Overdue Follow-ups",
+    19: "Days to Fill Variance",
   };
 
   /* ---------------- CHART CONFIG FUNCTIONS ---------------- */
@@ -3754,7 +4219,7 @@ const getFilledVsOpeningsChart = () => {
   const getSelectionRateChart = () => {
     const src = dashboard?.selection_rate_trend ?? [];
     return {
-      series: [{ name: 'Selection Rate (%)', data: src.map((d) => d.selection_rate ?? 0) }],
+      series: [{ name: 'Selected Count', data: src.map((d) => d.selected ?? 0) }],
       options: {
         chart: { type: 'area', height: 320, toolbar: { show: false }, zoom: { enabled: false } },
         stroke: { curve: 'smooth', width: 3 },
@@ -3768,10 +4233,10 @@ const getFilledVsOpeningsChart = () => {
           },
           title: { text: 'Month', style: { fontSize: '11px' } },
         },
-        yaxis: { title: { text: 'Selection Rate (%)', style: { fontSize: '11px' } }, labels: { style: { fontSize: '11px' }, formatter: (v) => v + '%' }, min: 0 },
+        yaxis: { title: { text: 'Selected Count', style: { fontSize: '11px' } }, labels: { style: { fontSize: '11px' }, formatter: (v) => v + '%' }, min: 0 },
         grid: { borderColor: isDark ? '#191E3A' : '#E0E6ED', strokeDashArray: 5 },
         markers: { size: 5, colors: ['#007550'], strokeColors: '#fff', strokeWidth: 2, hover: { size: 7 } },
-        tooltip: { y: { formatter: (v) => v + '%' } },
+        tooltip: { y: { formatter: (v) => v } },
         legend: { show: false },
         dataLabels: { enabled: false },
         noData: { text: 'No data available' },
@@ -4525,22 +4990,51 @@ const getFilledVsOpeningsChart = () => {
 
        {/* College filter above stat cards — only for roles with college list */}
       {state.collegeList?.length > 0 && (
-        <div className="mb-5 w-56">
-          <CustomSelect
-            options={state.collegeList}
-            value={state.dashboardCollegeFilter}
-            onChange={(e) => {
-              setState({ dashboardCollegeFilter: e });
-              const params = activePeriod !== "custom"
-                ? { period: activePeriod }
-                : fromDate && toDate
-                ? { from: moment(fromDate).format("YYYY-MM-DD"), to: moment(toDate).format("YYYY-MM-DD") }
-                : { period: activePeriod };
-              fetchDashboard(params, state.profile, e?.value ?? null);
-            }}
-            placeholder="Filter by College"
-            isClearable
-          />
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-56">
+            <CustomSelect
+              options={state.collegeList}
+              value={state.dashboardCollegeFilter}
+              onChange={(e) => {
+                setState({ dashboardCollegeFilter: e, cardApplicationDepartment: null, cardPanelDepartment: null });
+                // load department list scoped to selected college for card-level dept filters
+                if (e?.value) {
+                  departmentDropdownList(1, "", false, e.value);
+                } else {
+                  setState({ departmentList: [] });
+                }
+                const params = activePeriod !== "custom"
+                  ? { period: activePeriod }
+                  : fromDate && toDate
+                  ? { from: moment(fromDate).format("YYYY-MM-DD"), to: moment(toDate).format("YYYY-MM-DD") }
+                  : { period: activePeriod };
+                fetchDashboard(params, state.profile, e?.value ?? null);
+              }}
+              placeholder="Filter by College"
+              isClearable
+            />
+          </div>
+          {state.dashboardCollegeFilter && (
+            <div className=" flex flex-wrap items-center gap-2">
+              <span className="flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                College: {state.dashboardCollegeFilter.label}
+                <button
+                  onClick={() => {
+                    setState({ dashboardCollegeFilter: null, cardApplicationDepartment: null, cardPanelDepartment: null, departmentList: [] });
+                    const params = activePeriod !== "custom"
+                      ? { period: activePeriod }
+                      : fromDate && toDate
+                      ? { from: moment(fromDate).format("YYYY-MM-DD"), to: moment(toDate).format("YYYY-MM-DD") }
+                      : { period: activePeriod };
+                    fetchDashboard(params, state.profile, null);
+                  }}
+                  className="rounded-full p-0.5 hover:bg-blue-200 dark:hover:bg-blue-700"
+                >
+                  <X className="h-3 w-3 text-black" />
+                </button>
+              </span>
+            </div>
+          )}
         </div>
       )}
 
@@ -4598,20 +5092,306 @@ const getFilledVsOpeningsChart = () => {
 
       {/* Card-driven table */}
       {CARD_FETCH_MAP[state.activeCard] && (
-        <div className="panel shadow-md border-gray rounded-xl shadow-md border-gray rounded-xl mb-6 mt-5">
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+        <div className="panel shadow-md border-gray rounded-xl mb-6 mt-5">
+
+          {/* ── Header + inline filters ── */}
+          <div className="mb-3 flex flex-wrap items-center gap-3">
             <h2 className="text-lg font-semibold text-black dark:text-white">
               {CARD_TITLES[state.activeCard]}
             </h2>
-            {/* <TextInput
+            </div>
+
+           <div className="flex items-center justify-start gap-5 mb-5">
+
+            {/* Search — always visible */}
+            <TextInput
               placeholder="Search..."
               value={state.cardSearch}
               onChange={(e) =>
                 setState({ cardSearch: e.target.value, cardTablePage: 1 })
               }
+              parentClassName="min-w-[300px] max-w-[500px]"
               icon={<IconSearch className="h-4 w-4" />}
-            /> */}
-          </div>
+            />
+
+            {/* ── Card 1: Total Applications ── */}
+            {state.activeCard === 1 && (
+              <>
+              
+                {(state.profile?.role === ROLES.SUPER_ADMIN ||
+                  state.profile?.role === ROLES.INSTITUTION_ADMIN ||
+                  state.profile?.role === ROLES.HR) && (
+                  <CustomSelect
+                    options={state.departmentList}
+                    value={state.cardApplicationDepartment}
+                    onChange={(e) => {
+                      setState({ cardApplicationDepartment: e, cardTablePage: 1 });
+                      fetchCardApplications(1, { cardApplicationDepartment: e });
+                    }}
+                    placeholder="Department"
+                    isClearable
+                    disabled={!state.dashboardCollegeFilter}
+                    loading={state.departmentLoading}
+                    className = "w-[500px]"
+                  />
+                )}
+
+                  <CustomSelect
+                  options={state.applicationStatusList}
+                  value={state.cardApplicationStatus}
+                  onChange={(e) => {
+                    setState({ cardApplicationStatus: e, cardTablePage: 1 });
+                    fetchCardApplications(1, { cardApplicationStatus: e });
+                  }}
+                  placeholder="Status"
+                  isClearable
+                  loading={state.applicationStatusLoading}
+                  className = "w-[500px]"
+                />
+              </>
+            )}
+
+            {/* ── Card 2: Interview Scheduled ── */}
+            {state.activeCard === 2 && (
+              <>
+                {(state.profile?.role === ROLES.HR ||
+                  state.profile?.role === ROLES.SUPER_ADMIN ||
+                  state.profile?.role === ROLES.INSTITUTION_ADMIN) && (
+                  <CustomSelect
+                    options={state.departmentList}
+                    value={state.cardApplicationDepartment}
+                    onChange={(e) => {
+                      setState({ cardApplicationDepartment: e, cardTablePage: 1 });
+                      CARD_FETCH_MAP[2]?.(1, { cardApplicationDepartment: e });
+                    }}
+                    placeholder="Department"
+                    isClearable
+                    disabled={!state.dashboardCollegeFilter}
+                    loading={state.departmentLoading}
+                    className = "w-[500px]"
+                  />
+                )}
+              </>
+            )}
+
+            {/* ── Card 7: Awaiting Review ── */}
+            {state.activeCard === 7 && (
+              <>
+                
+                {(state.profile?.role === ROLES.HR ||
+                  state.profile?.role === ROLES.SUPER_ADMIN ||
+                  state.profile?.role === ROLES.INSTITUTION_ADMIN) && (
+                  <CustomSelect
+                    options={state.departmentList}
+                    value={state.cardApplicationDepartment}
+                    onChange={(e) => {
+                      setState({ cardApplicationDepartment: e, cardTablePage: 1 });
+                      CARD_FETCH_MAP[7]?.(1, { cardApplicationDepartment: e });
+                    }}
+                    placeholder="Department"
+                    isClearable
+                    disabled={!state.dashboardCollegeFilter}
+                    loading={state.departmentLoading}
+                    className = "w-[500px]"
+                  />
+                )}
+
+                <CustomSelect
+                  options={state.applicationStatusList}
+                  value={state.cardApplicationStatus}
+                  onChange={(e) => {
+                    setState({ cardApplicationStatus: e, cardTablePage: 1 });
+                      CARD_FETCH_MAP[7]?.(1, { cardApplicationStatus: e });
+                  }}
+                  placeholder="Status"
+                  isClearable
+                  loading={state.applicationStatusLoading}
+                  className = "w-[500px]"
+                />
+              </>
+            )}
+
+            {/* ── Cards 6, 10, 13: Selected / Rejected / Reschedule ── */}
+            {(state.activeCard === 6 || state.activeCard === 10 || state.activeCard === 13) && (
+              <>
+                {(state.profile?.role === ROLES.HR ||
+                  state.profile?.role === ROLES.SUPER_ADMIN ||
+                  state.profile?.role === ROLES.INSTITUTION_ADMIN) && (
+                  <CustomSelect
+                    options={state.departmentList}
+                    value={state.cardApplicationDepartment}
+                    onChange={(e) => {
+                      setState({ cardApplicationDepartment: e, cardTablePage: 1 });
+                      CARD_FETCH_MAP[state.activeCard]?.(1, { cardApplicationDepartment: e });
+                    }}
+                    placeholder="Department"
+                    isClearable
+                    disabled={!state.dashboardCollegeFilter}
+                    loading={state.departmentLoading}
+                    className = "w-[500px]"
+                  />
+                )}
+              </>
+            )}
+
+            {/* ── Cards 4 & 5: Active / Pending Jobs ── */}
+            {(state.activeCard === 4 || state.activeCard === 5) && (
+              <>
+                {(state.profile?.role === ROLES.HR ||
+                  state.profile?.role === ROLES.SUPER_ADMIN ||
+                  state.profile?.role === ROLES.INSTITUTION_ADMIN) && (
+                  <CustomSelect
+                    options={state.departmentList}
+                    value={state.cardApplicationDepartment}
+                    onChange={(e) => {
+                      setState({ cardApplicationDepartment: e, cardTablePage: 1 });
+                      CARD_FETCH_MAP[state.activeCard]?.(1, { cardApplicationDepartment: e });
+                    }}
+                    placeholder="Department"
+                    isClearable
+                    disabled={!state.dashboardCollegeFilter}
+                    loading={state.departmentLoading}
+                    className = "w-[500px]"
+                  />
+                )}
+                <CustomSelect
+                  options={state.cardLocationList}
+                  value={state.cardJobLocation}
+                  onChange={(e) => {
+                    setState({ cardJobLocation: e, cardTablePage: 1 });
+                    CARD_FETCH_MAP[state.activeCard]?.(1, { cardJobLocation: e });
+                  }}
+                  placeholder="Location"
+                  isClearable
+                  className = "w-[500px]"
+                />
+              </>
+            )}
+
+            {/* ── Card 8: Active Panel Members ── */}
+            {state.activeCard === 8 && (
+              <>
+                <CustomSelect
+                  options={state.departmentList}
+                  value={state.cardPanelDepartment}
+                  onChange={(e) => {
+                    setState({ cardPanelDepartment: e, cardTablePage: 1 });
+                    CARD_FETCH_MAP[8]?.(1, { cardPanelDepartment: e });
+                  }}
+                  placeholder="Department"
+                  isClearable
+                  disabled={!state.dashboardCollegeFilter}
+                  loading={state.departmentLoading}
+                  className = "w-[500px]"
+                />
+              </>
+            )}
+
+            {/* ── Card 14: Find Right Talents ── */}
+            {state.activeCard === 14 && (
+              <>
+                <CustomSelect
+                  options={state.master_department}
+                  value={state.cardTalentDepartment}
+                  onChange={(e) => {
+                    setState({ cardTalentDepartment: e, cardTablePage: 1 });
+                    fetchCardFindRightTalents(1, { cardTalentDepartment: e });
+                  }}
+                  placeholder="Department"
+                  isClearable
+                  className = "w-[500px]"
+                />
+                <CustomSelect
+                  options={state.cardExperienceList}
+                  value={state.cardTalentExperience}
+                  onChange={(e) => {
+                    setState({ cardTalentExperience: e, cardTablePage: 1 });
+                    fetchCardFindRightTalents(1, { cardTalentExperience: e });
+                  }}
+                  placeholder="Experience"
+                  isClearable
+                  className = "w-[500px]"
+                />
+              </>
+            )}
+
+            </div>
+
+          {/* ── Active filter pills ── */}
+          {(() => {
+            const chips: { key: string; label: string }[] = [];
+
+            // department filter applies to all application-based cards
+            if ([1, 2, 6, 7, 10, 13].includes(state.activeCard)) {
+              if (state.cardApplicationStatus)     chips.push({ key: "cardApplicationStatus",     label: `Status: ${state.cardApplicationStatus.label}` });
+              if (state.cardApplicationDepartment) chips.push({ key: "cardApplicationDepartment", label: `Dept: ${state.cardApplicationDepartment.label}` });
+            }
+            if (state.activeCard === 4 || state.activeCard === 5) {
+              if (state.cardApplicationDepartment) chips.push({ key: "cardApplicationDepartment", label: `Dept: ${state.cardApplicationDepartment.label}` });
+              if (state.cardJobLocation)           chips.push({ key: "cardJobLocation",           label: `Location: ${state.cardJobLocation.label}` });
+              if (state.cardJobSalary)             chips.push({ key: "cardJobSalary",             label: `Salary: ${state.cardJobSalary.label}` });
+              if (state.cardJobStatus)             chips.push({ key: "cardJobStatus",             label: `Status: ${state.cardJobStatus.label}` });
+              if (state.cardJobStartDate)          chips.push({ key: "cardJobStartDate",          label: `From: ${moment(state.cardJobStartDate).format("DD/MM/YY")}` });
+              if (state.cardJobEndDate)            chips.push({ key: "cardJobEndDate",            label: `To: ${moment(state.cardJobEndDate).format("DD/MM/YY")}` });
+              if (state.cardJobAcademicResponsibilities?.length) chips.push({ key: "cardJobAcademicResponsibilities", label: `Responsibility (${state.cardJobAcademicResponsibilities.length})` });
+            }
+            if (state.activeCard === 8) {
+              if (state.cardPanelDepartment) chips.push({ key: "cardPanelDepartment", label: `Dept: ${state.cardPanelDepartment.label}` });
+            }
+            if (state.activeCard === 14) {
+              if (state.cardTalentDepartment) chips.push({ key: "cardTalentDepartment", label: `Dept: ${state.cardTalentDepartment.label}` });
+              if (state.cardTalentExperience) chips.push({ key: "cardTalentExperience", label: `Exp: ${state.cardTalentExperience.label}` });
+              if (state.cardTalentPreferences?.length)              chips.push({ key: "cardTalentPreferences",              label: `Qualification (${state.cardTalentPreferences.length})` });
+              if (state.cardTalentAcademicResponsibilities?.length) chips.push({ key: "cardTalentAcademicResponsibilities", label: `Responsibility (${state.cardTalentAcademicResponsibilities.length})` });
+            }
+
+            if (!chips.length) return null;
+
+            const clearAllMap: Record<number, object> = {
+              1:  { cardApplicationStatus: null, cardApplicationDepartment: null },
+              2:  { cardApplicationDepartment: null },
+              4:  { cardApplicationDepartment: null, cardJobLocation: null, cardJobSalary: null, cardJobStatus: null, cardJobStartDate: null, cardJobEndDate: null, cardJobAcademicResponsibilities: [] },
+              5:  { cardApplicationDepartment: null, cardJobLocation: null, cardJobSalary: null, cardJobStatus: null, cardJobStartDate: null, cardJobEndDate: null, cardJobAcademicResponsibilities: [] },
+              6:  { cardApplicationStatus: null, cardApplicationDepartment: null },
+              7:  { cardApplicationStatus: null, cardApplicationDepartment: null },
+              8:  { cardPanelDepartment: null },
+              10: { cardApplicationStatus: null, cardApplicationDepartment: null },
+              13: { cardApplicationDepartment: null },
+              14: { cardTalentDepartment: null, cardTalentExperience: null, cardTalentPreferences: [], cardTalentAcademicResponsibilities: [] },
+            };
+
+            return (
+              <div className="mb-3 mt-1 flex flex-wrap items-center gap-2">
+                {chips.map((chip) => (
+                  <span key={chip.key} className="flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                    {chip.label}
+                    <button
+                      onClick={() => {
+                        const isArr = Array.isArray((state as any)[chip.key]);
+                        const reset = isArr ? [] : null;
+                        setState({ [chip.key]: reset } as any);
+                        setTimeout(() => CARD_FETCH_MAP[state.activeCard]?.(1, { [chip.key]: reset }), 0);
+                      }}
+                      className="rounded-full p-0.5 hover:bg-blue-200 dark:hover:bg-blue-700"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+                <button
+                  onClick={() => {
+                    const cleared = clearAllMap[state.activeCard] ?? {};
+                    setState(cleared as any);
+                    setTimeout(() => CARD_FETCH_MAP[state.activeCard]?.(1, cleared), 0);
+                  }}
+                  className="text-xs text-red-500 hover:underline"
+                >
+                  Clear all
+                </button>
+              </div>
+            );
+          })()}
+
           <DataTable
             noRecordsText="No data found"
             highlightOnHover
@@ -4855,7 +5635,7 @@ const getFilledVsOpeningsChart = () => {
                   <StageCard label="Interview" value={interview}
                     borderColor="#ffa339" bgColor={isDark ? "#3d2e0022" : "#ffe2c0"} iconBg="#fff" valueColor="#000"
                     icon={<IconUsers className="h-5 w-5 text-black" />}
-                    moved={i2s.moved + i2w.moved} dropped={i2s.not_moved + i2w.not_moved}
+                    moved={i2s.moved} dropped={i2s.not_moved}
                   />
 
                   {/* ── Fork: Interview → Selected + Waitlisted ── */}
@@ -5388,7 +6168,7 @@ const getFilledVsOpeningsChart = () => {
           )}
         </div> }
         
-        <div className="panel shadow-md border-gray rounded-xl mb-5">
+        {/* <div className="panel shadow-md border-gray rounded-xl mb-5">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-semibold text-black dark:text-white">
@@ -5410,11 +6190,7 @@ const getFilledVsOpeningsChart = () => {
               { accessor: "department_name", title: "Department" },
               
               { accessor: "college", title: "College" },
-              // {
-              //   accessor: "applied_date",
-              //   title: "Applied date",
-              //   // textAlignment: "right",
-              // },
+              
               {
         accessor: "status",
         title: "Status",
@@ -5434,7 +6210,7 @@ const getFilledVsOpeningsChart = () => {
               : "-"}
           </span>
         ),
-                // textAlignment: "right",
+              
               },
 
 
@@ -5480,11 +6256,11 @@ const getFilledVsOpeningsChart = () => {
               />
             </div>
           )}
-        </div> 
+        </div>  */}
      
 
         {/* Overdue Follow-ups */}
-        <div className="panel shadow-md border-gray rounded-xl mb-5">
+        {/* <div className="panel shadow-md border-gray rounded-xl mb-5">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-semibold text-black dark:text-white">
@@ -5534,7 +6310,6 @@ const getFilledVsOpeningsChart = () => {
 
                   return (
                     <div className="flex flex-wrap items-center gap-2">
-                      {/* First department text */}
                       <span
                         title={firstDept}
                         className="text-sm  text-gray-700 dark:text-gray-300"
@@ -5542,7 +6317,6 @@ const getFilledVsOpeningsChart = () => {
                         {firstDept}
                       </span>
 
-                      {/* Avatars */}
                       <div className="flex items-center -space-x-2">
                         {visibleDept?.map((dept: string, index: number) => (
                           <div key={index} className="group relative z-10">
@@ -5550,7 +6324,6 @@ const getFilledVsOpeningsChart = () => {
                               {dept?.slice(0, 2)?.toUpperCase()}
                             </div>
 
-                            {/* Tooltip */}
                             <div className="absolute bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
                               {capitalizeFLetter(dept)}
                             </div>
@@ -5562,7 +6335,6 @@ const getFilledVsOpeningsChart = () => {
                               +{remaining}
                             </div>
 
-                            {/* Remaining tooltip */}
                             <div className="absolute bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
                               {hiddenDept
                                 ?.map((d: string) => capitalizeFLetter(d))
@@ -5619,28 +6391,7 @@ const getFilledVsOpeningsChart = () => {
                       <BriefcaseBusiness className="h-4 w-4" />
                     </button>
 
-                    {state.profile?.role == ROLES.HR && (
-                      <button
-                        onClick={() => {
-                          setState({
-                            showStatusModal: true,
-                            selectedApplication: row,
-                            selectedStatus: row.application_status,
-                          });
-                        }}
-                        className="flex items-center justify-center rounded-lg text-purple-600 transition-all duration-200 "
-                        title="Update Status"
-                      >
-                        <UserCheck className="h-4 w-4" />
-                      </button>
-                    )}
-                    {/* <button
-                            onClick={() => handleDelete(row)}
-                            className="flex items-center justify-center rounded-lg  text-red-600 transition-all duration-200 "
-                            title="Delete"
-                          >
-                            <IconTrash className="h-4 w-4" />
-                          </button> */}
+                    
                   </div>
                 ),
               },
@@ -5664,7 +6415,7 @@ const getFilledVsOpeningsChart = () => {
               />
             </div>
           )}
-        </div>
+        </div> */}
      
 
       <Modal

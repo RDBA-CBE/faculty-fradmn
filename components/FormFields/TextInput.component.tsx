@@ -7,6 +7,7 @@ interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   icon?: React.ReactNode; 
   rightIcon?: React.ReactNode;
   rightIconOnlick?:any
+  parentClassName?: any
 }
 
 const TextInput: React.FC<TextInputProps> = ({
@@ -22,10 +23,11 @@ const TextInput: React.FC<TextInputProps> = ({
   icon,
   rightIcon,
   rightIconOnlick,
+  parentClassName = "",
   ...rest
 }) => {
   return (
-    <div className="w-full">
+    <div className={`${parentClassName  || "w-full"}`}>
       {title && (
         <label
           htmlFor={name}
@@ -54,7 +56,7 @@ const TextInput: React.FC<TextInputProps> = ({
             error ? "border-red-500" : "border-gray-300"
           } ${icon ? "pl-10" : ""} ${rightIcon ? "pr-10" : ""} ${
             rest.disabled ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""
-          } ${className}`}
+          } ${className || 'w-full'}`}
           {...rest}
         />
 

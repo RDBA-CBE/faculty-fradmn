@@ -128,7 +128,7 @@ const CustomSelect = (props: SelectProps) => {
   };
 
   return (
-    <div className={`w-full ${className}`}>
+    <div className={` ${className ||'w-full'}`}>
       {title && (
         <label className="block text-sm font-bold text-gray-700 mb-1">
           
