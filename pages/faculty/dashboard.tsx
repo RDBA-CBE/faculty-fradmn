@@ -442,7 +442,7 @@ const Dashboard = () => {
         id: 8,
         label: "Active Panel Members",
         value: tc?.active_panel_members?.value ?? 0,
-       color: "text-dblue",
+        color: "text-dblue",
         bg: "bg-[#f4f9ff]",
         mainbg: "bg-[#f4f9ff]",
         accentColor: "#324ca5",
@@ -453,7 +453,7 @@ const Dashboard = () => {
         id: 14,
         label: "Talents Identified",
         value: tc?.find_right_talents?.value ?? 0,
-       color: "text-dblue",
+        color: "text-dblue",
         bg: "bg-[#f4f9ff]",
         mainbg: "bg-[#f4f9ff]",
         accentColor: "#324ca5",
@@ -484,7 +484,7 @@ const Dashboard = () => {
       //   icon: <IconUser className="h-7 w-7 text-teal-600" />,
       //   clickable: tc?.talents_identified?.clickable,
       // },
-     
+
       // {
       //   id: 15,
       //   label: "Interest Sent",
@@ -504,7 +504,7 @@ const Dashboard = () => {
           tc?.avg_days_to_schedule_interview?.value != null
             ? Number(tc.avg_days_to_schedule_interview.value).toFixed(1)
             : "—",
-       color: "text-dblue",
+        color: "text-dblue",
         bg: "bg-[#f4f9ff]",
         mainbg: "bg-[#f4f9ff]",
         accentColor: "#324ca5",
@@ -514,7 +514,10 @@ const Dashboard = () => {
       {
         id: 17,
         label: "Upcoming Interviews",
-        value: tc?.upcoming_interview_slots?.value ?? tc?.upcoming_interview_slots?.value ?? 0,
+        value:
+          tc?.upcoming_interview_slots?.value ??
+          tc?.upcoming_interview_slots?.value ??
+          0,
         color: "text-dblue",
         bg: "bg-[#f4f9ff]",
         mainbg: "bg-[#f4f9ff]",
@@ -525,7 +528,10 @@ const Dashboard = () => {
       {
         id: 18,
         label: "Overdue Follow-ups",
-        value: tc?.followup_applications?.value ?? tc?.followup_applications.value ?? 0,
+        value:
+          tc?.followup_applications?.value ??
+          tc?.followup_applications.value ??
+          0,
         color: "text-dblue",
         bg: "bg-[#f4f9ff]",
         mainbg: "bg-[#f4f9ff]",
@@ -536,7 +542,10 @@ const Dashboard = () => {
       {
         id: 19,
         label: "Job Variance",
-        value: tc?.critical_variance_jobs?.value ?? tc?.critical_variance_jobs?.value ?? 0,
+        value:
+          tc?.critical_variance_jobs?.value ??
+          tc?.critical_variance_jobs?.value ??
+          0,
         color: "text-dblue",
         bg: "bg-[#f4f9ff]",
         mainbg: "bg-[#f4f9ff]",
@@ -887,10 +896,15 @@ const Dashboard = () => {
     return body;
   };
 
-  const fetchDashboard = async (params?: any, profile?: any, collegeId?: any) => {
+  const fetchDashboard = async (
+    params?: any,
+    profile?: any,
+    collegeId?: any,
+  ) => {
     try {
       const profileRes = await Models.auth.profile();
-      const resolvedCollegeId = collegeId ?? state.dashboardCollegeFilter?.value;
+      const resolvedCollegeId =
+        collegeId ?? state.dashboardCollegeFilter?.value;
       const dashRes: any = await Models.dashboard.dashboard({
         ...(params ?? {}),
         ...(resolvedCollegeId ? { college_id: resolvedCollegeId } : {}),
@@ -904,7 +918,7 @@ const Dashboard = () => {
       cards(profile?.role, data?.top_cards);
       fetchOverdueFollowups(1, profileRes);
       fetchDaysToFillVariance(1, profileRes);
-      upCommingInterviews(1, profileRes)
+      upCommingInterviews(1, profileRes);
     } catch (err) {
       console.error(err);
     }
@@ -1029,9 +1043,7 @@ const Dashboard = () => {
     }
   };
 
-  
-
-   const upCommingInterviews = async (page = 1, profileData?: any) => {
+  const upCommingInterviews = async (page = 1, profileData?: any) => {
     try {
       setState({ upCommingInterviewsLoading: true });
 
@@ -1049,31 +1061,32 @@ const Dashboard = () => {
         schedule_date_to: fiveDaysLater,
       };
 
-
       const res: any = await Models.interview.list(page, body);
       const results = res?.results ?? [];
       const rows = results.map((item: any) => {
         const appliedDate = item?.created_at ? new Date(item.created_at) : null;
 
         console.log("item", item);
-        
 
         return {
           id: item?.id,
           candidate: item?.applications[0]?.applicant_name,
-          job_role: item?.applications[0]?.short_name || item?.applications[0]?.job_title,
-        
+          job_role:
+            item?.applications[0]?.short_name ||
+            item?.applications[0]?.job_title,
+
           college: item?.applications[0]?.job_detail?.college?.name,
           applied_date: moment(appliedDate).format("DD MMM YYYY, hh:mm A"),
           status_date: moment(item.applications[0]?.status_changed_at).format(
             "DD MMM YYYY, hh:mm A",
           ),
-          department_name: item?.applications[0]?.department_detail?.department_name,
+          department_name:
+            item?.applications[0]?.department_detail?.department_name,
           resume: item?.resume,
-          status: item?.applications[0]?.application_status?.name ?? item?.status,
+          status:
+            item?.applications[0]?.application_status?.name ?? item?.status,
           scheduled_date: item?.scheduled_date,
-          applications_id:item?.applications[0]?.id
-
+          applications_id: item?.applications[0]?.id,
         };
       });
       const total = rows.reduce(
@@ -1432,16 +1445,22 @@ const Dashboard = () => {
   // card id=1 — Total Applications (filter: none extra)
   const loadCardFilterOptions = async () => {
     try {
-      const [locations, salaries, responsibilities, experiences] : any = await Promise.all([
-        Models.job.job_locations(),
-        Models.job.job_salary_ranges(),
-        Models.master.additional_academic_responsibilities_list({ pagination: "No" }, 1),
-        Models.master.experience_list({ pagination: "No" }, 1),
-      ]);
+      const [locations, salaries, responsibilities, experiences]: any =
+        await Promise.all([
+          Models.job.job_locations(),
+          Models.job.job_salary_ranges(),
+          Models.master.additional_academic_responsibilities_list(
+            { pagination: "No" },
+            1,
+          ),
+          Models.master.experience_list({ pagination: "No" }, 1),
+        ]);
       setState({
         cardLocationList: Dropdown(locations?.results, "city"),
         cardSalaryRangeList: Dropdown(salaries?.results, "name"),
-        cardAcademicResponsibilityList: (responsibilities ?? []).map((item: any) => ({ value: item.id, label: item.responsibility_title })),
+        cardAcademicResponsibilityList: (responsibilities ?? []).map(
+          (item: any) => ({ value: item.id, label: item.responsibility_title }),
+        ),
         cardExperienceList: Dropdown(experiences?.results, "name"),
       });
     } catch (error) {
@@ -1450,57 +1469,117 @@ const Dashboard = () => {
   };
 
   const getFilterValue = (filters: any, key: string, currentValue: any) =>
-    Object.prototype.hasOwnProperty.call(filters, key) ? filters[key] : currentValue;
+    Object.prototype.hasOwnProperty.call(filters, key)
+      ? filters[key]
+      : currentValue;
 
   // Build application-card filter body from explicit values (no state reads — avoids stale closure)
   const cardApplicationFilterBody = (filters: any = {}) => {
     const body: any = {};
-    const dept   = getFilterValue(filters, "cardApplicationDepartment", state.cardApplicationDepartment);
-    const status = getFilterValue(filters, "cardApplicationStatus", state.cardApplicationStatus);
-    const college= getFilterValue(filters, "cardApplicationCollege", state.cardApplicationCollege);
-    if (college?.value)  body.college    = college.value;
-    if (dept?.value)     body.department = dept.value;
-    if (status?.value)   body.status     = status.value;
+    const dept = getFilterValue(
+      filters,
+      "cardApplicationDepartment",
+      state.cardApplicationDepartment,
+    );
+    const status = getFilterValue(
+      filters,
+      "cardApplicationStatus",
+      state.cardApplicationStatus,
+    );
+    const college = getFilterValue(
+      filters,
+      "cardApplicationCollege",
+      state.cardApplicationCollege,
+    );
+    if (college?.value) body.college = college.value;
+    if (dept?.value) body.department = dept.value;
+    if (status?.value) body.status = status.value;
     return body;
   };
 
   // Build job-card filter body from explicit values
   const cardJobFilterBody = (filters: any = {}) => {
     const body: any = {};
-    const loc    = getFilterValue(filters, "cardJobLocation", state.cardJobLocation);
-    const salary = getFilterValue(filters, "cardJobSalary", state.cardJobSalary);
-    const status = getFilterValue(filters, "cardJobStatus", state.cardJobStatus);
-    const start  = getFilterValue(filters, "cardJobStartDate", state.cardJobStartDate);
-    const end    = getFilterValue(filters, "cardJobEndDate", state.cardJobEndDate);
-    const resp   = getFilterValue(filters, "cardJobAcademicResponsibilities", state.cardJobAcademicResponsibilities);
-    const dept   = getFilterValue(filters, "cardApplicationDepartment", state.cardApplicationDepartment);
-    if (start)        body.start_date  = moment(start).format("YYYY-MM-DD");
-    if (end)          body.end_date    = moment(end).format("YYYY-MM-DD");
-    if (loc?.value)   body.location    = loc.value;
-    if (salary?.value)body.salary_range= salary.value;
-    if (status?.value)body.status      = status.value;
-    if (dept?.value)  body.department_id = dept.value;
-    if (resp?.length) body.additional_academic_responsibility_ids = resp.map((i: any) => i.value);
+    const loc = getFilterValue(
+      filters,
+      "cardJobLocation",
+      state.cardJobLocation,
+    );
+    const salary = getFilterValue(
+      filters,
+      "cardJobSalary",
+      state.cardJobSalary,
+    );
+    const status = getFilterValue(
+      filters,
+      "cardJobStatus",
+      state.cardJobStatus,
+    );
+    const start = getFilterValue(
+      filters,
+      "cardJobStartDate",
+      state.cardJobStartDate,
+    );
+    const end = getFilterValue(filters, "cardJobEndDate", state.cardJobEndDate);
+    const resp = getFilterValue(
+      filters,
+      "cardJobAcademicResponsibilities",
+      state.cardJobAcademicResponsibilities,
+    );
+    const dept = getFilterValue(
+      filters,
+      "cardApplicationDepartment",
+      state.cardApplicationDepartment,
+    );
+    if (start) body.start_date = moment(start).format("YYYY-MM-DD");
+    if (end) body.end_date = moment(end).format("YYYY-MM-DD");
+    if (loc?.value) body.location = loc.value;
+    if (salary?.value) body.salary_range = salary.value;
+    if (status?.value) body.status = status.value;
+    if (dept?.value) body.department_id = dept.value;
+    if (resp?.length)
+      body.additional_academic_responsibility_ids = resp.map(
+        (i: any) => i.value,
+      );
     return body;
   };
 
   // Build talent-card filter body from explicit values
   const cardTalentFilterBody = (filters: any = {}) => {
     const body: any = {};
-    const prefs = getFilterValue(filters, "cardTalentPreferences", state.cardTalentPreferences);
-    const dept  = getFilterValue(filters, "cardTalentDepartment", state.cardTalentDepartment);
-    const exp   = getFilterValue(filters, "cardTalentExperience", state.cardTalentExperience);
-    const resp  = getFilterValue(filters, "cardTalentAcademicResponsibilities", state.cardTalentAcademicResponsibilities);
+    const prefs = getFilterValue(
+      filters,
+      "cardTalentPreferences",
+      state.cardTalentPreferences,
+    );
+    const dept = getFilterValue(
+      filters,
+      "cardTalentDepartment",
+      state.cardTalentDepartment,
+    );
+    const exp = getFilterValue(
+      filters,
+      "cardTalentExperience",
+      state.cardTalentExperience,
+    );
+    const resp = getFilterValue(
+      filters,
+      "cardTalentAcademicResponsibilities",
+      state.cardTalentAcademicResponsibilities,
+    );
     const values = prefs?.map((i: any) => i.value) ?? [];
     if (values.length) {
       body.phd_completed = values.includes(1);
-      body.net_cleared   = values.includes(2);
-      body.set_cleared   = values.includes(3);
-      body.slet_cleared  = values.includes(4);
+      body.net_cleared = values.includes(2);
+      body.set_cleared = values.includes(3);
+      body.slet_cleared = values.includes(4);
     }
-    if (dept?.value)  body.department_id = dept.value;
-    if (exp?.value)   body.experience_id = exp.label;
-    if (resp?.length) body.additional_academic_responsibility_ids = resp.map((i: any) => i.value);
+    if (dept?.value) body.department_id = dept.value;
+    if (exp?.value) body.experience_id = exp.label;
+    if (resp?.length)
+      body.additional_academic_responsibility_ids = resp.map(
+        (i: any) => i.value,
+      );
     return body;
   };
   const fetchCardApplications = async (page = 1, filters: any = {}) => {
@@ -1840,7 +1919,8 @@ const Dashboard = () => {
       if (state.cardSearch) body.search = state.cardSearch;
       const colleges = state.profile?.college?.map((c: any) => c.college_id);
       if (colleges?.length) body.college_id = colleges;
-      if (state.cardPanelCollege?.value) body.college_id = state.cardPanelCollege.value;
+      if (state.cardPanelCollege?.value)
+        body.college_id = state.cardPanelCollege.value;
       const dept = filters.cardPanelDepartment ?? state.cardPanelDepartment;
       if (dept?.value) body.department_id = dept.value;
       const df = dashboardDateFilter();
@@ -1989,7 +2069,7 @@ const Dashboard = () => {
         ...cardBodyData(),
         ...cardApplicationFilterBody(filters),
         page,
-        reschedule : true
+        reschedule: true,
       };
       const df = dashboardDateFilter();
       if (df.start_date) body.schedule_date_from = df.start_date;
@@ -2002,7 +2082,8 @@ const Dashboard = () => {
           job: item?.job_detail?.short_name,
           college: item?.job_detail?.college?.short_name,
           scheduled_date: item?.interview_slots?.slice(-1)?.[0]?.scheduled_date,
-          rescheduled_date: item?.interview_slots?.slice(-1)?.[0]?.rescheduled_date,
+          rescheduled_date:
+            item?.interview_slots?.[0]?.applicant_feedback?.reschedule_date,
           status: item?.interview_slots?.slice(-1)?.[0]?.status ?? "-",
         })),
         cardTableCount: res?.count,
@@ -2032,13 +2113,21 @@ const Dashboard = () => {
         id: item?.id,
         applications_id: item?.applications?.[0]?.id,
         candidate: item?.applications?.[0]?.applicant_name,
-        job_role: item?.applications?.[0]?.short_name || item?.applications?.[0]?.job_title,
+        job_role:
+          item?.applications?.[0]?.short_name ||
+          item?.applications?.[0]?.job_title,
         college: item?.applications?.[0]?.job_detail?.college?.name,
-        department_name: item?.applications?.[0]?.department_detail?.department_name,
-        status: item?.applications?.[0]?.application_status?.name ?? item?.status,
+        department_name:
+          item?.applications?.[0]?.department_detail?.department_name,
+        status:
+          item?.applications?.[0]?.application_status?.name ?? item?.status,
         scheduled_date: item?.scheduled_date,
       }));
-      setState({ cardTableData: rows, cardTableCount: res?.count ?? 0, cardTableLoading: false });
+      setState({
+        cardTableData: rows,
+        cardTableCount: res?.count ?? 0,
+        cardTableLoading: false,
+      });
     } catch {
       setState({ cardTableLoading: false });
     }
@@ -2064,18 +2153,29 @@ const Dashboard = () => {
       const res: any = await Models.application.list(page, body);
       const rows = (res?.results ?? []).map((item: any) => ({
         id: item?.id,
-        candidate: item?.first_name ? `${item.first_name} ${item.last_name}` : item?.username ?? "—",
+        candidate: item?.first_name
+          ? `${item.first_name} ${item.last_name}`
+          : item?.username ?? "—",
         job: item?.job_detail?.short_name,
         college: item?.job_detail?.college?.short_name,
         status: item?.application_status?.name ?? item?.status,
-        applied_date: item?.created_at ? moment(item.created_at).format("DD MMM YYYY, hh:mm A") : "—",
-        status_date: item?.status_changed_at ? moment(item.status_changed_at).format("DD MMM YYYY, hh:mm A") : "—",
-        department_name: item?.department_details?.length > 0
-          ? item.department_details?.map((d: any) => d?.short_name)
-          : null,
+        applied_date: item?.created_at
+          ? moment(item.created_at).format("DD MMM YYYY, hh:mm A")
+          : "—",
+        status_date: item?.status_changed_at
+          ? moment(item.status_changed_at).format("DD MMM YYYY, hh:mm A")
+          : "—",
+        department_name:
+          item?.department_details?.length > 0
+            ? item.department_details?.map((d: any) => d?.short_name)
+            : null,
         resume: item?.resume,
       }));
-      setState({ cardTableData: rows, cardTableCount: res?.count ?? 0, cardTableLoading: false });
+      setState({
+        cardTableData: rows,
+        cardTableCount: res?.count ?? 0,
+        cardTableLoading: false,
+      });
     } catch {
       setState({ cardTableLoading: false });
     }
@@ -2095,7 +2195,8 @@ const Dashboard = () => {
       const df = dashboardDateFilter();
       if (df.start_date) body.start_date = df.start_date;
       if (df.end_date) body.end_date = df.end_date;
-      if (role === ROLES.INSTITUTION_ADMIN && instId) body.institution_id = instId;
+      if (role === ROLES.INSTITUTION_ADMIN && instId)
+        body.institution_id = instId;
       if (role === ROLES.HR && colleges?.length) body.college_id = colleges;
       if (role === ROLES.HOD && deptId) body.department_id = deptId;
       const res: any = await Models.job.list(page, body);
@@ -2104,7 +2205,10 @@ const Dashboard = () => {
         job_role: item.roles?.length > 0 ? item?.roles?.[0]?.short_name : "",
         job_title: item?.roles?.[0]?.role_name,
         college: item?.college?.short_name ?? "—",
-        department: item?.department?.length > 0 ? item?.department?.map((d: any) => d?.short_name) : [],
+        department:
+          item?.department?.length > 0
+            ? item?.department?.map((d: any) => d?.short_name)
+            : [],
         total_applications: item?.total_applications,
         priority: item?.priority,
         days_to_fill: item.days_to_fill,
@@ -2112,30 +2216,35 @@ const Dashboard = () => {
         is_approved: item?.is_approved,
         job_status: item?.job_status,
       }));
-      setState({ cardTableData: rows, cardTableCount: res?.count ?? 0, cardTableLoading: false });
+      setState({
+        cardTableData: rows,
+        cardTableCount: res?.count ?? 0,
+        cardTableLoading: false,
+      });
     } catch {
       setState({ cardTableLoading: false });
     }
   };
 
-  const CARD_FETCH_MAP: Record<number, (page?: number, filters?: any) => void> = {
-    1: fetchCardApplications,
-    2: fetchCardInterviewScheduled,
-    4: fetchCardActiveJobs,
-    5: fetchCardPendingJobs,
-    6: fetchCardSelected,
-    7: fetchCardAwaitingReview,
-    8: fetchCardPanelMembers,
-    9: fetchCardTalents,
-    10: fetchCardRejected,
-    11: fetchCardOutreached,
-    13: fetchCardRescheduled,
-    14: fetchCardFindRightTalents,
-    15: fetchCardInterestSent,
-    17: fetchCardUpcomingInterviews,
-    18: fetchCardOverdueFollowups,
-    19: fetchCardDaysToFillVariance,
-  };
+  const CARD_FETCH_MAP: Record<number, (page?: number, filters?: any) => void> =
+    {
+      1: fetchCardApplications,
+      2: fetchCardInterviewScheduled,
+      4: fetchCardActiveJobs,
+      5: fetchCardPendingJobs,
+      6: fetchCardSelected,
+      7: fetchCardAwaitingReview,
+      8: fetchCardPanelMembers,
+      9: fetchCardTalents,
+      10: fetchCardRejected,
+      11: fetchCardOutreached,
+      13: fetchCardRescheduled,
+      14: fetchCardFindRightTalents,
+      15: fetchCardInterestSent,
+      17: fetchCardUpcomingInterviews,
+      18: fetchCardOverdueFollowups,
+      19: fetchCardDaysToFillVariance,
+    };
 
   const CARD_COLUMNS: Record<number, any[]> = {
     1: [
@@ -2532,10 +2641,7 @@ const Dashboard = () => {
           wordBreak: "break-word",
         },
         render: ({ college_name }) => (
-          <span
-            className="text-gray-600 dark:text-black"
-            title={college_name}
-          >
+          <span className="text-gray-600 dark:text-black" title={college_name}>
             {college_name || "-"}
           </span>
         ),
@@ -2772,10 +2878,7 @@ const Dashboard = () => {
           wordBreak: "break-word",
         },
         render: ({ college_name }) => (
-          <span
-            className="text-gray-600 dark:text-black"
-            title={college_name}
-          >
+          <span className="text-gray-600 dark:text-black" title={college_name}>
             {college_name || "-"}
           </span>
         ),
@@ -3491,7 +3594,10 @@ const Dashboard = () => {
         accessor: "candidate",
         title: "Candidate",
         render: (r: any) => (
-          <Link href={`/faculty/application_detail?id=${r.applications_id}`} className="text-dblue hover:underline">
+          <Link
+            href={`/faculty/application_detail?id=${r.applications_id}`}
+            className="text-dblue hover:underline"
+          >
             {r.candidate}
           </Link>
         ),
@@ -3503,14 +3609,20 @@ const Dashboard = () => {
         accessor: "status",
         title: "Status",
         render: (r: any) => (
-          <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs text-purple-700">{r.status}</span>
+          <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs text-purple-700">
+            {r.status}
+          </span>
         ),
       },
       {
         accessor: "scheduled_date",
         title: "Scheduled Date",
         render: (r: any) => (
-          <span className="text-xs">{r.scheduled_date ? moment(r.scheduled_date).format("DD MMM YYYY, hh:mm A") : "-"}</span>
+          <span className="text-xs">
+            {r.scheduled_date
+              ? moment(r.scheduled_date).format("DD MMM YYYY, hh:mm A")
+              : "-"}
+          </span>
         ),
       },
       {
@@ -3519,7 +3631,15 @@ const Dashboard = () => {
         textAlignment: "center",
         render: (row: any) => (
           <div className="flex items-center justify-center gap-3">
-            <button onClick={() => router.push(`/faculty/application_detail?id=${row.applications_id}`)} className="flex items-center justify-center rounded-lg text-indigo-600" title="View">
+            <button
+              onClick={() =>
+                router.push(
+                  `/faculty/application_detail?id=${row.applications_id}`,
+                )
+              }
+              className="flex items-center justify-center rounded-lg text-indigo-600"
+              title="View"
+            >
               <IconEye className="h-4 w-4" />
             </button>
           </div>
@@ -3531,7 +3651,10 @@ const Dashboard = () => {
         accessor: "candidate",
         title: "Candidate",
         render: (r: any) => (
-          <Link href={`/faculty/application_detail?id=${r.id}`} className="text-dblue hover:underline">
+          <Link
+            href={`/faculty/application_detail?id=${r.id}`}
+            className="text-dblue hover:underline"
+          >
             {r.candidate}
           </Link>
         ),
@@ -3542,15 +3665,28 @@ const Dashboard = () => {
         accessor: "department_name",
         title: "Department",
         render: ({ department_name }) => {
-          if (!department_name || !Array.isArray(department_name) || department_name.length === 0) return <span className="text-gray-400">-</span>;
-          return <span className="text-sm text-gray-700 dark:text-gray-300">{department_name.join(", ")}</span>;
+          if (
+            !department_name ||
+            !Array.isArray(department_name) ||
+            department_name.length === 0
+          )
+            return <span className="text-gray-400">-</span>;
+          return (
+            <span className="text-sm text-gray-700 dark:text-gray-300">
+              {department_name.join(", ")}
+            </span>
+          );
         },
       },
       {
         accessor: "status",
         title: "Status",
         render: (r: any) => (
-          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLOR[r.status] ?? "bg-gray-100 text-gray-700"}`}>
+          <span
+            className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+              STATUS_COLOR[r.status] ?? "bg-gray-100 text-gray-700"
+            }`}
+          >
             {r.status}
           </span>
         ),
@@ -3563,13 +3699,25 @@ const Dashboard = () => {
         textAlignment: "center",
         render: (row: any) => (
           <div className="flex items-center justify-center gap-3">
-            <button onClick={() => handleEdit(row)} className="flex items-center justify-center rounded-lg text-green-900 transition-all duration-200" title="View">
+            <button
+              onClick={() => handleEdit(row)}
+              className="flex items-center justify-center rounded-lg text-green-900 transition-all duration-200"
+              title="View"
+            >
               <IconEye className="h-4 w-4" />
             </button>
-            <button onClick={() => handleDownloadResume(row)} className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200" title="Resume">
+            <button
+              onClick={() => handleDownloadResume(row)}
+              className="flex items-center justify-center rounded-lg text-blue-600 transition-all duration-200"
+              title="Resume"
+            >
               <FileText className="h-4 w-4" />
             </button>
-            <button onClick={() => handleRound(row)} className="flex items-center justify-center rounded-lg text-pink-600 transition-all duration-200" title="Interview Round">
+            <button
+              onClick={() => handleRound(row)}
+              className="flex items-center justify-center rounded-lg text-pink-600 transition-all duration-200"
+              title="Interview Round"
+            >
               <BriefcaseBusiness className="h-4 w-4" />
             </button>
           </div>
@@ -3582,7 +3730,7 @@ const Dashboard = () => {
         title: "Job Role",
         render: (row: any) => (
           <div
-            className="cursor-pointer text-dblue hover:underline"
+            className="text-dblue cursor-pointer hover:underline"
             onClick={() => router.push(`/faculty/job_details?id=${row.id}`)}
           >
             {row.job_role || row.job_title || "—"}
@@ -3593,7 +3741,11 @@ const Dashboard = () => {
         accessor: "department",
         title: "Department",
         render: ({ department }) => {
-          if (!department || !Array.isArray(department) || department.length === 0)
+          if (
+            !department ||
+            !Array.isArray(department) ||
+            department.length === 0
+          )
             return <span className="text-gray-400">-</span>;
           const first = department[0];
           const rest = department.slice(1);
@@ -3603,7 +3755,12 @@ const Dashboard = () => {
           const remaining = rest.length - maxShow;
           return (
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm text-gray-700 dark:text-gray-300" title={first}>{first}</span>
+              <span
+                className="text-sm text-gray-700 dark:text-gray-300"
+                title={first}
+              >
+                {first}
+              </span>
               <div className="flex items-center -space-x-2">
                 {visible.map((dept: string, i: number) => (
                   <div key={i} className="group relative">
@@ -3621,7 +3778,9 @@ const Dashboard = () => {
                       +{remaining}
                     </div>
                     <div className="absolute bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
-                      {hidden.map((d: string) => capitalizeFLetter(d)).join(", ")}
+                      {hidden
+                        .map((d: string) => capitalizeFLetter(d))
+                        .join(", ")}
                     </div>
                   </div>
                 )}
@@ -3635,20 +3794,36 @@ const Dashboard = () => {
         accessor: "days_to_fill",
         title: "Days to Fill",
         textAlignment: "right",
-        render: (r: any) => <span className="text-gray-700 dark:text-gray-300">{r.days_to_fill ?? "—"}</span>,
+        render: (r: any) => (
+          <span className="text-gray-700 dark:text-gray-300">
+            {r.days_to_fill ?? "—"}
+          </span>
+        ),
       },
       {
         accessor: "priority",
         title: "Expiration Period",
         textAlignment: "right",
-        render: (r: any) => <span className="text-gray-700 dark:text-gray-300">{r.priority ?? "—"}</span>,
+        render: (r: any) => (
+          <span className="text-gray-700 dark:text-gray-300">
+            {r.priority ?? "—"}
+          </span>
+        ),
       },
       {
         accessor: "variance",
         title: "Variance",
         textAlignment: "right",
         render: (r: any) => (
-          <span className={`font-medium ${r.variance < 0 ? "text-green-600" : r.variance <= 7 ? "text-amber-600" : "text-red-600"}`}>
+          <span
+            className={`font-medium ${
+              r.variance < 0
+                ? "text-green-600"
+                : r.variance <= 7
+                ? "text-amber-600"
+                : "text-red-600"
+            }`}
+          >
             {r.variance > 0 ? `+${r.variance}` : r.variance ?? "—"}
           </span>
         ),
@@ -3656,7 +3831,11 @@ const Dashboard = () => {
       {
         accessor: "total_applications",
         title: "Applications",
-        render: (r: any) => <span className="text-gray-600 dark:text-gray-400">{r.total_applications}</span>,
+        render: (r: any) => (
+          <span className="text-gray-600 dark:text-gray-400">
+            {r.total_applications}
+          </span>
+        ),
       },
       {
         accessor: "actions",
@@ -3671,7 +3850,10 @@ const Dashboard = () => {
               <IconEye className="h-4 w-4" />
             </button>
             <button
-              onClick={(e) => { e.stopPropagation(); router.push(`/faculty/updatejob?id=${row.id}`); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/faculty/updatejob?id=${row.id}`);
+              }}
               className="flex items-center justify-center rounded-lg text-blue-600"
               title="Edit"
             >
@@ -3725,11 +3907,11 @@ const Dashboard = () => {
         fill: {
           type: "gradient",
           gradient: {
-  shadeIntensity: 0.1,
-  opacityFrom: 0.15,
-  opacityTo: 0.35,
-  stops: [0, 100],
-},
+            shadeIntensity: 0.1,
+            opacityFrom: 0.15,
+            opacityTo: 0.35,
+            stops: [0, 100],
+          },
         },
         xaxis: {
           categories: labels,
@@ -3963,8 +4145,16 @@ const Dashboard = () => {
     const src = dashboard?.applications_by_department ?? [];
     return {
       series: [
-        { name: "Applicants", type: "bar", data: src.map((d: any) => d.applications) },
-        { name: "Selected", type: "line", data: src.map((d: any) => d.selected) },
+        {
+          name: "Applicants",
+          type: "bar",
+          data: src.map((d: any) => d.applications),
+        },
+        {
+          name: "Selected",
+          type: "line",
+          data: src.map((d: any) => d.selected),
+        },
       ],
       options: {
         chart: {
@@ -3973,7 +4163,10 @@ const Dashboard = () => {
           toolbar: { show: false },
           zoom: { enabled: false },
         },
-        colors: [isDark ? "#818cf8" : "#c7d7fa", isDark ? "#34d399" : "#007550"],
+        colors: [
+          isDark ? "#818cf8" : "#c7d7fa",
+          isDark ? "#34d399" : "#007550",
+        ],
         stroke: { width: [0, 3], curve: "smooth" },
         plotOptions: { bar: { columnWidth: "55%", borderRadius: 12 } },
         markers: { size: [0, 5], hover: { size: 7 } },
@@ -3991,9 +4184,14 @@ const Dashboard = () => {
         },
         yaxis: {
           title: { text: "Count", style: { fontSize: "11px" } },
-          labels: { style: { fontSize: "11px", colors: isDark ? "#94a3b8" : "#374151" } },
+          labels: {
+            style: { fontSize: "11px", colors: isDark ? "#94a3b8" : "#374151" },
+          },
         },
-        grid: { borderColor: isDark ? "#1e293b" : "#E0E6ED", strokeDashArray: 4 },
+        grid: {
+          borderColor: isDark ? "#1e293b" : "#E0E6ED",
+          strokeDashArray: 4,
+        },
         legend: {
           position: "top",
           horizontalAlign: "right",
@@ -4060,186 +4258,207 @@ const Dashboard = () => {
   };
 
   // Positions Filled vs Openings — by department (not month)
-const getFilledVsOpeningsChart = () => {
-  const src = dashboard?.position_fill_trend ?? [];
+  const getFilledVsOpeningsChart = () => {
+    const src = dashboard?.position_fill_trend ?? [];
 
-  return {
-    series: [
-      {
-        name: "Job Postings",
-        data: src.map((d: any) => d.job_postings),
-      },
-      {
-        name: "Openings",
-        data: src.map((d: any) => d.openings),
-      },
-      {
-        name: "Positions Filled",
-        data: src.map((d: any) => d.positions_filled),
-      },
-    ],
-
-    options: {
-      chart: {
-        type: "bar",
-        height: 350,
-        toolbar: {
-          show: false,
+    return {
+      series: [
+        {
+          name: "Job Postings",
+          data: src.map((d: any) => d.job_postings),
         },
-        zoom: {
-          enabled: false,
+        {
+          name: "Openings",
+          data: src.map((d: any) => d.openings),
         },
-      },
+        {
+          name: "Positions Filled",
+          data: src.map((d: any) => d.positions_filled),
+        },
+      ],
 
-      // Very light gradient
-      fill: {
+      options: {
+        chart: {
+          type: "bar",
+          height: 350,
+          toolbar: {
+            show: false,
+          },
+          zoom: {
+            enabled: false,
+          },
+        },
+
+        // Very light gradient
+        fill: {
           type: "gradient",
           gradient: {
-  shadeIntensity: 0.1,
-  opacityFrom: 0.15,
-  opacityTo: 0.35,
-  stops: [0, 100],
-},
-      },
-
-      plotOptions: {
-        bar: {
-          horizontal: true,
-          barHeight: "55%",
-          borderRadius: 4,
-        },
-      },
-
-      dataLabels: {
-        enabled: false,
-      },
-
-      colors: isDark
-        ? ["#818cf8", "#fbbf24", "#34d399"]
-        : ["#1f46b3", "#d97706", "#007550"],
-
-      xaxis: {
-        categories: src.map(
-          (d: any) => d.department_name
-        ),
-
-        title: {
-          text: "Count",
-          style: {
-            fontSize: "11px",
-            color: isDark ? "#94a3b8" : "#374151",
+            shadeIntensity: 0.1,
+            opacityFrom: 0.15,
+            opacityTo: 0.35,
+            stops: [0, 100],
           },
         },
 
-        labels: {
-          formatter: (value: string) => wrapChartLabel(value),
-          style: {
-            fontSize: "11px",
-            colors: isDark ? "#94a3b8" : "#374151",
+        plotOptions: {
+          bar: {
+            horizontal: true,
+            barHeight: "55%",
+            borderRadius: 4,
           },
         },
 
-        axisBorder: {
-          show: true,
+        dataLabels: {
+          enabled: false,
         },
 
-        axisTicks: {
-          show: true,
-        },
-
-        position: "bottom",
-      },
-
-      yaxis: {
-        labels: {
-          show: true,
-          style: {
-            fontSize: "10px",
-            colors: isDark ? "#94a3b8" : "#374151",
-          },
-        },
-
-        title: {
-          text: "Department",
-          style: {
-            fontSize: "11px",
-            color: isDark ? "#94a3b8" : "#374151",
-          },
-        },
-
-        axisBorder: {
-          show: false,
-        },
-
-        axisTicks: {
-          show: false,
-        },
-      },
-
-      grid: {
-        borderColor: isDark ? "#1e293b" : "#E0E6ED",
-        strokeDashArray: 0.2,
-        strokeWidth: 0.5,
+        colors: isDark
+          ? ["#818cf8", "#fbbf24", "#34d399"]
+          : ["#1f46b3", "#d97706", "#007550"],
 
         xaxis: {
-          lines: {
+          categories: src.map((d: any) => d.department_name),
+
+          title: {
+            text: "Count",
+            style: {
+              fontSize: "11px",
+              color: isDark ? "#94a3b8" : "#374151",
+            },
+          },
+
+          labels: {
+            formatter: (value: string) => wrapChartLabel(value),
+            style: {
+              fontSize: "11px",
+              colors: isDark ? "#94a3b8" : "#374151",
+            },
+          },
+
+          axisBorder: {
             show: true,
           },
+
+          axisTicks: {
+            show: true,
+          },
+
+          position: "bottom",
         },
 
         yaxis: {
-          lines: {
+          labels: {
+            show: true,
+            style: {
+              fontSize: "10px",
+              colors: isDark ? "#94a3b8" : "#374151",
+            },
+          },
+
+          title: {
+            text: "Department",
+            style: {
+              fontSize: "11px",
+              color: isDark ? "#94a3b8" : "#374151",
+            },
+          },
+
+          axisBorder: {
+            show: false,
+          },
+
+          axisTicks: {
             show: false,
           },
         },
-      },
 
-      legend: {
-        position: "top",
-        horizontalAlign: "right",
-        fontSize: "12px",
-        labels: {
-          colors: isDark ? "#cbd5e1" : "#374151",
+        grid: {
+          borderColor: isDark ? "#1e293b" : "#E0E6ED",
+          strokeDashArray: 0.2,
+          strokeWidth: 0.5,
+
+          xaxis: {
+            lines: {
+              show: true,
+            },
+          },
+
+          yaxis: {
+            lines: {
+              show: false,
+            },
+          },
+        },
+
+        legend: {
+          position: "top",
+          horizontalAlign: "right",
+          fontSize: "12px",
+          labels: {
+            colors: isDark ? "#cbd5e1" : "#374151",
+          },
+        },
+
+        tooltip: {
+          shared: true,
+          intersect: false,
+        },
+
+        noData: {
+          text: "No data available",
         },
       },
-
-      tooltip: {
-        shared: true,
-        intersect: false,
-      },
-
-      noData: {
-        text: "No data available",
-      },
-    },
+    };
   };
-};
 
   // Selection Rate Trend — bars for applications/selected + line for rate on secondary axis
   const getSelectionRateChart = () => {
     const src = dashboard?.selection_rate_trend ?? [];
     return {
-      series: [{ name: 'Selected Count', data: src.map((d) => d.selected ?? 0) }],
+      series: [
+        { name: "Selected Count", data: src.map((d) => d.selected ?? 0) },
+      ],
       options: {
-        chart: { type: 'area', height: 320, toolbar: { show: false }, zoom: { enabled: false } },
-        stroke: { curve: 'smooth', width: 3 },
-        colors: ['#1f46b3'],
-        fill: { type: 'gradient', gradient: { shadeIntensity: 1,  stops: [0, 100] } },
+        chart: {
+          type: "area",
+          height: 320,
+          toolbar: { show: false },
+          zoom: { enabled: false },
+        },
+        stroke: { curve: "smooth", width: 3 },
+        colors: ["#1f46b3"],
+        fill: {
+          type: "gradient",
+          gradient: { shadeIntensity: 1, stops: [0, 100] },
+        },
         xaxis: {
           categories: src.map((d) => d.month),
           labels: {
             formatter: (value: string) => wrapChartLabel(value),
-            style: { fontSize: '11px' },
+            style: { fontSize: "11px" },
           },
-          title: { text: 'Month', style: { fontSize: '11px' } },
+          title: { text: "Month", style: { fontSize: "11px" } },
         },
-        yaxis: { title: { text: 'Selected Count', style: { fontSize: '11px' } }, labels: { style: { fontSize: '11px' }, formatter: (v) => v + '%' }, min: 0 },
-        grid: { borderColor: isDark ? '#191E3A' : '#E0E6ED', strokeDashArray: 5 },
-        markers: { size: 5, colors: ['#007550'], strokeColors: '#fff', strokeWidth: 2, hover: { size: 7 } },
+        yaxis: {
+          title: { text: "Selected Count", style: { fontSize: "11px" } },
+          labels: { style: { fontSize: "11px" }, formatter: (v) => v + "%" },
+          min: 0,
+        },
+        grid: {
+          borderColor: isDark ? "#191E3A" : "#E0E6ED",
+          strokeDashArray: 5,
+        },
+        markers: {
+          size: 5,
+          colors: ["#007550"],
+          strokeColors: "#fff",
+          strokeWidth: 2,
+          hover: { size: 7 },
+        },
         tooltip: { y: { formatter: (v) => v } },
         legend: { show: false },
         dataLabels: { enabled: false },
-        noData: { text: 'No data available' },
+        noData: { text: "No data available" },
       },
     };
   };
@@ -4413,7 +4632,17 @@ const getFilledVsOpeningsChart = () => {
 
   const chartColors = isDark
     ? ["#818cf8", "#34d399", "#fbbf24", "#f87171", "#c084fc", "#22d3ee"]
-    : ["#1f46b3",  "#007550", "#d97706", "#dc2626", "#9333ea", "#0891b2", "#4f46e5", "#b20865", "#b20808"];
+    : [
+        "#1f46b3",
+        "#007550",
+        "#d97706",
+        "#dc2626",
+        "#9333ea",
+        "#0891b2",
+        "#4f46e5",
+        "#b20865",
+        "#b20808",
+      ];
 
   const darkChartTheme = isDark
     ? {
@@ -4988,26 +5217,34 @@ const getFilledVsOpeningsChart = () => {
         </div>
       )}
 
-       {/* College filter above stat cards — only for roles with college list */}
+      {/* College filter above stat cards — only for roles with college list */}
       {state.collegeList?.length > 0 && (
-        <div className="flex items-center gap-3 mb-3">
+        <div className="mb-3 flex items-center gap-3">
           <div className="w-56">
             <CustomSelect
               options={state.collegeList}
               value={state.dashboardCollegeFilter}
               onChange={(e) => {
-                setState({ dashboardCollegeFilter: e, cardApplicationDepartment: null, cardPanelDepartment: null });
+                setState({
+                  dashboardCollegeFilter: e,
+                  cardApplicationDepartment: null,
+                  cardPanelDepartment: null,
+                });
                 // load department list scoped to selected college for card-level dept filters
                 if (e?.value) {
                   departmentDropdownList(1, "", false, e.value);
                 } else {
                   setState({ departmentList: [] });
                 }
-                const params = activePeriod !== "custom"
-                  ? { period: activePeriod }
-                  : fromDate && toDate
-                  ? { from: moment(fromDate).format("YYYY-MM-DD"), to: moment(toDate).format("YYYY-MM-DD") }
-                  : { period: activePeriod };
+                const params =
+                  activePeriod !== "custom"
+                    ? { period: activePeriod }
+                    : fromDate && toDate
+                    ? {
+                        from: moment(fromDate).format("YYYY-MM-DD"),
+                        to: moment(toDate).format("YYYY-MM-DD"),
+                      }
+                    : { period: activePeriod };
                 fetchDashboard(params, state.profile, e?.value ?? null);
               }}
               placeholder="Filter by College"
@@ -5020,12 +5257,21 @@ const getFilledVsOpeningsChart = () => {
                 College: {state.dashboardCollegeFilter.label}
                 <button
                   onClick={() => {
-                    setState({ dashboardCollegeFilter: null, cardApplicationDepartment: null, cardPanelDepartment: null, departmentList: [] });
-                    const params = activePeriod !== "custom"
-                      ? { period: activePeriod }
-                      : fromDate && toDate
-                      ? { from: moment(fromDate).format("YYYY-MM-DD"), to: moment(toDate).format("YYYY-MM-DD") }
-                      : { period: activePeriod };
+                    setState({
+                      dashboardCollegeFilter: null,
+                      cardApplicationDepartment: null,
+                      cardPanelDepartment: null,
+                      departmentList: [],
+                    });
+                    const params =
+                      activePeriod !== "custom"
+                        ? { period: activePeriod }
+                        : fromDate && toDate
+                        ? {
+                            from: moment(fromDate).format("YYYY-MM-DD"),
+                            to: moment(toDate).format("YYYY-MM-DD"),
+                          }
+                        : { period: activePeriod };
                     fetchDashboard(params, state.profile, null);
                   }}
                   className="rounded-full p-0.5 hover:bg-blue-200 dark:hover:bg-blue-700"
@@ -5041,29 +5287,45 @@ const getFilledVsOpeningsChart = () => {
       {/* Stat Cards */}
       <div className="tour-stat-cards mb-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7">
         {state.cards?.map((card) => {
-          const isActive = state.activeCard === card.id && CARD_FETCH_MAP[card.id] && state.activeCard !== null;
+          const isActive =
+            state.activeCard === card.id &&
+            CARD_FETCH_MAP[card.id] &&
+            state.activeCard !== null;
           return (
             <div
               key={card.label}
-              className={`cursor-pointer rounded-xl p-3 transition-all duration-200 ${card.mainbg} ${
-                isActive ? "ring-2 ring-offset-1 scale-[1] shadow-lg" : "shadow-md hover:shadow-md"
+              className={`cursor-pointer rounded-xl p-3 transition-all duration-200 ${
+                card.mainbg
+              } ${
+                isActive
+                  ? "scale-[1] shadow-lg ring-2 ring-offset-1"
+                  : "shadow-md hover:shadow-md"
               }`}
               style={
                 isActive
-                  ? { "--tw-ring-color": card.accentColor } as React.CSSProperties
+                  ? ({
+                      "--tw-ring-color": card.accentColor,
+                    } as React.CSSProperties)
                   : { border: "1px solid #aebdf1" }
               }
               onMouseEnter={(e) => {
                 if (!isActive) {
-                  (e.currentTarget as HTMLDivElement).style.border = `1px solid ${card.accentColor}`;
+                  (
+                    e.currentTarget as HTMLDivElement
+                  ).style.border = `1px solid ${card.accentColor}`;
                 }
               }}
               onMouseLeave={(e) => {
                 if (!isActive) {
-                  (e.currentTarget as HTMLDivElement).style.border = "1px solid #aebdf1";
+                  (e.currentTarget as HTMLDivElement).style.border =
+                    "1px solid #aebdf1";
                 }
               }}
-              onClick={() => setState({ activeCard: state.activeCard === card.id ? null : card.id })}
+              onClick={() =>
+                setState({
+                  activeCard: state.activeCard === card.id ? null : card.id,
+                })
+              }
             >
               <div className="flex items-start gap-2">
                 <div
@@ -5072,12 +5334,13 @@ const getFilledVsOpeningsChart = () => {
                   {card.icon}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div
-                    className={`text-xl font-bold leading-tight text-black`}
-                  >
+                  <div className={`text-xl font-bold leading-tight text-black`}>
                     {card.value}
                   </div>
-                  <div className="truncate text-xs text-black" title={card.label}>
+                  <div
+                    className="truncate text-xs text-black"
+                    title={card.label}
+                  >
                     {card.label}
                   </div>
                   {/* {isActive && (
@@ -5092,17 +5355,15 @@ const getFilledVsOpeningsChart = () => {
 
       {/* Card-driven table */}
       {CARD_FETCH_MAP[state.activeCard] && (
-        <div className="panel shadow-md border-gray rounded-xl mb-6 mt-5">
-
+        <div className="panel border-gray mb-6 mt-5 rounded-xl shadow-md">
           {/* ── Header + inline filters ── */}
           <div className="mb-3 flex flex-wrap items-center gap-3">
             <h2 className="text-lg font-semibold text-black dark:text-white">
               {CARD_TITLES[state.activeCard]}
             </h2>
-            </div>
+          </div>
 
-           <div className="flex items-center justify-start gap-5 mb-5">
-
+          <div className="mb-5 flex items-center justify-start gap-5">
             {/* Search — always visible */}
             <TextInput
               placeholder="Search..."
@@ -5117,7 +5378,6 @@ const getFilledVsOpeningsChart = () => {
             {/* ── Card 1: Total Applications ── */}
             {state.activeCard === 1 && (
               <>
-              
                 {(state.profile?.role === ROLES.SUPER_ADMIN ||
                   state.profile?.role === ROLES.INSTITUTION_ADMIN ||
                   state.profile?.role === ROLES.HR) && (
@@ -5125,18 +5385,23 @@ const getFilledVsOpeningsChart = () => {
                     options={state.departmentList}
                     value={state.cardApplicationDepartment}
                     onChange={(e) => {
-                      setState({ cardApplicationDepartment: e, cardTablePage: 1 });
-                      fetchCardApplications(1, { cardApplicationDepartment: e });
+                      setState({
+                        cardApplicationDepartment: e,
+                        cardTablePage: 1,
+                      });
+                      fetchCardApplications(1, {
+                        cardApplicationDepartment: e,
+                      });
                     }}
                     placeholder="Department"
                     isClearable
                     disabled={!state.dashboardCollegeFilter}
                     loading={state.departmentLoading}
-                    className = "w-[500px]"
+                    className="w-[500px]"
                   />
                 )}
 
-                  <CustomSelect
+                <CustomSelect
                   options={state.applicationStatusList}
                   value={state.cardApplicationStatus}
                   onChange={(e) => {
@@ -5146,7 +5411,7 @@ const getFilledVsOpeningsChart = () => {
                   placeholder="Status"
                   isClearable
                   loading={state.applicationStatusLoading}
-                  className = "w-[500px]"
+                  className="w-[500px]"
                 />
               </>
             )}
@@ -5161,14 +5426,17 @@ const getFilledVsOpeningsChart = () => {
                     options={state.departmentList}
                     value={state.cardApplicationDepartment}
                     onChange={(e) => {
-                      setState({ cardApplicationDepartment: e, cardTablePage: 1 });
+                      setState({
+                        cardApplicationDepartment: e,
+                        cardTablePage: 1,
+                      });
                       CARD_FETCH_MAP[2]?.(1, { cardApplicationDepartment: e });
                     }}
                     placeholder="Department"
                     isClearable
                     disabled={!state.dashboardCollegeFilter}
                     loading={state.departmentLoading}
-                    className = "w-[500px]"
+                    className="w-[500px]"
                   />
                 )}
               </>
@@ -5177,7 +5445,6 @@ const getFilledVsOpeningsChart = () => {
             {/* ── Card 7: Awaiting Review ── */}
             {state.activeCard === 7 && (
               <>
-                
                 {(state.profile?.role === ROLES.HR ||
                   state.profile?.role === ROLES.SUPER_ADMIN ||
                   state.profile?.role === ROLES.INSTITUTION_ADMIN) && (
@@ -5185,14 +5452,17 @@ const getFilledVsOpeningsChart = () => {
                     options={state.departmentList}
                     value={state.cardApplicationDepartment}
                     onChange={(e) => {
-                      setState({ cardApplicationDepartment: e, cardTablePage: 1 });
+                      setState({
+                        cardApplicationDepartment: e,
+                        cardTablePage: 1,
+                      });
                       CARD_FETCH_MAP[7]?.(1, { cardApplicationDepartment: e });
                     }}
                     placeholder="Department"
                     isClearable
                     disabled={!state.dashboardCollegeFilter}
                     loading={state.departmentLoading}
-                    className = "w-[500px]"
+                    className="w-[500px]"
                   />
                 )}
 
@@ -5201,18 +5471,20 @@ const getFilledVsOpeningsChart = () => {
                   value={state.cardApplicationStatus}
                   onChange={(e) => {
                     setState({ cardApplicationStatus: e, cardTablePage: 1 });
-                      CARD_FETCH_MAP[7]?.(1, { cardApplicationStatus: e });
+                    CARD_FETCH_MAP[7]?.(1, { cardApplicationStatus: e });
                   }}
                   placeholder="Status"
                   isClearable
                   loading={state.applicationStatusLoading}
-                  className = "w-[500px]"
+                  className="w-[500px]"
                 />
               </>
             )}
 
             {/* ── Cards 6, 10, 13: Selected / Rejected / Reschedule ── */}
-            {(state.activeCard === 6 || state.activeCard === 10 || state.activeCard === 13) && (
+            {(state.activeCard === 6 ||
+              state.activeCard === 10 ||
+              state.activeCard === 13) && (
               <>
                 {(state.profile?.role === ROLES.HR ||
                   state.profile?.role === ROLES.SUPER_ADMIN ||
@@ -5221,14 +5493,19 @@ const getFilledVsOpeningsChart = () => {
                     options={state.departmentList}
                     value={state.cardApplicationDepartment}
                     onChange={(e) => {
-                      setState({ cardApplicationDepartment: e, cardTablePage: 1 });
-                      CARD_FETCH_MAP[state.activeCard]?.(1, { cardApplicationDepartment: e });
+                      setState({
+                        cardApplicationDepartment: e,
+                        cardTablePage: 1,
+                      });
+                      CARD_FETCH_MAP[state.activeCard]?.(1, {
+                        cardApplicationDepartment: e,
+                      });
                     }}
                     placeholder="Department"
                     isClearable
                     disabled={!state.dashboardCollegeFilter}
                     loading={state.departmentLoading}
-                    className = "w-[500px]"
+                    className="w-[500px]"
                   />
                 )}
               </>
@@ -5244,14 +5521,19 @@ const getFilledVsOpeningsChart = () => {
                     options={state.departmentList}
                     value={state.cardApplicationDepartment}
                     onChange={(e) => {
-                      setState({ cardApplicationDepartment: e, cardTablePage: 1 });
-                      CARD_FETCH_MAP[state.activeCard]?.(1, { cardApplicationDepartment: e });
+                      setState({
+                        cardApplicationDepartment: e,
+                        cardTablePage: 1,
+                      });
+                      CARD_FETCH_MAP[state.activeCard]?.(1, {
+                        cardApplicationDepartment: e,
+                      });
                     }}
                     placeholder="Department"
                     isClearable
                     disabled={!state.dashboardCollegeFilter}
                     loading={state.departmentLoading}
-                    className = "w-[500px]"
+                    className="w-[500px]"
                   />
                 )}
                 <CustomSelect
@@ -5259,11 +5541,13 @@ const getFilledVsOpeningsChart = () => {
                   value={state.cardJobLocation}
                   onChange={(e) => {
                     setState({ cardJobLocation: e, cardTablePage: 1 });
-                    CARD_FETCH_MAP[state.activeCard]?.(1, { cardJobLocation: e });
+                    CARD_FETCH_MAP[state.activeCard]?.(1, {
+                      cardJobLocation: e,
+                    });
                   }}
                   placeholder="Location"
                   isClearable
-                  className = "w-[500px]"
+                  className="w-[500px]"
                 />
               </>
             )}
@@ -5282,7 +5566,7 @@ const getFilledVsOpeningsChart = () => {
                   isClearable
                   disabled={!state.dashboardCollegeFilter}
                   loading={state.departmentLoading}
-                  className = "w-[500px]"
+                  className="w-[500px]"
                 />
               </>
             )}
@@ -5299,7 +5583,7 @@ const getFilledVsOpeningsChart = () => {
                   }}
                   placeholder="Department"
                   isClearable
-                  className = "w-[500px]"
+                  className="w-[500px]"
                 />
                 <CustomSelect
                   options={state.cardExperienceList}
@@ -5310,12 +5594,11 @@ const getFilledVsOpeningsChart = () => {
                   }}
                   placeholder="Experience"
                   isClearable
-                  className = "w-[500px]"
+                  className="w-[500px]"
                 />
               </>
             )}
-
-            </div>
+          </div>
 
           {/* ── Active filter pills ── */}
           {(() => {
@@ -5323,54 +5606,156 @@ const getFilledVsOpeningsChart = () => {
 
             // department filter applies to all application-based cards
             if ([1, 2, 6, 7, 10, 13].includes(state.activeCard)) {
-              if (state.cardApplicationStatus)     chips.push({ key: "cardApplicationStatus",     label: `Status: ${state.cardApplicationStatus.label}` });
-              if (state.cardApplicationDepartment) chips.push({ key: "cardApplicationDepartment", label: `Dept: ${state.cardApplicationDepartment.label}` });
+              if (state.cardApplicationStatus)
+                chips.push({
+                  key: "cardApplicationStatus",
+                  label: `Status: ${state.cardApplicationStatus.label}`,
+                });
+              if (state.cardApplicationDepartment)
+                chips.push({
+                  key: "cardApplicationDepartment",
+                  label: `Dept: ${state.cardApplicationDepartment.label}`,
+                });
             }
             if (state.activeCard === 4 || state.activeCard === 5) {
-              if (state.cardApplicationDepartment) chips.push({ key: "cardApplicationDepartment", label: `Dept: ${state.cardApplicationDepartment.label}` });
-              if (state.cardJobLocation)           chips.push({ key: "cardJobLocation",           label: `Location: ${state.cardJobLocation.label}` });
-              if (state.cardJobSalary)             chips.push({ key: "cardJobSalary",             label: `Salary: ${state.cardJobSalary.label}` });
-              if (state.cardJobStatus)             chips.push({ key: "cardJobStatus",             label: `Status: ${state.cardJobStatus.label}` });
-              if (state.cardJobStartDate)          chips.push({ key: "cardJobStartDate",          label: `From: ${moment(state.cardJobStartDate).format("DD/MM/YY")}` });
-              if (state.cardJobEndDate)            chips.push({ key: "cardJobEndDate",            label: `To: ${moment(state.cardJobEndDate).format("DD/MM/YY")}` });
-              if (state.cardJobAcademicResponsibilities?.length) chips.push({ key: "cardJobAcademicResponsibilities", label: `Responsibility (${state.cardJobAcademicResponsibilities.length})` });
+              if (state.cardApplicationDepartment)
+                chips.push({
+                  key: "cardApplicationDepartment",
+                  label: `Dept: ${state.cardApplicationDepartment.label}`,
+                });
+              if (state.cardJobLocation)
+                chips.push({
+                  key: "cardJobLocation",
+                  label: `Location: ${state.cardJobLocation.label}`,
+                });
+              if (state.cardJobSalary)
+                chips.push({
+                  key: "cardJobSalary",
+                  label: `Salary: ${state.cardJobSalary.label}`,
+                });
+              if (state.cardJobStatus)
+                chips.push({
+                  key: "cardJobStatus",
+                  label: `Status: ${state.cardJobStatus.label}`,
+                });
+              if (state.cardJobStartDate)
+                chips.push({
+                  key: "cardJobStartDate",
+                  label: `From: ${moment(state.cardJobStartDate).format(
+                    "DD/MM/YY",
+                  )}`,
+                });
+              if (state.cardJobEndDate)
+                chips.push({
+                  key: "cardJobEndDate",
+                  label: `To: ${moment(state.cardJobEndDate).format(
+                    "DD/MM/YY",
+                  )}`,
+                });
+              if (state.cardJobAcademicResponsibilities?.length)
+                chips.push({
+                  key: "cardJobAcademicResponsibilities",
+                  label: `Responsibility (${state.cardJobAcademicResponsibilities.length})`,
+                });
             }
             if (state.activeCard === 8) {
-              if (state.cardPanelDepartment) chips.push({ key: "cardPanelDepartment", label: `Dept: ${state.cardPanelDepartment.label}` });
+              if (state.cardPanelDepartment)
+                chips.push({
+                  key: "cardPanelDepartment",
+                  label: `Dept: ${state.cardPanelDepartment.label}`,
+                });
             }
             if (state.activeCard === 14) {
-              if (state.cardTalentDepartment) chips.push({ key: "cardTalentDepartment", label: `Dept: ${state.cardTalentDepartment.label}` });
-              if (state.cardTalentExperience) chips.push({ key: "cardTalentExperience", label: `Exp: ${state.cardTalentExperience.label}` });
-              if (state.cardTalentPreferences?.length)              chips.push({ key: "cardTalentPreferences",              label: `Qualification (${state.cardTalentPreferences.length})` });
-              if (state.cardTalentAcademicResponsibilities?.length) chips.push({ key: "cardTalentAcademicResponsibilities", label: `Responsibility (${state.cardTalentAcademicResponsibilities.length})` });
+              if (state.cardTalentDepartment)
+                chips.push({
+                  key: "cardTalentDepartment",
+                  label: `Dept: ${state.cardTalentDepartment.label}`,
+                });
+              if (state.cardTalentExperience)
+                chips.push({
+                  key: "cardTalentExperience",
+                  label: `Exp: ${state.cardTalentExperience.label}`,
+                });
+              if (state.cardTalentPreferences?.length)
+                chips.push({
+                  key: "cardTalentPreferences",
+                  label: `Qualification (${state.cardTalentPreferences.length})`,
+                });
+              if (state.cardTalentAcademicResponsibilities?.length)
+                chips.push({
+                  key: "cardTalentAcademicResponsibilities",
+                  label: `Responsibility (${state.cardTalentAcademicResponsibilities.length})`,
+                });
             }
 
             if (!chips.length) return null;
 
             const clearAllMap: Record<number, object> = {
-              1:  { cardApplicationStatus: null, cardApplicationDepartment: null },
-              2:  { cardApplicationDepartment: null },
-              4:  { cardApplicationDepartment: null, cardJobLocation: null, cardJobSalary: null, cardJobStatus: null, cardJobStartDate: null, cardJobEndDate: null, cardJobAcademicResponsibilities: [] },
-              5:  { cardApplicationDepartment: null, cardJobLocation: null, cardJobSalary: null, cardJobStatus: null, cardJobStartDate: null, cardJobEndDate: null, cardJobAcademicResponsibilities: [] },
-              6:  { cardApplicationStatus: null, cardApplicationDepartment: null },
-              7:  { cardApplicationStatus: null, cardApplicationDepartment: null },
-              8:  { cardPanelDepartment: null },
-              10: { cardApplicationStatus: null, cardApplicationDepartment: null },
+              1: {
+                cardApplicationStatus: null,
+                cardApplicationDepartment: null,
+              },
+              2: { cardApplicationDepartment: null },
+              4: {
+                cardApplicationDepartment: null,
+                cardJobLocation: null,
+                cardJobSalary: null,
+                cardJobStatus: null,
+                cardJobStartDate: null,
+                cardJobEndDate: null,
+                cardJobAcademicResponsibilities: [],
+              },
+              5: {
+                cardApplicationDepartment: null,
+                cardJobLocation: null,
+                cardJobSalary: null,
+                cardJobStatus: null,
+                cardJobStartDate: null,
+                cardJobEndDate: null,
+                cardJobAcademicResponsibilities: [],
+              },
+              6: {
+                cardApplicationStatus: null,
+                cardApplicationDepartment: null,
+              },
+              7: {
+                cardApplicationStatus: null,
+                cardApplicationDepartment: null,
+              },
+              8: { cardPanelDepartment: null },
+              10: {
+                cardApplicationStatus: null,
+                cardApplicationDepartment: null,
+              },
               13: { cardApplicationDepartment: null },
-              14: { cardTalentDepartment: null, cardTalentExperience: null, cardTalentPreferences: [], cardTalentAcademicResponsibilities: [] },
+              14: {
+                cardTalentDepartment: null,
+                cardTalentExperience: null,
+                cardTalentPreferences: [],
+                cardTalentAcademicResponsibilities: [],
+              },
             };
 
             return (
               <div className="mb-3 mt-1 flex flex-wrap items-center gap-2">
                 {chips.map((chip) => (
-                  <span key={chip.key} className="flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                  <span
+                    key={chip.key}
+                    className="flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                  >
                     {chip.label}
                     <button
                       onClick={() => {
                         const isArr = Array.isArray((state as any)[chip.key]);
                         const reset = isArr ? [] : null;
                         setState({ [chip.key]: reset } as any);
-                        setTimeout(() => CARD_FETCH_MAP[state.activeCard]?.(1, { [chip.key]: reset }), 0);
+                        setTimeout(
+                          () =>
+                            CARD_FETCH_MAP[state.activeCard]?.(1, {
+                              [chip.key]: reset,
+                            }),
+                          0,
+                        );
                       }}
                       className="rounded-full p-0.5 hover:bg-blue-200 dark:hover:bg-blue-700"
                     >
@@ -5382,7 +5767,10 @@ const getFilledVsOpeningsChart = () => {
                   onClick={() => {
                     const cleared = clearAllMap[state.activeCard] ?? {};
                     setState(cleared as any);
-                    setTimeout(() => CARD_FETCH_MAP[state.activeCard]?.(1, cleared), 0);
+                    setTimeout(
+                      () => CARD_FETCH_MAP[state.activeCard]?.(1, cleared),
+                      0,
+                    );
                   }}
                   className="text-xs text-red-500 hover:underline"
                 >
@@ -5423,7 +5811,7 @@ const getFilledVsOpeningsChart = () => {
 
       {/* Row 1: Application Volume Trend (area) 2/3 + Experience Level Donut 1/3 */}
       <div className="mb-5 grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <div className="panel shadow-md border-gray rounded-xl xl:col-span-2">
+        <div className="panel border-gray rounded-xl shadow-md xl:col-span-2">
           <h5 className="mb-0.5 !text-lg font-semibold text-black dark:text-white">
             Application Volume Trend
           </h5>
@@ -5443,7 +5831,7 @@ const getFilledVsOpeningsChart = () => {
               );
             })()}
         </div>
-        <div className="panel shadow-md border-gray rounded-xl xl:col-span-1">
+        <div className="panel border-gray rounded-xl shadow-md xl:col-span-1">
           <h5 className="mb-0.5 !text-lg font-semibold text-black dark:text-white">
             Applications by Experience Level
           </h5>
@@ -5465,8 +5853,8 @@ const getFilledVsOpeningsChart = () => {
         </div>
       </div>
 
-       <div className="mb-5 grid grid-cols-1">
-        <div className="panel shadow-md border-gray rounded-xl col-span-1">
+      <div className="mb-5 grid grid-cols-1">
+        <div className="panel border-gray col-span-1 rounded-xl shadow-md">
           <h5 className="mb-0.5 !text-lg font-semibold text-black dark:text-white">
             Applications by Department
           </h5>
@@ -5487,11 +5875,6 @@ const getFilledVsOpeningsChart = () => {
             })()}
         </div>
       </div>
-   
-
-
-
-      
 
       {/* Row 4: Full Overview Trend + Interviews & Decisions stacked */}
       {/* <div className="mb-5 grid grid-cols-1 gap-4 xl:grid-cols-3">
@@ -5516,9 +5899,7 @@ const getFilledVsOpeningsChart = () => {
 
       {/* Row 5: + Selection Rate (2/5) */}
       <div className="mb-5 grid grid-cols-1 gap-5 xl:grid-cols-5">
-        
-        
-        <div className="panel shadow-md border-gray rounded-xl xl:col-span-3">
+        <div className="panel border-gray rounded-xl shadow-md xl:col-span-3">
           <h5 className="mb-4 !text-lg font-semibold text-black dark:text-white">
             Stage Drop-off Analysis
           </h5>
@@ -5531,32 +5912,74 @@ const getFilledVsOpeningsChart = () => {
             const joined = d?.joined ?? 0;
             const a2i = d?.applied_to_interview ?? { moved: 0, not_moved: 0 };
             const i2s = d?.interview_to_selected ?? { moved: 0, not_moved: 0 };
-            const i2w = d?.interview_to_waitlisted ?? { moved: 0, not_moved: 0 };
+            const i2w = d?.interview_to_waitlisted ?? {
+              moved: 0,
+              not_moved: 0,
+            };
             const s2j = d?.selected_to_joined ?? { moved: 0, not_moved: 0 };
 
-            const StageCard = ({ label, value, icon, borderColor, bgColor, iconBg, valueColor, moved, dropped }: {
-              label: string; value: number; icon: React.ReactNode;
-              borderColor: string; bgColor: string; iconBg: string; valueColor: string;
-              moved?: number; dropped?: number;
+            const StageCard = ({
+              label,
+              value,
+              icon,
+              borderColor,
+              bgColor,
+              iconBg,
+              valueColor,
+              moved,
+              dropped,
+            }: {
+              label: string;
+              value: number;
+              icon: React.ReactNode;
+              borderColor: string;
+              bgColor: string;
+              iconBg: string;
+              valueColor: string;
+              moved?: number;
+              dropped?: number;
             }) => (
-              <div className="overflow-hidden rounded-2xl shadow-sm" style={{ border: `1.5px solid ${borderColor}`, minWidth: 180 }}>
-                <div className="flex items-center gap-3 px-4 py-3" style={{ backgroundColor: bgColor }}>
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: iconBg }}>
+              <div
+                className="overflow-hidden rounded-2xl shadow-sm"
+                style={{ border: `1.5px solid ${borderColor}`, minWidth: 180 }}
+              >
+                <div
+                  className="flex items-center gap-3 px-4 py-3"
+                  style={{ backgroundColor: bgColor }}
+                >
+                  <div
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
+                    style={{ backgroundColor: iconBg }}
+                  >
                     {icon}
                   </div>
                   <div>
-                    <div className="text-2xl font-bold" style={{ color: valueColor }}>{value}</div>
-                    <div className="text-xs font-semibold text-gray-600 dark:text-gray-300">{label}</div>
+                    <div
+                      className="text-2xl font-bold"
+                      style={{ color: valueColor }}
+                    >
+                      {value}
+                    </div>
+                    <div className="text-xs font-semibold text-gray-600 dark:text-gray-300">
+                      {label}
+                    </div>
                   </div>
                 </div>
                 {(moved !== undefined || dropped !== undefined) && (
-                  <div className="grid grid-cols-2 divide-x border-t" style={{ borderColor, borderTopColor: borderColor }}>
+                  <div
+                    className="grid grid-cols-2 divide-x border-t"
+                    style={{ borderColor, borderTopColor: borderColor }}
+                  >
                     <div className="flex flex-col items-center py-2">
-                      <span className="text-lg font-bold text-[#128639]">{moved ?? 0}</span>
+                      <span className="text-lg font-bold text-[#128639]">
+                        {moved ?? 0}
+                      </span>
                       <span className="text-[14px] text-black">Moved</span>
                     </div>
                     <div className="flex flex-col items-center py-2">
-                      <span className="text-lg font-bold text-[#dc2626]">{dropped ?? 0}</span>
+                      <span className="text-lg font-bold text-[#dc2626]">
+                        {dropped ?? 0}
+                      </span>
                       <span className="text-[14px] text-black">Dropped</span>
                     </div>
                   </div>
@@ -5565,9 +5988,14 @@ const getFilledVsOpeningsChart = () => {
             );
 
             const DropCard = ({ count }: { count: number }) => (
-              <div className="flex flex-col items-center gap-1 rounded-2xl border-2 border-dashed border-[#dc2626] bg-red-50 px-4 py-3 dark:border-red-700 dark:bg-red-900/20" style={{ minWidth: 120 }}>
+              <div
+                className="flex flex-col items-center gap-1 rounded-2xl border-2 border-dashed border-[#dc2626] bg-red-50 px-4 py-3 dark:border-red-700 dark:bg-red-900/20"
+                style={{ minWidth: 120 }}
+              >
                 <div className="flex items-center gap-1.5">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#dc2626] text-white text-[8px] font-bold">✕</span>
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#dc2626] text-[8px] font-bold text-white">
+                    ✕
+                  </span>
                   <span className="text-xl font-bold text-black">{count}</span>
                 </div>
                 <span className="text-xs text-black">Dropped off</span>
@@ -5575,67 +6003,219 @@ const getFilledVsOpeningsChart = () => {
             );
 
             const MovedCard = () => (
-              <div className="flex flex-col items-center gap-1 rounded-2xl border-2 border-dashed border-green-300 bg-green-50 px-4 py-3 dark:border-green-700 dark:bg-green-900/20" style={{ minWidth: 120 }}>
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-green-500 text-white text-xs">✓</span>
-                <span className="text-[11px] text-black">Moved to next stage</span>
+              <div
+                className="flex flex-col items-center gap-1 rounded-2xl border-2 border-dashed border-green-300 bg-green-50 px-4 py-3 dark:border-green-700 dark:bg-green-900/20"
+                style={{ minWidth: 120 }}
+              >
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-green-500 text-xs text-white">
+                  ✓
+                </span>
+                <span className="text-[11px] text-black">
+                  Moved to next stage
+                </span>
               </div>
             );
 
             // Vertical connector with dot at bottom
             const VConn = ({ color = "#a5b4fc" }: { color?: string }) => (
-              <div className="flex flex-col items-center" style={{ height: 32 }}>
-                <div className="flex-1 w-px" style={{ backgroundColor: color }} />
-                <div className="h-2.5 w-2.5 rounded-full border-2 bg-white dark:bg-gray-900" style={{ borderColor: color }} />
+              <div
+                className="flex flex-col items-center"
+                style={{ height: 32 }}
+              >
+                <div
+                  className="w-px flex-1"
+                  style={{ backgroundColor: color }}
+                />
+                <div
+                  className="h-2.5 w-2.5 rounded-full border-2 bg-white dark:bg-gray-900"
+                  style={{ borderColor: color }}
+                />
               </div>
             );
 
             // Horizontal fork: draws a T-shape connecting two children
-            const HFork = ({ color = "#a5b4fc", leftPct = "25%", rightPct = "75%" }: { color?: string; leftPct?: string; rightPct?: string }) => (
+            const HFork = ({
+              color = "#a5b4fc",
+              leftPct = "25%",
+              rightPct = "75%",
+            }: {
+              color?: string;
+              leftPct?: string;
+              rightPct?: string;
+            }) => (
               <div className="relative w-full" style={{ height: 32 }}>
                 {/* vertical stem from top center */}
-                <div className="absolute top-0 left-1/2 w-px" style={{ height: "50%", backgroundColor: color, transform: "translateX(-50%)" }} />
+                <div
+                  className="absolute left-1/2 top-0 w-px"
+                  style={{
+                    height: "50%",
+                    backgroundColor: color,
+                    transform: "translateX(-50%)",
+                  }}
+                />
                 {/* horizontal bar */}
-                <div className="absolute" style={{ top: "50%", left: leftPct, right: `calc(100% - ${rightPct})`, height: 1, backgroundColor: color }} />
+                <div
+                  className="absolute"
+                  style={{
+                    top: "50%",
+                    left: leftPct,
+                    right: `calc(100% - ${rightPct})`,
+                    height: 1,
+                    backgroundColor: color,
+                  }}
+                />
                 {/* left drop */}
-                <div className="absolute" style={{ top: "50%", left: leftPct, width: 1, height: "50%", backgroundColor: color }} />
+                <div
+                  className="absolute"
+                  style={{
+                    top: "50%",
+                    left: leftPct,
+                    width: 1,
+                    height: "50%",
+                    backgroundColor: color,
+                  }}
+                />
                 {/* right drop */}
-                <div className="absolute" style={{ top: "50%", left: rightPct, width: 1, height: "50%", backgroundColor: color, transform: "translateX(-1px)" }} />
+                <div
+                  className="absolute"
+                  style={{
+                    top: "50%",
+                    left: rightPct,
+                    width: 1,
+                    height: "50%",
+                    backgroundColor: color,
+                    transform: "translateX(-1px)",
+                  }}
+                />
                 {/* left dot */}
-                <div className="absolute" style={{ bottom: 0, left: leftPct, transform: "translate(-50%, 50%)", width: 10, height: 10, borderRadius: "50%", border: `2px solid ${color}`, backgroundColor: "white" }} />
+                <div
+                  className="absolute"
+                  style={{
+                    bottom: 0,
+                    left: leftPct,
+                    transform: "translate(-50%, 50%)",
+                    width: 10,
+                    height: 10,
+                    borderRadius: "50%",
+                    border: `2px solid ${color}`,
+                    backgroundColor: "white",
+                  }}
+                />
                 {/* right dot */}
-                <div className="absolute" style={{ bottom: 0, left: rightPct, transform: "translate(-50%, 50%)", width: 10, height: 10, borderRadius: "50%", border: `2px solid ${color}`, backgroundColor: "white" }} />
+                <div
+                  className="absolute"
+                  style={{
+                    bottom: 0,
+                    left: rightPct,
+                    transform: "translate(-50%, 50%)",
+                    width: 10,
+                    height: 10,
+                    borderRadius: "50%",
+                    border: `2px solid ${color}`,
+                    backgroundColor: "white",
+                  }}
+                />
               </div>
             );
 
             // Small fork for leaf level (two children from one parent)
             const LeafFork = ({ color = "#a5b4fc" }: { color?: string }) => (
               <div className="relative w-full" style={{ height: 32 }}>
-                <div className="absolute top-0 left-1/2 w-px" style={{ height: "50%", backgroundColor: color, transform: "translateX(-50%)" }} />
-                <div className="absolute" style={{ top: "50%", left: "20%", right: "20%", height: 1, backgroundColor: color }} />
-                <div className="absolute" style={{ top: "50%", left: "20%", width: 1, height: "50%", backgroundColor: color }} />
-                <div className="absolute" style={{ top: "50%", right: "20%", width: 1, height: "50%", backgroundColor: color }} />
-                <div className="absolute" style={{ bottom: 0, left: "20%", transform: "translate(-50%, 50%)", width: 10, height: 10, borderRadius: "50%", border: `2px solid ${color}`, backgroundColor: "white" }} />
-                <div className="absolute" style={{ bottom: 0, right: "20%", transform: "translate(50%, 50%)", width: 10, height: 10, borderRadius: "50%", border: `2px solid ${color}`, backgroundColor: "white" }} />
+                <div
+                  className="absolute left-1/2 top-0 w-px"
+                  style={{
+                    height: "50%",
+                    backgroundColor: color,
+                    transform: "translateX(-50%)",
+                  }}
+                />
+                <div
+                  className="absolute"
+                  style={{
+                    top: "50%",
+                    left: "20%",
+                    right: "20%",
+                    height: 1,
+                    backgroundColor: color,
+                  }}
+                />
+                <div
+                  className="absolute"
+                  style={{
+                    top: "50%",
+                    left: "20%",
+                    width: 1,
+                    height: "50%",
+                    backgroundColor: color,
+                  }}
+                />
+                <div
+                  className="absolute"
+                  style={{
+                    top: "50%",
+                    right: "20%",
+                    width: 1,
+                    height: "50%",
+                    backgroundColor: color,
+                  }}
+                />
+                <div
+                  className="absolute"
+                  style={{
+                    bottom: 0,
+                    left: "20%",
+                    transform: "translate(-50%, 50%)",
+                    width: 10,
+                    height: 10,
+                    borderRadius: "50%",
+                    border: `2px solid ${color}`,
+                    backgroundColor: "white",
+                  }}
+                />
+                <div
+                  className="absolute"
+                  style={{
+                    bottom: 0,
+                    right: "20%",
+                    transform: "translate(50%, 50%)",
+                    width: 10,
+                    height: 10,
+                    borderRadius: "50%",
+                    border: `2px solid ${color}`,
+                    backgroundColor: "white",
+                  }}
+                />
               </div>
             );
 
             return (
               <div className="w-full overflow-x-auto">
                 <div className="flex min-w-[520px] flex-col items-center pb-6">
-
                   {/* ── Applied ── */}
-                  <StageCard label="Applied" value={applied}
-                    borderColor="#537bd7" bgColor={isDark ? "#1e3a5f22" : "#dfe9ff"} iconBg="#fff" valueColor="#000"
+                  <StageCard
+                    label="Applied"
+                    value={applied}
+                    borderColor="#537bd7"
+                    bgColor={isDark ? "#1e3a5f22" : "#dfe9ff"}
+                    iconBg="#fff"
+                    valueColor="#000"
                     icon={<IconUsers className="h-5 w-5 text-black" />}
-                    moved={a2i.moved} dropped={a2i.not_moved}
+                    moved={a2i.moved}
+                    dropped={a2i.not_moved}
                   />
                   <VConn color="#acabab" />
 
                   {/* ── Interview ── */}
-                  <StageCard label="Interview" value={interview}
-                    borderColor="#ffa339" bgColor={isDark ? "#3d2e0022" : "#ffe2c0"} iconBg="#fff" valueColor="#000"
+                  <StageCard
+                    label="Interview"
+                    value={interview}
+                    borderColor="#ffa339"
+                    bgColor={isDark ? "#3d2e0022" : "#ffe2c0"}
+                    iconBg="#fff"
+                    valueColor="#000"
                     icon={<IconUsers className="h-5 w-5 text-black" />}
-                    moved={i2s.moved} dropped={i2s.not_moved}
+                    moved={i2s.moved}
+                    dropped={i2s.not_moved}
                   />
 
                   {/* ── Fork: Interview → Selected + Waitlisted ── */}
@@ -5643,22 +6223,34 @@ const getFilledVsOpeningsChart = () => {
 
                   {/* ── Selected + Waitlisted row ── */}
                   <div className="flex w-full items-start justify-around gap-4 px-2">
-
                     {/* LEFT: Selected branch */}
                     <div className="flex flex-1 flex-col items-center">
-                      <StageCard label="Selected" value={selected}
-                        borderColor="#128639" bgColor={isDark ? "#06402022" : "#f0fdf4"} iconBg="#fff" valueColor="#000"
+                      <StageCard
+                        label="Selected"
+                        value={selected}
+                        borderColor="#128639"
+                        bgColor={isDark ? "#06402022" : "#f0fdf4"}
+                        iconBg="#fff"
+                        valueColor="#000"
                         icon={<IconUsers className="h-5 w-5 text-black" />}
-                        moved={s2j.moved} dropped={s2j.not_moved}
+                        moved={s2j.moved}
+                        dropped={s2j.not_moved}
                       />
                       {/* Only show children if selected > 0 */}
                       {selected > 0 && (
                         <>
                           <LeafFork color="#acabab" />
                           <div className="flex w-full justify-around gap-2 px-2">
-                            <StageCard label="Joined" value={joined}
-                              borderColor="#128639" bgColor={isDark ? "#06402022" : "#f0fdf4"} iconBg="#fff" valueColor="#000"
-                              icon={<IconUsers className="h-5 w-5 text-black" />}
+                            <StageCard
+                              label="Joined"
+                              value={joined}
+                              borderColor="#128639"
+                              bgColor={isDark ? "#06402022" : "#f0fdf4"}
+                              iconBg="#fff"
+                              valueColor="#000"
+                              icon={
+                                <IconUsers className="h-5 w-5 text-black" />
+                              }
                               moved={s2j.moved}
                             />
                             <DropCard count={s2j.not_moved} />
@@ -5669,10 +6261,16 @@ const getFilledVsOpeningsChart = () => {
 
                     {/* RIGHT: Waitlisted branch */}
                     <div className="flex flex-1 flex-col items-center">
-                      <StageCard label="Waitlisted" value={waitlisted}
-                        borderColor="#537bd7" bgColor={isDark ? "#2e1a5522" : "#dfe9ff"} iconBg="#fff" valueColor="#000"
+                      <StageCard
+                        label="Waitlisted"
+                        value={waitlisted}
+                        borderColor="#537bd7"
+                        bgColor={isDark ? "#2e1a5522" : "#dfe9ff"}
+                        iconBg="#fff"
+                        valueColor="#000"
                         icon={<IconUsers className="h-5 w-5 text-black" />}
-                        moved={i2w.moved} dropped={i2w.not_moved}
+                        moved={i2w.moved}
+                        dropped={i2w.not_moved}
                       />
                       {/* Only show children if waitlisted > 0 */}
                       {waitlisted > 0 && (
@@ -5689,8 +6287,14 @@ const getFilledVsOpeningsChart = () => {
 
                   {/* Legend */}
                   <div className="mt-10 flex items-center gap-6 text-[12px] text-black">
-                    <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-[#128639]" /> Moved to next stage</span>
-                    <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-[#dc2626]" /> Dropped off</span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="h-2.5 w-2.5 rounded-full bg-[#128639]" />{" "}
+                      Moved to next stage
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="h-2.5 w-2.5 rounded-full bg-[#dc2626]" />{" "}
+                      Dropped off
+                    </span>
                   </div>
                 </div>
               </div>
@@ -5698,135 +6302,182 @@ const getFilledVsOpeningsChart = () => {
           })()}
         </div>
 
-
-        <div className=" xl:col-span-2 flex flex-col space-y-5">
-          <div className="panel shadow-md border-gray rounded-xl">
-          <h5 className="mb-5 !text-lg font-semibold text-black dark:text-white">
-            Applications by Source
-          </h5>
-          {/* <p className="mb-3 text-xs text-black">
+        <div className=" flex flex-col space-y-5 xl:col-span-2">
+          <div className="panel border-gray rounded-xl shadow-md">
+            <h5 className="mb-5 !text-lg font-semibold text-black dark:text-white">
+              Applications by Source
+            </h5>
+            {/* <p className="mb-3 text-xs text-black">
             Internal vs External applicants
           </p> */}
-          {(() => {
-            const src = dashboard?.applications_by_source ?? [];
-            const internal = src.find((d: any) => d.source === "internal")?.applications ?? 0;
-            const external = src.find((d: any) => d.source === "external")?.applications ?? 0;
-            const total = internal + external || 1;
-            const internalPct = Math.round((internal / total) * 100);
-            const externalPct = 100 - internalPct;
-            const r = 54;
-            const circ = 2 * Math.PI * r;
-            const internalDash = (internalPct / 100) * circ;
-            const externalDash = (externalPct / 100) * circ;
-            return (
-              <div className="flex flex-col items-center gap-6 py-2">
-                {/* Donut */}
-                <div className="relative flex items-center justify-center">
-                  <svg width="200" height="150" viewBox="0 0 140 140">
-                    {/* bg track */}
-                    <circle cx="70" cy="70" r={r} fill="none" stroke={isDark ? "#1e293b" : "#f1f5f9"} strokeWidth="18" />
-                    {/* external arc (amber) — drawn first, full circle offset */}
-                    <circle cx="70" cy="70" r={r} fill="none" stroke="#ffa339" strokeWidth="18"
-                      strokeDasharray={`${externalDash} ${circ - externalDash}`}
-                      strokeDashoffset={-(internalDash)}
-                      strokeLinecap="round"
-                      style={{ transform: "rotate(-90deg)", transformOrigin: "70px 70px" }}
-                    />
-                    {/* internal arc (blue) */}
-                    <circle cx="70" cy="70" r={r} fill="none" stroke="#1f46b3" strokeWidth="18"
-                      strokeDasharray={`${internalDash} ${circ - internalDash}`}
-                      strokeDashoffset={0}
-                      strokeLinecap="round"
-                      style={{ transform: "rotate(-90deg)", transformOrigin: "70px 70px" }}
-                    />
-                  </svg>
-                  <div className="absolute flex flex-col items-center">
-                    <span className="text-2xl font-bold text-gray-800 dark:text-white">{total}</span>
-                    <span className="text-[10px] text-black">Total</span>
-                  </div>
-                </div>
-                {/* Stat rows */}
-                <div className="w-full space-y-3">
-                  <div className="flex items-center justify-between rounded-xl bg-[#dfe9ff] px-4 py-3 dark:bg-blue-900/20">
-                    <div className="flex items-center gap-2">
-                      <span className="h-3 w-3 rounded-full bg-[#1f46b3]" />
-                      <span className="text-md font-medium text-black dark:text-gray-300">Internal</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-xl font-bold text-black">{internal}</span>
-                      {/* <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-semibold text-blue-700 dark:bg-blue-800 dark:text-blue-200">{internalPct}%</span> */}
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between rounded-xl bg-[#ffe2c0] px-4 py-3 dark:bg-amber-900/20">
-                    <div className="flex items-center gap-2">
-                      <span className="h-3 w-3 rounded-full bg-[#ffa339]" />
-                      <span className="text-md font-medium text-black dark:text-gray-300">External</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-xl font-bold text-black">{external}</span>
-                      {/* <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700 dark:bg-amber-800 dark:text-amber-200">{externalPct}%</span> */}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
-        </div>
-        <div className="panel shadow-md border-gray rounded-xl">
-          <h5 className="mb-3 !text-lg font-semibold text-black dark:text-white">
-            Application Funnel
-          </h5>
-          {/* <p className="mb-3 text-xs text-black">
-            Stage-wise conversion pipeline
-          </p> */}
-          {isMounted &&
-            (() => {
-              if (dashboard?.application_funnel?.length > 0) {
-                const funnelItems = dashboard.application_funnel.reduce(
-                  (acc: any[], f: any) => {
-                    if (f.selected !== undefined || f.rejected !== undefined) {
-                      if (f.selected !== undefined)
-                        acc.push({
-                          name: "Selected",
-                          value: f.selected,
-                          fill: "#007550",
-                        });
-                      if (f.rejected !== undefined)
-                        acc.push({
-                          name: "Rejected",
-                          value: f.rejected,
-                          fill: "#dc2626",
-                        });
-                    } else {
-                      acc.push({
-                        name: f.stage,
-                        value: f.value,
-                        fill: ["#4361ee", "#2196f3", "#e2a03f"][acc.length % 3],
-                      });
-                    }
-                    return acc;
-                  },
-                  [],
-                );
-                return <Funnel data={funnelItems} />;
-              }
-              const c = getFunnelDummyChart();
+            {(() => {
+              const src = dashboard?.applications_by_source ?? [];
+              const internal =
+                src.find((d: any) => d.source === "internal")?.applications ??
+                0;
+              const external =
+                src.find((d: any) => d.source === "external")?.applications ??
+                0;
+              const total = internal + external || 1;
+              const internalPct = Math.round((internal / total) * 100);
+              const externalPct = 100 - internalPct;
+              const r = 54;
+              const circ = 2 * Math.PI * r;
+              const internalDash = (internalPct / 100) * circ;
+              const externalDash = (externalPct / 100) * circ;
               return (
-                <ReactApexChart
-                  series={c.series}
-                  options={c.options as any}
-                  type="bar"
-                  height={240}
-                />
+                <div className="flex flex-col items-center gap-6 py-2">
+                  {/* Donut */}
+                  <div className="relative flex items-center justify-center">
+                    <svg width="200" height="150" viewBox="0 0 140 140">
+                      {/* bg track */}
+                      <circle
+                        cx="70"
+                        cy="70"
+                        r={r}
+                        fill="none"
+                        stroke={isDark ? "#1e293b" : "#f1f5f9"}
+                        strokeWidth="18"
+                      />
+                      {/* external arc (amber) — drawn first, full circle offset */}
+                      <circle
+                        cx="70"
+                        cy="70"
+                        r={r}
+                        fill="none"
+                        stroke="#ffa339"
+                        strokeWidth="18"
+                        strokeDasharray={`${externalDash} ${
+                          circ - externalDash
+                        }`}
+                        strokeDashoffset={-internalDash}
+                        strokeLinecap="round"
+                        style={{
+                          transform: "rotate(-90deg)",
+                          transformOrigin: "70px 70px",
+                        }}
+                      />
+                      {/* internal arc (blue) */}
+                      <circle
+                        cx="70"
+                        cy="70"
+                        r={r}
+                        fill="none"
+                        stroke="#1f46b3"
+                        strokeWidth="18"
+                        strokeDasharray={`${internalDash} ${
+                          circ - internalDash
+                        }`}
+                        strokeDashoffset={0}
+                        strokeLinecap="round"
+                        style={{
+                          transform: "rotate(-90deg)",
+                          transformOrigin: "70px 70px",
+                        }}
+                      />
+                    </svg>
+                    <div className="absolute flex flex-col items-center">
+                      <span className="text-2xl font-bold text-gray-800 dark:text-white">
+                        {total}
+                      </span>
+                      <span className="text-[10px] text-black">Total</span>
+                    </div>
+                  </div>
+                  {/* Stat rows */}
+                  <div className="w-full space-y-3">
+                    <div className="flex items-center justify-between rounded-xl bg-[#dfe9ff] px-4 py-3 dark:bg-blue-900/20">
+                      <div className="flex items-center gap-2">
+                        <span className="h-3 w-3 rounded-full bg-[#1f46b3]" />
+                        <span className="text-md font-medium text-black dark:text-gray-300">
+                          Internal
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl font-bold text-black">
+                          {internal}
+                        </span>
+                        {/* <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-semibold text-blue-700 dark:bg-blue-800 dark:text-blue-200">{internalPct}%</span> */}
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between rounded-xl bg-[#ffe2c0] px-4 py-3 dark:bg-amber-900/20">
+                      <div className="flex items-center gap-2">
+                        <span className="h-3 w-3 rounded-full bg-[#ffa339]" />
+                        <span className="text-md font-medium text-black dark:text-gray-300">
+                          External
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl font-bold text-black">
+                          {external}
+                        </span>
+                        {/* <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700 dark:bg-amber-800 dark:text-amber-200">{externalPct}%</span> */}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               );
             })()}
-        </div>
+          </div>
+          <div className="panel border-gray rounded-xl shadow-md">
+            <h5 className="mb-3 !text-lg font-semibold text-black dark:text-white">
+              Application Funnel
+            </h5>
+            {/* <p className="mb-3 text-xs text-black">
+            Stage-wise conversion pipeline
+          </p> */}
+            {isMounted &&
+              (() => {
+                if (dashboard?.application_funnel?.length > 0) {
+                  const funnelItems = dashboard.application_funnel.reduce(
+                    (acc: any[], f: any) => {
+                      if (
+                        f.selected !== undefined ||
+                        f.rejected !== undefined
+                      ) {
+                        if (f.selected !== undefined)
+                          acc.push({
+                            name: "Selected",
+                            value: f.selected,
+                            fill: "#007550",
+                          });
+                        if (f.rejected !== undefined)
+                          acc.push({
+                            name: "Rejected",
+                            value: f.rejected,
+                            fill: "#dc2626",
+                          });
+                      } else {
+                        acc.push({
+                          name: f.stage,
+                          value: f.value,
+                          fill: ["#4361ee", "#2196f3", "#e2a03f"][
+                            acc.length % 3
+                          ],
+                        });
+                      }
+                      return acc;
+                    },
+                    [],
+                  );
+                  return <Funnel data={funnelItems} />;
+                }
+                const c = getFunnelDummyChart();
+                return (
+                  <ReactApexChart
+                    series={c.series}
+                    options={c.options as any}
+                    type="bar"
+                    height={240}
+                  />
+                );
+              })()}
+          </div>
         </div>
       </div>
 
-              {/* Positions Filled (3/5) */}
+      {/* Positions Filled (3/5) */}
       <div className="mb-5 grid grid-cols-1">
-        <div className="panel shadow-md border-gray rounded-xl xl:col-span-3">
+        <div className="panel border-gray rounded-xl shadow-md xl:col-span-3">
           <h5 className="mb-0.5 !text-lg font-semibold text-black dark:text-white">
             Positions Filled vs Openings
           </h5>
@@ -5851,27 +6502,27 @@ const getFilledVsOpeningsChart = () => {
       </div>
 
       <div className="mb-5 grid grid-cols-1 gap-5 xl:grid-cols-6">
-        <div className="panel shadow-md border-gray rounded-xl xl:col-span-3">
-            <h5 className="mb-0.5 !text-lg font-semibold text-black dark:text-white">
-              Selection Rate Trend
-            </h5>
-            {/* <p className="mb-4 text-xs text-black">
+        <div className="panel border-gray rounded-xl shadow-md xl:col-span-3">
+          <h5 className="mb-0.5 !text-lg font-semibold text-black dark:text-white">
+            Selection Rate Trend
+          </h5>
+          {/* <p className="mb-4 text-xs text-black">
               Line chart — x: month · y: % selected · dashed line = average
             </p> */}
-            {isMounted &&
-              (() => {
-                const c = getSelectionRateChart();
-                return (
-                  <ReactApexChart
-                    series={c.series}
-                    options={c.options as any}
-                    type="line"
-                    height={360}
-                  />
-                );
-              })()}
+          {isMounted &&
+            (() => {
+              const c = getSelectionRateChart();
+              return (
+                <ReactApexChart
+                  series={c.series}
+                  options={c.options as any}
+                  type="line"
+                  height={360}
+                />
+              );
+            })()}
         </div>
-        <div className="panel shadow-md border-gray rounded-xl xl:col-span-3">
+        <div className="panel border-gray rounded-xl shadow-md xl:col-span-3">
           <h5 className="mb-5 !text-lg font-semibold text-black dark:text-white">
             Job Postings by Urgency
           </h5>
@@ -5893,10 +6544,9 @@ const getFilledVsOpeningsChart = () => {
         </div>
       </div>
 
-
       {/* Row 3: Applications by Department (horizontal bar, 3/5) + Applications by College (line, 2/5) */}
       <div className="mb-5 grid grid-cols-1 gap-4 xl:grid-cols-5">
-        <div className="panel shadow-md border-gray rounded-xl xl:col-span-3">
+        <div className="panel border-gray rounded-xl shadow-md xl:col-span-3">
           <h5 className="mb-0.5 !text-lg font-semibold text-black dark:text-white">
             Immediate vs Regular Hiring
           </h5>
@@ -5917,7 +6567,7 @@ const getFilledVsOpeningsChart = () => {
               );
             })()}
         </div>
-        <div className="panel shadow-md border-gray rounded-xl xl:col-span-2">
+        <div className="panel border-gray rounded-xl shadow-md xl:col-span-2">
           <h5 className="mb-0.5 !text-lg font-semibold text-black dark:text-white">
             Applications by College
           </h5>
@@ -5939,12 +6589,10 @@ const getFilledVsOpeningsChart = () => {
         </div>
       </div>
 
-      
-
       {/* ── Bottom Tables Row ── */}
-     
-        {/* Days to Fill Variance */}
-         {state.daysToFillVariance.length > 0 &&
+
+      {/* Days to Fill Variance */}
+      {/* {state.daysToFillVariance.length > 0 &&
          <div className="panel shadow-md border-gray rounded-xl mb-5">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -5987,7 +6635,6 @@ const getFilledVsOpeningsChart = () => {
 
                   return (
                     <div className="flex flex-wrap items-center gap-2">
-                      {/* First department text */}
                       <span
                         className="text-sm  text-gray-700 dark:text-gray-300"
                         title={firstDept}
@@ -5995,7 +6642,6 @@ const getFilledVsOpeningsChart = () => {
                         {firstDept}
                       </span>
 
-                      {/* Avatars */}
                       <div className="flex items-center -space-x-2">
                         {visibleDept?.map((dept: string, index: number) => (
                           <div key={index} className="group relative">
@@ -6003,7 +6649,6 @@ const getFilledVsOpeningsChart = () => {
                               {dept?.slice(0, 2)?.toUpperCase()}
                             </div>
 
-                            {/* Tooltip */}
                             <div
                               className="absolute bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100"
                               title={dept}
@@ -6018,7 +6663,6 @@ const getFilledVsOpeningsChart = () => {
                               +{remaining}
                             </div>
 
-                            {/* Remaining tooltip */}
                             <div className="absolute bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
                               {hiddenDept
                                 ?.map((d: string) => capitalizeFLetter(d))
@@ -6090,16 +6734,12 @@ const getFilledVsOpeningsChart = () => {
                     >
                       <IconEye className="h-4 w-4" />
                     </button>
-                    {/* {state.profile?.role == ROLES.HR && ( */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
 
-                        // if (state.profile?.role == ROLES.HR) {
                         handleApprove(row);
-                        // }
                       }}
-                      // onClick={() => handleToggleStatus(row)}
                       className={`flex items-center justify-center rounded-lg ${
                         row?.job_status === "published"
                           ? "text-red-600 "
@@ -6109,17 +6749,7 @@ const getFilledVsOpeningsChart = () => {
                     >
                       <CheckCircle className="h-4 w-4" />
                     </button>
-                    {/* )} */}
-                    {/* <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleLog(row);
-                          }}
-                          className="flex items-center justify-center rounded-lg  text-purple-600 "
-                          title="Logs"
-                        >
-                          <IconHistory className="h-4 w-4" />
-                        </button> */}
+                   
 
                     <button
                       onClick={(e) => {
@@ -6132,17 +6762,7 @@ const getFilledVsOpeningsChart = () => {
                       <IconEdit className="h-4 w-4" />
                     </button>
 
-                    {/* <button
-              // onClickCapture={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDelete(row);
-              }}
-              className="flex  items-center justify-center rounded-lg  text-red-600 "
-              title="Delete"
-            >
-              <IconTrash className="h-4 w-4" />
-            </button> */}
+                  
                   </div>
                 ),
               },
@@ -6166,9 +6786,9 @@ const getFilledVsOpeningsChart = () => {
               />
             </div>
           )}
-        </div> }
-        
-        {/* <div className="panel shadow-md border-gray rounded-xl mb-5">
+        </div> } */}
+
+      {/* <div className="panel shadow-md border-gray rounded-xl mb-5">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-semibold text-black dark:text-white">
@@ -6257,10 +6877,9 @@ const getFilledVsOpeningsChart = () => {
             </div>
           )}
         </div>  */}
-     
 
-        {/* Overdue Follow-ups */}
-        {/* <div className="panel shadow-md border-gray rounded-xl mb-5">
+      {/* Overdue Follow-ups */}
+      {/* <div className="panel shadow-md border-gray rounded-xl mb-5">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-semibold text-black dark:text-white">
@@ -6416,7 +7035,6 @@ const getFilledVsOpeningsChart = () => {
             </div>
           )}
         </div> */}
-     
 
       <Modal
         subTitle="Interview Rounds"
