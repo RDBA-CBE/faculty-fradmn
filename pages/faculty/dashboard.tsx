@@ -530,7 +530,7 @@ const Dashboard = () => {
         label: "Overdue Follow-ups",
         value:
           tc?.followup_applications?.value ??
-          tc?.followup_applications.value ??
+          tc?.followup_applications?.value ??
           0,
         color: "text-dblue",
         bg: "bg-[#f4f9ff]",
@@ -2266,7 +2266,7 @@ const Dashboard = () => {
         accessor: "department_name",
         title: "Department",
         render: ({ department_name }) => {
-          if (!department_name || department_name?.length === 0) {
+          if (!department_name || !Array.isArray(department_name) || department_name.length === 0) {
             return <span className="text-black">-</span>;
           }
 
@@ -2417,7 +2417,7 @@ const Dashboard = () => {
         accessor: "department_name",
         title: "Department",
         render: ({ department_name }) => {
-          if (!department_name || department_name?.length === 0) {
+          if (!department_name || !Array.isArray(department_name) || department_name.length === 0) {
             return <span className="text-black">-</span>;
           }
 
@@ -3042,7 +3042,7 @@ const Dashboard = () => {
         accessor: "department_name",
         title: "Department",
         render: ({ department_name }) => {
-          if (!department_name || department_name?.length === 0) {
+          if (!department_name || !Array.isArray(department_name) || department_name.length === 0) {
             return <span className="text-black">-</span>;
           }
 
@@ -3189,7 +3189,7 @@ const Dashboard = () => {
         accessor: "department_name",
         title: "Department",
         render: ({ department_name }) => {
-          if (!department_name || department_name?.length === 0) {
+          if (!department_name || !Array.isArray(department_name) || department_name.length === 0) {
             return <span className="text-black">-</span>;
           }
 
@@ -3337,7 +3337,7 @@ const Dashboard = () => {
         accessor: "department_name",
         title: "Department",
         render: ({ department_name }) => {
-          if (!department_name || department_name?.length === 0) {
+          if (!department_name || !Array.isArray(department_name) || department_name.length === 0) {
             return <span className="text-black">-</span>;
           }
 
@@ -5294,7 +5294,7 @@ const Dashboard = () => {
           return (
             <div
               key={card.label}
-              className={`cursor-pointer rounded-xl p-3 transition-all duration-200 ${
+              className={` rounded-xl p-3 transition-all duration-200 ${card.clickable && 'cursor-pointer'} ${
                 card.mainbg
               } ${
                 isActive
@@ -6916,7 +6916,7 @@ const Dashboard = () => {
                 accessor: "department_name",
                 title: "Department",
                 render: ({ department_name }) => {
-                  if (!department_name || department_name?.length === 0) {
+                  if (!department_name || !Array.isArray(department_name) || department_name.length === 0) {
                     return <span className="text-black">-</span>;
                   }
 
