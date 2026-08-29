@@ -108,6 +108,8 @@ const Dashboard = () => {
     useSelector((state: IRootState) => state.themeConfig.rtlClass) === "rtl";
 
   const [isMounted, setIsMounted] = useState(false);
+  const [filterSticky, setFilterSticky] = useState(false);
+  const filterBarRef = useRef<HTMLDivElement>(null);
   const [profile, setProfile] = useState<any>(null);
   const [dashboard, setDashboard] = useState<any>(null);
   const [activePeriod, setActivePeriod] = useState("6m");
@@ -192,6 +194,21 @@ const Dashboard = () => {
   });
 
   const debounceSearch = useDebounce(state.search, 500);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (filterBarRef.current) {
+        const stickyThreshold = 56;
+        setFilterSticky(
+          filterBarRef.current.getBoundingClientRect().top <= stickyThreshold,
+        );
+      }
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     dispatch(setPageTitle("Faculty Pro - Dashboard"));
@@ -5109,52 +5126,68 @@ const Dashboard = () => {
 
   return (
     <div className="dark:from-gray-900 dark:to-gray-800">
-      <div className=" flex justify-between">
-        {/* Filters */}
-        <div className="mb-2 flex flex-wrap items-center gap-2">
-          {filterLables?.map((p) => (
-            <button
-              key={p.value}
-              onClick={() => setActivePeriod(p.value)}
-              className={`rounded-lg border px-3 py-1.5 text-sm transition-colors ${
-                activePeriod === p.value
-                  ? " bg-dblue text-white"
-                  : "border-gray-300 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
-              }`}
-            >
-              {p.label}
-            </button>
-          ))}
-          <div className="flex items-center gap-2">
-            <CustomeDatePicker
-              value={fromDate}
-              placeholder="From Date"
-              onChange={(e) => {
-                setFromDate(e);
-                setActivePeriod("custom");
-              }}
-              showTimeSelect={false}
-            />
-            <CustomeDatePicker
-              value={toDate}
-              placeholder="To Date"
-              onChange={(e) => {
-                setToDate(e);
-                setActivePeriod("custom");
-              }}
-              showTimeSelect={false}
-            />
-          </div>
-        </div>
-        <button
-          onClick={() => router.push("faculty/newjob")}
-          className="tour-add-job bg-dblue group relative ms-auto inline-flex h-fit w-[150px] transform items-center gap-2 overflow-hidden rounded-lg px-4 py-2 text-white  shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl xl:w-[120px]"
+      {/*Date Filters */}
+      <div
+        ref={filterBarRef}
+        className={`sticky top-14 z-30 transition-all duration-200 ${
+          filterSticky ? "-mx-6 pt-2 px-4 bg-white shadow-sm dark:bg-gray-900 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.08)]" : "bg-transparent"
+        }`}
+        style={{
+          width: filterSticky ? "" : "100%",
+          marginLeft: filterSticky ? "" : 0,
+        }}
+      >
+        <div
+          className={`flex justify-between py-2 ${
+            filterSticky ? "  dark:bg-gray-900" : ""
+          }`}
         >
-          <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
-          <IconPlus className="relative z-10 h-5 w-5" />
-          <span className="relative z-10 whitespace-nowrap">Add Jobs</span>
-        </button>
+          <div className="mb-2 flex flex-wrap items-center gap-2">
+            {filterLables?.map((p) => (
+              <button
+                key={p.value}
+                onClick={() => setActivePeriod(p.value)}
+                className={`rounded-lg border px-3 py-1.5 text-sm transition-colors ${
+                  activePeriod === p.value
+                    ? " bg-dblue text-white"
+                    : "border-gray-300 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+            <div className="flex items-center gap-2">
+              <CustomeDatePicker
+                value={fromDate}
+                placeholder="From Date"
+                onChange={(e) => {
+                  setFromDate(e);
+                  setActivePeriod("custom");
+                }}
+                showTimeSelect={false}
+              />
+              <CustomeDatePicker
+                value={toDate}
+                placeholder="To Date"
+                onChange={(e) => {
+                  setToDate(e);
+                  setActivePeriod("custom");
+                }}
+                showTimeSelect={false}
+              />
+            </div>
+          </div>
+          <button
+            onClick={() => router.push("faculty/newjob")}
+            className="tour-add-job bg-dblue group relative ms-auto inline-flex h-fit w-[150px] transform items-center gap-2 overflow-hidden rounded-lg px-4 py-2 text-white  shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl xl:w-[120px]"
+          >
+            <div className="bg-dblue absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+            <IconPlus className="relative z-10 h-5 w-5" />
+            <span className="relative z-10 whitespace-nowrap">Add Jobs</span>
+          </button>
+        </div>
       </div>
+      {/*Date Filters end */}
 
       {(fromDate || toDate || (activePeriod && activePeriod !== "custom")) && (
         <div className="mb-6 mt-1 flex flex-wrap items-center gap-2">
