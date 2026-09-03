@@ -1961,7 +1961,7 @@ export default function UpdateJob() {
               }}
               maxFiles={1}
               title="Job Image"
-              description="Upload job logo (JPEG or PNG)"
+              description="Upload job Poster image (JPEG or PNG)"
               validateDimensions={false}
               isSingleImage={true}
             />

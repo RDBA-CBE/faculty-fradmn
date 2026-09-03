@@ -742,7 +742,8 @@ export default function Newjob() {
           : "",
         responsibility: keyResponsibilityData,
 
-        is_approved: state.profile?.role == ROLES.HR ? true : false,
+        // is_approved: state.profile?.role == ROLES.HR ? true : false,
+        is_approved : false,
         priority_id: state.priority?.value,
         immediate_join: state.immediateHiring,
       };
@@ -1993,7 +1994,7 @@ export default function Newjob() {
                 }}
                 maxFiles={1}
                 title="Job Image"
-                description="Upload job logo (JPEG or PNG)"
+                description="Upload job Poster image (JPEG or PNG)"
                 validateDimensions={false}
                 isSingleImage={true}
               />
@@ -2020,17 +2021,19 @@ export default function Newjob() {
                   </h2>
                 </div>
                 <div className="p-6">
-                  <div className="overflow-hidden rounded-lg border-2 border-dashed border-gray-300 transition-colors">
-                    <div
-                      ref={editorRef}
-                      id="jobDescriptionEditor"
-                      className="max-h-[400px] min-h-[250px] overflow-y-auto p-4"
-                    ></div>
-                  </div>
-                  {state.error?.description && (
-                    <p className="mt-2 text-sm text-red-600">{state.error.description}</p>
-                  )}
-                </div>
+                                <TextArea
+                                  name="description"
+                                  placeholder="Job descriptions..."
+                                  value={state.description}
+                                  onChange={(e) =>
+                                    handleFieldChange("description", e.target.value)
+                                  }
+                                  rows={10}
+                                  required
+                                  error={state.error?.description}
+                                />
+                              </div>                              
+               
               </div>
 
               {/* Card 3: Key Responsibility */}
