@@ -28,6 +28,7 @@ import Modal from "@/components/modal/modal.component";
 import ParentChildCat from "@/components/FormFields/parent_child_dropdown";
 import CategorySelector, { transformCategoryData } from "@/components/FormFields/categorySelect";
 import AccordionSelect from "@/components/FormFields/AccordionSelect";
+import IconLoader from "@/components/Icon/IconLoader";
 
 type QuickOptionGroupProps = {
   label: string;
@@ -2151,8 +2152,13 @@ export default function Newjob() {
                   type="button"
                   className="bg-dblue w-full rounded-lg px-8 py-2 font-semibold text-white shadow-lg transition-all hover:from-purple-700 hover:to-blue-700 hover:shadow-xl sm:w-auto"
                   onClick={() => handleSubmit()}
+                  disabled={state.btnLoading}
                 >
-                  Create Job
+                  {state.btnLoading ? (
+                    <><IconLoader className="h-4 w-4 animate-spin" /> Creating...</>
+                  ) : (
+                    "Create Job"
+                  )}
                 </button>
               </div>
             </div>
